@@ -1,0 +1,2776 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "updated": "2026-05-21",
+    "source": "TempGuru-345-City-Content-Master.json",
+    "total_cities": 345,
+    "tier_counts": {
+      "hub": 25,
+      "mid": 129,
+      "small": 191,
+      "unknown": 0
+    }
+  },
+  "cities": [
+    {
+      "slug": "atlanta-event-staffing",
+      "name": "Atlanta",
+      "state": "Georgia",
+      "state_abbr": "GA",
+      "country": "US",
+      "tier": "hub"
+    },
+    {
+      "slug": "austin-event-staffing",
+      "name": "Austin",
+      "state": "Texas",
+      "state_abbr": "TX",
+      "country": "US",
+      "tier": "hub"
+    },
+    {
+      "slug": "boston-event-staffing",
+      "name": "Boston",
+      "state": "Massachusetts",
+      "state_abbr": "MA",
+      "country": "US",
+      "tier": "hub"
+    },
+    {
+      "slug": "calgary-event-staffing",
+      "name": "Calgary",
+      "state": "Alberta",
+      "state_abbr": "AB",
+      "country": "CA",
+      "tier": "hub"
+    },
+    {
+      "slug": "charlotte-event-staffing",
+      "name": "Charlotte",
+      "state": "North Carolina",
+      "state_abbr": "NC",
+      "country": "US",
+      "tier": "hub"
+    },
+    {
+      "slug": "chicago-event-staffing",
+      "name": "Chicago",
+      "state": "Illinois",
+      "state_abbr": "IL",
+      "country": "US",
+      "tier": "hub"
+    },
+    {
+      "slug": "dallas-event-staffing",
+      "name": "Dallas",
+      "state": "Texas",
+      "state_abbr": "TX",
+      "country": "US",
+      "tier": "hub"
+    },
+    {
+      "slug": "denver-event-staffing",
+      "name": "Denver",
+      "state": "Colorado",
+      "state_abbr": "CO",
+      "country": "US",
+      "tier": "hub"
+    },
+    {
+      "slug": "detroit-event-staffing",
+      "name": "Detroit",
+      "state": "Michigan",
+      "state_abbr": "MI",
+      "country": "US",
+      "tier": "hub"
+    },
+    {
+      "slug": "houston-event-staffing",
+      "name": "Houston",
+      "state": "Texas",
+      "state_abbr": "TX",
+      "country": "US",
+      "tier": "hub"
+    },
+    {
+      "slug": "las-vegas-event-staffing",
+      "name": "Las Vegas",
+      "state": "Nevada",
+      "state_abbr": "NV",
+      "country": "US",
+      "tier": "hub"
+    },
+    {
+      "slug": "los-angeles-event-staffing",
+      "name": "Los Angeles",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "hub"
+    },
+    {
+      "slug": "miami-event-staffing",
+      "name": "Miami",
+      "state": "Florida",
+      "state_abbr": "FL",
+      "country": "US",
+      "tier": "hub"
+    },
+    {
+      "slug": "minneapolis-event-staffing",
+      "name": "Minneapolis",
+      "state": "Minnesota",
+      "state_abbr": "MN",
+      "country": "US",
+      "tier": "hub"
+    },
+    {
+      "slug": "nashville-event-staffing",
+      "name": "Nashville",
+      "state": "Tennessee",
+      "state_abbr": "TN",
+      "country": "US",
+      "tier": "hub"
+    },
+    {
+      "slug": "new-york-city-event-staffing",
+      "name": "New York City",
+      "state": "New York",
+      "state_abbr": "NY",
+      "country": "US",
+      "tier": "hub"
+    },
+    {
+      "slug": "orlando-event-staffing",
+      "name": "Orlando",
+      "state": "Florida",
+      "state_abbr": "FL",
+      "country": "US",
+      "tier": "hub"
+    },
+    {
+      "slug": "philadelphia-event-staffing",
+      "name": "Philadelphia",
+      "state": "Pennsylvania",
+      "state_abbr": "PA",
+      "country": "US",
+      "tier": "hub"
+    },
+    {
+      "slug": "phoenix-event-staffing",
+      "name": "Phoenix",
+      "state": "Arizona",
+      "state_abbr": "AZ",
+      "country": "US",
+      "tier": "hub"
+    },
+    {
+      "slug": "san-diego-event-staffing",
+      "name": "San Diego",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "hub"
+    },
+    {
+      "slug": "san-francisco-event-staffing",
+      "name": "San Francisco",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "hub"
+    },
+    {
+      "slug": "seattle-event-staffing",
+      "name": "Seattle",
+      "state": "Washington",
+      "state_abbr": "WA",
+      "country": "US",
+      "tier": "hub"
+    },
+    {
+      "slug": "toronto-event-staffing",
+      "name": "Toronto",
+      "state": "Ontario",
+      "state_abbr": "ON",
+      "country": "CA",
+      "tier": "hub"
+    },
+    {
+      "slug": "vancouver-event-staffing",
+      "name": "Vancouver",
+      "state": "British Columbia",
+      "state_abbr": "BC",
+      "country": "CA",
+      "tier": "hub"
+    },
+    {
+      "slug": "washington-dc-event-staffing",
+      "name": "Washington D.C.",
+      "state": "District of Columbia",
+      "state_abbr": "DC",
+      "country": "US",
+      "tier": "hub"
+    },
+    {
+      "slug": "ajax-event-staffing",
+      "name": "Ajax",
+      "state": "Ontario",
+      "state_abbr": "ON",
+      "country": "CA",
+      "tier": "mid"
+    },
+    {
+      "slug": "akron-event-staffing",
+      "name": "Akron",
+      "state": "Ohio",
+      "state_abbr": "OH",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "albuquerque-event-staffing",
+      "name": "Albuquerque",
+      "state": "New Mexico",
+      "state_abbr": "NM",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "amarillo-event-staffing",
+      "name": "Amarillo",
+      "state": "Texas",
+      "state_abbr": "TX",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "anaheim-event-staffing",
+      "name": "Anaheim",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "anchorage-event-staffing",
+      "name": "Anchorage",
+      "state": "Alaska",
+      "state_abbr": "AK",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "arlington-event-staffing",
+      "name": "Arlington",
+      "state": "Texas",
+      "state_abbr": "TX",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "bakersfield-event-staffing",
+      "name": "Bakersfield",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "baltimore-event-staffing",
+      "name": "Baltimore",
+      "state": "Maryland",
+      "state_abbr": "MD",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "banff-event-staffing",
+      "name": "Banff",
+      "state": "Alberta",
+      "state_abbr": "AB",
+      "country": "CA",
+      "tier": "mid"
+    },
+    {
+      "slug": "bellevue-event-staffing",
+      "name": "Bellevue",
+      "state": "Washington",
+      "state_abbr": "WA",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "boise-event-staffing",
+      "name": "Boise",
+      "state": "Idaho",
+      "state_abbr": "ID",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "brownsville-event-staffing",
+      "name": "Brownsville",
+      "state": "Texas",
+      "state_abbr": "TX",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "charlottetown-event-staffing",
+      "name": "Charlottetown",
+      "state": "Prince Edward Island",
+      "state_abbr": "PE",
+      "country": "CA",
+      "tier": "mid"
+    },
+    {
+      "slug": "cincinnati-event-staffing",
+      "name": "Cincinnati",
+      "state": "Ohio",
+      "state_abbr": "OH",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "cleveland-event-staffing",
+      "name": "Cleveland",
+      "state": "Ohio",
+      "state_abbr": "OH",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "columbus-event-staffing",
+      "name": "Columbus",
+      "state": "Ohio",
+      "state_abbr": "OH",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "conception-bay-event-staffing",
+      "name": "Conception Bay South",
+      "state": "Newfoundland and Labrador",
+      "state_abbr": "NL",
+      "country": "CA",
+      "tier": "mid"
+    },
+    {
+      "slug": "corner-brook-event-staffing",
+      "name": "Corner Brook",
+      "state": "Newfoundland and Labrador",
+      "state_abbr": "NL",
+      "country": "CA",
+      "tier": "mid"
+    },
+    {
+      "slug": "edmonton-event-staffing",
+      "name": "Edmonton",
+      "state": "Alberta",
+      "state_abbr": "AB",
+      "country": "CA",
+      "tier": "mid"
+    },
+    {
+      "slug": "el-paso-event-staffing",
+      "name": "El Paso",
+      "state": "Texas",
+      "state_abbr": "TX",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "gander-event-staffing",
+      "name": "Gander",
+      "state": "Newfoundland and Labrador",
+      "state_abbr": "NL",
+      "country": "CA",
+      "tier": "mid"
+    },
+    {
+      "slug": "gatineau-event-staffing",
+      "name": "Gatineau",
+      "state": "Quebec",
+      "state_abbr": "QC",
+      "country": "CA",
+      "tier": "mid"
+    },
+    {
+      "slug": "halifax-event-staffing",
+      "name": "Halifax",
+      "state": "Nova Scotia",
+      "state_abbr": "NS",
+      "country": "CA",
+      "tier": "mid"
+    },
+    {
+      "slug": "hamilton-event-staffing",
+      "name": "Hamilton",
+      "state": "Ontario",
+      "state_abbr": "ON",
+      "country": "CA",
+      "tier": "mid"
+    },
+    {
+      "slug": "honolulu-event-staffing",
+      "name": "Honolulu",
+      "state": "Hawaii",
+      "state_abbr": "HI",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "indianapolis-event-staffing",
+      "name": "Indianapolis",
+      "state": "Indiana",
+      "state_abbr": "IN",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "jacksonville-event-staffing",
+      "name": "Jacksonville",
+      "state": "Florida",
+      "state_abbr": "FL",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "kansas-city-event-staffing",
+      "name": "Kansas City",
+      "state": "Missouri",
+      "state_abbr": "MO",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "kingston-event-staffing",
+      "name": "Kingston",
+      "state": "Ontario",
+      "state_abbr": "ON",
+      "country": "CA",
+      "tier": "mid"
+    },
+    {
+      "slug": "lafayette-event-staffing",
+      "name": "Lafayette",
+      "state": "Louisiana",
+      "state_abbr": "LA",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "lansing-event-staffing",
+      "name": "Lansing",
+      "state": "Michigan",
+      "state_abbr": "MI",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "louisville-event-staffing",
+      "name": "Louisville",
+      "state": "Kentucky",
+      "state_abbr": "KY",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "levis-event-staffing",
+      "name": "Lévis",
+      "state": "Quebec",
+      "state_abbr": "QC",
+      "country": "CA",
+      "tier": "mid"
+    },
+    {
+      "slug": "macon-event-staffing",
+      "name": "Macon",
+      "state": "Georgia",
+      "state_abbr": "GA",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "madison-event-staffing",
+      "name": "Madison",
+      "state": "Wisconsin",
+      "state_abbr": "WI",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "manchester-event-staffing",
+      "name": "Manchester",
+      "state": "New Hampshire",
+      "state_abbr": "NH",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "mcallen-event-staffing",
+      "name": "McAllen",
+      "state": "Texas",
+      "state_abbr": "TX",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "mckinney-event-staffing",
+      "name": "McKinney",
+      "state": "Texas",
+      "state_abbr": "TX",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "memphis-event-staffing",
+      "name": "Memphis",
+      "state": "Tennessee",
+      "state_abbr": "TN",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "mesa-event-staffing",
+      "name": "Mesa",
+      "state": "Arizona",
+      "state_abbr": "AZ",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "milwaukee-event-staffing",
+      "name": "Milwaukee",
+      "state": "Wisconsin",
+      "state_abbr": "WI",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "miramar-event-staffing",
+      "name": "Miramar",
+      "state": "Florida",
+      "state_abbr": "FL",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "mobile-event-staffing",
+      "name": "Mobile",
+      "state": "Alabama",
+      "state_abbr": "AL",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "modesto-event-staffing",
+      "name": "Modesto",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "moncton-event-staffing",
+      "name": "Moncton",
+      "state": "New Brunswick",
+      "state_abbr": "NB",
+      "country": "CA",
+      "tier": "mid"
+    },
+    {
+      "slug": "monterey-event-staffing",
+      "name": "Monterey",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "montgomery-event-staffing",
+      "name": "Montgomery",
+      "state": "Alabama",
+      "state_abbr": "AL",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "montreal-event-staffing",
+      "name": "Montreal",
+      "state": "Quebec",
+      "state_abbr": "QC",
+      "country": "CA",
+      "tier": "mid"
+    },
+    {
+      "slug": "moreno-valley-event-staffing",
+      "name": "Moreno Valley",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "murfreesboro-event-staffing",
+      "name": "Murfreesboro",
+      "state": "Tennessee",
+      "state_abbr": "TN",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "naperville-event-staffing",
+      "name": "Naperville",
+      "state": "Illinois",
+      "state_abbr": "IL",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "nashua-event-staffing",
+      "name": "Nashua",
+      "state": "New Hampshire",
+      "state_abbr": "NH",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "new-haven-event-staffing",
+      "name": "New Haven",
+      "state": "Connecticut",
+      "state_abbr": "CT",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "new-orleans-event-staffing",
+      "name": "New Orleans",
+      "state": "Louisiana",
+      "state_abbr": "LA",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "newark-event-staffing",
+      "name": "Newark",
+      "state": "New Jersey",
+      "state_abbr": "NJ",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "norfolk-event-staffing",
+      "name": "Norfolk",
+      "state": "Virginia",
+      "state_abbr": "VA",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "north-las-vegas-event-staffing",
+      "name": "North Las Vegas",
+      "state": "Nevada",
+      "state_abbr": "NV",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "oakland-event-staffing",
+      "name": "Oakland",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "oceanside-event-staffing",
+      "name": "Oceanside",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "oklahoma-city-event-staffing",
+      "name": "Oklahoma City",
+      "state": "Oklahoma",
+      "state_abbr": "OK",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "olathe-event-staffing",
+      "name": "Olathe",
+      "state": "Kansas",
+      "state_abbr": "KS",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "omaha-event-staffing",
+      "name": "Omaha",
+      "state": "Nebraska",
+      "state_abbr": "NE",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "ontario-event-staffing",
+      "name": "Ontario",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "orange-event-staffing",
+      "name": "Orange",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "oshawa-event-staffing",
+      "name": "Oshawa",
+      "state": "Ontario",
+      "state_abbr": "ON",
+      "country": "CA",
+      "tier": "mid"
+    },
+    {
+      "slug": "ottawa-event-staffing",
+      "name": "Ottawa",
+      "state": "Ontario",
+      "state_abbr": "ON",
+      "country": "CA",
+      "tier": "mid"
+    },
+    {
+      "slug": "overland-park-event-staffing",
+      "name": "Overland Park",
+      "state": "Kansas",
+      "state_abbr": "KS",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "oxnard-event-staffing",
+      "name": "Oxnard",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "palmdale-event-staffing",
+      "name": "Palmdale",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "pasadena-event-staffing",
+      "name": "Pasadena",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "paterson-event-staffing",
+      "name": "Paterson",
+      "state": "New Jersey",
+      "state_abbr": "NJ",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "pensacola-event-staffing",
+      "name": "Pensacola",
+      "state": "Florida",
+      "state_abbr": "FL",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "peterborough-event-staffing",
+      "name": "Peterborough",
+      "state": "Ontario",
+      "state_abbr": "ON",
+      "country": "CA",
+      "tier": "mid"
+    },
+    {
+      "slug": "pittsburgh-event-staffing",
+      "name": "Pittsburgh",
+      "state": "Pennsylvania",
+      "state_abbr": "PA",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "plano-event-staffing",
+      "name": "Plano",
+      "state": "Texas",
+      "state_abbr": "TX",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "pomona-event-staffing",
+      "name": "Pomona",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "port-st-lucie-event-staffing",
+      "name": "Port St. Lucie",
+      "state": "Florida",
+      "state_abbr": "FL",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "portland-event-staffing",
+      "name": "Portland",
+      "state": "Oregon",
+      "state_abbr": "OR",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "portland-me-event-staffing",
+      "name": "Portland",
+      "state": "Maine",
+      "state_abbr": "ME",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "portsmouth-event-staffing",
+      "name": "Portsmouth",
+      "state": "New Hampshire",
+      "state_abbr": "NH",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "poughkeepsie-event-staffing",
+      "name": "Poughkeepsie",
+      "state": "New York",
+      "state_abbr": "NY",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "providence-event-staffing",
+      "name": "Providence",
+      "state": "Rhode Island",
+      "state_abbr": "RI",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "quebec-city-event-staffing",
+      "name": "Quebec City",
+      "state": "Quebec",
+      "state_abbr": "QC",
+      "country": "CA",
+      "tier": "mid"
+    },
+    {
+      "slug": "reading-event-staffing",
+      "name": "Reading",
+      "state": "Pennsylvania",
+      "state_abbr": "PA",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "red-deer-event-staffing",
+      "name": "Red Deer",
+      "state": "Alberta",
+      "state_abbr": "AB",
+      "country": "CA",
+      "tier": "mid"
+    },
+    {
+      "slug": "regina-event-staffing",
+      "name": "Regina",
+      "state": "Saskatchewan",
+      "state_abbr": "SK",
+      "country": "CA",
+      "tier": "mid"
+    },
+    {
+      "slug": "reno-event-staffing",
+      "name": "Reno",
+      "state": "Nevada",
+      "state_abbr": "NV",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "richmond-event-staffing",
+      "name": "Richmond",
+      "state": "Virginia",
+      "state_abbr": "VA",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "riverside-event-staffing",
+      "name": "Riverside",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "sacramento-event-staffing",
+      "name": "Sacramento",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "saint-john-event-staffing",
+      "name": "Saint John",
+      "state": "New Brunswick",
+      "state_abbr": "NB",
+      "country": "CA",
+      "tier": "mid"
+    },
+    {
+      "slug": "saint-paul-event-staffing",
+      "name": "Saint Paul",
+      "state": "Minnesota",
+      "state_abbr": "MN",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "salinas-event-staffing",
+      "name": "Salinas",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "salt-lake-city-event-staffing",
+      "name": "Salt Lake City",
+      "state": "Utah",
+      "state_abbr": "UT",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "san-antonio-event-staffing",
+      "name": "San Antonio",
+      "state": "Texas",
+      "state_abbr": "TX",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "san-jose-event-staffing",
+      "name": "San Jose",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "santa-ana-event-staffing",
+      "name": "Santa Ana",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "santa-barbara-event-staffing",
+      "name": "Santa Barbara",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "santa-rosa-event-staffing",
+      "name": "Santa Rosa",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "sarasota-event-staffing",
+      "name": "Sarasota",
+      "state": "Florida",
+      "state_abbr": "FL",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "saskatoon-event-staffing",
+      "name": "Saskatoon",
+      "state": "Saskatchewan",
+      "state_abbr": "SK",
+      "country": "CA",
+      "tier": "mid"
+    },
+    {
+      "slug": "savannah-event-staffing",
+      "name": "Savannah",
+      "state": "Georgia",
+      "state_abbr": "GA",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "scottsdale-event-staffing",
+      "name": "Scottsdale",
+      "state": "Arizona",
+      "state_abbr": "AZ",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "scranton-event-staffing",
+      "name": "Scranton",
+      "state": "Pennsylvania",
+      "state_abbr": "PA",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "sherbrooke-event-staffing",
+      "name": "Sherbrooke",
+      "state": "Quebec",
+      "state_abbr": "QC",
+      "country": "CA",
+      "tier": "mid"
+    },
+    {
+      "slug": "shreveport-event-staffing",
+      "name": "Shreveport",
+      "state": "Louisiana",
+      "state_abbr": "LA",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "sioux-falls-event-staffing",
+      "name": "Sioux Falls",
+      "state": "South Dakota",
+      "state_abbr": "SD",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "south-bend-event-staffing",
+      "name": "South Bend",
+      "state": "Indiana",
+      "state_abbr": "IN",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "spokane-event-staffing",
+      "name": "Spokane",
+      "state": "Washington",
+      "state_abbr": "WA",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "springfield-ma-event-staffing",
+      "name": "Springfield",
+      "state": "Massachusetts",
+      "state_abbr": "MA",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "springfield-event-staffing",
+      "name": "Springfield",
+      "state": "Missouri",
+      "state_abbr": "MO",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "st-johns-event-staffing",
+      "name": "St. John's",
+      "state": "Newfoundland and Labrador",
+      "state_abbr": "NL",
+      "country": "CA",
+      "tier": "mid"
+    },
+    {
+      "slug": "st-louis-event-staffing",
+      "name": "St. Louis",
+      "state": "Missouri",
+      "state_abbr": "MO",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "st-petersburg-event-staffing",
+      "name": "St. Petersburg",
+      "state": "Florida",
+      "state_abbr": "FL",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "stamford-event-staffing",
+      "name": "Stamford",
+      "state": "Connecticut",
+      "state_abbr": "CT",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "sunnyvale-event-staffing",
+      "name": "Sunnyvale",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "sydney-event-staffing",
+      "name": "Sydney",
+      "state": "Nova Scotia",
+      "state_abbr": "NS",
+      "country": "CA",
+      "tier": "mid"
+    },
+    {
+      "slug": "tacoma-event-staffing",
+      "name": "Tacoma",
+      "state": "Washington",
+      "state_abbr": "WA",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "tampa-event-staffing",
+      "name": "Tampa",
+      "state": "Florida",
+      "state_abbr": "FL",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "trois-rivieres-event-staffing",
+      "name": "Trois-Rivières",
+      "state": "Quebec",
+      "state_abbr": "QC",
+      "country": "CA",
+      "tier": "mid"
+    },
+    {
+      "slug": "tucson-event-staffing",
+      "name": "Tucson",
+      "state": "Arizona",
+      "state_abbr": "AZ",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "victoria-event-staffing",
+      "name": "Victoria",
+      "state": "British Columbia",
+      "state_abbr": "BC",
+      "country": "CA",
+      "tier": "mid"
+    },
+    {
+      "slug": "virginia-beach-event-staffing",
+      "name": "Virginia Beach",
+      "state": "Virginia",
+      "state_abbr": "VA",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "whistler-event-staffing",
+      "name": "Whistler",
+      "state": "British Columbia",
+      "state_abbr": "BC",
+      "country": "CA",
+      "tier": "mid"
+    },
+    {
+      "slug": "whitby-event-staffing",
+      "name": "Whitby",
+      "state": "Ontario",
+      "state_abbr": "ON",
+      "country": "CA",
+      "tier": "mid"
+    },
+    {
+      "slug": "white-plains-event-staffing",
+      "name": "White Plains",
+      "state": "New York",
+      "state_abbr": "NY",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "wilmington-event-staffing",
+      "name": "Wilmington",
+      "state": "Delaware",
+      "state_abbr": "DE",
+      "country": "US",
+      "tier": "mid"
+    },
+    {
+      "slug": "winnipeg-event-staffing",
+      "name": "Winnipeg",
+      "state": "Manitoba",
+      "state_abbr": "MB",
+      "country": "CA",
+      "tier": "mid"
+    },
+    {
+      "slug": "albany-event-staffing",
+      "name": "Albany",
+      "state": "New York",
+      "state_abbr": "NY",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "alexandria-event-staffing",
+      "name": "Alexandria",
+      "state": "Virginia",
+      "state_abbr": "VA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "allentown-event-staffing",
+      "name": "Allentown",
+      "state": "Pennsylvania",
+      "state_abbr": "PA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "ann-arbor-event-staffing",
+      "name": "Ann Arbor",
+      "state": "Michigan",
+      "state_abbr": "MI",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "appleton-event-staffing",
+      "name": "Appleton",
+      "state": "Wisconsin",
+      "state_abbr": "WI",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "asheville-event-staffing",
+      "name": "Asheville",
+      "state": "North Carolina",
+      "state_abbr": "NC",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "atlantic-city-event-staffing",
+      "name": "Atlantic City",
+      "state": "New Jersey",
+      "state_abbr": "NJ",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "augusta-event-staffing",
+      "name": "Augusta",
+      "state": "Georgia",
+      "state_abbr": "GA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "aurora-event-staffing",
+      "name": "Aurora",
+      "state": "Colorado",
+      "state_abbr": "CO",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "bangor-event-staffing",
+      "name": "Bangor",
+      "state": "Maine",
+      "state_abbr": "ME",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "baton-rouge-event-staffing",
+      "name": "Baton Rouge",
+      "state": "Louisiana",
+      "state_abbr": "LA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "beaumont-event-staffing",
+      "name": "Beaumont",
+      "state": "Texas",
+      "state_abbr": "TX",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "binghamton-event-staffing",
+      "name": "Binghamton",
+      "state": "New York",
+      "state_abbr": "NY",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "birmingham-event-staffing",
+      "name": "Birmingham",
+      "state": "Alabama",
+      "state_abbr": "AL",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "bloomington-event-staffing",
+      "name": "Bloomington",
+      "state": "Illinois",
+      "state_abbr": "IL",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "boulder-event-staffing",
+      "name": "Boulder",
+      "state": "Colorado",
+      "state_abbr": "CO",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "bowling-green-event-staffing",
+      "name": "Bowling Green",
+      "state": "Kentucky",
+      "state_abbr": "KY",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "bradenton-event-staffing",
+      "name": "Bradenton",
+      "state": "Florida",
+      "state_abbr": "FL",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "bridgeport-event-staffing",
+      "name": "Bridgeport",
+      "state": "Connecticut",
+      "state_abbr": "CT",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "buffalo-event-staffing",
+      "name": "Buffalo",
+      "state": "New York",
+      "state_abbr": "NY",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "burlington-event-staffing",
+      "name": "Burlington",
+      "state": "Vermont",
+      "state_abbr": "VT",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "cambridge-event-staffing",
+      "name": "Cambridge",
+      "state": "Massachusetts",
+      "state_abbr": "MA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "canton-event-staffing",
+      "name": "Canton",
+      "state": "Ohio",
+      "state_abbr": "OH",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "cape-coral-event-staffing",
+      "name": "Cape Coral",
+      "state": "Florida",
+      "state_abbr": "FL",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "carrollton-event-staffing",
+      "name": "Carrollton",
+      "state": "Texas",
+      "state_abbr": "TX",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "cary-event-staffing",
+      "name": "Cary",
+      "state": "North Carolina",
+      "state_abbr": "NC",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "cedar-rapids-event-staffing",
+      "name": "Cedar Rapids",
+      "state": "Iowa",
+      "state_abbr": "IA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "champaign-event-staffing",
+      "name": "Champaign",
+      "state": "Illinois",
+      "state_abbr": "IL",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "chandler-event-staffing",
+      "name": "Chandler",
+      "state": "Arizona",
+      "state_abbr": "AZ",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "charleston-wv-event-staffing",
+      "name": "Charleston",
+      "state": "West Virginia",
+      "state_abbr": "WV",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "charleston-event-staffing",
+      "name": "Charleston",
+      "state": "South Carolina",
+      "state_abbr": "SC",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "charlottesville-event-staffing",
+      "name": "Charlottesville",
+      "state": "Virginia",
+      "state_abbr": "VA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "chattanooga-event-staffing",
+      "name": "Chattanooga",
+      "state": "Tennessee",
+      "state_abbr": "TN",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "chesapeake-event-staffing",
+      "name": "Chesapeake",
+      "state": "Virginia",
+      "state_abbr": "VA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "chula-vista-event-staffing",
+      "name": "Chula Vista",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "clarksville-event-staffing",
+      "name": "Clarksville",
+      "state": "Tennessee",
+      "state_abbr": "TN",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "clearwater-event-staffing",
+      "name": "Clearwater",
+      "state": "Florida",
+      "state_abbr": "FL",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "college-station-event-staffing",
+      "name": "College Station",
+      "state": "Texas",
+      "state_abbr": "TX",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "colorado-springs-event-staffing",
+      "name": "Colorado Springs",
+      "state": "Colorado",
+      "state_abbr": "CO",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "columbia-event-staffing",
+      "name": "Columbia",
+      "state": "South Carolina",
+      "state_abbr": "SC",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "concord-event-staffing",
+      "name": "Concord",
+      "state": "New Hampshire",
+      "state_abbr": "NH",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "coral-springs-event-staffing",
+      "name": "Coral Springs",
+      "state": "Florida",
+      "state_abbr": "FL",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "corona-event-staffing",
+      "name": "Corona",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "corpus-christi-event-staffing",
+      "name": "Corpus Christi",
+      "state": "Texas",
+      "state_abbr": "TX",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "danbury-event-staffing",
+      "name": "Danbury",
+      "state": "Connecticut",
+      "state_abbr": "CT",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "davenport-event-staffing",
+      "name": "Davenport",
+      "state": "Iowa",
+      "state_abbr": "IA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "dayton-event-staffing",
+      "name": "Dayton",
+      "state": "Ohio",
+      "state_abbr": "OH",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "daytona-event-staffing",
+      "name": "Daytona Beach",
+      "state": "Florida",
+      "state_abbr": "FL",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "denton-event-staffing",
+      "name": "Denton",
+      "state": "Texas",
+      "state_abbr": "TX",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "des-moines-event-staffing",
+      "name": "Des Moines",
+      "state": "Iowa",
+      "state_abbr": "IA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "duluth-event-staffing",
+      "name": "Duluth",
+      "state": "Minnesota",
+      "state_abbr": "MN",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "durham-event-staffing",
+      "name": "Durham",
+      "state": "North Carolina",
+      "state_abbr": "NC",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "elizabeth-event-staffing",
+      "name": "Elizabeth",
+      "state": "New Jersey",
+      "state_abbr": "NJ",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "elk-grove-event-staffing",
+      "name": "Elk Grove",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "erie-event-staffing",
+      "name": "Erie",
+      "state": "Pennsylvania",
+      "state_abbr": "PA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "escondido-event-staffing",
+      "name": "Escondido",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "eugene-event-staffing",
+      "name": "Eugene",
+      "state": "Oregon",
+      "state_abbr": "OR",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "evansville-event-staffing",
+      "name": "Evansville",
+      "state": "Indiana",
+      "state_abbr": "IN",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "fargo-event-staffing",
+      "name": "Fargo",
+      "state": "North Dakota",
+      "state_abbr": "ND",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "fayetteville-event-staffing",
+      "name": "Fayetteville",
+      "state": "Arkansas",
+      "state_abbr": "AR",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "flagstaff-event-staffing",
+      "name": "Flagstaff",
+      "state": "Arizona",
+      "state_abbr": "AZ",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "flint-event-staffing",
+      "name": "Flint",
+      "state": "Michigan",
+      "state_abbr": "MI",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "fontana-event-staffing",
+      "name": "Fontana",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "fort-collins-event-staffing",
+      "name": "Fort Collins",
+      "state": "Colorado",
+      "state_abbr": "CO",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "fort-lauderdale-event-staffing",
+      "name": "Fort Lauderdale",
+      "state": "Florida",
+      "state_abbr": "FL",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "fort-myers-event-staffing",
+      "name": "Fort Myers",
+      "state": "Florida",
+      "state_abbr": "FL",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "fort-wayne-event-staffing",
+      "name": "Fort Wayne",
+      "state": "Indiana",
+      "state_abbr": "IN",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "fort-worth-event-staffing",
+      "name": "Fort Worth",
+      "state": "Texas",
+      "state_abbr": "TX",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "fresno-event-staffing",
+      "name": "Fresno",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "frisco-event-staffing",
+      "name": "Frisco",
+      "state": "Texas",
+      "state_abbr": "TX",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "fullerton-event-staffing",
+      "name": "Fullerton",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "gainesville-event-staffing",
+      "name": "Gainesville",
+      "state": "Florida",
+      "state_abbr": "FL",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "galveston-event-staffing",
+      "name": "Galveston",
+      "state": "Texas",
+      "state_abbr": "TX",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "garden-grove-event-staffing",
+      "name": "Garden Grove",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "garland-event-staffing",
+      "name": "Garland",
+      "state": "Texas",
+      "state_abbr": "TX",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "gilbert-event-staffing",
+      "name": "Gilbert",
+      "state": "Arizona",
+      "state_abbr": "AZ",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "glendale-ca-event-staffing",
+      "name": "Glendale",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "glendale-event-staffing",
+      "name": "Glendale",
+      "state": "Arizona",
+      "state_abbr": "AZ",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "grand-forks-event-staffing",
+      "name": "Grand Forks",
+      "state": "North Dakota",
+      "state_abbr": "ND",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "grand-rapids-event-staffing",
+      "name": "Grand Rapids",
+      "state": "Michigan",
+      "state_abbr": "MI",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "greeley-event-staffing",
+      "name": "Greeley",
+      "state": "Colorado",
+      "state_abbr": "CO",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "green-bay-event-staffing",
+      "name": "Green Bay",
+      "state": "Wisconsin",
+      "state_abbr": "WI",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "greensboro-event-staffing",
+      "name": "Greensboro",
+      "state": "North Carolina",
+      "state_abbr": "NC",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "greenville-event-staffing",
+      "name": "Greenville",
+      "state": "South Carolina",
+      "state_abbr": "SC",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "greenwich-event-staffing",
+      "name": "Greenwich",
+      "state": "Connecticut",
+      "state_abbr": "CT",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "hampton-event-staffing",
+      "name": "Hampton",
+      "state": "Virginia",
+      "state_abbr": "VA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "harrisburg-event-staffing",
+      "name": "Harrisburg",
+      "state": "Pennsylvania",
+      "state_abbr": "PA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "hartford-event-staffing",
+      "name": "Hartford",
+      "state": "Connecticut",
+      "state_abbr": "CT",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "hayward-event-staffing",
+      "name": "Hayward",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "henderson-event-staffing",
+      "name": "Henderson",
+      "state": "Nevada",
+      "state_abbr": "NV",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "hialeah-event-staffing",
+      "name": "Hialeah",
+      "state": "Florida",
+      "state_abbr": "FL",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "hollywood-event-staffing",
+      "name": "Hollywood",
+      "state": "Florida",
+      "state_abbr": "FL",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "huntington-beach-event-staffing",
+      "name": "Huntington Beach",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "huntsville-event-staffing",
+      "name": "Huntsville",
+      "state": "Alabama",
+      "state_abbr": "AL",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "idaho-falls-event-staffing",
+      "name": "Idaho Falls",
+      "state": "Idaho",
+      "state_abbr": "ID",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "iowa-city-event-staffing",
+      "name": "Iowa City",
+      "state": "Iowa",
+      "state_abbr": "IA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "irvine-event-staffing",
+      "name": "Irvine",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "irving-event-staffing",
+      "name": "Irving",
+      "state": "Texas",
+      "state_abbr": "TX",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "ithaca-event-staffing",
+      "name": "Ithaca",
+      "state": "New York",
+      "state_abbr": "NY",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "jackson-event-staffing",
+      "name": "Jackson",
+      "state": "Mississippi",
+      "state_abbr": "MS",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "jersey-city-event-staffing",
+      "name": "Jersey City",
+      "state": "New Jersey",
+      "state_abbr": "NJ",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "joliet-event-staffing",
+      "name": "Joliet",
+      "state": "Illinois",
+      "state_abbr": "IL",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "joplin-event-staffing",
+      "name": "Joplin",
+      "state": "Missouri",
+      "state_abbr": "MO",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "kalamazoo-event-staffing",
+      "name": "Kalamazoo",
+      "state": "Michigan",
+      "state_abbr": "MI",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "kansas-city-ks-event-staffing",
+      "name": "Kansas City",
+      "state": "Kansas",
+      "state_abbr": "KS",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "kelowna-event-staffing",
+      "name": "Kelowna",
+      "state": "British Columbia",
+      "state_abbr": "BC",
+      "country": "CA",
+      "tier": "small"
+    },
+    {
+      "slug": "kent-event-staffing",
+      "name": "Kent",
+      "state": "Washington",
+      "state_abbr": "WA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "key-west-event-staffing",
+      "name": "Key West",
+      "state": "Florida",
+      "state_abbr": "FL",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "killeen-event-staffing",
+      "name": "Killeen",
+      "state": "Texas",
+      "state_abbr": "TX",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "kissimmee-event-staffing",
+      "name": "Kissimmee",
+      "state": "Florida",
+      "state_abbr": "FL",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "kitchener-event-staffing",
+      "name": "Kitchener",
+      "state": "Ontario",
+      "state_abbr": "ON",
+      "country": "CA",
+      "tier": "small"
+    },
+    {
+      "slug": "knoxville-event-staffing",
+      "name": "Knoxville",
+      "state": "Tennessee",
+      "state_abbr": "TN",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "lake-charles-event-staffing",
+      "name": "Lake Charles",
+      "state": "Louisiana",
+      "state_abbr": "LA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "lakewood-event-staffing",
+      "name": "Lakewood",
+      "state": "Colorado",
+      "state_abbr": "CO",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "lancaster-event-staffing",
+      "name": "Lancaster",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "laredo-event-staffing",
+      "name": "Laredo",
+      "state": "Texas",
+      "state_abbr": "TX",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "lawrence-event-staffing",
+      "name": "Lawrence",
+      "state": "Kansas",
+      "state_abbr": "KS",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "lethbridge-event-staffing",
+      "name": "Lethbridge",
+      "state": "Alberta",
+      "state_abbr": "AB",
+      "country": "CA",
+      "tier": "small"
+    },
+    {
+      "slug": "lexington-event-staffing",
+      "name": "Lexington",
+      "state": "Kentucky",
+      "state_abbr": "KY",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "lincoln-event-staffing",
+      "name": "Lincoln",
+      "state": "Nebraska",
+      "state_abbr": "NE",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "little-rock-event-staffing",
+      "name": "Little Rock",
+      "state": "Arkansas",
+      "state_abbr": "AR",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "london-on-event-staffing",
+      "name": "London",
+      "state": "Ontario",
+      "state_abbr": "ON",
+      "country": "CA",
+      "tier": "small"
+    },
+    {
+      "slug": "long-beach-event-staffing",
+      "name": "Long Beach",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "lowell-event-staffing",
+      "name": "Lowell",
+      "state": "Massachusetts",
+      "state_abbr": "MA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "lubbock-event-staffing",
+      "name": "Lubbock",
+      "state": "Texas",
+      "state_abbr": "TX",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "mankato-event-staffing",
+      "name": "Mankato",
+      "state": "Minnesota",
+      "state_abbr": "MN",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "mesquite-event-staffing",
+      "name": "Mesquite",
+      "state": "Texas",
+      "state_abbr": "TX",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "midland-event-staffing",
+      "name": "Midland",
+      "state": "Texas",
+      "state_abbr": "TX",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "missoula-event-staffing",
+      "name": "Missoula",
+      "state": "Montana",
+      "state_abbr": "MT",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "myrtle-beach-event-staffing",
+      "name": "Myrtle Beach",
+      "state": "South Carolina",
+      "state_abbr": "SC",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "napa-valley-event-staffing",
+      "name": "Napa Valley",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "new-britain-event-staffing",
+      "name": "New Britain",
+      "state": "Connecticut",
+      "state_abbr": "CT",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "new-london-event-staffing",
+      "name": "New London",
+      "state": "Connecticut",
+      "state_abbr": "CT",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "norman-event-staffing",
+      "name": "Norman",
+      "state": "Oklahoma",
+      "state_abbr": "OK",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "norwich-event-staffing",
+      "name": "Norwich",
+      "state": "Connecticut",
+      "state_abbr": "CT",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "ocala-event-staffing",
+      "name": "Ocala",
+      "state": "Florida",
+      "state_abbr": "FL",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "ogden-event-staffing",
+      "name": "Ogden",
+      "state": "Utah",
+      "state_abbr": "UT",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "palm-springs-event-staffing",
+      "name": "Palm Springs",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "panama-city-event-staffing",
+      "name": "Panama City",
+      "state": "Florida",
+      "state_abbr": "FL",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "pembroke-pines-event-staffing",
+      "name": "Pembroke Pines",
+      "state": "Florida",
+      "state_abbr": "FL",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "peoria-event-staffing",
+      "name": "Peoria",
+      "state": "Illinois",
+      "state_abbr": "IL",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "provo-event-staffing",
+      "name": "Provo",
+      "state": "Utah",
+      "state_abbr": "UT",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "pueblo-event-staffing",
+      "name": "Pueblo",
+      "state": "Colorado",
+      "state_abbr": "CO",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "raleigh-event-staffing",
+      "name": "Raleigh",
+      "state": "North Carolina",
+      "state_abbr": "NC",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "rapid-city-event-staffing",
+      "name": "Rapid City",
+      "state": "South Dakota",
+      "state_abbr": "SD",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "roanoke-event-staffing",
+      "name": "Roanoke",
+      "state": "Virginia",
+      "state_abbr": "VA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "rochester-mn-event-staffing",
+      "name": "Rochester",
+      "state": "Minnesota",
+      "state_abbr": "MN",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "rochester-event-staffing",
+      "name": "Rochester",
+      "state": "New York",
+      "state_abbr": "NY",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "rockford-event-staffing",
+      "name": "Rockford",
+      "state": "Illinois",
+      "state_abbr": "IL",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "roseville-event-staffing",
+      "name": "Roseville",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "round-rock-event-staffing",
+      "name": "Round Rock",
+      "state": "Texas",
+      "state_abbr": "TX",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "saginaw-event-staffing",
+      "name": "Saginaw",
+      "state": "Michigan",
+      "state_abbr": "MI",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "salem-event-staffing",
+      "name": "Salem",
+      "state": "Oregon",
+      "state_abbr": "OR",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "san-bernardino-event-staffing",
+      "name": "San Bernardino",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "san-luis-obispo-event-staffing",
+      "name": "San Luis Obispo",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "santa-clarita-event-staffing",
+      "name": "Santa Clarita",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "santa-cruz-event-staffing",
+      "name": "Santa Cruz",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "santa-fe-event-staffing",
+      "name": "Santa Fe",
+      "state": "New Mexico",
+      "state_abbr": "NM",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "springfield-mo-event-staffing",
+      "name": "Springfield",
+      "state": "Missouri",
+      "state_abbr": "MO",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "state-college-event-staffing",
+      "name": "State College",
+      "state": "Pennsylvania",
+      "state_abbr": "PA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "sterling-heights-event-staffing",
+      "name": "Sterling Heights",
+      "state": "Michigan",
+      "state_abbr": "MI",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "stockton-event-staffing",
+      "name": "Stockton",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "syracuse-event-staffing",
+      "name": "Syracuse",
+      "state": "New York",
+      "state_abbr": "NY",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "tallahassee-event-staffing",
+      "name": "Tallahassee",
+      "state": "Florida",
+      "state_abbr": "FL",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "tempe-event-staffing",
+      "name": "Tempe",
+      "state": "Arizona",
+      "state_abbr": "AZ",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "terre-haute-event-staffing",
+      "name": "Terre Haute",
+      "state": "Indiana",
+      "state_abbr": "IN",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "thornton-event-staffing",
+      "name": "Thornton",
+      "state": "Colorado",
+      "state_abbr": "CO",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "thunder-bay-event-staffing",
+      "name": "Thunder Bay",
+      "state": "Ontario",
+      "state_abbr": "ON",
+      "country": "CA",
+      "tier": "small"
+    },
+    {
+      "slug": "toledo-event-staffing",
+      "name": "Toledo",
+      "state": "Ohio",
+      "state_abbr": "OH",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "topeka-event-staffing",
+      "name": "Topeka",
+      "state": "Kansas",
+      "state_abbr": "KS",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "torrance-event-staffing",
+      "name": "Torrance",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "trenton-event-staffing",
+      "name": "Trenton",
+      "state": "New Jersey",
+      "state_abbr": "NJ",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "tulsa-event-staffing",
+      "name": "Tulsa",
+      "state": "Oklahoma",
+      "state_abbr": "OK",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "tuscaloosa-event-staffing",
+      "name": "Tuscaloosa",
+      "state": "Alabama",
+      "state_abbr": "AL",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "tyler-event-staffing",
+      "name": "Tyler",
+      "state": "Texas",
+      "state_abbr": "TX",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "utica-event-staffing",
+      "name": "Utica",
+      "state": "New York",
+      "state_abbr": "NY",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "vail-event-staffing",
+      "name": "Vail",
+      "state": "Colorado",
+      "state_abbr": "CO",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "vancouver-wa-event-staffing",
+      "name": "Vancouver",
+      "state": "Washington",
+      "state_abbr": "WA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "ventura-event-staffing",
+      "name": "Ventura",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "visalia-event-staffing",
+      "name": "Visalia",
+      "state": "California",
+      "state_abbr": "CA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "waco-event-staffing",
+      "name": "Waco",
+      "state": "Texas",
+      "state_abbr": "TX",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "warren-event-staffing",
+      "name": "Warren",
+      "state": "Michigan",
+      "state_abbr": "MI",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "waterbury-event-staffing",
+      "name": "Waterbury",
+      "state": "Connecticut",
+      "state_abbr": "CT",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "west-jordan-event-staffing",
+      "name": "West Jordan",
+      "state": "Utah",
+      "state_abbr": "UT",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "west-valley-city-event-staffing",
+      "name": "West Valley City",
+      "state": "Utah",
+      "state_abbr": "UT",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "wichita-event-staffing",
+      "name": "Wichita",
+      "state": "Kansas",
+      "state_abbr": "KS",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "winston-salem-event-staffing",
+      "name": "Winston-Salem",
+      "state": "North Carolina",
+      "state_abbr": "NC",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "worcester-event-staffing",
+      "name": "Worcester",
+      "state": "Massachusetts",
+      "state_abbr": "MA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "yonkers-event-staffing",
+      "name": "Yonkers",
+      "state": "New York",
+      "state_abbr": "NY",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "york-event-staffing",
+      "name": "York",
+      "state": "Pennsylvania",
+      "state_abbr": "PA",
+      "country": "US",
+      "tier": "small"
+    },
+    {
+      "slug": "youngstown-event-staffing",
+      "name": "Youngstown",
+      "state": "Ohio",
+      "state_abbr": "OH",
+      "country": "US",
+      "tier": "small"
+    }
+  ]
+}

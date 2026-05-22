@@ -1,0 +1,25 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "updated": "2026-05-21",
+    "notes": "All rates USD/hr, all-inclusive (worker pay + workers comp + general liability + payroll taxes). Canadian markets bill in CAD at parity; client invoicing converts. Floors enforced — Brand Ambassadors never below $40 anywhere.",
+    "currency_default": "USD",
+    "tier_definitions": {
+      "small": "Tertiary markets (~191 cities) — smaller metros, secondary towns",
+      "mid": "Secondary markets (~129 cities) — regional hubs, mid-size metros",
+      "hub": "Primary markets (~25 cities) — NYC, LA, SF, Chicago, Boston, Miami, DC, Houston, Dallas, Atlanta, Seattle, Denver, etc."
+    }
+  },
+  "pricing": {
+    "setup-breakdown":     { "small": { "low": 30, "high": 36 }, "mid": { "low": 36, "high": 42 }, "hub": { "low": 42, "high": 48 } },
+    "booth-monitors":      { "small": { "low": 30, "high": 36 }, "mid": { "low": 36, "high": 42 }, "hub": { "low": 42, "high": 48 } },
+    "ushers":              { "small": { "low": 32, "high": 38 }, "mid": { "low": 38, "high": 44 }, "hub": { "low": 44, "high": 50 } },
+    "gate-staff":          { "small": { "low": 34, "high": 40 }, "mid": { "low": 40, "high": 47 }, "hub": { "low": 47, "high": 55 } },
+    "registration-staff":  { "small": { "low": 36, "high": 42 }, "mid": { "low": 42, "high": 50 }, "hub": { "low": 50, "high": 58 } },
+    "hospitality-staff":   { "small": { "low": 38, "high": 45 }, "mid": { "low": 45, "high": 53 }, "hub": { "low": 53, "high": 62 } },
+    "brand-ambassadors":   { "small": { "low": 40, "high": 48 }, "mid": { "low": 48, "high": 56 }, "hub": { "low": 56, "high": 65 } },
+    "guest-services":      { "small": { "low": 40, "high": 48 }, "mid": { "low": 48, "high": 56 }, "hub": { "low": 56, "high": 65 } },
+    "crowd-control":       { "small": { "low": 42, "high": 50 }, "mid": { "low": 50, "high": 58 }, "hub": { "low": 58, "high": 68 } },
+    "team-leads":          { "small": { "low": 48, "high": 58 }, "mid": { "low": 58, "high": 70 }, "hub": { "low": 70, "high": 85 } }
+  }
+}

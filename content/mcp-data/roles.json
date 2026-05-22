@@ -1,0 +1,79 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "updated": "2026-05-21",
+    "source": "TempGuru role definitions; mirrors role x city page slugs"
+  },
+  "roles": [
+    {
+      "slug": "setup-breakdown",
+      "name": "Setup & Breakdown Crew",
+      "description": "Physical labor for event setup and teardown: tables, chairs, signage, AV equipment, decor. Pre-event and post-event shifts.",
+      "skill_tier": 1,
+      "typical_shift_length_hours": 6
+    },
+    {
+      "slug": "booth-monitors",
+      "name": "Booth Monitors",
+      "description": "Stationary supervision of exhibitor booths, demo stations, or product displays. Light engagement, basic information handoff.",
+      "skill_tier": 1,
+      "typical_shift_length_hours": 8
+    },
+    {
+      "slug": "ushers",
+      "name": "Ushers",
+      "description": "Guest flow management, seating direction, light wayfinding at theaters, ceremonies, and large gatherings.",
+      "skill_tier": 2,
+      "typical_shift_length_hours": 6
+    },
+    {
+      "slug": "gate-staff",
+      "name": "Gate Staff",
+      "description": "Entry-point credentialing, ticket scanning, ID verification, and access control. Often paired with security at larger events.",
+      "skill_tier": 2,
+      "typical_shift_length_hours": 8
+    },
+    {
+      "slug": "registration-staff",
+      "name": "Registration Staff",
+      "description": "Tablet-based or kiosk check-in, badge printing, attendee lookups, and on-site corrections. Common at conferences and conventions.",
+      "skill_tier": 3,
+      "typical_shift_length_hours": 8
+    },
+    {
+      "slug": "hospitality-staff",
+      "name": "Hospitality Staff",
+      "description": "F&B service: servers, bartenders, banquet staff. TIPS certification often required for alcohol service.",
+      "skill_tier": 3,
+      "typical_shift_length_hours": 6
+    },
+    {
+      "slug": "brand-ambassadors",
+      "name": "Brand Ambassadors",
+      "description": "On-brand product representation, sampling, demo, and consumer engagement at activations, retail, and field marketing events.",
+      "skill_tier": 4,
+      "typical_shift_length_hours": 6
+    },
+    {
+      "slug": "guest-services",
+      "name": "Guest Services",
+      "description": "Concierge-level support: VIP check-in, problem resolution, hospitality coordination. Brand-voice critical.",
+      "skill_tier": 4,
+      "typical_shift_length_hours": 8
+    },
+    {
+      "slug": "crowd-control",
+      "name": "Crowd Control",
+      "description": "Crowd flow management, line control, queue management, and light de-escalation. Safety-trained, not licensed security.",
+      "skill_tier": 4,
+      "typical_shift_length_hours": 8
+    },
+    {
+      "slug": "team-leads",
+      "name": "Team Leads",
+      "description": "On-site crew supervision, client liaison, schedule management, and quality assurance. Accountable for crew performance.",
+      "skill_tier": 5,
+      "typical_shift_length_hours": 10
+    }
+  ]
+}
