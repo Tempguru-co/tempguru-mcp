@@ -298,13 +298,58 @@ const handler = createMcpHandler(
 // Remove this wrapper when mcp-handler upgrades to the 2026-07-28 spec
 // (stateless protocol — Accept enforcement is relaxed in that revision).
 
-async function withAcceptNormalization(request: Request): Promise<Response> {
-  const accept = request.headers.get("accept") ?? "";
-  const wantsJson = accept.includes("application/json") || accept.includes("*/*") || accept === "";
-  const wantsSse = accept.includes("text/event-stream") || accept.includes("*/*") || accept === "";
+// ─── CORS headers ──────────────────────────────────────────────────────
+//
+// Glama's health checker, in-browser MCP clients (Claude.ai connector
+// surface, future web-based MCP playgrounds), and any directory scanner
+// that probes from a browser context all require CORS preflight to
+// succeed before the actual request lands.
+//
+// Until 2026-06-04 ~04:30 UTC the route returned 204 to OPTIONS without
+// Access-Control-* headers — mcp-handler's built-in OPTIONS handler does
+// the bare minimum. That looked fine to server-to-server clients
+// (Anthropic's connectors, Smithery's scanner, our own curl probes) but
+// silently failed Glama's browser-context health probe, which surfaced
+// as a generic "unhealthy" status with no diagnostic.
+//
+// Wide-open CORS is correct for this server: no auth, no sensitive
+// data, no per-client config, no credentialed requests. Allow-list any
+// origin, expose the MCP-Session-Id and Last-Event-ID headers used by
+// streamable HTTP, and apply on every response — including OPTIONS
+// preflights.
 
-  if (wantsJson && wantsSse && accept.includes("application/json") && accept.includes("text/event-stream")) {
-    return handler(request);
+const CORS_HEADERS: Record<string, string> = {
+  "access-control-allow-origin": "*",
+  "access-control-allow-methods": "GET, POST, DELETE, OPTIONS",
+  "access-control-allow-headers":
+    "Content-Type, Accept, Mcp-Session-Id, Last-Event-ID, Authorization",
+  "access-control-expose-headers": "Mcp-Session-Id, WWW-Authenticate",
+  "access-control-max-age": "86400",
+};
+
+function withCors(response: Response): Response {
+  const headers = new Headers(response.headers);
+  for (const [k, v] of Object.entries(CORS_HEADERS)) {
+    headers.set(k, v);
+  }
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
+async function withAcceptNormalization(request: Request): Promise<Response> {
+  // Short-circuit OPTIONS preflights with a CORS-only 204 — no need to
+  // run them through the MCP handler.
+  if (request.method === "OPTIONS") {
+    return withCors(new Response(null, { status: 204 }));
+  }
+
+  const accept = request.headers.get("accept") ?? "";
+
+  if (accept.includes("application/json") && accept.includes("text/event-stream")) {
+    return withCors(await handler(request));
   }
 
   // Clone the request with a normalized Accept header. Body must be read first
@@ -323,11 +368,12 @@ async function withAcceptNormalization(request: Request): Promise<Response> {
     body,
   });
 
-  return handler(normalized);
+  return withCors(await handler(normalized));
 }
 
 export {
   withAcceptNormalization as GET,
   withAcceptNormalization as POST,
   withAcceptNormalization as DELETE,
+  withAcceptNormalization as OPTIONS,
 };
