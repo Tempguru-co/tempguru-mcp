@@ -1,0 +1,12 @@
+.git
+.github
+.next
+.vercel
+node_modules
+.env*
+*.log
+.DS_Store
+README.md
+README.zh-CN.md
+LICENSE
+key.pem
