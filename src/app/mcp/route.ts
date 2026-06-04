@@ -28,6 +28,8 @@ import {
   queryStateCompliance,
   type CityTier,
 } from "@/lib/mcp/queries";
+import { runWithContext, currentContext } from "@/lib/telemetry/context";
+import { track } from "@/lib/telemetry/track";
 
 // ─── Skill resource content ───────────────────────────────────────────────
 //
@@ -83,6 +85,14 @@ const handler = createMcpHandler(
       },
       async ({ state, tier }) => {
         const result = queryCities({ state, tier: tier as CityTier | undefined });
+        const ctx = currentContext();
+        track({
+          tool: "get_cities",
+          userAgent: ctx.userAgent,
+          ipCountry: ctx.ipCountry,
+          status: result.ok ? "success" : "error",
+          state,
+        });
         if (!result.ok) return jsonContent({ error: result.error.message });
         return jsonContent(result.data);
       },
@@ -103,6 +113,13 @@ const handler = createMcpHandler(
       },
       async () => {
         const result = queryRoles();
+        const ctx = currentContext();
+        track({
+          tool: "get_roles",
+          userAgent: ctx.userAgent,
+          ipCountry: ctx.ipCountry,
+          status: result.ok ? "success" : "error",
+        });
         if (!result.ok) return jsonContent({ error: result.error.message });
         return jsonContent(result.data);
       },
@@ -140,6 +157,15 @@ const handler = createMcpHandler(
       },
       async ({ date, city, role, count }) => {
         const result = queryAvailability({ date, city, role, headcount: count });
+        const ctx = currentContext();
+        track({
+          tool: "check_availability",
+          userAgent: ctx.userAgent,
+          ipCountry: ctx.ipCountry,
+          status: result.ok ? "success" : "error",
+          city,
+          role,
+        });
         if (!result.ok) return jsonContent({ error: result.error.message });
         return jsonContent(result.data);
       },
@@ -167,6 +193,15 @@ const handler = createMcpHandler(
       },
       async ({ role, city }) => {
         const result = queryRolePricing({ role, city });
+        const ctx = currentContext();
+        track({
+          tool: "get_role_pricing",
+          userAgent: ctx.userAgent,
+          ipCountry: ctx.ipCountry,
+          status: result.ok ? "success" : "error",
+          role,
+          city,
+        });
         if (!result.ok) return jsonContent({ error: result.error.message });
         return jsonContent(result.data);
       },
@@ -191,6 +226,14 @@ const handler = createMcpHandler(
       },
       async ({ state }) => {
         const result = queryStateCompliance({ state });
+        const ctx = currentContext();
+        track({
+          tool: "get_compliance_by_state",
+          userAgent: ctx.userAgent,
+          ipCountry: ctx.ipCountry,
+          status: result.ok ? "success" : "error",
+          state,
+        });
         if (!result.ok) return jsonContent({ error: result.error.message });
         return jsonContent(result.data);
       },
@@ -346,29 +389,38 @@ async function withAcceptNormalization(request: Request): Promise<Response> {
     return withCors(new Response(null, { status: 204 }));
   }
 
-  const accept = request.headers.get("accept") ?? "";
+  // Bind per-request context (User-Agent + Vercel IP-country header) so
+  // each tool handler can record telemetry without threading the request.
+  const ctx = {
+    userAgent: request.headers.get("user-agent") ?? "",
+    ipCountry: request.headers.get("x-vercel-ip-country") ?? "",
+  };
 
-  if (accept.includes("application/json") && accept.includes("text/event-stream")) {
-    return withCors(await handler(request));
-  }
+  return runWithContext(ctx, async () => {
+    const accept = request.headers.get("accept") ?? "";
 
-  // Clone the request with a normalized Accept header. Body must be read first
-  // because Request bodies are one-shot streams under Node's fetch.
-  const normalizedHeaders = new Headers(request.headers);
-  normalizedHeaders.set("accept", "application/json, text/event-stream");
+    if (accept.includes("application/json") && accept.includes("text/event-stream")) {
+      return withCors(await handler(request));
+    }
 
-  let body: BodyInit | null = null;
-  if (request.method !== "GET" && request.method !== "HEAD") {
-    body = await request.text();
-  }
+    // Clone the request with a normalized Accept header. Body must be read first
+    // because Request bodies are one-shot streams under Node's fetch.
+    const normalizedHeaders = new Headers(request.headers);
+    normalizedHeaders.set("accept", "application/json, text/event-stream");
 
-  const normalized = new Request(request.url, {
-    method: request.method,
-    headers: normalizedHeaders,
-    body,
+    let body: BodyInit | null = null;
+    if (request.method !== "GET" && request.method !== "HEAD") {
+      body = await request.text();
+    }
+
+    const normalized = new Request(request.url, {
+      method: request.method,
+      headers: normalizedHeaders,
+      body,
+    });
+
+    return withCors(await handler(normalized));
   });
-
-  return withCors(await handler(normalized));
 }
 
 export {
