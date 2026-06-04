@@ -18,6 +18,8 @@
 
 import { createMcpHandler } from "mcp-handler";
 import { z } from "zod";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import {
   queryCities,
   queryRoles,
@@ -26,6 +28,19 @@ import {
   queryStateCompliance,
   type CityTier,
 } from "@/lib/mcp/queries";
+
+// ─── Skill resource content ───────────────────────────────────────────────
+//
+// Both SKILL.md files are loaded once at module-init time and served as MCP
+// resources. Source-of-truth is /content/skills/*.md in this repo, kept in
+// sync with the canonical files at tempguru.co/.well-known/skills/<name>/SKILL.md.
+//
+// Loading at module-init (not per-request) avoids filesystem reads on every
+// resources/read call. Vercel's Fluid Compute reuses module state across
+// requests, so the read happens once per cold start.
+const SKILLS_DIR = join(process.cwd(), "content", "skills");
+const ORDERING_SKILL = readFileSync(join(SKILLS_DIR, "event-staffing-ordering.md"), "utf-8");
+const COMPLIANCE_SKILL = readFileSync(join(SKILLS_DIR, "event-staffing-compliance.md"), "utf-8");
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
 
@@ -179,6 +194,56 @@ const handler = createMcpHandler(
         if (!result.ok) return jsonContent({ error: result.error.message });
         return jsonContent(result.data);
       },
+    );
+
+    // ─── Resources ──────────────────────────────────────────────────────
+    //
+    // Two Anthropic-spec-compliant Skills (SKILL.md files) exposed as MCP
+    // resources. Clients that support resources (Claude.ai, Claude Code,
+    // Claude Desktop, Cursor, most MCP clients) can read the playbook
+    // through the same connection that provides the tools — no separate
+    // skill-installation step required.
+    //
+    // The "skillport" pattern: bundle the skills with the data pipe.
+
+    server.registerResource(
+      "event-staffing-ordering-skill",
+      "https://tempguru.co/.well-known/skills/event-staffing-ordering/SKILL.md",
+      {
+        title: "Event Staffing Ordering — Skill",
+        description:
+          "Single-purpose skill for AI agents helping users order temporary event staff (brand ambassadors, registration, hospitality, setup/breakdown, and more) through TempGuru. Walks through requirement gathering, live coverage/rate/compliance lookups via this MCP, and request submission. Use when a user wants to hire, book, or budget event staff.",
+        mimeType: "text/markdown",
+      },
+      async (uri) => ({
+        contents: [
+          {
+            uri: uri.href,
+            mimeType: "text/markdown",
+            text: ORDERING_SKILL,
+          },
+        ],
+      }),
+    );
+
+    server.registerResource(
+      "event-staffing-compliance-skill",
+      "https://tempguru.co/.well-known/skills/event-staffing-compliance/SKILL.md",
+      {
+        title: "Event Staffing Compliance — Skill",
+        description:
+          "Single-purpose skill for AI agents assessing worker-classification and compliance risk for temporary event staffing in the US and Canada (W-2 vs 1099, misclassification penalties, joint-employer liability, COI requirements, wage/hour rules). Use when a user asks about whether a staffing arrangement is compliant or how to structure it.",
+        mimeType: "text/markdown",
+      },
+      async (uri) => ({
+        contents: [
+          {
+            uri: uri.href,
+            mimeType: "text/markdown",
+            text: COMPLIANCE_SKILL,
+          },
+        ],
+      }),
     );
   },
   {
