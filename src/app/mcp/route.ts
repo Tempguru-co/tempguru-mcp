@@ -200,7 +200,11 @@ const handler = createMcpHandler(
         {
           src: "https://mcp.tempguru.co/logo.svg",
           mimeType: "image/svg+xml",
-          sizes: "any",
+          // sizes must be an array per MCP spec rev 2025-03-26 (and Glama's
+          // strict validator) — single string "any" was rejected with:
+          // { expected: 'array', code: 'invalid_type', path: ['serverInfo',
+          //   'icons', 0, 'sizes'], message: 'Invalid input' }
+          sizes: ["any"],
         },
       ],
     } as { name: string; version: string },
