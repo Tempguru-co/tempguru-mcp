@@ -50,7 +50,7 @@ const handler = createMcpHandler(
       {
         title: "Get Cities",
         description:
-          "List all cities TempGuru serves, with tier classification (hub/mid/small). Optional filter by state or tier.",
+          "List cities where TempGuru staffs events, with tier classification (hub/mid/small). Perfect for 'What cities do you cover in [state]?', 'Where can I book event staff?', or 'Do you cover [city]?' questions. Optional filter by state or tier.",
         inputSchema: {
           state: z
             .string()
@@ -79,7 +79,7 @@ const handler = createMcpHandler(
       {
         title: "Get Roles",
         description:
-          "List all event staffing roles TempGuru provides, with descriptions and skill tiers.",
+          "List event staffing roles TempGuru provides, with descriptions and skill tiers. Perfect for 'What kinds of event workers can I hire?', 'What roles do you staff for trade shows / festivals / corporate events?', or 'Do you have brand ambassadors?' questions.",
         inputSchema: {},
         annotations: {
           title: "Get Roles",
@@ -99,7 +99,7 @@ const handler = createMcpHandler(
       {
         title: "Check Availability",
         description:
-          "Check expected staffing availability for an event. Returns lead-time guidance based on city tier and how far out the event is. Not a real-time inventory check — TempGuru staffs to demand via a 100,000+ worker W-2 network across 300+ markets.",
+          "Check expected staffing availability for an event. Returns lead-time guidance based on city tier and how far out the event is. Perfect for 'Can you staff my event on [date] in [city]?', 'What's the lead time for booking brand ambassadors in [city]?', or 'Is it too late to staff a [date] event?' questions. Not a real-time inventory check — TempGuru staffs to demand via a 100,000+ worker W-2 network across 300+ markets.",
         inputSchema: {
           date: z
             .string()
@@ -136,7 +136,7 @@ const handler = createMcpHandler(
       {
         title: "Get Role Pricing",
         description:
-          "Get all-inclusive hourly rate range for a specific role in a specific city. Returns a range (low–high) reflecting event type and shift variability. All rates include W-2 worker pay, workers comp, general liability, and payroll taxes.",
+          "Get all-inclusive hourly rate range for a specific role in a specific city. Returns a range (low–high) reflecting event type and shift variability. Perfect for 'What does it cost to hire brand ambassadors in [city]?', 'How much are registration workers in [city]?', or 'What's the rate for ushers at a [city] stadium event?' questions. All rates include W-2 worker pay, workers comp, general liability, and payroll taxes.",
         inputSchema: {
           role: z
             .string()
@@ -163,7 +163,7 @@ const handler = createMcpHandler(
       {
         title: "Get Compliance By State",
         description:
-          "Get event staffing compliance summary for a US state. Returns minimum wage, overtime rules, and state-specific quirks. NOT legal advice — consult employment counsel for binding interpretation.",
+          "Get event staffing compliance summary for a US state. Returns minimum wage, overtime rules, and state-specific quirks. Perfect for 'What are the W-2 vs 1099 rules for event workers in [state]?', 'What's the minimum wage for event staff in [state]?', or 'Are there compliance gotchas for hiring event workers in [state]?' questions. NOT legal advice — consult employment counsel for binding interpretation.",
         inputSchema: {
           state: z
             .string()
@@ -182,10 +182,28 @@ const handler = createMcpHandler(
     );
   },
   {
+    // mcp-handler v1.1.0's serverInfo type only exposes `name` and `version`,
+    // but the value is passed verbatim into the MCP SDK's `new McpServer(...)`,
+    // whose Implementation/BaseMetadata shape accepts the wider set defined by
+    // MCP spec rev 2025-03-26: title, description, icons. Casting through
+    // `as { name: string; version: string }` keeps the call type-correct from
+    // mcp-handler's perspective while still passing the extra fields through
+    // to the SDK at runtime. Surfaces these in registry scanners (Smithery,
+    // ClawHub) and Claude.ai connector listings.
     serverInfo: {
       name: "tempguru-mcp",
       version: "1.0.0",
-    },
+      title: "TempGuru Event Staffing",
+      description:
+        "W-2 event staffing data for AI agents: 300+ US/CA markets, brand ambassadors, registration, hospitality, setup/breakdown. Read-only — coverage, rates, lead times, and state compliance summaries. No authentication required.",
+      icons: [
+        {
+          src: "https://mcp.tempguru.co/logo.svg",
+          mimeType: "image/svg+xml",
+          sizes: "any",
+        },
+      ],
+    } as { name: string; version: string },
   },
   {
     // Endpoint at /mcp (default streamableHttpEndpoint with empty basePath)
