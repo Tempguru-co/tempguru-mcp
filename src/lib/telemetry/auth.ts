@@ -10,6 +10,7 @@
 
 import { createHash, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 const COOKIE_NAME = "tg_admin";
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
@@ -71,4 +72,19 @@ export async function login(password: string): Promise<boolean> {
 export async function logout(): Promise<void> {
   const c = await cookies();
   c.delete(COOKIE_NAME);
+}
+
+/**
+ * Convenience helper for protected pages: redirects to /admin/login if the
+ * current request isn't authenticated. Call at the top of any server
+ * component under /admin/* that isn't itself /admin/login.
+ *
+ * Note: do NOT call this from a shared layout — that creates a redirect
+ * loop when the login page is wrapped by the same layout. The layout for
+ * /admin/* should just provide shared UI; gating belongs at the page level.
+ */
+export async function requireAuth(): Promise<void> {
+  if (!(await isAuthenticated())) {
+    redirect("/admin/login");
+  }
 }

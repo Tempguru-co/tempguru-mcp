@@ -1,4 +1,5 @@
 import { getMetrics, type DashboardMetrics } from "@/lib/telemetry/query";
+import { requireAuth } from "@/lib/telemetry/auth";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -8,6 +9,7 @@ export default async function AdminPage({
 }: {
   searchParams: Promise<{ days?: string }>;
 }) {
+  await requireAuth();
   const sp = await searchParams;
   const days = Math.max(1, Math.min(90, parseInt(sp.days ?? "7", 10) || 7));
   const m = await getMetrics(days);
