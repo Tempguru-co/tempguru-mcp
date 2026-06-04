@@ -90,6 +90,19 @@ The matrix is "the server is spec-compliant; any spec-compliant client connects.
 
 A REST mirror of every tool is also available at `mcp.tempguru.co/api/v1/*` with OpenAPI 3.1 at `/openapi.json` and RFC 9727 api-catalog at `/.well-known/api-catalog`.
 
+### Telemetry & admin dashboard
+
+Every MCP tool invocation is instrumented with anonymized usage telemetry stored in Upstash Redis (Vercel Marketplace integration). A password-gated dashboard at `/admin` surfaces:
+
+- Daily volume, tool breakdown, UA-class breakdown
+- Top 20 cities / roles / states queried (demand signal)
+- Country breakdown (Vercel edge geolocation, no IPs stored)
+- Recent invocations table (last 50 events)
+
+**No PII is captured.** Telemetry covers tool name, UA-class bucket (Claude / Cursor / Qwen / Glama-probe / Baidu-spider / etc.), success/error status, country code, and parameter slugs (city/role/state, which are public catalog values). No raw IPs, no request bodies, no response bodies, no user content.
+
+Full operations documentation — schema, classifier, failure modes, cost ceiling — in [`OPERATIONS.md`](./OPERATIONS.md). Telemetry is fire-and-forget; Upstash failures never block MCP responses.
+
 ---
 
 ## FAQ

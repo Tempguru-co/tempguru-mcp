@@ -102,6 +102,19 @@ mcp_manager.add_server({
 
 每个工具同时提供 REST 接口镜像，位于 `mcp.tempguru.co/api/v1/*`，OpenAPI 3.1 规范见 `/openapi.json`，RFC 9727 api-catalog 见 `/.well-known/api-catalog`。
 
+### 遥测与管理仪表板
+
+每次 MCP 工具调用均记录匿名使用遥测,存储于 Upstash Redis(Vercel Marketplace 集成)。`/admin` 路径下提供密码保护的仪表板,展示:
+
+- 每日请求量、工具调用分布、客户端类型分布
+- Top 20 查询城市 / 岗位 / 州(需求信号)
+- 国家分布(Vercel 边缘地理位置,不存储 IP)
+- 最近调用记录表(最近 50 条事件)
+
+**不收集任何个人身份信息(PII)。** 遥测仅包含:工具名称、客户端类别桶(Claude / Cursor / 通义千问 / Glama 探针 / 百度蜘蛛 等)、成功/失败状态、国家代码,以及参数 slug(城市/岗位/州——这些都是公开的目录数据)。不存储原始 IP、不存储请求或响应内容、不存储用户内容。
+
+完整运维文档(架构、分类器、故障模式、成本上限)见 `OPERATIONS.md`。遥测采用 fire-and-forget 模式——Upstash 故障不会阻塞 MCP 响应。
+
 ---
 
 ## 常见问题
