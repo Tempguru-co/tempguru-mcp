@@ -195,4 +195,52 @@ const handler = createMcpHandler(
   },
 );
 
-export { handler as GET, handler as POST, handler as DELETE };
+// ─── Accept header normalization wrapper ────────────────────────────────
+//
+// mcp-handler enforces the MCP spec rev 2025-03-26 requirement that
+// clients MUST send `Accept: application/json, text/event-stream`. Real-
+// world clients (Anthropic's claude.ai connectors among them) often send
+// only `application/json` and get a 406 — which surfaces as "This connector
+// has no tools available" with no further diagnostic.
+//
+// We rewrite the incoming Accept header to include both content types when
+// either is missing, so the downstream handler always sees a spec-compliant
+// request. Responses are unchanged (SSE-framed), which any compliant MCP
+// client handles correctly.
+//
+// Remove this wrapper when mcp-handler upgrades to the 2026-07-28 spec
+// (stateless protocol — Accept enforcement is relaxed in that revision).
+
+async function withAcceptNormalization(request: Request): Promise<Response> {
+  const accept = request.headers.get("accept") ?? "";
+  const wantsJson = accept.includes("application/json") || accept.includes("*/*") || accept === "";
+  const wantsSse = accept.includes("text/event-stream") || accept.includes("*/*") || accept === "";
+
+  if (wantsJson && wantsSse && accept.includes("application/json") && accept.includes("text/event-stream")) {
+    return handler(request);
+  }
+
+  // Clone the request with a normalized Accept header. Body must be read first
+  // because Request bodies are one-shot streams under Node's fetch.
+  const normalizedHeaders = new Headers(request.headers);
+  normalizedHeaders.set("accept", "application/json, text/event-stream");
+
+  let body: BodyInit | null = null;
+  if (request.method !== "GET" && request.method !== "HEAD") {
+    body = await request.text();
+  }
+
+  const normalized = new Request(request.url, {
+    method: request.method,
+    headers: normalizedHeaders,
+    body,
+  });
+
+  return handler(normalized);
+}
+
+export {
+  withAcceptNormalization as GET,
+  withAcceptNormalization as POST,
+  withAcceptNormalization as DELETE,
+};
