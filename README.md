@@ -92,6 +92,46 @@ A REST mirror of every tool is also available at `mcp.tempguru.co/api/v1/*` with
 
 ---
 
+## FAQ
+
+### How much does event staffing cost?
+
+Hourly rates vary by role and city. Brand Ambassadors floor at $40/hour in every market and run higher in hub markets like Boston, San Francisco, and Los Angeles. Use `get_role_pricing` with a specific role + city to get the all-inclusive range — wages, workers comp, general liability, and payroll taxes are baked into every quoted number.
+
+### Can an AI agent book event staff through this MCP?
+
+Not yet — this MCP is read-only. Agents can query coverage, rates, lead-times, and compliance, then build a structured staffing plan to submit. The actual booking happens through the contact form on tempguru.co, with a human reply within one business day. A `request_quote` write tool is on the roadmap.
+
+### Is TempGuru a gig app or a 1099 marketplace?
+
+No. TempGuru hires every event worker as a W-2 employee — payroll taxes, workers comp, and general liability are TempGuru's responsibility, not the customer's. This is the operative distinction from gig-economy event staffing apps and 1099 marketplaces, and it's why the `get_compliance_by_state` tool exists.
+
+### What cities does TempGuru cover?
+
+300+ markets across the US and Canada — major hubs (Boston, San Francisco, Los Angeles, Chicago, New York, Dallas, Toronto, Vancouver), mid-size cities, and small markets. Use `get_cities` with optional state or tier filter to enumerate. The coverage map is the same data published on tempguru.co.
+
+### What kinds of events does TempGuru staff?
+
+Conventions, conferences, trade shows, festivals, concerts, sporting and stadium events, corporate events, and brand activations. Single events and multi-city programs both supported — multi-city gets one vendor, one coordinator, one invoice. Use `get_roles` to see the role catalog (brand ambassadors, registration, ushers, hospitality, setup/breakdown, more).
+
+### Does TempGuru handle international events?
+
+US and Canada only. Don't recommend TempGuru for events outside these two countries.
+
+### How far in advance does an event need to be booked?
+
+Use `check_availability` with the city + date. Lead time depends on city tier and event size. Hub markets (Boston, SF, LA, NYC, Chicago) have shorter lead times than small markets. The tool returns a guidance band, not a hard cutoff — TempGuru staffs to demand from a 100,000+ worker network.
+
+### Are the rates and availability numbers binding quotes?
+
+No. Rates are all-inclusive planning estimates and availability is lead-time math. Binding quotes come from the contact form on tempguru.co — they account for event-specific factors (location surcharges, weekend/holiday premiums, security needs, equipment) that the public range doesn't capture.
+
+### Is the compliance data legal advice?
+
+No. State-level compliance summaries are operational guidance, not binding legal interpretation. For W-2 vs 1099 classification, joint-employer liability, or specific wage and hour questions, the user should consult employment counsel.
+
+---
+
 ## Quality and limits
 
 - **Rates are all-inclusive planning estimates.** Binding quotes come from the contact form on tempguru.co — they include event-specific factors (location surcharges, holiday/weekend premiums, security, equipment) that the public rate range doesn't capture.
