@@ -66,6 +66,8 @@ mcp_manager.add_server({
 
 **Smithery** — [`tempguru/event-staffing`](https://smithery.ai/server/tempguru/event-staffing)
 
+**ModelScope 魔搭社区 MCP 广场** — [`tempguru/TempGuru-Event-Staffing`](https://modelscope.cn/mcp/servers/tempguru/TempGuru-Event-Staffing/)
+
 ---
 
 ## 客户端兼容性

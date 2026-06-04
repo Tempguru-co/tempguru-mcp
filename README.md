@@ -54,6 +54,8 @@ The server speaks MCP Streamable HTTP (spec rev 2025-03-26). Any MCP-compliant c
 
 **Smithery** — [`tempguru/event-staffing`](https://smithery.ai/server/tempguru/event-staffing)
 
+**ModelScope MCP Plaza (魔搭社区)** — [`tempguru/TempGuru-Event-Staffing`](https://modelscope.cn/mcp/servers/tempguru/TempGuru-Event-Staffing/)
+
 ---
 
 ## Client compatibility
