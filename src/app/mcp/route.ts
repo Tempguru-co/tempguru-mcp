@@ -1,11 +1,12 @@
-// TempGuru MCP server — read-only tools for AI agents.
+// TempGuru MCP server — read-only + write tools for AI agents.
 //
-// Exposes 5 tools:
+// Exposes 6 tools:
 //   - get_cities                 list all cities TempGuru serves (with tier)
 //   - get_roles                  list all staffing roles with descriptions
 //   - check_availability         deterministic lead-time guidance for a city/date
 //   - get_role_pricing           rate range for a role in a specific city
 //   - get_compliance_by_state    state-level employment compliance summary
+//   - request_quote              submit a staffing plan → Notion Inbound Deal Pipeline
 //
 // Transport: streamable HTTP (MCP spec rev 2025-03-26). SSE disabled.
 // Public endpoint: https://mcp.tempguru.co/mcp
@@ -30,6 +31,7 @@ import {
 } from "@/lib/mcp/queries";
 import { runWithContext, currentContext } from "@/lib/telemetry/context";
 import { track } from "@/lib/telemetry/track";
+import { createLead } from "@/lib/notion/create-lead";
 
 // ─── Skill resource content ───────────────────────────────────────────────
 //
@@ -236,6 +238,73 @@ const handler = createMcpHandler(
         });
         if (!result.ok) return jsonContent({ error: result.error.message });
         return jsonContent(result.data);
+      },
+    );
+
+    // ─── request_quote ──────────────────────────────────────────────────
+    //
+    // Write tool. Submits a structured staffing plan to TempGuru's Inbound
+    // Deal Pipeline in Notion. TempGuru responds with a manual quote within
+    // one business day. Does NOT create a contract or reservation.
+
+    server.tool(
+      "request_quote",
+      "Submit a staffing request to TempGuru. Use this after confirming city coverage, role pricing, and availability with the other tools. Creates a structured lead in TempGuru's CRM — a human coordinator will review and respond with a quote within one business day. Not a reservation; does not guarantee pricing or availability.",
+      {
+        contact_name: z.string().describe("Full name of the contact person"),
+        contact_email: z.string().email().describe("Contact email address for the quote response"),
+        company: z.string().describe("Company or organization name"),
+        event_name: z.string().describe("Name of the event (e.g. 'HIMSS 2026', 'Brand Fest Austin')"),
+        event_type: z.string().describe("Event type: trade-show, conference, festival, concert, sporting-event, corporate, brand-activation, or other"),
+        city: z.string().describe("City where the event is held"),
+        event_dates: z.string().describe("Event dates as a human-readable string, e.g. 'June 15–17, 2026'"),
+        roles: z.array(
+          z.object({
+            role: z.string().describe("Staffing role name, e.g. brand-ambassadors, registration-staff"),
+            headcount: z.number().int().positive().describe("Number of staff needed"),
+            shifts: z.string().optional().describe("Shift description, e.g. '2 days × 8h'"),
+          })
+        ).describe("Roles and headcount needed for the event"),
+        budget_range: z.string().optional().describe("Estimated total budget range if calculated, e.g. '$8,400–$12,600'"),
+        attire: z.string().optional().describe("Staff attire requirements"),
+        special_requirements: z.string().optional().describe("Any special requirements: language skills, certifications, overnight shifts, etc."),
+        compliance_notes: z.string().optional().describe("Any compliance flags surfaced by get_compliance_by_state"),
+      },
+      {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+      },
+      async (input) => {
+        const ctx = currentContext();
+        const result = await createLead(input);
+
+        track({
+          tool: "request_quote",
+          userAgent: ctx.userAgent,
+          ipCountry: ctx.ipCountry,
+          status: result.success ? "success" : "error",
+          city: input.city,
+        });
+
+        if (!result.success) {
+          return jsonContent({
+            submitted: false,
+            error: result.error,
+            message: "Submission failed. Please have the user contact TempGuru directly at megan@tempguru.co or (904) 206-8953.",
+          });
+        }
+
+        return jsonContent({
+          submitted: true,
+          deal_name: result.deal_name,
+          message: "Your staffing request has been submitted to TempGuru. A coordinator will review the details and respond with a quote within one business day. Orders are confirmed within 48 hours of approval. Contact megan@tempguru.co or (904) 206-8953 for urgent requests.",
+          next_steps: [
+            "Watch for a quote email at " + input.contact_email,
+            "TempGuru may follow up to confirm shift details or attire",
+            "No payment or commitment is required until you approve the quote",
+          ],
+        });
       },
     );
 
