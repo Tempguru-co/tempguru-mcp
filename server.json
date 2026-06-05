@@ -6,7 +6,7 @@
   "version": "1.0.0",
   "websiteUrl": "https://tempguru.co/ai",
   "repository": {
-    "url": "https://github.com/kissmyabs32/tempguru-agent-skills",
+    "url": "https://github.com/tempguru-co/tempguru-agent-skills",
     "source": "github"
   },
   "remotes": [

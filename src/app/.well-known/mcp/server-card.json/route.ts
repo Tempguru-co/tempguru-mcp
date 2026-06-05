@@ -6,7 +6,7 @@
 // before they hit /mcp itself. Update if the final SEP-1649 schema diverges.
 //
 // Kept hand-synced with the same file at:
-//   github.com/kissmyabs32/tempguru-agent-skills/blob/main/mcp/server-card.json
+//   github.com/tempguru-co/tempguru-agent-skills/blob/main/mcp/server-card.json
 //
 // served with application/json + 1-hour public cache.
 

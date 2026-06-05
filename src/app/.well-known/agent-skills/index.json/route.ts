@@ -10,7 +10,7 @@
 // IMPORTANT — digest values are SHA-256 of each SKILL.md file, byte-for-byte.
 // Recompute before deploying if either skill file changes:
 //   shasum -a 256 <file> inside tempguru-agent-skills/skills/<name>/SKILL.md
-// Current digests match the SKILL.md files in kissmyabs32/tempguru-agent-skills
+// Current digests match the SKILL.md files in tempguru-co/tempguru-agent-skills
 // as of 2026-06-04.
 
 const AGENT_SKILLS_INDEX = {

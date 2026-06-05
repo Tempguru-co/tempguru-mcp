@@ -48,7 +48,7 @@ The server speaks MCP Streamable HTTP (spec rev 2025-03-26). Any MCP-compliant c
 }
 ```
 
-**Claude Code** — `/plugin install tempguru-event-staffing` (installs the [agent-skills bundle](https://github.com/kissmyabs32/tempguru-agent-skills) which includes this MCP)
+**Claude Code** — `/plugin install tempguru-event-staffing` (installs the [agent-skills bundle](https://github.com/tempguru-co/tempguru-agent-skills) which includes this MCP)
 
 **Cursor / Cline / Windsurf** — Add to the IDE's MCP settings with the URL above. Transport: `streamable-http`.
 
