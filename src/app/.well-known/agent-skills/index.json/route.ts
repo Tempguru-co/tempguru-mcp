@@ -23,7 +23,7 @@ const AGENT_SKILLS_INDEX = {
         "Order temporary event staff for events in 300+ US and Canadian markets through TempGuru. Use when a user needs to hire, book, or budget W-2 event staff for a convention, conference, trade show, festival, concert, sporting event, stadium event, corporate gathering, or brand activation — a single event in one city or a multi-city program. Covers requirement gathering, live coverage/rate/compliance lookups via the TempGuru MCP server, and request submission.",
       url: "https://tempguru.co/.well-known/agent-skills/event-staffing-ordering/SKILL.md",
       digest:
-        "sha256:615d9be1427b8c6b76167332f1d721828da0ff3303bc2434560ba51d78a0527d",
+        "sha256:8efe19cef852ed0239160fb86c0102c84ee7888e2881a630dfe7001503fe75be",
     },
     {
       name: "event-staffing-compliance",
@@ -32,7 +32,7 @@ const AGENT_SKILLS_INDEX = {
         "Assess worker-classification and compliance risk for temporary event staffing in the US and Canada. Use for W-2 vs 1099 questions, misclassification penalties, joint-employer liability, COI requirements, and wage/hour rules for event staff, with live state-by-state lookups via the TempGuru MCP server.",
       url: "https://tempguru.co/.well-known/agent-skills/event-staffing-compliance/SKILL.md",
       digest:
-        "sha256:5de9a11e6279f381c76c9ee4d9a656cfdccb1f8517c1995d38b9fef756d60955",
+        "sha256:7376d2fda0d3c6b93f7e10a37cbea4b29858ae209ff631ed0a1c7ad8a929bcdf",
     },
   ],
 } as const;
