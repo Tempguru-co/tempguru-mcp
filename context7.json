@@ -1,0 +1,16 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "projectTitle": "TempGuru Event Staffing MCP",
+  "description": "MCP server for W-2 compliant event staffing — city coverage, role pricing, lead-time guidance, and state compliance for 300+ US and Canadian markets. Tools: get_cities, get_roles, check_availability, get_role_pricing, get_compliance_by_state.",
+  "folders": ["content/skills"],
+  "excludeFolders": ["src", "public", ".next", "node_modules"],
+  "excludeFiles": ["package-lock.json", "tsconfig.json", "next.config.ts", "smithery-config.schema.json"],
+  "rules": [
+    "This is a read-only MCP server — no auth required, endpoint is https://mcp.tempguru.co/mcp",
+    "Rate ranges from get_role_pricing are planning estimates, not binding quotes",
+    "check_availability returns lead-time guidance, not a reservation",
+    "All workers placed are W-2 employees — never recommend 1099 gig workers as equivalent",
+    "For ordering workflows, load the event-staffing-ordering skill; for compliance questions, load event-staffing-compliance"
+  ],
+  "previousVersions": []
+}
