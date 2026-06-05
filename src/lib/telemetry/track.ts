@@ -32,15 +32,33 @@ export interface TrackInput {
 }
 
 const utcDate = (): string => new Date().toISOString().slice(0, 10);
-const slug = (s: string): string => s.trim().toLowerCase().replace(/\s+/g, "-").slice(0, 80);
+// Bug fix: also replace underscores so "registration_staff" normalises to "registration-staff"
+const slug = (s: string): string => s.trim().toLowerCase().replace(/[\s_]+/g, "-").slice(0, 80);
 
 export function track(input: TrackInput): void {
   const date = utcDate();
   const ua: UaClass = classifyUserAgent(input.userAgent);
 
+  // Build the ring-buffer payload before entering the async context so it is
+  // already serialised when the Promise.allSettled batch fires.
+  const event = JSON.stringify({
+    ts: new Date().toISOString(),
+    tool: input.tool,
+    ua,
+    country: input.ipCountry || null,
+    status: input.status,
+    city: input.city ? slug(input.city) : null,
+    role: input.role ? slug(input.role) : null,
+    state: input.state ? input.state.toUpperCase().slice(0, 2) : null,
+  });
+
   ff(async (r) => {
-    // Counters
+    // All writes in ONE Promise.allSettled so they race to completion in
+    // parallel. Previously the serial await blocks meant the ring-buffer
+    // lpush ran last and was killed when Vercel terminated the function
+    // after the HTTP response was sent.
     await Promise.allSettled([
+      // Counters
       r.hincrby(`tools:${date}`, input.tool, 1),
       r.hincrby(`uas:${date}`, ua, 1),
       r.hincrby(`status:${date}`, input.status, 1),
@@ -52,10 +70,7 @@ export function track(input: TrackInput): void {
       input.state
         ? r.zincrby(`queries:states:${date}`, 1, input.state.toUpperCase().slice(0, 2))
         : Promise.resolve(),
-    ]);
-
-    // Set TTL on the daily keys (idempotent — re-setting is safe)
-    await Promise.allSettled([
+      // TTLs (idempotent — re-setting is safe)
       r.expire(`tools:${date}`, TTL_SECONDS),
       r.expire(`uas:${date}`, TTL_SECONDS),
       r.expire(`status:${date}`, TTL_SECONDS),
@@ -63,23 +78,13 @@ export function track(input: TrackInput): void {
       r.expire(`queries:cities:${date}`, TTL_SECONDS),
       r.expire(`queries:roles:${date}`, TTL_SECONDS),
       r.expire(`queries:states:${date}`, TTL_SECONDS),
+      // dates:active ZSET — used by the time-series widget
+      r.zadd("dates:active", { score: Date.now(), member: date }),
+      // Ring buffer — lpush must complete before ltrim; chain with .then()
+      // so both are initiated in this batch but trim only fires after push.
+      r.lpush("recent:invocations", event).then(() =>
+        r.ltrim("recent:invocations", 0, RECENT_LIMIT - 1),
+      ),
     ]);
-
-    // Track which dates have any data — used by the time-series widget
-    await r.zadd("dates:active", { score: Date.now(), member: date });
-
-    // Append to recent invocations ring buffer
-    const event = JSON.stringify({
-      ts: new Date().toISOString(),
-      tool: input.tool,
-      ua,
-      country: input.ipCountry || null,
-      status: input.status,
-      city: input.city || null,
-      role: input.role || null,
-      state: input.state || null,
-    });
-    await r.lpush("recent:invocations", event);
-    await r.ltrim("recent:invocations", 0, RECENT_LIMIT - 1);
   });
 }
