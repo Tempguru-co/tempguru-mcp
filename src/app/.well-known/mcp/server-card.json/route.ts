@@ -16,9 +16,9 @@ const SERVER_CARD = {
   serverInfo: {
     name: "tempguru-event-staffing",
     title: "TempGuru Event Staffing",
-    version: "1.0.0",
+    version: "1.1.0",
     description:
-      "Read-only Model Context Protocol server for TempGuru event staffing data: city coverage (300+ US/Canada markets), staffing roles, lead-time guidance, all-inclusive W-2 rate ranges, and state-by-state compliance rules.",
+      "Model Context Protocol server for TempGuru event staffing data: city coverage (300+ US/Canada markets), staffing roles, lead-time guidance, all-inclusive W-2 rate ranges, and state-by-state compliance rules. Includes a request_quote write tool that submits structured staffing requests to TempGuru's pipeline.",
     websiteUrl: "https://tempguru.co",
   },
   transport: {
@@ -54,6 +54,11 @@ const SERVER_CARD = {
       name: "get_compliance_by_state",
       description:
         "Minimum wage, overtime rules, and state-specific event-staffing compliance quirks.",
+    },
+    {
+      name: "request_quote",
+      description:
+        "Submit a structured staffing request to TempGuru's pipeline. A coordinator reviews and responds with a quote within one business day. Not a reservation; does not guarantee pricing or availability.",
     },
   ],
   authentication: { required: false },

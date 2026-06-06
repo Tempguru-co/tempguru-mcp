@@ -247,33 +247,38 @@ const handler = createMcpHandler(
     // Deal Pipeline in Notion. TempGuru responds with a manual quote within
     // one business day. Does NOT create a contract or reservation.
 
-    server.tool(
+    server.registerTool(
       "request_quote",
-      "Submit a staffing request to TempGuru. Use this after confirming city coverage, role pricing, and availability with the other tools. Creates a structured lead in TempGuru's CRM — a human coordinator will review and respond with a quote within one business day. Not a reservation; does not guarantee pricing or availability.",
       {
-        contact_name: z.string().describe("Full name of the contact person"),
-        contact_email: z.string().email().describe("Contact email address for the quote response"),
-        company: z.string().describe("Company or organization name"),
-        event_name: z.string().describe("Name of the event (e.g. 'HIMSS 2026', 'Brand Fest Austin')"),
-        event_type: z.string().describe("Event type: trade-show, conference, festival, concert, sporting-event, corporate, brand-activation, or other"),
-        city: z.string().describe("City where the event is held"),
-        event_dates: z.string().describe("Event dates as a human-readable string, e.g. 'June 15–17, 2026'"),
-        roles: z.array(
-          z.object({
-            role: z.string().describe("Staffing role name, e.g. brand-ambassadors, registration-staff"),
-            headcount: z.number().int().positive().describe("Number of staff needed"),
-            shifts: z.string().optional().describe("Shift description, e.g. '2 days × 8h'"),
-          })
-        ).describe("Roles and headcount needed for the event"),
-        budget_range: z.string().optional().describe("Estimated total budget range if calculated, e.g. '$8,400–$12,600'"),
-        attire: z.string().optional().describe("Staff attire requirements"),
-        special_requirements: z.string().optional().describe("Any special requirements: language skills, certifications, overnight shifts, etc."),
-        compliance_notes: z.string().optional().describe("Any compliance flags surfaced by get_compliance_by_state"),
-      },
-      {
-        readOnlyHint: false,
-        destructiveHint: false,
-        idempotentHint: false,
+        title: "Request Quote",
+        description:
+          "Submit a staffing request to TempGuru. Use this after confirming city coverage, role pricing, and availability with the other tools. Creates a structured lead in TempGuru's CRM — a human coordinator will review and respond with a quote within one business day. Not a reservation; does not guarantee pricing or availability.",
+        inputSchema: {
+          contact_name: z.string().describe("Full name of the contact person"),
+          contact_email: z.string().email().describe("Contact email address for the quote response"),
+          company: z.string().describe("Company or organization name"),
+          event_name: z.string().describe("Name of the event (e.g. 'HIMSS 2026', 'Brand Fest Austin')"),
+          event_type: z.string().describe("Event type: trade-show, conference, festival, concert, sporting-event, corporate, brand-activation, or other"),
+          city: z.string().describe("City where the event is held"),
+          event_dates: z.string().describe("Event dates as a human-readable string, e.g. 'June 15–17, 2026'"),
+          roles: z.array(
+            z.object({
+              role: z.string().describe("Staffing role name, e.g. brand-ambassadors, registration-staff"),
+              headcount: z.number().int().positive().describe("Number of staff needed"),
+              shifts: z.string().optional().describe("Shift description, e.g. '2 days × 8h'"),
+            })
+          ).describe("Roles and headcount needed for the event"),
+          budget_range: z.string().optional().describe("Estimated total budget range if calculated, e.g. '$8,400–$12,600'"),
+          attire: z.string().optional().describe("Staff attire requirements"),
+          special_requirements: z.string().optional().describe("Any special requirements: language skills, certifications, overnight shifts, etc."),
+          compliance_notes: z.string().optional().describe("Any compliance flags surfaced by get_compliance_by_state"),
+        },
+        annotations: {
+          title: "Request Quote",
+          readOnlyHint: false,
+          destructiveHint: false,
+          idempotentHint: false,
+        },
       },
       async (input) => {
         const ctx = currentContext();
