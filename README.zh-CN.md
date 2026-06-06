@@ -101,7 +101,7 @@ mcp_manager.add_server({
 - **传输：** 仅支持 Streamable HTTP（SSE 已禁用——在 MCP 规范 2025-03-26 中移除）
 - **身份验证：** 无。数据为公开数据。
 - **数据源：** `content/mcp-data/` 下的 JSON 文件（城市、岗位、岗位定价、州合规）
-- **身份认证：** `_mcp-registry.tempguru.co` 的 DNS TXT 记录承载 Ed25519 公钥，授权在官方 MCP 注册中心以 `co.tempguru` 命名空间发布
+- **身份认证：** `tempguru.co` 根域的 DNS TXT 记录承载 Ed25519 公钥，授权在官方 MCP 注册中心以 `co.tempguru` 命名空间发布
 
 每个工具同时提供 REST 接口镜像，位于 `mcp.tempguru.co/api/v1/*`，OpenAPI 3.1 规范见 `/openapi.json`，RFC 9727 api-catalog 见 `/.well-known/api-catalog`。
 

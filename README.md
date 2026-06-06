@@ -89,7 +89,7 @@ The matrix is "the server is spec-compliant; any spec-compliant client connects.
 - **Transport:** Streamable HTTP only (SSE disabled — removed in MCP spec rev 2025-03-26)
 - **Auth:** None. Data is public.
 - **Source of truth:** JSON files in `content/mcp-data/` (cities, roles, role-pricing, state-compliance)
-- **Identity verification:** DNS TXT record on `_mcp-registry.tempguru.co` with Ed25519 public key authorizes publishes under the `co.tempguru` namespace on the official MCP Registry
+- **Identity verification:** DNS TXT record on the `tempguru.co` apex with Ed25519 public key authorizes publishes under the `co.tempguru` namespace on the official MCP Registry
 
 A REST mirror of every tool is also available at `mcp.tempguru.co/api/v1/*` with OpenAPI 3.1 at `/openapi.json` and RFC 9727 api-catalog at `/.well-known/api-catalog`.
 
