@@ -1,6 +1,23 @@
-# Operations — Telemetry & Admin Dashboard
+# Operations — Deploy, Telemetry & Admin Dashboard
 
 Internal documentation for the telemetry layer added 2026-06-04. The MCP server itself is stateless; this doc covers the *measurement* layer that sits alongside it.
+
+---
+
+## Deployment
+
+- **Source repo:** [`Tempguru-co/tempguru-mcp`](https://github.com/Tempguru-co/tempguru-mcp) (GitHub, public)
+- **Vercel project:** `temp-guru/tempguru-mcp` (team `temp-guru`)
+- **Auto-deploy:** every push to `main` ships to **Production** via Vercel's GitHub App — no manual `vercel --prod` needed.
+
+> **Failure mode — pushes stop deploying after a repo transfer/rename.** Vercel's Git integration breaks *silently*: `git push` no longer triggers a build, and the last good deploy keeps serving, so nothing looks broken until you notice prod is stale. Root cause: a GitHub repo transfer does **not** carry the Vercel GitHub App installation to the new owner/org (the org ends up with zero app installations).
+>
+> **Fix:**
+> 1. Install/configure the Vercel GitHub App on the org and grant it the repo — [`github.com/apps/vercel`](https://github.com/apps/vercel) → **Configure** → select the org → grant access to `tempguru-mcp`. Requires an **org owner**; the CLI cannot perform this step.
+> 2. From the repo root: `vercel git connect` — should print `Connected`.
+> 3. Verify: push a trivial commit to `main`; a new Production deploy should appear within ~30s.
+>
+> Confirm a deploy was **git-triggered** (not a manual `vercel --prod`) by the `…-git-main-…` alias shown in `vercel inspect` — manual deploys never get that branch alias. Heads-up: the current CLI's `vercel inspect` does not print the commit SHA, so that alias is the reliable signal.
 
 ---
 
@@ -170,3 +187,4 @@ Upstash free tier is 10,000 commands/day. Each MCP tool invocation writes ~8 com
 | Tool responses slow but dashboard still works | Upstash latency spike | Verify Upstash region matches Vercel region; consider switching to fire-and-forget exclusively (already the case) |
 | `other` bucket growing | Unclassified client | Inspect Vercel logs for raw UA strings; add regex to `classify-ua.ts` |
 | Redirect loop on /admin | Stale browser cookie | Clear cookies for mcp.tempguru.co OR open in incognito |
+| `git push` to `main` doesn't deploy | Vercel GitHub App not installed on the org (e.g. after a repo transfer) | Install the Vercel app on the org → `vercel git connect` → verify with a test push (see **Deployment**) |
