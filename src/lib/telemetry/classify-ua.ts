@@ -46,6 +46,9 @@ export type UaClass =
   | "yandex-bot"
   | "applebot"
   | "common-crawl"
+  // TempGuru's own smoke tests / health checks (so they don't masquerade
+  // as generic scripted traffic or real agents)
+  | "internal-test"
   // Scripted / unknown
   | "scripted"
   | "other";
@@ -53,6 +56,15 @@ export type UaClass =
 export function classifyUserAgent(raw: string | null | undefined): UaClass {
   const ua = (raw || "").toLowerCase();
   if (!ua) return "other";
+
+  // TempGuru's own test / health-check traffic. MUST be first so our smoke
+  // tests are quarantined into their own bucket instead of polluting
+  // "scripted" (curl) or real-agent buckets. Convention: any internal test
+  // or health-check call sends `User-Agent: TempGuru-SmokeTest/<version>`
+  // (or any UA containing "tempguru-smoketest" / "tempguru-internal").
+  if (/tempguru-smoketest|tempguru-internal|tempguru-healthcheck/.test(ua)) {
+    return "internal-test";
+  }
 
   // Anthropic
   if (/claude\.ai|anthropic-claude/.test(ua)) return "claude-ai";
