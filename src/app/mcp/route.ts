@@ -377,7 +377,7 @@ const handler = createMcpHandler(
       version: "1.0.0",
       title: "TempGuru Event Staffing",
       description:
-        "W-2 event staffing data for AI agents: 300+ US/CA markets, brand ambassadors, registration, hospitality, setup/breakdown. Read-only — coverage, rates, lead times, and state compliance summaries. No authentication required.",
+        "W-2 event staffing data for AI agents: 300+ US/CA markets, brand ambassadors, registration, hospitality, setup/breakdown. Five read-only lookups (coverage, rates, lead times, state compliance summaries) plus an opt-in request_quote submission. No authentication required.",
       icons: [
         {
           src: "https://mcp.tempguru.co/logo.svg",

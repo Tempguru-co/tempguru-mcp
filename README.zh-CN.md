@@ -1,6 +1,6 @@
 # TempGuru MCP（中文）
 
-> 只读 MCP 服务器，提供覆盖美国和加拿大 300+ 个城市的 W-2 活动用工数据。
+> MCP 服务器，提供覆盖美国和加拿大 300+ 个城市的 W-2 活动用工数据：五个只读查询工具，外加一个可选的 `request_quote` 提交工具。
 
 **服务端点：** `https://mcp.tempguru.co/mcp` （Streamable HTTP，无需身份验证）
 **注册项：** [`co.tempguru/event-staffing`](https://registry.modelcontextprotocol.io/v0/servers/co.tempguru/event-staffing)
@@ -25,8 +25,9 @@ TempGuru 是一家总部位于美国佛罗里达州杰克逊维尔海滩（Jacks
 | `check_availability` | 根据城市分级和距活动日期的天数，返回预定提前期建议。**不是实时库存查询**。 |
 | `get_role_pricing` | 指定城市、指定岗位的全包小时费率区间（低-高）。已包含 W-2 员工工资、工伤保险、综合责任险和工资税。 |
 | `get_compliance_by_state` | 美国州级用工合规摘要（最低工资、加班规则、各州特殊条款）。**不构成法律意见**。 |
+| `request_quote` | 将结构化的人员配备请求（联系人 + 活动 + 岗位）提交到 TempGuru 的 CRM，由人工审核。可选的写入工具；不构成预订或合同。 |
 
-5 个工具全部为只读，已标注 `readOnlyHint: true`。
+前五个工具为只读（`readOnlyHint: true`）。`request_quote` 是唯一的写入工具，标注为 `readOnlyHint: false`。
 
 ---
 
@@ -74,7 +75,7 @@ mcp_manager.add_server({
 
 | 客户端 / 智能体运行时 | 状态 | 备注 |
 |---|---|---|
-| Claude.ai（网页版） | ✅ 已验证 | 5 个工具在"只读工具"列表中可见 |
+| Claude.ai（网页版） | ✅ 已验证 | 6 个工具（5 个只读 + `request_quote`） |
 | Claude Desktop | ✅ 兼容 | 标准远程 MCP 配置 |
 | Claude Code | ✅ 已验证 | 工具可通过插件或直接添加加载 |
 | Claude for Work / Cowork | ✅ 兼容 | 与 Claude.ai 使用同一连接器框架 |
@@ -113,6 +114,8 @@ mcp_manager.add_server({
 
 **不收集任何个人身份信息(PII)。** 遥测仅包含:工具名称、客户端类别桶(Claude / Cursor / 通义千问 / Glama 探针 / 百度蜘蛛 等)、成功/失败状态、国家代码,以及参数 slug(城市/岗位/州——这些都是公开的目录数据)。不存储原始 IP、不存储请求或响应内容、不存储用户内容。
 
+此外，`request_quote` 会将用户明确提供的联系人与活动信息（姓名、邮箱、公司、活动详情）提交到 TempGuru 的 CRM，以便协调员跟进。这些字段仅发送给 TempGuru，绝不写入遥测层；仪表板只统计工具名称、城市与成功/失败结果。
+
 完整运维文档(架构、分类器、故障模式、成本上限)见 `OPERATIONS.md`。遥测采用 fire-and-forget 模式——Upstash 故障不会阻塞 MCP 响应。
 
 ---
@@ -125,7 +128,7 @@ mcp_manager.add_server({
 
 ### AI 智能体能直接通过此 MCP 预定活动人员吗?
 
-暂时不能——本 MCP 为只读接口。智能体可查询覆盖、费率、提前期与合规,并据此构建结构化人员配备方案,实际预定通过 tempguru.co 联系表单完成,一个工作日内人工回应。`request_quote` 写入工具已在路线图上。
+可以提交请求，但不是预订。`request_quote` 工具会将结构化的人员配备方案，连同用户提供的联系人和活动信息，提交到 TempGuru 的 CRM，协调员将在一个工作日内回复报价。它不会预留人员、不保证价格或可用性，也不构成合同；在用户确认报价之前无需付款。其余五个工具均为只读查询，用于构建该方案。
 
 ### TempGuru 是零工平台或 1099 市场吗?
 
@@ -173,7 +176,7 @@ mcp_manager.add_server({
 ```
 src/
   app/
-    mcp/route.ts          # MCP 处理器（5 个工具）
+    mcp/route.ts          # MCP 处理器（6 个工具）
     api/v1/*/route.ts     # REST 镜像
     .well-known/          # api-catalog 与 mcp/server-card
     openapi.json/         # OpenAPI 3.1 构建器

@@ -17,7 +17,7 @@ const MCP_DISCOVERY = {
       name: "tempguru-event-staffing",
       title: "TempGuru Event Staffing",
       description:
-        "Read-only MCP server for TempGuru event staffing data: city coverage (300+ US/Canada markets), staffing roles, lead-time guidance, all-inclusive W-2 rate ranges, and state-by-state compliance rules.",
+        "MCP server for TempGuru event staffing data: city coverage (300+ US/Canada markets), staffing roles, lead-time guidance, all-inclusive W-2 rate ranges, and state-by-state compliance rules, plus an opt-in request_quote submission tool.",
       endpoint: "https://mcp.tempguru.co/mcp",
       transport: "streamable-http",
       protocolVersion: "2025-03-26",

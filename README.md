@@ -1,6 +1,6 @@
 # TempGuru MCP
 
-> Read-only MCP server for W-2 event staffing data across 300+ US and Canadian markets.
+> MCP server for W-2 event staffing data across 300+ US and Canadian markets: five read-only lookup tools plus an opt-in `request_quote` submission.
 
 **Endpoint:** `https://mcp.tempguru.co/mcp` (streamable HTTP, no auth)
 **Registry:** [`co.tempguru/event-staffing`](https://registry.modelcontextprotocol.io/v0/servers/co.tempguru/event-staffing)
@@ -25,8 +25,9 @@ This MCP server lets AI agents query our published coverage, rates, lead-time gu
 | `check_availability` | Lead-time guidance for a city + date. Not a real-time inventory check. |
 | `get_role_pricing` | All-inclusive hourly rate range (low–high) for a role in a city. Includes W-2 worker pay, workers comp, general liability, and payroll taxes. |
 | `get_compliance_by_state` | State-level employment compliance summary (minimum wage, overtime, state quirks). NOT legal advice. |
+| `request_quote` | Submits a structured staffing request (contact + event + roles) to TempGuru's CRM for human review. Opt-in write tool; not a reservation or contract. |
 
-All five tools are read-only and annotated with `readOnlyHint: true`.
+The first five tools are read-only (`readOnlyHint: true`). `request_quote` is the one write tool, annotated `readOnlyHint: false`.
 
 ---
 
@@ -62,7 +63,7 @@ The server speaks MCP Streamable HTTP (spec rev 2025-03-26). Any MCP-compliant c
 
 | Client / Agent runtime | Status | Notes |
 |---|---|---|
-| Claude.ai (web) | ✅ Verified | 5 tools listed under Read-only tools |
+| Claude.ai (web) | ✅ Verified | 6 tools (5 read-only + `request_quote`) |
 | Claude Desktop | ✅ Compatible | Standard remote MCP config |
 | Claude Code | ✅ Verified | Tools load via plugin or direct add |
 | Claude for Work / Cowork | ✅ Compatible | Same connector framework as Claude.ai |
@@ -101,6 +102,8 @@ Every MCP tool invocation is instrumented with anonymized usage telemetry stored
 
 **No PII is captured.** Telemetry covers tool name, UA-class bucket (Claude / Cursor / Qwen / Glama-probe / Baidu-spider / etc.), success/error status, country code, and parameter slugs (city/role/state, which are public catalog values). No raw IPs, no request bodies, no response bodies, no user content.
 
+Separately, `request_quote` submits the contact and event details a user explicitly provides (name, email, company, event specifics) to TempGuru's CRM so a coordinator can follow up. Those fields go only to TempGuru and are **never written to telemetry**; the dashboard counts only the tool name, city, and success/error outcome.
+
 Full operations documentation — schema, classifier, failure modes, cost ceiling — in [`OPERATIONS.md`](./OPERATIONS.md). Telemetry is fire-and-forget; Upstash failures never block MCP responses.
 
 ---
@@ -113,7 +116,7 @@ Hourly rates vary by role and city. Brand Ambassadors floor at $40/hour in every
 
 ### Can an AI agent book event staff through this MCP?
 
-Not yet — this MCP is read-only. Agents can query coverage, rates, lead-times, and compliance, then build a structured staffing plan to submit. The actual booking happens through the contact form on tempguru.co, with a human reply within one business day. A `request_quote` write tool is on the roadmap.
+It can submit a request, not a booking. `request_quote` sends a structured staffing plan, plus the contact and event details the user provides, to TempGuru's CRM, and a coordinator replies with a quote within one business day. It does not reserve staff, guarantee pricing or availability, or create a contract; no payment is required until the user approves the quote. The other five tools are read-only lookups for building that plan.
 
 ### Is TempGuru a gig app or a 1099 marketplace?
 
@@ -161,7 +164,7 @@ These disclaimers are surfaced to the agent inside the tool descriptions so the 
 ```
 src/
   app/
-    mcp/route.ts          # MCP handler (5 tools)
+    mcp/route.ts          # MCP handler (6 tools)
     api/v1/*/route.ts     # REST mirror
     .well-known/          # api-catalog, mcp/server-card
     openapi.json/         # OpenAPI 3.1 builder

@@ -24,6 +24,10 @@ export default function Home() {
       name: "get_compliance_by_state",
       desc: "Minimum wage, overtime rules, and state-specific event-staffing compliance quirks.",
     },
+    {
+      name: "request_quote",
+      desc: "Submit a structured staffing request to TempGuru's CRM for human review. Opt-in write tool; not a reservation or contract.",
+    },
   ];
 
   const restEndpoints = [
@@ -60,8 +64,9 @@ export default function Home() {
         TempGuru MCP Server
       </h1>
       <p style={{ color: "#9ab0cc", fontSize: 16, marginBottom: 32 }}>
-        Read-only Model Context Protocol server and public REST API for TempGuru
-        event staffing data.
+        Model Context Protocol server and public REST API for TempGuru
+        event staffing data. Five read-only lookup tools plus an opt-in
+        request_quote submission.
       </p>
 
       <section style={sectionStyle}>
