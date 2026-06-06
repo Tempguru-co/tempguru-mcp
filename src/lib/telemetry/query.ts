@@ -56,6 +56,7 @@ export interface DashboardMetrics {
   totalErrors: number;
   byTool: Record<string, number>;
   byUa: Record<string, number>;
+  unclassifiedUas: Array<{ member: string; count: number }>;
   byCountry: Record<string, number>;
   topCities: Array<{ member: string; count: number }>;
   topRoles: Array<{ member: string; count: number }>;
@@ -82,6 +83,7 @@ export async function getMetrics(windowDays = 7): Promise<DashboardMetrics> {
       totalErrors: 0,
       byTool: {},
       byUa: {},
+      unclassifiedUas: [],
       byCountry: {},
       topCities: [],
       topRoles: [],
@@ -93,17 +95,24 @@ export async function getMetrics(windowDays = 7): Promise<DashboardMetrics> {
 
   const dates = lastNDates(windowDays);
 
-  const [byTool, byUa, byStatus, byCountry, topCities, topRoles, topStates, recentRaw] =
+  const [byTool, byUa, byStatus, byCountry, unclassifiedHash, topCities, topRoles, topStates, recentRaw] =
     await Promise.all([
       aggregateHash("tools", dates),
       aggregateHash("uas", dates),
       aggregateHash("status", dates),
       aggregateHash("countries", dates),
+      aggregateHash("ua:unclassified", dates),
       aggregateZSet("queries:cities", dates, 20),
       aggregateZSet("queries:roles", dates, 20),
       aggregateZSet("queries:states", dates, 20),
       exec((r) => r.lrange("recent:invocations", 0, 49)),
     ]);
+
+  // Top-N raw unclassified UA strings — the menu for the next classifier pass.
+  const unclassifiedUas = Object.entries(unclassifiedHash)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 25)
+    .map(([member, count]) => ({ member, count }));
 
   const totalRequests = Object.values(byTool).reduce((a, b) => a + b, 0);
   const totalErrors = byStatus.error ?? 0;
@@ -134,6 +143,7 @@ export async function getMetrics(windowDays = 7): Promise<DashboardMetrics> {
     totalErrors,
     byTool,
     byUa,
+    unclassifiedUas,
     byCountry,
     topCities,
     topRoles,

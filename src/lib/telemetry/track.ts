@@ -4,6 +4,7 @@
 //
 //   tools:{date}                 HASH  tool_name → invocation count
 //   uas:{date}                   HASH  ua_class → invocation count
+//   ua:unclassified:{date}       HASH  raw UA string → count (only "other" bucket)
 //   countries:{date}             HASH  iso2_country → invocation count
 //   status:{date}                HASH  "success"|"error" → count
 //   queries:cities:{date}        ZSET  city slug → invocation count (sorted)
@@ -39,6 +40,14 @@ export function track(input: TrackInput): void {
   const date = utcDate();
   const ua: UaClass = classifyUserAgent(input.userAgent);
 
+  // Diagnostic: when a UA still falls into "other", retain the raw string
+  // (truncated) so the dashboard can show exactly what's unclassified and we
+  // can add a pattern next time. Without this, "other" is a black hole.
+  const rawUnclassified =
+    ua === "other" && input.userAgent
+      ? input.userAgent.trim().slice(0, 200)
+      : null;
+
   // Build the ring-buffer payload before entering the async context so it is
   // already serialised when the Promise.allSettled batch fires.
   const event = JSON.stringify({
@@ -61,6 +70,10 @@ export function track(input: TrackInput): void {
       // Counters
       r.hincrby(`tools:${date}`, input.tool, 1),
       r.hincrby(`uas:${date}`, ua, 1),
+      // Raw unclassified UA capture (only when bucket === "other")
+      rawUnclassified
+        ? r.hincrby(`ua:unclassified:${date}`, rawUnclassified, 1)
+        : Promise.resolve(),
       r.hincrby(`status:${date}`, input.status, 1),
       input.ipCountry
         ? r.hincrby(`countries:${date}`, input.ipCountry.toUpperCase(), 1)
@@ -73,6 +86,7 @@ export function track(input: TrackInput): void {
       // TTLs (idempotent — re-setting is safe)
       r.expire(`tools:${date}`, TTL_SECONDS),
       r.expire(`uas:${date}`, TTL_SECONDS),
+      rawUnclassified ? r.expire(`ua:unclassified:${date}`, TTL_SECONDS) : Promise.resolve(),
       r.expire(`status:${date}`, TTL_SECONDS),
       r.expire(`countries:${date}`, TTL_SECONDS),
       r.expire(`queries:cities:${date}`, TTL_SECONDS),

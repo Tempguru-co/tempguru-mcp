@@ -135,6 +135,14 @@ function Dashboard({ m }: { m: DashboardMetrics }) {
         </Card>
       </div>
 
+      {/* Unclassified raw UAs — the menu for the next classifier pass */}
+      <Card title="Unclassified user-agents (raw)">
+        <KeyValueTable
+          rows={m.unclassifiedUas.map((u) => [u.member, u.count])}
+          emptyMessage="No unclassified user-agents — every UA matched a known pattern."
+        />
+      </Card>
+
       {/* Three-column row: top cities / roles / states */}
       <div
         style={{

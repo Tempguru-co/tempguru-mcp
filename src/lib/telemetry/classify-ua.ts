@@ -25,6 +25,12 @@ export type UaClass =
   | "deepseek"
   | "doubao"
   | "kimi"
+  // Generic MCP client libraries (SDK clients with no app-specific UA)
+  | "mcp-client"
+  // AI training / citation crawlers (index us for model answers, not interactive)
+  | "ai-crawler"
+  // Plain browser UA — human in a browser, or a browser-context probe
+  | "browser"
   // Directory / scanner probes
   | "glama-probe"
   | "smithery-probe"
@@ -88,9 +94,38 @@ export function classifyUserAgent(raw: string | null | undefined): UaClass {
   if (/applebot/.test(ua)) return "applebot";
   if (/ccbot|commoncrawl/.test(ua)) return "common-crawl";
 
+  // AI training / citation crawlers — index the site to feed model answers.
+  // These were previously all falling into "other". Note the interactive
+  // user-triggered fetches (chatgpt-user, claude-user) are matched ABOVE in
+  // the Anthropic/OpenAI blocks so they stay in their interactive buckets.
+  if (
+    /gptbot|oai-searchbot|claudebot|claude-searchbot|anthropic-ai|google-extended|googleother|applebot-extended|amazonbot|meta-externalagent|meta-externalfetcher|facebookbot|bravebot|mistralai|youbot|bytespider|diffbot|timpibot|omgili|imagesiftbot/.test(
+      ua,
+    )
+  ) {
+    return "ai-crawler";
+  }
+
+  // Generic MCP client libraries — the official SDKs and remote shims send
+  // these when an app hasn't set its own UA. Distinguishes real MCP traffic
+  // from random noise.
+  if (
+    /modelcontextprotocol|mcp-remote|mcp-client|mcp-use|@modelcontextprotocol|mcp-sdk|fastmcp|mcp\.js|eventsource/.test(
+      ua,
+    )
+  ) {
+    return "mcp-client";
+  }
+
   // Scripted (curl, wget, python-requests, etc.)
-  if (/curl|wget|python-requests|httpx|axios|node-fetch|got/.test(ua)) {
+  if (/curl|wget|python-requests|httpx|axios|node-fetch|undici|go-http-client|okhttp|got|^node\/|^node$/.test(ua)) {
     return "scripted";
+  }
+
+  // Plain browser user-agent — a human poking the endpoint, or a
+  // browser-context probe (some directory scanners fetch with an Origin).
+  if (/mozilla\/|applewebkit|chrome\/|safari\/|firefox\/|edge\//.test(ua)) {
+    return "browser";
   }
 
   return "other";
