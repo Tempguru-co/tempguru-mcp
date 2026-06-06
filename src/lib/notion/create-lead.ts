@@ -83,7 +83,10 @@ function buildCallNotes(input: CreateLeadInput): string {
 }
 
 export async function createLead(input: CreateLeadInput): Promise<CreateLeadResult> {
-  const apiKey = process.env.NOTION_API_KEY;
+  // Accept either casing — the Vercel env var was created as `Notion_API_Key`
+  // while convention (and this code) prefers `NOTION_API_KEY`. Read both so a
+  // casing mismatch can't silently break quote submission again.
+  const apiKey = process.env.NOTION_API_KEY || process.env.Notion_API_Key;
   if (!apiKey) {
     return { success: false, error: "NOTION_API_KEY not configured" };
   }
