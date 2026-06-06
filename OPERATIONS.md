@@ -72,20 +72,24 @@ All keys are namespaced by UTC date (`YYYY-MM-DD`). Every daily key carries a **
 
 ## User-agent classifier
 
-`src/lib/telemetry/classify-ua.ts` maps raw UA strings to ~25 categories. First-match-wins. Categories grouped by:
+`src/lib/telemetry/classify-ua.ts` maps raw UA strings to ~30 categories. First-match-wins (order matters). Categories grouped by:
 
+- **Internal test (matched FIRST)** — `internal-test`. Any UA containing `tempguru-smoketest` / `tempguru-internal` / `tempguru-healthcheck`. **Convention: all internal test + health-check calls MUST send `User-Agent: TempGuru-SmokeTest/<version>`** so our own traffic doesn't pollute `scripted` or masquerade as a real agent.
 - **Anthropic surfaces** — claude-ai, claude-code, claude-desktop
 - **OpenAI surfaces** — openai-chatgpt, openai-codex, openai-agents-sdk
 - **Other Western agents** — cursor, cline, windsurf, gemini, perplexity
 - **Chinese ecosystem agents** — qwen-ecosystem (Qwen/DashScope/ModelScope-Agent), deepseek, doubao, kimi
+- **MCP client libraries** — `mcp-client` (modelcontextprotocol SDK, mcp-remote, fastmcp, eventsource). NOTE: this is the *client software*, not always the underlying model — a generic MCP SDK call can't always be attributed to Kimi vs OpenAI vs Claude.
+- **AI training / citation crawlers** — `ai-crawler` (GPTBot, ClaudeBot, OAI-SearchBot, Google-Extended, Bytespider, Amazonbot, meta-external*, anthropic-ai, mistralai, etc.). These index the site to feed model answers; previously all fell into `other`.
 - **Directory probes** — glama-probe, smithery-probe, modelscope-probe, mcp-inspector
 - **Search crawlers** — baidu-spider, yisou-spider, sogou-spider, _360-spider, bing-bot, google-bot, yandex-bot, applebot, common-crawl
-- **Scripted clients** — curl/wget/python-requests/httpx/axios/node-fetch/got
+- **Browser** — `browser` (Mozilla/AppleWebKit/Chrome/Safari/Firefox/Edge UAs = a human in a browser, or a browser-context probe)
+- **Scripted clients** — curl/wget/python-requests/httpx/axios/node-fetch/undici/go-http-client/okhttp/got/bare-node. Genuine third-party scripts only (our own tests are `internal-test`).
 - **Catchall** — `other` (when nothing matches)
 
 ### Adding a new UA class
 
-When `other` grows large, inspect the raw UA strings in Vercel logs or via Redis CLI, then add a new regex branch in `classify-ua.ts` and bump the `UaClass` union type. The classifier runs at MCP-call time, so changes apply to new traffic only — historical events keep their old classification.
+`other` is now **self-diagnosing**: when a UA falls into `other`, the raw string is captured to the Redis hash `ua:unclassified:{date}` (truncated 200 chars, 90-day TTL) and surfaced on the admin dashboard as the **"Unclassified user-agents (raw)"** card (top 25). To add a class: read that card, add a new regex branch in `classify-ua.ts`, bump the `UaClass` union type. The classifier runs at MCP-call time, so changes apply to new traffic only — historical events keep their old classification.
 
 ---
 
@@ -187,4 +191,7 @@ Upstash free tier is 10,000 commands/day. Each MCP tool invocation writes ~8 com
 | Tool responses slow but dashboard still works | Upstash latency spike | Verify Upstash region matches Vercel region; consider switching to fire-and-forget exclusively (already the case) |
 | `other` bucket growing | Unclassified client | Inspect Vercel logs for raw UA strings; add regex to `classify-ua.ts` |
 | Redirect loop on /admin | Stale browser cookie | Clear cookies for mcp.tempguru.co OR open in incognito |
-| `git push` to `main` doesn't deploy | Vercel GitHub App not installed on the org (e.g. after a repo transfer) | Install the Vercel app on the org → `vercel git connect` → verify with a test push (see **Deployment**) |
+| `git push` to `main` doesn't deploy | Vercel GitHub App can't see the repo (common after a repo transfer to a new org). `vercel git connect` may say "already connected" — the project link is fine; the problem is the **GitHub App's repo access**. The app is installed on the org but the repo isn't in its **"Only select repositories"** list, so GitHub never sends push webhooks. | GitHub → org **Settings → Installations → Vercel → Configure** → add the repo to the selected list (or "All repositories") → Save. Verify with a test push: a new deploy should appear in `vercel ls` within ~30s. (Resolved 2026-06-06 for tempguru-mcp after the kissmyabs32→tempguru-co transfer.) |
+| `request_quote` returns "NOTION_API_KEY not configured" | Env var casing mismatch | Vercel var is `Notion_API_Key`; code reads `NOTION_API_KEY` first then falls back to `Notion_API_Key`. If both absent, add `NOTION_API_KEY` (Production+Preview) + redeploy. |
+| `request_quote` returns a `ByteString` TypeError | Notion API key value contains a non-ASCII char (e.g. an em dash from smart-typography on paste) | Re-enter the raw integration token (`ntn_…`/`secret_…`, pure ASCII, no surrounding text) in Vercel. Code now rejects non-ASCII keys with a clear message. |
+| `request_quote` returns Notion 404 "Could not find database" | `DB_ID` set to the **data_source_id** instead of the **database_id**, OR integration not shared with the DB | `DB_ID` in `src/lib/notion/create-lead.ts` must be the database_id (`2f87d2b7-68c5-818d-93ae-f835c7b478f2`), NOT the data_source_id (`…620bde`). Also share the integration with the DB: Notion DB → ••• → Connections → add the integration. |
