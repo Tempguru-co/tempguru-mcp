@@ -36,6 +36,11 @@ export function buildOpenApiSpec() {
         name: "Public read-only data",
         url: "https://tempguru.co/ai",
       },
+      "x-logo": {
+        url: "https://mcp.tempguru.co/logo.svg",
+        backgroundColor: "#FFFFFF",
+        altText: "TempGuru",
+      },
     },
     servers: [
       {
