@@ -1,10 +1,12 @@
-# Dockerfile for tempguru-mcp — primarily so Glama can introspect a
-# `/mcp/servers/` listing alongside the existing `/mcp/connectors/` one.
+# Dockerfile for tempguru-mcp.
+#
+# Published to Docker Hub as tempguru/event-staffing via .github/workflows/docker.yml.
+# Used by: Docker MCP Catalog, Glama, and any directory that prefers a buildable
+# image over a remote-URL pointer.
 #
 # Production deploy continues to run on Vercel (Fluid Compute, App Router).
-# This Dockerfile is NOT the production runtime; it exists so that any
-# directory or scanner that prefers buildable source can spin up a clone
-# of the server and call /mcp/initialize against it.
+# This image is NOT the production runtime — it's a self-contained reference
+# implementation. Connect to the live server directly at https://mcp.tempguru.co/mcp.
 #
 # Two-stage build keeps the runtime image small. Final image runs
 # `npm start` against the standard Next.js production build.
@@ -24,6 +26,18 @@ RUN npm run build
 # ─── Stage 2: runtime ──────────────────────────────────────────────────
 FROM node:24-alpine AS runner
 WORKDIR /app
+
+LABEL org.opencontainers.image.title="TempGuru Event Staffing MCP"
+LABEL org.opencontainers.image.description="MCP server for W-2 event staffing data across 300+ US/Canadian markets. Tools: get_cities, get_roles, check_availability, get_role_pricing, get_compliance_by_state, request_quote."
+LABEL org.opencontainers.image.vendor="Temporary Assistance Guru, Inc."
+LABEL org.opencontainers.image.url="https://tempguru.co"
+LABEL org.opencontainers.image.source="https://github.com/tempguru-co/tempguru-mcp"
+LABEL org.opencontainers.image.documentation="https://mcp.tempguru.co/"
+LABEL org.opencontainers.image.licenses="MIT"
+LABEL mcp.server.name="co.tempguru/event-staffing"
+LABEL mcp.server.transport="streamable-http"
+LABEL mcp.server.url="https://mcp.tempguru.co/mcp"
+LABEL mcp.server.tools="get_cities,get_roles,check_availability,get_role_pricing,get_compliance_by_state,request_quote"
 
 ENV NODE_ENV=production
 ENV PORT=3000

@@ -1,0 +1,327 @@
+# Archetype: trade-show-booth-activation-small
+#
+# This file is the TEMPLATE for all archetypes. Copy it when adding new ones.
+# One YAML file per archetype, one PR review per blessing.
+#
+# LIFECYCLE:
+#   status: draft     → TJ reviews defaults section by section
+#   status: blessed   → fill blessed_by + blessed_at, merge to main
+#
+# WHAT LIVES HERE:
+#   - Default role mix (counts, not rates)
+#   - Lead-time bands by market tier
+#   - Typical attendance/scope ranges
+#   - Equipment ownership
+#   - Compliance flags to surface
+#   - Staffing-plan generation rules
+#   - Agent conversation field list
+#
+# WHAT DOES NOT LIVE HERE:
+#   - Bill rates — always live in role-pricing.json, fetched via get_role_pricing
+#   - Global rules (cancellation policy, team-lead threshold, attire, reports-to)
+#     These are enforced by the staffing-plan engine and defined in GLOBAL_RULES.md.
+#     Archetype can reference them but must not redefine them.
+
+id: trade-show-booth-activation-small
+event_type: trade-show
+scale: small
+display_name: "Trade Show / Booth Activation — Small"
+version: "0.1.0"
+status: draft
+blessed_by: null        # TJ Southern — set when approved
+blessed_at: null        # ISO 8601 date
+created_at: "2026-06-04"
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# SCOPE
+# What makes this archetype distinct from others in the matrix.
+# ──────────────────────────────────────────────────────────────────────────────
+
+scope:
+  description: >
+    One to three exhibitor booths at a trade show, exposition, or industry
+    conference. The client is the exhibitor, not the show organizer. Primary
+    driver: brand-forward representation at the booth to engage attendees,
+    demo products, and capture leads. Typically 1–2 show days; setup and
+    teardown days billed separately.
+
+  # OPEN QUESTION for TJ:
+  #   Should "small" split into single-booth vs multi-booth (e.g., 1 booth vs 2–3)?
+  #   Current approach treats 1–3 booths as one archetype with headcount scaling within.
+  booth_count_range: [1, 3]   # TODO: TJ confirm upper bound; 3 still "small"?
+  show_days_typical: [1, 2]
+
+  # Typical total attendee count at the show (not TempGuru staff count).
+  # Used by the agent to calibrate role mix suggestions.
+  # TODO: TJ — what range do small trade shows typically fall in?
+  # Example: 500–5,000 attendees?
+  show_attendance_range:
+    low: null     # TODO: TJ
+    high: null    # TODO: TJ
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# DEFAULT ROLE MIX
+#
+# Starting headcount suggestions the staffing-plan endpoint pre-fills.
+# User adjusts; these are the anchor, not the ceiling.
+# All counts are per_shift unless noted.
+#
+# Team lead: auto-inserted by the staffing-plan engine when total shift
+# headcount >= 20. That threshold is a global rule — do not override here.
+# For small trade shows the threshold rarely triggers, but the engine checks.
+# ──────────────────────────────────────────────────────────────────────────────
+
+default_role_mix:
+
+  # Per-booth roles: these scale with booth_count.
+  # The staffing-plan engine multiplies per_booth defaults by the user's booth count.
+  per_booth:
+    - role: brand-ambassadors
+      # Primary staffing role for booth activations.
+      # Client provides product knowledge; TempGuru provides brand-ready, personable staff.
+      default_count: null   # TODO: TJ — anchor count per booth (thinking 2?)
+      min_count: 1
+      max_count: null       # TODO: TJ — practical ceiling per booth for quoting?
+      rate_source: role-pricing.json  # never override; engine fetches by market tier
+
+    - role: booth-monitors
+      # Optional. Add if booth has high-value demo equipment, unattended product,
+      # or the client wants a second body for overflow coverage.
+      # TODO: TJ — is booth-monitor a standard include at this scale, or client-request only?
+      default_count: 0       # TODO: TJ — 0 (opt-in) or 1 (default)?
+      min_count: 0
+      max_count: null        # TODO: TJ
+      rate_source: role-pricing.json
+
+  # Per-event roles: these are fixed regardless of booth count.
+  per_event:
+    - role: setup-breakdown
+      # Pre-show setup and post-show teardown. Separate shifts from show-floor staff.
+      # Not included by default for very small single-booth builds.
+      # TODO: TJ — at what booth count / complexity does setup crew become a standard include?
+      default_count: null    # TODO: TJ — e.g., 2–3 for a 1-booth build?
+      min_count: 0
+      max_count: null        # TODO: TJ
+      shift_type: setup_teardown
+      rate_source: role-pricing.json
+      note: >
+        Setup and teardown shifts are separate from show-floor headcount.
+        The team-lead threshold check runs on each shift type independently.
+
+  # Team lead: handled by global auto-add rule.
+  # Defined here for visibility only — the engine owns the insertion logic.
+  team_lead_auto_add:
+    trigger: "total_headcount_on_shift >= 20"
+    role: team-leads
+    count: 1
+    note: >
+      For small trade shows this rarely triggers unless the client requests
+      a large booth staff on a single shift. Engine inserts automatically;
+      agent should confirm with client if headcount is near the threshold.
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# LEAD TIME BANDS
+#
+# Business days from booking confirmation to first shift start.
+# These are the bands the agent surfaces; not hard cutoffs.
+# "comfortable" = clean fill with no schedule pressure.
+# "rush" = possible but may limit candidate pool; agent should note this.
+# "urgent" = best-effort; availability not guaranteed; do not promise.
+#
+# TODO: TJ — fill in all bands. Small markets consistently need more runway
+# than hubs because TempGuru's active roster is thinner in tertiary cities.
+# ──────────────────────────────────────────────────────────────────────────────
+
+lead_time_days:
+  hub:
+    # hub = NYC, LA, SF, Chicago, Boston, Miami, DC, Houston, Dallas, Atlanta, Seattle, etc.
+    comfortable: null    # TODO: TJ — e.g., 10+?
+    standard: null       # TODO: TJ — e.g., 5–9?
+    rush: null           # TODO: TJ — e.g., 3–4?
+    urgent: null         # TODO: TJ — e.g., 1–2?
+
+  mid:
+    # mid = regional hubs, mid-size metros (~129 cities)
+    comfortable: null    # TODO: TJ
+    standard: null       # TODO: TJ
+    rush: null           # TODO: TJ
+    urgent: null         # TODO: TJ
+
+  small:
+    # small = tertiary markets, secondary towns (~191 cities)
+    comfortable: null    # TODO: TJ — likely 14+?
+    standard: null       # TODO: TJ
+    rush: null           # TODO: TJ — small market rush may not be reliably serviceable
+    urgent: null         # TODO: TJ
+    urgent_note: >
+      TODO: TJ — should the agent discourage urgent requests in small markets,
+      or simply note availability isn't guaranteed?
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# SHIFT STRUCTURE
+# ──────────────────────────────────────────────────────────────────────────────
+
+shift_structure:
+  show_floor:
+    # Trade show floor hours vary widely by show and convention center.
+    # The agent should ask the client for actual show hours rather than assuming.
+    hours_per_day: null    # TODO: TJ — typical range for quoting purposes? (e.g., 8–10h?)
+    split_shifts: null     # TODO: TJ — do small trade shows commonly run split shifts?
+
+  setup_teardown:
+    setup_hours: null      # TODO: TJ — typical setup shift for 1–3 booth build (e.g., 3–4h?)
+    teardown_hours: null   # TODO: TJ — teardown is usually faster; same as setup or shorter?
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# EQUIPMENT / MATERIALS
+#
+# What the agent can truthfully state about who brings what.
+# Attire policy is GLOBAL: agent asks "What should staff wear?" — no default.
+# ──────────────────────────────────────────────────────────────────────────────
+
+equipment:
+  provided_by_client:
+    - "Booth structure and furnishings"
+    - "Product samples and demo materials"
+    - "Marketing collateral and branded materials"
+    - "Tablets or lead-capture devices (badge scanners, etc.)"
+    - null    # TODO: TJ — anything else always client-supplied at this scale?
+
+  provided_by_tempguru:
+    # For small trade shows TempGuru typically provides staff only, not materials.
+    - null    # TODO: TJ — does TempGuru ever supply any equipment at this scale?
+    #         If nothing, remove this section or mark as [].
+
+  attire:
+    # GLOBAL RULE — do not change.
+    # Agent asks: "What should staff wear?" No framing like "we don't have a default."
+    policy: agent_asks_client
+    common_options_for_agent_prompt:
+      - "Client-branded apparel (client provides)"
+      - "Business casual"
+      - "All-black"
+      - "Show-specific uniform (client provides)"
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# COMPLIANCE FLAGS
+#
+# State-specific rules the staffing-plan endpoint surfaces when the event
+# city matches. The full rule detail lives in state-compliance.json;
+# this section tells the engine when and why to surface it.
+# ──────────────────────────────────────────────────────────────────────────────
+
+compliance_flags:
+  - state: CA
+    flag: w2_classification_advantage
+    trigger: "any CA event"
+    agent_note: >
+      TempGuru's W-2 model means no AB5 exposure for the client — worth
+      calling out proactively for California events.
+
+  - state: NY
+    flag: wage_notice_requirements
+    trigger: "any NY event"
+    agent_note: null    # TODO: TJ — any NY-specific talking point for trade-show work?
+
+  # TODO: TJ — flag any other states relevant to trade-show booth work:
+  #   IL (Chicago show floor is a heavy union jurisdiction — does that affect our staffing?)
+  #   NV (Las Vegas convention center — any nuances?)
+  #   TX, WA for their own classification quirks?
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# AGENT CONVERSATION
+#
+# The fields the request_quote tool collects from the user.
+# Ordered by how a natural conversation should flow.
+#
+# NOT collected here (sales rep collects during review):
+#   - "Reports to" (on-site contact name + phone) — GLOBAL RULE
+#   - Exact billing address
+#   - Preferred payment terms
+# ──────────────────────────────────────────────────────────────────────────────
+
+agent_conversation:
+
+  required_inputs:
+    - field: event_name
+      label: "Event name"
+      prompt: "What's the name of the trade show or event?"
+
+    - field: venue_city
+      label: "City"
+      prompt: "What city is the event in?"
+      note: "Used to look up market tier (hub/mid/small) and compliance flags."
+
+    - field: show_dates
+      label: "Show dates"
+      prompt: "What are the show dates? (Include setup/teardown dates if known.)"
+
+    - field: booth_count
+      label: "Booth count"
+      prompt: "How many booths are you staffing?"
+      validation: "integer, 1–3 for this archetype; escalate to mid archetype if > 3"
+
+    - field: headcount_per_day
+      label: "Staff per day"
+      prompt: "Roughly how many staff do you need on the show floor each day?"
+      note: "Engine will use default_role_mix as anchor; user input overrides."
+
+    - field: attire
+      label: "Attire"
+      prompt: "What should staff wear?"   # GLOBAL RULE — always ask, no default suggested
+
+  optional_inputs:
+    - field: setup_teardown_needed
+      prompt: "Do you also need setup and/or teardown crew?"
+
+    - field: special_requirements
+      prompt: >
+        Any special requirements — language skills, specific product demo experience,
+        dress code details?
+
+  # Disclosures the agent MUST surface before the user proceeds to signing.
+  # Text is authoritative; do not paraphrase in the agent prompt.
+  required_disclosures:
+    cancellation_policy: >
+      Cancellations within 24 hours of a scheduled shift start time incur a fee
+      equal to (headcount on that shift × 4 hours × the per-position hourly rate)
+      for that shift only. Shifts cancelled more than 24 hours in advance carry
+      no cancellation fee. Other shifts in the same order are not affected.
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# STAFFING PLAN GENERATION RULES
+#
+# How the staffing-plan endpoint builds a draft plan from this archetype
+# and the user's inputs.
+# ──────────────────────────────────────────────────────────────────────────────
+
+staffing_plan_rules:
+  # Per-booth roles scale by booth_count; per_event roles are fixed.
+  headcount_scaling: per_booth_for_show_floor_roles
+
+  # Bill rates: always from role-pricing.json, never from this file.
+  rate_source: role-pricing.json
+  rate_display: range   # show low–high from the city's market tier
+
+  # Lead time: use this archetype's lead_time_days, keyed by city tier.
+  lead_time_source: archetype_bands
+
+  # Auto-insert team lead when any single shift hits the threshold.
+  team_lead_threshold: 20   # mirrors global rule; engine is authoritative
+
+  # Compliance: check event city's state against compliance_flags list above.
+  compliance_check: true
+
+  # Rate estimation note the agent surfaces alongside any dollar figures:
+  rate_disclaimer: >
+    Rate ranges shown are all-inclusive W-2 planning estimates
+    (worker pay + workers comp + general liability + payroll taxes).
+    Final rates are confirmed in the Job Order during sales review.

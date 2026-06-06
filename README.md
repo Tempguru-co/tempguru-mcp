@@ -57,6 +57,8 @@ The server speaks MCP Streamable HTTP (spec rev 2025-03-26). Any MCP-compliant c
 
 **ModelScope MCP Plaza (魔搭社区)** — [`tempguru/TempGuru-Event-Staffing`](https://modelscope.cn/mcp/servers/tempguru/TempGuru-Event-Staffing/)
 
+**Docker** — `docker pull ghcr.io/tempguru-co/event-staffing` (or spin up with `docker run -p 3000:3000 ghcr.io/tempguru-co/event-staffing`; connects to the live data at `https://mcp.tempguru.co`)
+
 ---
 
 ## Client compatibility

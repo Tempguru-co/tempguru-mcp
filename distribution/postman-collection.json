@@ -1,0 +1,303 @@
+{
+  "info": {
+    "name": "TempGuru Event Staffing API",
+    "description": "Read-only REST API for W-2 event staffing data across 300+ US and Canadian markets. No authentication required. All rates are all-inclusive W-2 bill rates (worker pay, payroll taxes, workers' comp, general liability, coordinator support).\n\nMCP server: https://mcp.tempguru.co/mcp\nOpenAPI 3.1: https://mcp.tempguru.co/openapi.json\nWebsite: https://tempguru.co",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 1
+    }
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://mcp.tempguru.co",
+      "type": "string",
+      "description": "TempGuru API base URL"
+    }
+  ],
+  "item": [
+    {
+      "name": "Discovery",
+      "description": "List the cities and staffing roles TempGuru covers.",
+      "item": [
+        {
+          "name": "List Cities",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/cities",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "cities"],
+              "query": [
+                {
+                  "key": "state",
+                  "value": "CA",
+                  "description": "Filter by 2-letter state code or full name (US + Canadian provinces)",
+                  "disabled": true
+                },
+                {
+                  "key": "tier",
+                  "value": "hub",
+                  "description": "hub | mid | small",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Returns all cities TempGuru staffs with tier classification. Optional filters: state (postal code or name), tier (hub/mid/small).\n\nhub = 25 major metros (NYC, LA, Boston, Chicago, SF, etc.)\nmid = 129 secondary markets\nsmall = 191 tertiary markets"
+          },
+          "response": [
+            {
+              "name": "All cities",
+              "originalRequest": {
+                "method": "GET",
+                "url": { "raw": "{{baseUrl}}/api/v1/cities" }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"input\": {},\n  \"total\": 345,\n  \"tier_breakdown\": { \"hub\": 25, \"mid\": 129, \"small\": 191 },\n  \"cities\": [\n    {\n      \"slug\": \"boston-event-staffing\",\n      \"name\": \"Boston\",\n      \"state\": \"Massachusetts\",\n      \"state_abbr\": \"MA\",\n      \"country\": \"US\",\n      \"tier\": \"hub\",\n      \"url\": \"https://tempguru.co/insights/boston-event-staffing\"\n    }\n  ]\n}"
+            },
+            {
+              "name": "Hub cities only",
+              "originalRequest": {
+                "method": "GET",
+                "url": { "raw": "{{baseUrl}}/api/v1/cities?tier=hub" }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"input\": { \"tier\": \"hub\" },\n  \"total\": 25,\n  \"tier_breakdown\": { \"hub\": 25, \"mid\": 0, \"small\": 0 },\n  \"cities\": []\n}"
+            }
+          ]
+        },
+        {
+          "name": "List Roles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/roles",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "roles"]
+            },
+            "description": "Returns all event staffing roles TempGuru places: brand ambassadors, registration, hospitality, setup/breakdown, ushers, gate staff, crowd control, guest services, booth monitors, team leads.\n\nThe returned `slug` values are the keys used in the pricing and availability endpoints."
+          },
+          "response": [
+            {
+              "name": "All roles",
+              "originalRequest": {
+                "method": "GET",
+                "url": { "raw": "{{baseUrl}}/api/v1/roles" }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"input\": {},\n  \"total\": 11,\n  \"roles\": [\n    {\n      \"slug\": \"brand-ambassadors\",\n      \"name\": \"Brand Ambassadors\",\n      \"description\": \"...\",\n      \"skill_tier\": 3,\n      \"typical_shift_length_hours\": 8,\n      \"url\": \"https://tempguru.co/roles/brand-ambassadors\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Planning",
+      "description": "Availability lead-time guidance and hourly rate ranges for specific markets.",
+      "item": [
+        {
+          "name": "Check Availability",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/availability?city=Boston&date=2026-09-15",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "availability"],
+              "query": [
+                {
+                  "key": "city",
+                  "value": "Boston",
+                  "description": "City name or slug from /api/v1/cities"
+                },
+                {
+                  "key": "date",
+                  "value": "2026-09-15",
+                  "description": "Event date (YYYY-MM-DD)"
+                },
+                {
+                  "key": "role",
+                  "value": "brand-ambassadors",
+                  "description": "Optional: role slug or name — adds rate range to response",
+                  "disabled": true
+                },
+                {
+                  "key": "headcount",
+                  "value": "10",
+                  "description": "Optional: number of staff needed",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Returns lead-time guidance for a city + date pair. Recommendation values:\n- yes: comfortable window, proceed normally\n- tight: at or near typical lead time, move quickly\n- rush: inside typical lead time, escalation likely needed\n- very-rush: < 24 hours\n\nThis is planning guidance, NOT a real-time inventory reservation. Confirmed bookings go through tempguru.co/get-staffing."
+          },
+          "response": [
+            {
+              "name": "Boston, comfortable lead time",
+              "originalRequest": {
+                "method": "GET",
+                "url": { "raw": "{{baseUrl}}/api/v1/availability?city=Boston&date=2026-09-15" }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"input\": { \"city\": \"Boston\", \"date\": \"2026-09-15\" },\n  \"city_found\": true,\n  \"city\": \"Boston\",\n  \"state\": \"Massachusetts\",\n  \"city_tier\": \"hub\",\n  \"event_date\": \"2026-09-15\",\n  \"days_until_event\": 102,\n  \"typical_lead_time_hours\": 72,\n  \"recommendation\": \"yes\",\n  \"role\": null,\n  \"count\": null,\n  \"notes\": [\"Hub market — strong network depth, typically 48–72h lead time.\"]\n}"
+            },
+            {
+              "name": "Boston + Brand Ambassadors + headcount",
+              "originalRequest": {
+                "method": "GET",
+                "url": { "raw": "{{baseUrl}}/api/v1/availability?city=Boston&date=2026-09-15&role=brand-ambassadors&headcount=10" }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"city\": \"Boston\",\n  \"recommendation\": \"yes\",\n  \"role\": {\n    \"name\": \"Brand Ambassadors\",\n    \"rate_range_usd\": { \"low\": 50, \"high\": 62 },\n    \"all_inclusive\": \"All-inclusive W-2 rate: worker pay + payroll taxes + workers comp + general liability\"\n  },\n  \"count\": 10,\n  \"notes\": []\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Role Pricing",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/pricing?role=brand-ambassadors&city=Boston",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "pricing"],
+              "query": [
+                {
+                  "key": "role",
+                  "value": "brand-ambassadors",
+                  "description": "Role slug or display name (e.g. 'Brand Ambassadors')"
+                },
+                {
+                  "key": "city",
+                  "value": "Boston",
+                  "description": "City name or slug"
+                }
+              ]
+            },
+            "description": "Returns the all-inclusive hourly rate range (low–high) for a specific role in a specific city.\n\nAll rates are W-2 bill rates: worker pay, employer-side payroll taxes (FICA/FUTA/SUTA), workers' comp, general liability, and coordinator support — no hidden fees at invoice time.\n\nBrand Ambassadors floor at $40/hr in every market."
+          },
+          "response": [
+            {
+              "name": "Brand Ambassadors in Boston",
+              "originalRequest": {
+                "method": "GET",
+                "url": { "raw": "{{baseUrl}}/api/v1/pricing?role=brand-ambassadors&city=Boston" }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"input\": { \"role\": \"brand-ambassadors\", \"city\": \"Boston\" },\n  \"role\": \"Brand Ambassadors\",\n  \"role_slug\": \"brand-ambassadors\",\n  \"city\": \"Boston\",\n  \"state\": \"Massachusetts\",\n  \"city_tier\": \"hub\",\n  \"hourly_range_low\": 50,\n  \"hourly_range_high\": 62,\n  \"currency\": \"USD\",\n  \"all_inclusive\": \"All-inclusive W-2 rate: worker pay + payroll taxes + workers comp + general liability\",\n  \"all_tiers_for_context\": {\n    \"small\": { \"low\": 40, \"high\": 48 },\n    \"mid\": { \"low\": 44, \"high\": 54 },\n    \"hub\": { \"low\": 50, \"high\": 62 }\n  }\n}"
+            },
+            {
+              "name": "Registration in Las Vegas",
+              "originalRequest": {
+                "method": "GET",
+                "url": { "raw": "{{baseUrl}}/api/v1/pricing?role=registration&city=Las+Vegas" }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"role\": \"Registration\",\n  \"city\": \"Las Vegas\",\n  \"city_tier\": \"hub\",\n  \"hourly_range_low\": 46,\n  \"hourly_range_high\": 58,\n  \"currency\": \"USD\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Compliance",
+      "description": "State-level employment compliance summaries for event staffing decisions.",
+      "item": [
+        {
+          "name": "Get State Compliance",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/compliance?state=CA",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "compliance"],
+              "query": [
+                {
+                  "key": "state",
+                  "value": "CA",
+                  "description": "Two-letter state code or full name. All 50 states + DC."
+                }
+              ]
+            },
+            "description": "Returns minimum wage, overtime thresholds (weekly and daily where applicable), and state-specific quirks relevant to event staffing — CA meal-break rules, NY spread-of-hours, etc.\n\nInformational only — not legal advice. Consult employment counsel for binding interpretation."
+          },
+          "response": [
+            {
+              "name": "California",
+              "originalRequest": {
+                "method": "GET",
+                "url": { "raw": "{{baseUrl}}/api/v1/compliance?state=CA" }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"state\": \"California\",\n  \"state_abbr\": \"CA\",\n  \"min_wage_usd\": 16.50,\n  \"w2_required\": true,\n  \"w2_note\": \"California AB5 makes it extremely difficult to classify event workers as 1099 — W-2 is the only safe path.\",\n  \"overtime_threshold_weekly_hours\": 40,\n  \"overtime_threshold_daily_hours\": 8,\n  \"unique_rules\": [\n    \"Daily overtime after 8 hours at 1.5x; after 12 hours at 2x\",\n    \"30-minute unpaid meal break required before 5th hour of shift\",\n    \"10-minute paid rest break per 4 hours worked\"\n  ],\n  \"liability_coverage_included\": true,\n  \"workers_comp_included\": true\n}"
+            },
+            {
+              "name": "New York",
+              "originalRequest": {
+                "method": "GET",
+                "url": { "raw": "{{baseUrl}}/api/v1/compliance?state=NY" }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"state\": \"New York\",\n  \"state_abbr\": \"NY\",\n  \"min_wage_usd\": 16.00,\n  \"w2_required\": false,\n  \"overtime_threshold_weekly_hours\": 40,\n  \"unique_rules\": [\n    \"Spread-of-hours rule: 1 extra hour of pay at minimum wage if shift spans more than 10 hours\"\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Operational",
+      "description": "Health check and metadata.",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "health"]
+            },
+            "description": "Returns immediately with the service status and deployed version. No caching. Use as a liveness probe or to confirm the running version."
+          },
+          "response": [
+            {
+              "name": "Healthy",
+              "originalRequest": {
+                "method": "GET",
+                "url": { "raw": "{{baseUrl}}/api/v1/health" }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{ \"status\": \"ok\", \"version\": \"1.0.1\" }"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

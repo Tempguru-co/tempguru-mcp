@@ -69,6 +69,8 @@ mcp_manager.add_server({
 
 **ModelScope 魔搭社区 MCP 广场** — [`tempguru/TempGuru-Event-Staffing`](https://modelscope.cn/mcp/servers/tempguru/TempGuru-Event-Staffing/)
 
+**Docker** — `docker pull ghcr.io/tempguru-co/event-staffing`（或使用 `docker run -p 3000:3000 ghcr.io/tempguru-co/event-staffing` 启动；数据来自 `https://mcp.tempguru.co`）
+
 ---
 
 ## 客户端兼容性
