@@ -6,7 +6,13 @@
 // MCP tool can confirm success or surface a clean error message.
 
 const NOTION_API_VERSION = "2022-06-28";
-const DB_ID = "2f87d2b7-68c5-81aa-928e-000bfa620bde";
+// IMPORTANT: this is the Notion *database_id*, not the *data_source_id*.
+// The workspace notes list 2f87d2b7-68c5-81aa-928e-000bfa620bde, but that is
+// the data SOURCE (collection) id — passing it as parent.database_id returns
+// a 404 ("Could not find database"). The parent database that holds that
+// single data source is the id below. (Single-source DB, so the classic
+// parent:{database_id} form works on API version 2022-06-28.)
+const DB_ID = "2f87d2b7-68c5-818d-93ae-f835c7b478f2";
 const NOTION_API_URL = "https://api.notion.com/v1/pages";
 
 export interface StaffingRole {
