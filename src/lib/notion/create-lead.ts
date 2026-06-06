@@ -85,10 +85,22 @@ function buildCallNotes(input: CreateLeadInput): string {
 export async function createLead(input: CreateLeadInput): Promise<CreateLeadResult> {
   // Accept either casing — the Vercel env var was created as `Notion_API_Key`
   // while convention (and this code) prefers `NOTION_API_KEY`. Read both so a
-  // casing mismatch can't silently break quote submission again.
-  const apiKey = process.env.NOTION_API_KEY || process.env.Notion_API_Key;
+  // casing mismatch can't silently break quote submission again. Trim to drop
+  // any stray whitespace/newline from a copy-paste.
+  const apiKey = (process.env.NOTION_API_KEY || process.env.Notion_API_Key || "").trim();
   if (!apiKey) {
     return { success: false, error: "NOTION_API_KEY not configured" };
+  }
+  // Notion integration tokens are pure ASCII (ntn_… / secret_…). A non-ASCII
+  // char means the env var was pasted with smart-typography or extra prose —
+  // fail with a clear message instead of a cryptic ByteString error from the
+  // fetch header encoder (which is what an em dash in the key produces).
+  if (!/^[\x20-\x7E]+$/.test(apiKey)) {
+    return {
+      success: false,
+      error:
+        "NOTION_API_KEY contains invalid (non-ASCII) characters — re-enter the raw Notion integration token (ntn_… or secret_…) in Vercel with no surrounding text.",
+    };
   }
 
   const dealName = `Agent Quote — ${input.event_type} · ${input.city} · ${input.event_dates}`;
