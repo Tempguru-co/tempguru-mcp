@@ -1,6 +1,12 @@
-// TempGuru MCP server — read-only + write tools for AI agents.
+// TempGuru MCP server — streamable-HTTP transport (production, on Vercel).
 //
-// Exposes 6 tools:
+// The 6 tools and 2 Skill resources are registered by the shared registerTools()
+// in @/lib/mcp/register-tools, so this hosted endpoint and the stdio binary
+// (src/mcp-stdio.ts) expose byte-identical tools — no behavior drift between the
+// remote server and a local/Docker build. This file owns only what is
+// HTTP-specific: per-request telemetry context, Accept-header normalization,
+// CORS, and the streamable-HTTP handler wiring.
+//
 //   - get_cities                 list all cities TempGuru serves (with tier)
 //   - get_roles                  list all staffing roles with descriptions
 //   - check_availability         deterministic lead-time guidance for a city/date
@@ -10,28 +16,13 @@
 //
 // Transport: streamable HTTP (MCP spec rev 2025-03-26). SSE disabled.
 // Public endpoint: https://mcp.tempguru.co/mcp
-//
-// Business logic lives in @/lib/mcp/queries — the same functions are called
-// from src/app/api/v1/*/route.ts to serve the public REST surface. The MCP
-// route is intentionally thin: each tool calls a query function and wraps
-// the resulting data shape in jsonContent. No behavior drift between MCP
-// and REST is possible because there is no behavior here to drift.
 
 import { createMcpHandler } from "mcp-handler";
-import { z } from "zod";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import {
-  queryCities,
-  queryRoles,
-  queryAvailability,
-  queryRolePricing,
-  queryStateCompliance,
-  type CityTier,
-} from "@/lib/mcp/queries";
+import { registerTools } from "@/lib/mcp/register-tools";
 import { runWithContext, currentContext } from "@/lib/telemetry/context";
 import { track } from "@/lib/telemetry/track";
-import { createLead } from "@/lib/notion/create-lead";
 
 // ─── Skill resource content ───────────────────────────────────────────────
 //
@@ -46,322 +37,21 @@ const SKILLS_DIR = join(process.cwd(), "content", "skills");
 const ORDERING_SKILL = readFileSync(join(SKILLS_DIR, "event-staffing-ordering.md"), "utf-8");
 const COMPLIANCE_SKILL = readFileSync(join(SKILLS_DIR, "event-staffing-compliance.md"), "utf-8");
 
-// ─── Helpers ──────────────────────────────────────────────────────────────
-
-function jsonContent(obj: unknown) {
-  return {
-    content: [
-      {
-        type: "text" as const,
-        text: JSON.stringify(obj, null, 2),
-      },
-    ],
-  };
-}
-
 // ─── Handler ──────────────────────────────────────────────────────────────
 
 const handler = createMcpHandler(
   (server) => {
-    // ─── get_cities ─────────────────────────────────────────────────────
-    server.registerTool(
-      "get_cities",
-      {
-        title: "Get Cities",
-        description:
-          "List cities where TempGuru staffs events, with tier classification (hub/mid/small). Perfect for 'What cities do you cover in [state]?', 'Where can I book event staff?', or 'Do you cover [city]?' questions. Optional filter by state or tier.",
-        inputSchema: {
-          state: z
-            .string()
-            .optional()
-            .describe("Optional 2-letter state code (e.g., 'CA') or full state name."),
-          tier: z
-            .enum(["hub", "mid", "small"])
-            .optional()
-            .describe("Optional filter to one tier only."),
-        },
-        annotations: {
-          title: "Get Cities",
-          readOnlyHint: true,
-        },
-      },
-      async ({ state, tier }) => {
-        const result = queryCities({ state, tier: tier as CityTier | undefined });
+    // Tools + resources come from the shared module. The HTTP route's only
+    // addition is telemetry: enrich each record with the request context bound
+    // in withAcceptNormalization (User-Agent + Vercel IP-country), then write
+    // to Redis. The stdio binary calls registerTools() with no onTrack at all.
+    registerTools(server, {
+      onTrack: (record) => {
         const ctx = currentContext();
-        track({
-          tool: "get_cities",
-          userAgent: ctx.userAgent,
-          ipCountry: ctx.ipCountry,
-          status: result.ok ? "success" : "error",
-          state,
-        });
-        if (!result.ok) return jsonContent({ error: result.error.message });
-        return jsonContent(result.data);
+        track({ ...record, userAgent: ctx.userAgent, ipCountry: ctx.ipCountry });
       },
-    );
-
-    // ─── get_roles ──────────────────────────────────────────────────────
-    server.registerTool(
-      "get_roles",
-      {
-        title: "Get Roles",
-        description:
-          "List event staffing roles TempGuru provides, with descriptions and skill tiers. Perfect for 'What kinds of event workers can I hire?', 'What roles do you staff for trade shows / festivals / corporate events?', or 'Do you have brand ambassadors?' questions.",
-        inputSchema: {},
-        annotations: {
-          title: "Get Roles",
-          readOnlyHint: true,
-        },
-      },
-      async () => {
-        const result = queryRoles();
-        const ctx = currentContext();
-        track({
-          tool: "get_roles",
-          userAgent: ctx.userAgent,
-          ipCountry: ctx.ipCountry,
-          status: result.ok ? "success" : "error",
-        });
-        if (!result.ok) return jsonContent({ error: result.error.message });
-        return jsonContent(result.data);
-      },
-    );
-
-    // ─── check_availability ─────────────────────────────────────────────
-    server.registerTool(
-      "check_availability",
-      {
-        title: "Check Availability",
-        description:
-          "Check expected staffing availability for an event. Returns lead-time guidance based on city tier and how far out the event is. Perfect for 'Can you staff my event on [date] in [city]?', 'What's the lead time for booking brand ambassadors in [city]?', or 'Is it too late to staff a [date] event?' questions. Not a real-time inventory check — TempGuru staffs to demand via a 100,000+ worker W-2 network across 300+ markets.",
-        inputSchema: {
-          date: z
-            .string()
-            .describe("Event date in ISO format (YYYY-MM-DD) or any date string parseable by Date()."),
-          city: z
-            .string()
-            .describe("City name (e.g., 'Boston') or slug (e.g., 'boston-event-staffing')."),
-          role: z
-            .string()
-            .optional()
-            .describe("Optional role name or slug to include rate context."),
-          count: z
-            .number()
-            .int()
-            .positive()
-            .optional()
-            .describe("Optional headcount for the event."),
-        },
-        annotations: {
-          title: "Check Availability",
-          readOnlyHint: true,
-        },
-      },
-      async ({ date, city, role, count }) => {
-        const result = queryAvailability({ date, city, role, headcount: count });
-        const ctx = currentContext();
-        track({
-          tool: "check_availability",
-          userAgent: ctx.userAgent,
-          ipCountry: ctx.ipCountry,
-          status: result.ok ? "success" : "error",
-          city,
-          role,
-        });
-        if (!result.ok) return jsonContent({ error: result.error.message });
-        return jsonContent(result.data);
-      },
-    );
-
-    // ─── get_role_pricing ───────────────────────────────────────────────
-    server.registerTool(
-      "get_role_pricing",
-      {
-        title: "Get Role Pricing",
-        description:
-          "Get all-inclusive hourly rate range for a specific role in a specific city. Returns a range (low–high) reflecting event type and shift variability. Perfect for 'What does it cost to hire brand ambassadors in [city]?', 'How much are registration workers in [city]?', or 'What's the rate for ushers at a [city] stadium event?' questions. All rates include W-2 worker pay, workers comp, general liability, and payroll taxes.",
-        inputSchema: {
-          role: z
-            .string()
-            .describe("Role name (e.g., 'Brand Ambassadors') or slug (e.g., 'brand-ambassadors')."),
-          city: z
-            .string()
-            .describe("City name (e.g., 'Boston') or slug (e.g., 'boston-event-staffing')."),
-        },
-        annotations: {
-          title: "Get Role Pricing",
-          readOnlyHint: true,
-        },
-      },
-      async ({ role, city }) => {
-        const result = queryRolePricing({ role, city });
-        const ctx = currentContext();
-        track({
-          tool: "get_role_pricing",
-          userAgent: ctx.userAgent,
-          ipCountry: ctx.ipCountry,
-          status: result.ok ? "success" : "error",
-          role,
-          city,
-        });
-        if (!result.ok) return jsonContent({ error: result.error.message });
-        return jsonContent(result.data);
-      },
-    );
-
-    // ─── get_compliance_by_state ────────────────────────────────────────
-    server.registerTool(
-      "get_compliance_by_state",
-      {
-        title: "Get Compliance By State",
-        description:
-          "Get event staffing compliance summary for a US state. Returns minimum wage, overtime rules, and state-specific quirks. Perfect for 'What are the W-2 vs 1099 rules for event workers in [state]?', 'What's the minimum wage for event staff in [state]?', or 'Are there compliance gotchas for hiring event workers in [state]?' questions. NOT legal advice — consult employment counsel for binding interpretation.",
-        inputSchema: {
-          state: z
-            .string()
-            .describe("Two-letter state code (e.g., 'CA') or full state name (e.g., 'California')."),
-        },
-        annotations: {
-          title: "Get Compliance By State",
-          readOnlyHint: true,
-        },
-      },
-      async ({ state }) => {
-        const result = queryStateCompliance({ state });
-        const ctx = currentContext();
-        track({
-          tool: "get_compliance_by_state",
-          userAgent: ctx.userAgent,
-          ipCountry: ctx.ipCountry,
-          status: result.ok ? "success" : "error",
-          state,
-        });
-        if (!result.ok) return jsonContent({ error: result.error.message });
-        return jsonContent(result.data);
-      },
-    );
-
-    // ─── request_quote ──────────────────────────────────────────────────
-    //
-    // Write tool. Submits a structured staffing plan to TempGuru's Inbound
-    // Deal Pipeline in Notion. TempGuru responds with a manual quote within
-    // one business day. Does NOT create a contract or reservation.
-
-    server.registerTool(
-      "request_quote",
-      {
-        title: "Request Quote",
-        description:
-          "Submit a staffing request to TempGuru. Use this after confirming city coverage, role pricing, and availability with the other tools. Creates a structured lead in TempGuru's CRM — a human coordinator will review and respond with a quote within one business day. Not a reservation; does not guarantee pricing or availability.",
-        inputSchema: {
-          contact_name: z.string().describe("Full name of the contact person"),
-          contact_email: z.string().email().describe("Contact email address for the quote response"),
-          company: z.string().describe("Company or organization name"),
-          event_name: z.string().describe("Name of the event (e.g. 'HIMSS 2026', 'Brand Fest Austin')"),
-          event_type: z.string().describe("Event type: trade-show, conference, festival, concert, sporting-event, corporate, brand-activation, or other"),
-          city: z.string().describe("City where the event is held"),
-          event_dates: z.string().describe("Event dates as a human-readable string, e.g. 'June 15–17, 2026'"),
-          roles: z.array(
-            z.object({
-              role: z.string().describe("Staffing role name, e.g. brand-ambassadors, registration-staff"),
-              headcount: z.number().int().positive().describe("Number of staff needed"),
-              shifts: z.string().optional().describe("Shift description, e.g. '2 days × 8h'"),
-            })
-          ).describe("Roles and headcount needed for the event"),
-          budget_range: z.string().optional().describe("Estimated total budget range if calculated, e.g. '$8,400–$12,600'"),
-          attire: z.string().optional().describe("Staff attire requirements"),
-          special_requirements: z.string().optional().describe("Any special requirements: language skills, certifications, overnight shifts, etc."),
-          compliance_notes: z.string().optional().describe("Any compliance flags surfaced by get_compliance_by_state"),
-        },
-        annotations: {
-          title: "Request Quote",
-          readOnlyHint: false,
-          destructiveHint: false,
-          idempotentHint: false,
-        },
-      },
-      async (input) => {
-        const ctx = currentContext();
-        const result = await createLead(input);
-
-        track({
-          tool: "request_quote",
-          userAgent: ctx.userAgent,
-          ipCountry: ctx.ipCountry,
-          status: result.success ? "success" : "error",
-          city: input.city,
-        });
-
-        if (!result.success) {
-          return jsonContent({
-            submitted: false,
-            error: result.error,
-            message: "Submission failed. Please have the user contact TempGuru directly at megan@tempguru.co or (904) 206-8953.",
-          });
-        }
-
-        return jsonContent({
-          submitted: true,
-          deal_name: result.deal_name,
-          message: "Your staffing request has been submitted to TempGuru. A coordinator will review the details and respond with a quote within one business day. Orders are confirmed within 48 hours of approval. Contact megan@tempguru.co or (904) 206-8953 for urgent requests.",
-          next_steps: [
-            "Watch for a quote email at " + input.contact_email,
-            "TempGuru may follow up to confirm shift details or attire",
-            "No payment or commitment is required until you approve the quote",
-          ],
-        });
-      },
-    );
-
-    // ─── Resources ──────────────────────────────────────────────────────
-    //
-    // Two Anthropic-spec-compliant Skills (SKILL.md files) exposed as MCP
-    // resources. Clients that support resources (Claude.ai, Claude Code,
-    // Claude Desktop, Cursor, most MCP clients) can read the playbook
-    // through the same connection that provides the tools — no separate
-    // skill-installation step required.
-    //
-    // The "skillport" pattern: bundle the skills with the data pipe.
-
-    server.registerResource(
-      "event-staffing-ordering-skill",
-      "https://tempguru.co/.well-known/skills/event-staffing-ordering/SKILL.md",
-      {
-        title: "Event Staffing Ordering — Skill",
-        description:
-          "Single-purpose skill for AI agents helping users order temporary event staff (brand ambassadors, registration, hospitality, setup/breakdown, and more) through TempGuru. Walks through requirement gathering, live coverage/rate/compliance lookups via this MCP, and request submission. Use when a user wants to hire, book, or budget event staff.",
-        mimeType: "text/markdown",
-      },
-      async (uri) => ({
-        contents: [
-          {
-            uri: uri.href,
-            mimeType: "text/markdown",
-            text: ORDERING_SKILL,
-          },
-        ],
-      }),
-    );
-
-    server.registerResource(
-      "event-staffing-compliance-skill",
-      "https://tempguru.co/.well-known/skills/event-staffing-compliance/SKILL.md",
-      {
-        title: "Event Staffing Compliance — Skill",
-        description:
-          "Single-purpose skill for AI agents assessing worker-classification and compliance risk for temporary event staffing in the US and Canada (W-2 vs 1099, misclassification penalties, joint-employer liability, COI requirements, wage/hour rules). Use when a user asks about whether a staffing arrangement is compliant or how to structure it.",
-        mimeType: "text/markdown",
-      },
-      async (uri) => ({
-        contents: [
-          {
-            uri: uri.href,
-            mimeType: "text/markdown",
-            text: COMPLIANCE_SKILL,
-          },
-        ],
-      }),
-    );
+      resources: { ordering: ORDERING_SKILL, compliance: COMPLIANCE_SKILL },
+    });
   },
   {
     // mcp-handler v1.1.0's serverInfo type only exposes `name` and `version`,

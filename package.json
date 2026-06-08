@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:stdio": "esbuild src/mcp-stdio.ts --bundle --platform=node --format=esm --outfile=dist/mcp-stdio.mjs --packages=external",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit"
@@ -23,6 +24,7 @@
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "esbuild": "^0.25.0",
     "typescript": "^5.6.0"
   },
   "engines": {
