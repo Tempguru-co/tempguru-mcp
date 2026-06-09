@@ -6,6 +6,7 @@
 // client below short-circuits to a no-op so the MCP tools continue serving
 // without an active telemetry backend.
 
+import { after } from "next/server";
 import { Redis } from "@upstash/redis";
 
 type RedisCmd = (redis: Redis) => Promise<unknown>;
@@ -31,9 +32,23 @@ function client(): Redis | null {
 export function ff(cmd: RedisCmd): void {
   const r = client();
   if (!r) return;
-  cmd(r).catch(() => {
-    // Telemetry failures must never surface to MCP clients. Silently drop.
-  });
+  // Run the write AFTER the response is sent. On Vercel, after() keeps the
+  // function alive until the write completes, instead of killing the pending
+  // promise on shutdown — plain fire-and-forget is not durable on serverless,
+  // which silently dropped telemetry. Runs post-response, so zero added latency.
+  try {
+    after(async () => {
+      try {
+        await cmd(r);
+      } catch {
+        // Telemetry failures must never surface to MCP clients. Silently drop.
+      }
+    });
+  } catch {
+    // after() is only valid within a request scope; outside one (e.g. a
+    // background job), fall back to plain fire-and-forget.
+    cmd(r).catch(() => {});
+  }
 }
 
 /**
