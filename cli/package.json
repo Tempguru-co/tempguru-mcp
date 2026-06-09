@@ -1,0 +1,41 @@
+{
+  "name": "tempguru-mcp",
+  "version": "1.0.0",
+  "description": "MCP server and CLI for W-2 event staffing data across 300+ US and Canadian markets: city coverage, role rates, availability, state compliance, and quote requests. Runs over stdio via npx, no auth for the read tools.",
+  "type": "module",
+  "bin": {
+    "tempguru-mcp": "index.mjs"
+  },
+  "files": [
+    "index.mjs",
+    "skills",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "mcp-server",
+    "event-staffing",
+    "staffing",
+    "w2",
+    "brand-ambassadors",
+    "ai-agents",
+    "claude",
+    "cursor",
+    "llm-tools"
+  ],
+  "author": "TempGuru (Temporary Assistance Guru, Inc.)",
+  "license": "MIT",
+  "homepage": "https://tempguru.co/ai",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tempguru-co/tempguru-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Tempguru-co/tempguru-mcp/issues"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

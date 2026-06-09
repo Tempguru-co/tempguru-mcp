@@ -18,26 +18,39 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import { registerTools } from "./lib/mcp/register-tools";
 
-// Skill resource bodies, loaded best-effort from the repo's content/ tree
-// (present when the binary is run from the project root, as in the Docker
-// build). If unreadable, tools still register — only the resources are skipped.
+// Skill resource bodies, loaded best-effort. Resolved relative to this binary
+// first (so they load when the server is installed as an npm package and run via
+// npx from any directory), then relative to cwd (the Docker/Glama build runs from
+// the project root). If none are found, tools still register and only the two
+// Skill resources are skipped.
 function loadSkills(): { ordering: string; compliance: string } | undefined {
+  let here: string;
   try {
-    const dir = join(process.cwd(), "content", "skills");
-    return {
-      ordering: readFileSync(join(dir, "event-staffing-ordering.md"), "utf-8"),
-      compliance: readFileSync(join(dir, "event-staffing-compliance.md"), "utf-8"),
-    };
-  } catch (err) {
-    console.error(
-      "[tempguru-mcp] Skill resources not found; registering tools only:",
-      err instanceof Error ? err.message : err,
-    );
-    return undefined;
+    here = dirname(fileURLToPath(import.meta.url));
+  } catch {
+    here = process.cwd();
   }
+  const candidates = [
+    join(here, "skills"), // npm CLI layout: <pkg>/skills
+    join(here, "..", "content", "skills"), // dist layout: <pkg>/content/skills
+    join(process.cwd(), "content", "skills"), // run from project root
+  ];
+  for (const dir of candidates) {
+    try {
+      return {
+        ordering: readFileSync(join(dir, "event-staffing-ordering.md"), "utf-8"),
+        compliance: readFileSync(join(dir, "event-staffing-compliance.md"), "utf-8"),
+      };
+    } catch {
+      // try the next candidate
+    }
+  }
+  console.error("[tempguru-mcp] Skill resources not found; registering tools only.");
+  return undefined;
 }
 
 const server = new McpServer({
