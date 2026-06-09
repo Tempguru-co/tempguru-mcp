@@ -46,9 +46,9 @@ const handler = createMcpHandler(
     // in withAcceptNormalization (User-Agent + Vercel IP-country), then write
     // to Redis. The stdio binary calls registerTools() with no onTrack at all.
     registerTools(server, {
-      onTrack: (record) => {
+      onTrack: async (record) => {
         const ctx = currentContext();
-        track({ ...record, userAgent: ctx.userAgent, ipCountry: ctx.ipCountry });
+        await track({ ...record, userAgent: ctx.userAgent, ipCountry: ctx.ipCountry });
       },
       resources: { ordering: ORDERING_SKILL, compliance: COMPLIANCE_SKILL },
     });

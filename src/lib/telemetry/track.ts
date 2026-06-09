@@ -16,11 +16,15 @@
 // Each daily key gets a 90-day TTL on first write. recent:invocations is
 // trimmed to 200 entries on every write.
 
-import { ff } from "./redis";
+import { exec } from "./redis";
 import { classifyUserAgent, type UaClass } from "./classify-ua";
 
 const TTL_SECONDS = 60 * 60 * 24 * 90; // 90 days
 const RECENT_LIMIT = 200;
+// Hard cap on how long a telemetry write may delay a tool response. Upstash
+// REST writes land in well under this; the cap only guards against a slow or
+// hung backend so telemetry can never noticeably degrade a tool call.
+const WRITE_CAP_MS = 1000;
 
 export interface TrackInput {
   tool: string;
@@ -36,7 +40,7 @@ const utcDate = (): string => new Date().toISOString().slice(0, 10);
 // Bug fix: also replace underscores so "registration_staff" normalises to "registration-staff"
 const slug = (s: string): string => s.trim().toLowerCase().replace(/[\s_]+/g, "-").slice(0, 80);
 
-export function track(input: TrackInput): void {
+export async function track(input: TrackInput): Promise<void> {
   const date = utcDate();
   const ua: UaClass = classifyUserAgent(input.userAgent);
 
@@ -61,11 +65,12 @@ export function track(input: TrackInput): void {
     state: input.state ? input.state.toUpperCase().slice(0, 2) : null,
   });
 
-  ff(async (r) => {
-    // All writes in ONE Promise.allSettled so they race to completion in
-    // parallel. Previously the serial await blocks meant the ring-buffer
-    // lpush ran last and was killed when Vercel terminated the function
-    // after the HTTP response was sent.
+  // Issue all writes in ONE Promise.allSettled so they race to completion in
+  // parallel, then AWAIT the batch (capped) so it lands before the tool handler
+  // returns its result. Non-awaited / after()-deferred writes were killed at
+  // Vercel function shutdown before reaching Upstash — awaiting in-handler is
+  // the only durable path on serverless.
+  const write = exec(async (r) => {
     await Promise.allSettled([
       // Counters
       r.hincrby(`tools:${date}`, input.tool, 1),
@@ -101,4 +106,22 @@ export function track(input: TrackInput): void {
       ),
     ]);
   });
+
+  // Await the write, but never let it hold up (or break) the tool response for
+  // more than WRITE_CAP_MS. In the normal case the write completes in well under
+  // the cap and is durably persisted; in the pathological slow-Redis case we
+  // drop the datapoint rather than degrade the agent's call.
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    await Promise.race([
+      write,
+      new Promise<void>((resolve) => {
+        timer = setTimeout(resolve, WRITE_CAP_MS);
+      }),
+    ]);
+  } catch {
+    // Telemetry must never surface to MCP clients. Silently drop.
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
 }

@@ -34,8 +34,12 @@ export type TrackRecord = {
 };
 
 export type RegisterToolsOptions = {
-  /** Optional telemetry sink. Omit for runtimes with no request context (stdio). */
-  onTrack?: (record: TrackRecord) => void;
+  /**
+   * Optional telemetry sink. Omit for runtimes with no request context (stdio).
+   * May be async — handlers await it so the write lands before the tool result
+   * is returned (durable on Vercel, where deferred writes were dropped).
+   */
+  onTrack?: (record: TrackRecord) => void | Promise<void>;
   /**
    * Optional SKILL.md resource bodies. When provided, the two Skills are
    * exposed as MCP resources. The HTTP route loads them once at module init;
@@ -82,7 +86,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     },
     async ({ state, tier }) => {
       const result = queryCities({ state, tier: tier as CityTier | undefined });
-      track({ tool: "get_cities", status: result.ok ? "success" : "error", state });
+      await track({ tool: "get_cities", status: result.ok ? "success" : "error", state });
       if (!result.ok) return jsonContent({ error: result.error.message });
       return jsonContent(result.data);
     },
@@ -103,7 +107,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     },
     async () => {
       const result = queryRoles();
-      track({ tool: "get_roles", status: result.ok ? "success" : "error" });
+      await track({ tool: "get_roles", status: result.ok ? "success" : "error" });
       if (!result.ok) return jsonContent({ error: result.error.message });
       return jsonContent(result.data);
     },
@@ -141,7 +145,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     },
     async ({ date, city, role, count }) => {
       const result = queryAvailability({ date, city, role, headcount: count });
-      track({ tool: "check_availability", status: result.ok ? "success" : "error", city, role });
+      await track({ tool: "check_availability", status: result.ok ? "success" : "error", city, role });
       if (!result.ok) return jsonContent({ error: result.error.message });
       return jsonContent(result.data);
     },
@@ -169,7 +173,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     },
     async ({ role, city }) => {
       const result = queryRolePricing({ role, city });
-      track({ tool: "get_role_pricing", status: result.ok ? "success" : "error", role, city });
+      await track({ tool: "get_role_pricing", status: result.ok ? "success" : "error", role, city });
       if (!result.ok) return jsonContent({ error: result.error.message });
       return jsonContent(result.data);
     },
@@ -194,7 +198,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     },
     async ({ state }) => {
       const result = queryStateCompliance({ state });
-      track({ tool: "get_compliance_by_state", status: result.ok ? "success" : "error", state });
+      await track({ tool: "get_compliance_by_state", status: result.ok ? "success" : "error", state });
       if (!result.ok) return jsonContent({ error: result.error.message });
       return jsonContent(result.data);
     },
@@ -241,7 +245,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     },
     async (input) => {
       const result = await createLead(input);
-      track({ tool: "request_quote", status: result.success ? "success" : "error", city: input.city });
+      await track({ tool: "request_quote", status: result.success ? "success" : "error", city: input.city });
 
       if (!result.success) {
         return jsonContent({
