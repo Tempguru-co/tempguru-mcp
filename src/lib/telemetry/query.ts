@@ -128,13 +128,23 @@ export async function getMetrics(windowDays = 7): Promise<DashboardMetrics> {
     }),
   );
 
-  const recent = (recentRaw ?? []).map((raw) => {
-    try {
-      return JSON.parse(String(raw));
-    } catch {
-      return null;
-    }
-  }).filter(Boolean);
+  // Upstash's client auto-deserializes JSON on read (automaticDeserialization
+  // defaults to true), so each ring-buffer entry comes back already parsed as an
+  // object — not the raw string we lpush'd. Pass objects through; only JSON.parse
+  // the string case. The previous JSON.parse(String(obj)) produced "[object
+  // Object]", threw, and silently dropped every recent-invocation row.
+  const recent = ((recentRaw ?? []) as unknown[])
+    .map((raw) => {
+      if (raw && typeof raw === "object") {
+        return raw as DashboardMetrics["recent"][number];
+      }
+      try {
+        return JSON.parse(String(raw)) as DashboardMetrics["recent"][number];
+      } catch {
+        return null;
+      }
+    })
+    .filter(Boolean) as DashboardMetrics["recent"];
 
   return {
     configured: true,
