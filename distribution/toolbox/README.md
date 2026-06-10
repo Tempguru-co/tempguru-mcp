@@ -71,11 +71,11 @@ Ordered by leverage. ✅ = already live from earlier pushes.
 3. **GitHub MCP Registry (github.com/mcp) + VS Code `@mcp` gallery** — the
    Copilot install base. 🟡 DIAGNOSED 2026-06-10: hand-curated, no
    auto-ingest of new servers, no PR repo; the documented path is emailing
-   **partnerships@github.com** after upstream publication (done). Email
-   drafted (Gmail draft r4719421374230781035, pending Megan's send);
-   server.json v1.0.3 repoints `repository` at tempguru-mcp (pushed,
-   30bd821) but the registry republish is BLOCKED on a DNS TXT key
-   mismatch — see SUBMISSIONS.md 2026-06-10 row + keep-alive drift warning.
+   **partnerships@github.com** after upstream publication. v1.0.3
+   (repository → tempguru-mcp) republished + registry-verified 2026-06-10
+   after a DNS-auth key rotation (resolved; see SUBMISSIONS.md keep-alive).
+   Remaining: Megan sends the drafted email (Gmail draft
+   r4719421374230781035); follow up if no reply by ~2026-07-08.
 
 ### Tier 2 — agent-IDE and client marketplaces (one sitting, ~15 min each)
 
