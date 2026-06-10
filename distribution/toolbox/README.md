@@ -108,8 +108,11 @@ Ordered by leverage. ✅ = already live from earlier pushes.
 14. **Push this repo** → Gemini CLI extension goes live by URL; then check
     geminicli.com/extensions for the browse-page submission process (the
     description field in the manifest is what they display).
-15. **PyPI**: `cd clients/python && python3 -m build && twine upload dist/*`
-    (name `tempguru` verified available 2026-06-09).
+15. **PyPI** — ✅ PUBLISHED 2026-06-09: `pip install tempguru` (v0.1.0) live
+    at pypi.org/project/tempguru, via Trusted Publishing (OIDC, no token) —
+    workflow `.github/workflows/publish-pypi.yml`. Future releases: bump
+    version in `clients/python/pyproject.toml` + push tag `python-v0.x.y`.
+    Unlocks the LangChain/LlamaIndex integration queue items (#23).
 16. **Open WebUI community hub** — create account at openwebui.com →
     submit the tool file. Reaches the self-hosted/Ollama crowd that never
     touches a cloud assistant.
