@@ -22,6 +22,7 @@ import {
   type CityTier,
 } from "./queries";
 import { createLead } from "../notion/create-lead";
+import { REQUEST_QUOTE_INPUT, quoteSubmittedPayload, quoteFailedPayload } from "./quote";
 
 // What a tool wants recorded. The HTTP route's onTrack enriches this with
 // request context before handing it to the Redis writer; stdio drops it.
@@ -210,32 +211,16 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
   // Pipeline in Notion. Without NOTION_API_KEY configured (e.g. a sandboxed
   // Docker/Glama build), createLead returns a clean error and the tool reports
   // the failure gracefully — it never throws, so the server stays up.
+  //
+  // Schema and confirmation payloads live in ./quote, shared with the REST
+  // mirror at POST /api/v1/quote-requests so the two surfaces cannot drift.
   server.registerTool(
     "request_quote",
     {
       title: "Request Quote",
       description:
         "Submit a staffing request to TempGuru. Use this after confirming city coverage, role pricing, and availability with the other tools. Creates a structured lead in TempGuru's CRM — a human coordinator will review and respond with a quote within one business day. Not a reservation; does not guarantee pricing or availability.",
-      inputSchema: {
-        contact_name: z.string().describe("Full name of the contact person"),
-        contact_email: z.string().email().describe("Contact email address for the quote response"),
-        company: z.string().describe("Company or organization name"),
-        event_name: z.string().describe("Name of the event (e.g. 'HIMSS 2026', 'Brand Fest Austin')"),
-        event_type: z.string().describe("Event type: trade-show, conference, festival, concert, sporting-event, corporate, brand-activation, or other"),
-        city: z.string().describe("City where the event is held"),
-        event_dates: z.string().describe("Event dates as a human-readable string, e.g. 'June 15–17, 2026'"),
-        roles: z.array(
-          z.object({
-            role: z.string().describe("Staffing role name, e.g. brand-ambassadors, registration-staff"),
-            headcount: z.number().int().positive().describe("Number of staff needed"),
-            shifts: z.string().optional().describe("Shift description, e.g. '2 days × 8h'"),
-          })
-        ).describe("Roles and headcount needed for the event"),
-        budget_range: z.string().optional().describe("Estimated total budget range if calculated, e.g. '$8,400–$12,600'"),
-        attire: z.string().optional().describe("Staff attire requirements"),
-        special_requirements: z.string().optional().describe("Any special requirements: language skills, certifications, overnight shifts, etc."),
-        compliance_notes: z.string().optional().describe("Any compliance flags surfaced by get_compliance_by_state"),
-      },
+      inputSchema: REQUEST_QUOTE_INPUT,
       annotations: {
         title: "Request Quote",
         readOnlyHint: false,
@@ -248,23 +233,10 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
       await track({ tool: "request_quote", status: result.success ? "success" : "error", city: input.city });
 
       if (!result.success) {
-        return jsonContent({
-          submitted: false,
-          error: result.error,
-          message: "Submission failed. Please have the user contact TempGuru directly at megan@tempguru.co or (904) 206-8953.",
-        });
+        return jsonContent(quoteFailedPayload(result.error));
       }
 
-      return jsonContent({
-        submitted: true,
-        deal_name: result.deal_name,
-        message: "Your staffing request has been submitted to TempGuru. A coordinator will review the details and respond with a quote within one business day. Orders are confirmed within 48 hours of approval. Contact megan@tempguru.co or (904) 206-8953 for urgent requests.",
-        next_steps: [
-          "Watch for a quote email at " + input.contact_email,
-          "TempGuru may follow up to confirm shift details or attire",
-          "No payment or commitment is required until you approve the quote",
-        ],
-      });
+      return jsonContent(quoteSubmittedPayload(input.contact_email, result.deal_name));
     },
   );
 

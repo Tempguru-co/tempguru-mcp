@@ -65,8 +65,18 @@ All keys are namespaced by UTC date (`YYYY-MM-DD`). Every daily key carries a **
 | `queries:states:{date}` | ZSET | state code, score = invocation count |
 | `recent:invocations` | LIST | last 200 events, each a JSON string |
 | `dates:active` | ZSET | `YYYY-MM-DD` → unix timestamp (for time-series widget) |
+| `ratelimit:quote:{hash}` | STRING | fixed-window counter for `POST /api/v1/quote-requests` (20/IP/hour) |
 
 `recent:invocations` is trimmed on every write via `LTRIM 0 199`.
+
+`ratelimit:quote:*` keys (from `src/lib/api/rate-limit.ts`) hold a counter
+per source IP for the public REST write endpoint. The `{hash}` is a truncated
+SHA-256 of the IP — raw IPs are never stored, consistent with the telemetry
+rules — and the key carries a 1-hour TTL (`EXPIRE NX`, so a crash mid-write
+can't orphan an immortal counter). The limiter fails open on any Redis
+absence, error, or response slower than 1s: it must never block a legitimate
+quote submission. The limit is generous on purpose — ChatGPT/Coze/Copilot
+route many users through shared egress IPs.
 
 ---
 

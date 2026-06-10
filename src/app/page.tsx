@@ -36,6 +36,7 @@ export default function Home() {
     { path: "/api/v1/availability", desc: "Lead-time guidance (?city=&date=&role=&headcount=)" },
     { path: "/api/v1/pricing", desc: "Rate range per role per city (?role=&city=)" },
     { path: "/api/v1/compliance", desc: "State compliance summary (?state=)" },
+    { path: "POST /api/v1/quote-requests", desc: "Submit a staffing quote request (JSON body; the one write endpoint — opt-in, no reservation, no payment)" },
     { path: "/api/v1/health", desc: "Service health probe" },
   ];
 

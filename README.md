@@ -91,7 +91,7 @@ The matrix is "the server is spec-compliant; any spec-compliant client connects.
 - **Source of truth:** JSON files in `content/mcp-data/` (cities, roles, role-pricing, state-compliance)
 - **Identity verification:** DNS TXT record on the `tempguru.co` apex with Ed25519 public key authorizes publishes under the `co.tempguru` namespace on the official MCP Registry
 
-A REST mirror of every tool is also available at `mcp.tempguru.co/api/v1/*` with OpenAPI 3.1 at `/openapi.json` and RFC 9727 api-catalog at `/.well-known/api-catalog`.
+A REST mirror of every tool is also available at `mcp.tempguru.co/api/v1/*` with OpenAPI 3.1 at `/openapi.json` and RFC 9727 api-catalog at `/.well-known/api-catalog`. That includes the write tool: `POST /api/v1/quote-requests` (operationId `submitQuoteRequest`) shares the MCP tool's validation schema, CRM write, and confirmation payload via the same shared modules, and adds a light per-IP rate limit since it is a no-auth public write. Like the MCP tool, it is opt-in, creates no reservation, and requires no payment.
 
 ### Telemetry & admin dashboard
 
