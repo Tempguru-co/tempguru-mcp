@@ -85,12 +85,13 @@ Ordered by leverage. ✅ = already live from earlier pushes.
    convention). Awaiting review.
 5. **LobeChat / LobeHub** — ✅ auto-aggregated from upstream sources, no
    action needed (confirmed 2026-06-04).
-6. **Cursor directory** — 🟡 researched 2026-06-10, ready for Megan (~3 min
-   in browser): data-PR model is dead (repo is now cursor/community-plugins,
-   DB-backed); submit at cursor.directory/plugins/new (GitHub OAuth) →
-   Auto-scan `tempguru-agent-skills` (verified scan-ready: root .mcp.json +
-   .claude-plugin manifest + 2 SKILL.md). Fill sheet:
-   website project `agent-discovery/batch-2026-06-10/cursor-directory-FILL.md`.
+6. **Cursor directory** — ✅ PUBLISHED 2026-06-10 by Megan via
+   cursor.directory/plugins/new Auto-scan of tempguru-agent-skills
+   (1 MCP server + 2 skill components; their security scan runs
+   post-publish). Expected listing:
+   cursor.directory/plugins/tempguru-event-staffing (confirm — site 429s
+   bots). Keywords added to .claude-plugin/plugin.json (v1.0.1, 119c105)
+   for the next listing refresh.
 7. **Continue hub** — ⬜ still open. hub.continue.dev block referencing the
    HTTP server.
 8. **mcp.so** — 🟡 submitted: issue chatmcp/mcpso#2625 (2026-06-04), edited
