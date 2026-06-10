@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "tempguru"
-version = "0.1.0"
-description = "Event staffing data for AI agents and apps: live rates, 345-city US/Canada coverage, lead times, and state labor compliance from TempGuru's public API. Zero dependencies."
+version = "0.2.0"
+description = "Event staffing data for AI agents and apps: live rates, 345-city US/Canada coverage, lead times, state labor compliance, and quote submission from TempGuru's public API. Zero core dependencies; LangChain and LlamaIndex adapters included."
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.9"
@@ -32,6 +32,10 @@ classifiers = [
   "Topic :: Office/Business",
   "Topic :: Software Development :: Libraries",
 ]
+
+[project.optional-dependencies]
+langchain = ["langchain-core>=0.3"]
+llamaindex = ["llama-index-core>=0.12"]
 
 [project.urls]
 Homepage = "https://tempguru.co"

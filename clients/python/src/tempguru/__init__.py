@@ -8,4 +8,4 @@ No API key required.
 from .client import TempGuru, TempGuruError
 
 __all__ = ["TempGuru", "TempGuruError"]
-__version__ = "0.1.0"
+__version__ = "0.2.0"

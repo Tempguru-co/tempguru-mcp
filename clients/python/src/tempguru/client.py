@@ -19,6 +19,7 @@ from urllib.request import Request, urlopen
 
 __all__ = ["TempGuru", "TempGuruError"]
 
+_VERSION = "0.2.0"
 DEFAULT_BASE_URL = "https://mcp.tempguru.co"
 QUOTE_FORM_URL = "https://tempguru.co/get-staffing"
 
@@ -53,12 +54,7 @@ class TempGuru:
 
     # ------------------------------------------------------------------ #
 
-    def _get(self, path: str, **params: Any) -> Dict[str, Any]:
-        query = {k: v for k, v in params.items() if v is not None}
-        url = f"{self.base_url}{path}"
-        if query:
-            url += "?" + urlencode(query)
-        req = Request(url, headers={"User-Agent": "tempguru-python/0.1.0"})
+    def _request(self, req: Request) -> Dict[str, Any]:
         try:
             with urlopen(req, timeout=self.timeout) as resp:
                 payload = json.loads(resp.read().decode("utf-8"))
@@ -75,6 +71,28 @@ class TempGuru:
         except URLError as exc:
             raise TempGuruError(f"TempGuru API unreachable: {exc.reason}") from None
         return payload
+
+    def _get(self, path: str, **params: Any) -> Dict[str, Any]:
+        query = {k: v for k, v in params.items() if v is not None}
+        url = f"{self.base_url}{path}"
+        if query:
+            url += "?" + urlencode(query)
+        return self._request(
+            Request(url, headers={"User-Agent": f"tempguru-python/{_VERSION}"})
+        )
+
+    def _post(self, path: str, body: Dict[str, Any]) -> Dict[str, Any]:
+        return self._request(
+            Request(
+                f"{self.base_url}{path}",
+                data=json.dumps(body).encode("utf-8"),
+                headers={
+                    "User-Agent": f"tempguru-python/{_VERSION}",
+                    "Content-Type": "application/json",
+                },
+                method="POST",
+            )
+        )
 
     # ------------------------------------------------------------------ #
 
@@ -135,6 +153,60 @@ class TempGuru:
         etc.). Operational guidance, not legal advice.
         """
         return self._get("/api/v1/compliance", state=state)
+
+    def request_quote(
+        self,
+        *,
+        contact_name: str,
+        contact_email: str,
+        company: str,
+        event_name: str,
+        event_type: str,
+        city: str,
+        event_dates: str,
+        roles: list,
+        budget_range: Optional[str] = None,
+        attire: Optional[str] = None,
+        special_requirements: Optional[str] = None,
+        compliance_notes: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Submit a staffing request to TempGuru for a human-reviewed quote.
+
+        OPT-IN WRITE: this sends the contact and event details to TempGuru's
+        CRM so a coordinator can respond within one business day. Confirm the
+        full plan with the user before calling. It creates no reservation,
+        forms no contract, and requires no payment until the user approves
+        the quote.
+
+        ``event_type`` is one of: trade-show, conference, festival, concert,
+        sporting-event, corporate, brand-activation, other. ``roles`` is a
+        list of dicts like ``{"role": "brand-ambassadors", "headcount": 10,
+        "shifts": "3 days x 8h"}`` (``shifts`` optional). ``event_dates`` is
+        human-readable, e.g. ``"June 15-17, 2026"``.
+
+        Returns ``{"submitted": true, "deal_name": ..., "next_steps": [...]}``
+        on success. Raises :class:`TempGuruError` on validation failure or
+        rate limiting (the endpoint allows 20 submissions/hour per IP).
+        """
+        body: Dict[str, Any] = {
+            "contact_name": contact_name,
+            "contact_email": contact_email,
+            "company": company,
+            "event_name": event_name,
+            "event_type": event_type,
+            "city": city,
+            "event_dates": event_dates,
+            "roles": roles,
+        }
+        for key, value in {
+            "budget_range": budget_range,
+            "attire": attire,
+            "special_requirements": special_requirements,
+            "compliance_notes": compliance_notes,
+        }.items():
+            if value is not None:
+                body[key] = value
+        return self._post("/api/v1/quote-requests", body)
 
     @staticmethod
     def quote_form_url(source: str = "python-client") -> str:

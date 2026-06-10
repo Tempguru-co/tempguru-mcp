@@ -30,23 +30,33 @@ advice.
 
 ## Use as LLM tools
 
-Method docstrings are written to be reused as tool descriptions.
+Built-in adapters ship for both major agent frameworks — six tools each
+(five read-only lookups + opt-in quote submission).
 
-**LangChain**
+**LangChain / LangGraph**
 
 ```python
-from langchain_core.tools import tool
-from tempguru import TempGuru
+# pip install "tempguru[langchain]"
+from tempguru.langchain import get_tools
 
-tg = TempGuru()
-
-@tool
-def get_event_staffing_pricing(role: str, city: str) -> dict:
-    """All-inclusive W-2 hourly rate range for an event staffing role in a
-    US/Canadian city (brand ambassadors, registration, ushers, hospitality,
-    and more). Planning estimate, not a binding quote."""
-    return tg.pricing(role=role, city=city)
+tools = get_tools()  # include_quote_submission=False for read-only
 ```
+
+**LlamaIndex**
+
+```python
+# pip install "tempguru[llamaindex]"
+from tempguru.llamaindex import TempGuruToolSpec
+
+tools = TempGuruToolSpec().to_tool_list()
+```
+
+**Quote submission** (`tg.request_quote(...)` / the `submit_event_staffing_
+quote_request` tool) sends a confirmed staffing plan to TempGuru's CRM; a
+coordinator replies with a binding quote within one business day. It is
+opt-in, creates no reservation, requires no payment, and is rate-limited
+(20/hour/IP). Agents should confirm the full plan with the user before
+calling it.
 
 **OpenAI / any function-calling API**
 
