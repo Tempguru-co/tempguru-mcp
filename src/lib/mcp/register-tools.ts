@@ -111,6 +111,8 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
       annotations: {
         title: "Get Cities",
         readOnlyHint: true,
+        destructiveHint: false,
+        openWorldHint: false,
       },
     },
     async ({ state, tier }) => {
@@ -133,6 +135,8 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
       annotations: {
         title: "Get Roles",
         readOnlyHint: true,
+        destructiveHint: false,
+        openWorldHint: false,
       },
     },
     async () => {
@@ -172,6 +176,8 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
       annotations: {
         title: "Check Availability",
         readOnlyHint: true,
+        destructiveHint: false,
+        openWorldHint: false,
       },
     },
     async ({ date, city, role, count }) => {
@@ -201,6 +207,8 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
       annotations: {
         title: "Get Role Pricing",
         readOnlyHint: true,
+        destructiveHint: false,
+        openWorldHint: false,
       },
     },
     async ({ role, city }) => {
@@ -227,6 +235,8 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
       annotations: {
         title: "Get Compliance By State",
         readOnlyHint: true,
+        destructiveHint: false,
+        openWorldHint: false,
       },
     },
     async ({ state }) => {
@@ -259,6 +269,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
         readOnlyHint: false,
         destructiveHint: false,
         idempotentHint: false,
+        openWorldHint: false,
       },
     },
     async (input) => {
