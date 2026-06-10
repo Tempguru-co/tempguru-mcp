@@ -57,7 +57,7 @@ The server speaks MCP Streamable HTTP (spec rev 2025-03-26). Any MCP-compliant c
 
 **npm / npx** — Install TempGuru MCP locally with `npx -y tempguru-mcp` ([npm package](https://www.npmjs.com/package/tempguru-mcp); runs this server over stdio for Claude Desktop, Cursor, Windsurf, and Claude Code)
 
-**Python** — `pip install "tempguru @ git+https://github.com/Tempguru-co/tempguru-mcp.git#subdirectory=clients/python"` (zero-dependency REST client in [clients/python](./clients/python/), with LangChain/OpenAI tool-wrapping examples; PyPI release pending)
+**Python** — `pip install tempguru` ([PyPI](https://pypi.org/project/tempguru/); zero-dependency REST client in [clients/python](./clients/python/), with LangChain/OpenAI tool-wrapping examples)
 
 **Smithery** — [`tempguru/event-staffing`](https://smithery.ai/server/tempguru/event-staffing)
 

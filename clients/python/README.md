@@ -6,8 +6,7 @@ state-by-state labor compliance from [TempGuru](https://tempguru.co)'s public
 API. Zero dependencies, no API key.
 
 ```bash
-# PyPI release pending — install from source:
-pip install "tempguru @ git+https://github.com/Tempguru-co/tempguru-mcp.git#subdirectory=clients/python"
+pip install tempguru
 ```
 
 ```python
