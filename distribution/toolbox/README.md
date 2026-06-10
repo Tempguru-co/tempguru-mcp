@@ -77,9 +77,10 @@ Ordered by leverage. ✅ = already live from earlier pushes.
 
 ### Tier 2 — agent-IDE and client marketplaces (one sitting, ~15 min each)
 
-4. **Cline marketplace** — ⬜ still open (not in the June campaign). New
-   issue at `cline/mcp-marketplace` with repo URL + 400x400 PNG logo
-   (exported at `distribution/toolbox/logo-400.png`) + one-paragraph pitch.
+4. **Cline marketplace** — 🟡 SUBMITTED 2026-06-10:
+   cline/mcp-marketplace#1763 (honest testing note in lieu of the
+   tested-in-Cline checkbox; `llms-install.md` added at repo root per their
+   convention). Awaiting review.
 5. **LobeChat / LobeHub** — ✅ auto-aggregated from upstream sources, no
    action needed (confirmed 2026-06-04).
 6. **Cursor directory** — ⬜ still open. cursor.directory MCP submission.
@@ -137,9 +138,13 @@ Ordered by leverage. ✅ = already live from earlier pushes.
     staffing platform"), verified 2026-06-09. Do NOT create another.
     Optional enrichment only: industry, HQ (Jacksonville Beach FL),
     founding, official website, MCP endpoint via "described at URL".
-23. **LangChain `langchain-community` tool + LlamaIndex tool spec** — code
-    contributions wrapping the Python client; docs pages are heavily
-    crawled. Queue after PyPI publish (they import it).
+23. **LangChain + LlamaIndex** — 🟡 adapters SHIPPED in `tempguru` 0.2.0
+    (2026-06-10): `tempguru.langchain.get_tools()` and
+    `tempguru.llamaindex.TempGuruToolSpec`, extras `[langchain]` /
+    `[llamaindex]`, 6 tools each incl. opt-in `request_quote` (new in the
+    client, wraps the REST write). Verified from PyPI. Remaining: the
+    UPSTREAM listings — llama-index-tools-tempguru monorepo PR + LangChain
+    integration docs PR (task chips spawned 2026-06-10).
 24. Keep shipping public, crawlable code and docs (GitHub/npm/PyPI/HF/
     README.zh-CN) — already the pattern.
 
