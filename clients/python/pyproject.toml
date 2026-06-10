@@ -1,0 +1,44 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tempguru"
+version = "0.1.0"
+description = "Event staffing data for AI agents and apps: live rates, 345-city US/Canada coverage, lead times, and state labor compliance from TempGuru's public API. Zero dependencies."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+authors = [{ name = "TempGuru (Temporary Assistance Guru, Inc.)", email = "megan@tempguru.co" }]
+keywords = [
+  "event staffing",
+  "events",
+  "staffing",
+  "temp staff",
+  "brand ambassadors",
+  "trade show",
+  "ai agents",
+  "llm tools",
+  "function calling",
+  "mcp",
+  "labor compliance",
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Topic :: Office/Business",
+  "Topic :: Software Development :: Libraries",
+]
+
+[project.urls]
+Homepage = "https://tempguru.co"
+Documentation = "https://tempguru.co/ai"
+Source = "https://github.com/Tempguru-co/tempguru-mcp"
+"API Reference (OpenAPI)" = "https://mcp.tempguru.co/openapi.json"
+"MCP Server" = "https://mcp.tempguru.co/mcp"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/tempguru"]

@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/copilot/plugin/v2.3/schema.json",
+  "schema_version": "v2.3",
+  "name_for_human": "TempGuru Public Data API",
+  "description_for_human": "Event staffing coverage, hourly rates, lead times, and state labor compliance for 345+ US and Canadian markets.",
+  "description_for_model": "Public data and quote submission for event staffing in the US and Canada from TempGuru. Use listCities for coverage, listRoles for the role catalog, checkAvailability for lead-time guidance on a city + date, getRolePricing for all-inclusive hourly rate ranges, and getComplianceByState for state wage and overtime rules. submitQuoteRequest is the single write operation: it submits a confirmed staffing plan to TempGuru's CRM for human review — call it only after the user explicitly confirms; it creates no reservation and requires no payment. No authentication.",
+  "contact_email": "megan@tempguru.co",
+  "namespace": "tempguru",
+  "legal_info_url": "https://tempguru.co/privacy-policy",
+  "logo_url": "https://mcp.tempguru.co/logo.svg",
+  "runtimes": [
+    {
+      "type": "OpenApi",
+      "auth": {
+        "type": "None"
+      },
+      "spec": {
+        "url": "https://mcp.tempguru.co/openapi.json"
+      },
+      "run_for_functions": [
+        "listCities",
+        "listRoles",
+        "checkAvailability",
+        "getRolePricing",
+        "getComplianceByState",
+        "submitQuoteRequest"
+      ]
+    }
+  ],
+  "capabilities": {
+    "conversation_starters": [
+      {
+        "text": "What do brand ambassadors cost in Boston?"
+      },
+      {
+        "text": "List the cities TempGuru covers in Texas"
+      }
+    ]
+  }
+}

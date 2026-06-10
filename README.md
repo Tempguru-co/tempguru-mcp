@@ -53,6 +53,12 @@ The server speaks MCP Streamable HTTP (spec rev 2025-03-26). Any MCP-compliant c
 
 **Cursor / Cline / Windsurf** — Add to the IDE's MCP settings with the URL above. Transport: `streamable-http`.
 
+**Gemini CLI** — `gemini extensions install https://github.com/Tempguru-co/tempguru-mcp` (installs the MCP server plus a [GEMINI.md](./GEMINI.md) staffing playbook; manifest at [gemini-extension.json](./gemini-extension.json))
+
+**npm / npx** — Install TempGuru MCP locally with `npx -y tempguru-mcp` ([npm package](https://www.npmjs.com/package/tempguru-mcp); runs this server over stdio for Claude Desktop, Cursor, Windsurf, and Claude Code)
+
+**Python** — `pip install "tempguru @ git+https://github.com/Tempguru-co/tempguru-mcp.git#subdirectory=clients/python"` (zero-dependency REST client in [clients/python](./clients/python/), with LangChain/OpenAI tool-wrapping examples; PyPI release pending)
+
 **Smithery** — [`tempguru/event-staffing`](https://smithery.ai/server/tempguru/event-staffing)
 
 **ModelScope MCP Plaza (魔搭社区)** — [`tempguru/TempGuru-Event-Staffing`](https://modelscope.cn/mcp/servers/tempguru/TempGuru-Event-Staffing/)
