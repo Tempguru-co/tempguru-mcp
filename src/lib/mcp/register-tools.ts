@@ -23,6 +23,14 @@ import {
 } from "./queries";
 import { createLead } from "../notion/create-lead";
 import { REQUEST_QUOTE_INPUT, quoteSubmittedPayload, quoteFailedPayload } from "./quote";
+import {
+  GET_CITIES_OUTPUT,
+  GET_ROLES_OUTPUT,
+  CHECK_AVAILABILITY_OUTPUT,
+  GET_ROLE_PRICING_OUTPUT,
+  GET_COMPLIANCE_OUTPUT,
+  REQUEST_QUOTE_OUTPUT,
+} from "./output-schemas";
 
 // What a tool wants recorded. The HTTP route's onTrack enriches this with
 // request context before handing it to the Redis writer; stdio drops it.
@@ -49,8 +57,27 @@ export type RegisterToolsOptions = {
   resources?: { ordering: string; compliance: string };
 };
 
-function jsonContent(obj: unknown) {
+// Success result: text content for legacy clients + structuredContent for
+// clients that consume the declared outputSchema (ChatGPT Apps, Claude, ...).
+// The SDK validates structuredContent against the tool's outputSchema.
+function structuredResult<T extends Record<string, unknown>>(obj: T) {
   return {
+    content: [
+      {
+        type: "text" as const,
+        text: JSON.stringify(obj, null, 2),
+      },
+    ],
+    structuredContent: obj,
+  };
+}
+
+// Protocol-level failure: isError exempts the result from outputSchema
+// validation. In practice unreachable for the read tools (zod input schemas
+// reject bad params first), but kept for defense in depth.
+function errorResult(obj: unknown) {
+  return {
+    isError: true as const,
     content: [
       {
         type: "text" as const,
@@ -80,6 +107,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
           .optional()
           .describe("Optional filter to one tier only."),
       },
+      outputSchema: GET_CITIES_OUTPUT,
       annotations: {
         title: "Get Cities",
         readOnlyHint: true,
@@ -88,8 +116,8 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     async ({ state, tier }) => {
       const result = queryCities({ state, tier: tier as CityTier | undefined });
       await track({ tool: "get_cities", status: result.ok ? "success" : "error", state });
-      if (!result.ok) return jsonContent({ error: result.error.message });
-      return jsonContent(result.data);
+      if (!result.ok) return errorResult({ error: result.error.message });
+      return structuredResult(result.data);
     },
   );
 
@@ -101,6 +129,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
       description:
         "List event staffing roles TempGuru provides, with descriptions and skill tiers. Perfect for 'What kinds of event workers can I hire?', 'What roles do you staff for trade shows / festivals / corporate events?', or 'Do you have brand ambassadors?' questions.",
       inputSchema: {},
+      outputSchema: GET_ROLES_OUTPUT,
       annotations: {
         title: "Get Roles",
         readOnlyHint: true,
@@ -109,8 +138,8 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     async () => {
       const result = queryRoles();
       await track({ tool: "get_roles", status: result.ok ? "success" : "error" });
-      if (!result.ok) return jsonContent({ error: result.error.message });
-      return jsonContent(result.data);
+      if (!result.ok) return errorResult({ error: result.error.message });
+      return structuredResult(result.data);
     },
   );
 
@@ -139,6 +168,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
           .optional()
           .describe("Optional headcount for the event."),
       },
+      outputSchema: CHECK_AVAILABILITY_OUTPUT,
       annotations: {
         title: "Check Availability",
         readOnlyHint: true,
@@ -147,8 +177,8 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     async ({ date, city, role, count }) => {
       const result = queryAvailability({ date, city, role, headcount: count });
       await track({ tool: "check_availability", status: result.ok ? "success" : "error", city, role });
-      if (!result.ok) return jsonContent({ error: result.error.message });
-      return jsonContent(result.data);
+      if (!result.ok) return errorResult({ error: result.error.message });
+      return structuredResult(result.data);
     },
   );
 
@@ -167,6 +197,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
           .string()
           .describe("City name (e.g., 'Boston') or slug (e.g., 'boston-event-staffing')."),
       },
+      outputSchema: GET_ROLE_PRICING_OUTPUT,
       annotations: {
         title: "Get Role Pricing",
         readOnlyHint: true,
@@ -175,8 +206,8 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     async ({ role, city }) => {
       const result = queryRolePricing({ role, city });
       await track({ tool: "get_role_pricing", status: result.ok ? "success" : "error", role, city });
-      if (!result.ok) return jsonContent({ error: result.error.message });
-      return jsonContent(result.data);
+      if (!result.ok) return errorResult({ error: result.error.message });
+      return structuredResult(result.data);
     },
   );
 
@@ -192,6 +223,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
           .string()
           .describe("Two-letter state code (e.g., 'CA') or full state name (e.g., 'California')."),
       },
+      outputSchema: GET_COMPLIANCE_OUTPUT,
       annotations: {
         title: "Get Compliance By State",
         readOnlyHint: true,
@@ -200,8 +232,8 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     async ({ state }) => {
       const result = queryStateCompliance({ state });
       await track({ tool: "get_compliance_by_state", status: result.ok ? "success" : "error", state });
-      if (!result.ok) return jsonContent({ error: result.error.message });
-      return jsonContent(result.data);
+      if (!result.ok) return errorResult({ error: result.error.message });
+      return structuredResult(result.data);
     },
   );
 
@@ -221,6 +253,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
       description:
         "Submit a staffing request to TempGuru. Use this after confirming city coverage, role pricing, and availability with the other tools. Creates a structured lead in TempGuru's CRM — a human coordinator will review and respond with a quote within one business day. Not a reservation; does not guarantee pricing or availability.",
       inputSchema: REQUEST_QUOTE_INPUT,
+      outputSchema: REQUEST_QUOTE_OUTPUT,
       annotations: {
         title: "Request Quote",
         readOnlyHint: false,
@@ -233,10 +266,10 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
       await track({ tool: "request_quote", status: result.success ? "success" : "error", city: input.city });
 
       if (!result.success) {
-        return jsonContent(quoteFailedPayload(result.error));
+        return structuredResult(quoteFailedPayload(result.error));
       }
 
-      return jsonContent(quoteSubmittedPayload(input.contact_email, result.deal_name));
+      return structuredResult(quoteSubmittedPayload(input.contact_email, result.deal_name));
     },
   );
 
