@@ -3,10 +3,10 @@
   "name": "co.tempguru/event-staffing",
   "title": "TempGuru Event Staffing",
   "description": "W-2 event staffing data + quote requests for AI agents: 300+ US/CA markets, rates, compliance.",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "websiteUrl": "https://tempguru.co/ai",
   "repository": {
-    "url": "https://github.com/tempguru-co/tempguru-agent-skills",
+    "url": "https://github.com/tempguru-co/tempguru-mcp",
     "source": "github"
   },
   "remotes": [
