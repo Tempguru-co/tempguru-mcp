@@ -69,11 +69,13 @@ Ordered by leverage. ✅ = already live from earlier pushes.
    [../assistants/chatgpt-app.md](../assistants/chatgpt-app.md); blocked
    only on business verification.
 3. **GitHub MCP Registry (github.com/mcp) + VS Code `@mcp` gallery** — the
-   Copilot install base. **Checked 2026-06-09: NOT listed**, despite being
-   in the upstream community registry (`co.tempguru/event-staffing`) ✅.
-   Confirmed gap — investigate why ingestion missed us, then file their
-   inclusion request (stability + security notes ready: HTTPS, read-only
-   hints, no auth, telemetry no-PII).
+   Copilot install base. 🟡 DIAGNOSED 2026-06-10: hand-curated, no
+   auto-ingest of new servers, no PR repo; the documented path is emailing
+   **partnerships@github.com** after upstream publication (done). Email
+   drafted (Gmail draft r4719421374230781035, pending Megan's send);
+   server.json v1.0.3 repoints `repository` at tempguru-mcp (pushed,
+   30bd821) but the registry republish is BLOCKED on a DNS TXT key
+   mismatch — see SUBMISSIONS.md 2026-06-10 row + keep-alive drift warning.
 
 ### Tier 2 — agent-IDE and client marketplaces (one sitting, ~15 min each)
 
@@ -83,23 +85,31 @@ Ordered by leverage. ✅ = already live from earlier pushes.
    convention). Awaiting review.
 5. **LobeChat / LobeHub** — ✅ auto-aggregated from upstream sources, no
    action needed (confirmed 2026-06-04).
-6. **Cursor directory** — ⬜ still open. cursor.directory MCP submission.
+6. **Cursor directory** — 🟡 researched 2026-06-10, ready for Megan (~3 min
+   in browser): data-PR model is dead (repo is now cursor/community-plugins,
+   DB-backed); submit at cursor.directory/plugins/new (GitHub OAuth) →
+   Auto-scan `tempguru-agent-skills` (verified scan-ready: root .mcp.json +
+   .claude-plugin manifest + 2 SKILL.md). Fill sheet:
+   website project `agent-discovery/batch-2026-06-10/cursor-directory-FILL.md`.
 7. **Continue hub** — ⬜ still open. hub.continue.dev block referencing the
    HTTP server.
 8. **mcp.so** — 🟡 submitted: issue chatmcp/mcpso#2625 (2026-06-04), edited
    with full metadata, awaiting maintainer (~1-7 days typical).
 9. **mcpservers.org** — ✅ LIVE at mcpservers.org/servers/kissmyabs32/tempguru-mcp.
-   **mcp.directory** — ⬜ open, but fill sheet + submit URL already prepped
-   in the website project (confirmed 2026-06-09) — use that, don't redo.
-   **mcpmarket.com** — ⬜ still open.
+   **mcp.directory** — ✅ SUBMITTED 2026-06-10 (server + both skills via
+   their forms; "publish within 24 hours", email notification to megan@).
+   **mcpmarket.com** — ✅ SUBMITTED 2026-06-10: submission_id 941702, FREE
+   queue ~2–4 weeks (declined the new $29 fast-lane per no-paid-placement).
 10. **PulseMCP** — 🟡 auto-ingests from the Official MCP Registry weekly
     (confirmed by PulseMCP); expect listing ~June 11. Email
     hello@pulsemcp.com only if absent after that.
 11. **awesome-mcp-servers** — 🟡 TWO PRs open: appcypher #7373 +
     punkpeye #7373 (Glama badge added, `has-glama` set, awaiting merge).
     Do not file new ones.
-12. **Goose (Block) extensions** — ⬜ still open. Community extension PR
-    pointing at the HTTP server.
+12. **Goose extensions** — 🟡 PR OPEN 2026-06-10:
+    aaif-goose/goose#9721 (repo moved from block/goose; directory now at
+    goose-docs.ai). servers.json entry (streamable-http, no auth) + tutorial
+    page with a live-data example transcript. Awaiting maintainer review.
 13. **Windsurf** — 🟡 half-covered: skills reach Windsurf via skills.sh, and
     the npm CLI README ships a Windsurf config. Only a Windsurf-STORE
     listing would be net-new; low priority.
@@ -142,9 +152,13 @@ Ordered by leverage. ✅ = already live from earlier pushes.
     (2026-06-10): `tempguru.langchain.get_tools()` and
     `tempguru.llamaindex.TempGuruToolSpec`, extras `[langchain]` /
     `[llamaindex]`, 6 tools each incl. opt-in `request_quote` (new in the
-    client, wraps the REST write). Verified from PyPI. Remaining: the
-    UPSTREAM listings — llama-index-tools-tempguru monorepo PR + LangChain
-    integration docs PR (task chips spawned 2026-06-10).
+    client, wraps the REST write). Verified from PyPI. **LangChain official
+    docs PR FILED 2026-06-10 (Megan approved):**
+    https://github.com/langchain-ai/docs/pull/4392 (tools + provider pages
+    on docs.langchain.com, from fork Tempguru-co/docs; vendor-named package
+    accepted per Stripe/Gradio precedent, no shim needed). Remaining:
+    llama-index-tools-tempguru standalone publish (monorepo closed to new
+    integrations; package prepared, see SUBMISSIONS.md).
 24. Keep shipping public, crawlable code and docs (GitHub/npm/PyPI/HF/
     README.zh-CN) — already the pattern.
 
