@@ -74,8 +74,8 @@ Ordered by leverage. ✅ = already live from earlier pushes.
    **partnerships@github.com** after upstream publication. v1.0.3
    (repository → tempguru-mcp) republished + registry-verified 2026-06-10
    after a DNS-auth key rotation (resolved; see SUBMISSIONS.md keep-alive).
-   Remaining: Megan sends the drafted email (Gmail draft
-   r4719421374230781035); follow up if no reply by ~2026-07-08.
+   Inclusion email SENT 2026-06-10 (Megan, to partnerships@github.com);
+   follow up on the thread if no reply by ~2026-07-08.
 
 ### Tier 2 — agent-IDE and client marketplaces (one sitting, ~15 min each)
 
