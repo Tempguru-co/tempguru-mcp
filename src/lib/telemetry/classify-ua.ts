@@ -66,8 +66,10 @@ export function classifyUserAgent(raw: string | null | undefined): UaClass {
     return "internal-test";
   }
 
-  // Anthropic
-  if (/claude\.ai|anthropic-claude/.test(ua)) return "claude-ai";
+  // Anthropic. claude-user is the UA on user-initiated fetches from Claude
+  // (connector/tool calls on claude.ai) — it must land here, not in "other";
+  // the comment above the ai-crawler block already promises this.
+  if (/claude\.ai|anthropic-claude|claude-user/.test(ua)) return "claude-ai";
   if (/claude-code/.test(ua)) return "claude-code";
   if (/claude desktop|claude-desktop/.test(ua)) return "claude-desktop";
 
