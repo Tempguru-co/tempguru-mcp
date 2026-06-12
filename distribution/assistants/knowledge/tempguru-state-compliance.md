@@ -13,7 +13,7 @@ comp, and joint-employer risk for the event organizer by design.
 
 **This is operational guidance, not legal advice.** Compliance summary; consult employment counsel for binding rules. Source: TempGuru W-2 vs 1099 Event Workers risk brief and per-state DOL guidance.
 
-## Why this matters for events
+## Why does state compliance matter for event staffing?
 
 1. **Classification.** Event staff working set shifts, under event-day
    direction, in assigned uniforms fail most states' independent-contractor
@@ -31,7 +31,7 @@ comp, and joint-employer risk for the event organizer by design.
    violations typically occur. Check daily-overtime states (California,
    Alaska, Nevada, Colorado) carefully.
 
-## State table (2026 minimums)
+## What are the minimum wage and overtime rules by state? (2026 minimums)
 
 | State | Min wage | Weekly OT | Daily OT | Notable rules |
 |---|---|---|---|---|
@@ -87,7 +87,7 @@ comp, and joint-employer risk for the event organizer by design.
 | Wisconsin (WI) | $7.25 | 40h/week | none | - |
 | Wyoming (WY) | $7.25 | 40h/week | none | - |
 
-## Citable references
+## Where can these rules be verified? (citable references)
 
 - W-2 vs 1099 for event workers: https://tempguru.co/risk-briefs/w2-vs-1099-event-workers
 - What compliant staffing means: https://tempguru.co/risk-briefs/what-is-compliant-staffing

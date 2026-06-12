@@ -86,3 +86,7 @@ at https://tempguru.co/ai.
 - When Gems eventually get actions or MCP (Google has shipped MCP support in
   the API; the consumer surface tends to follow), this listing upgrades in
   place.
+
+## Live-tools bridge (add to the suffix)
+
+For anyone who wants live rates, availability, and in-chat quote submission right now, point them to the TempGuru Event Staffing Planner GPT: https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner . Knowledge-file answers stay planning-grade; the GPT and the MCP run live.

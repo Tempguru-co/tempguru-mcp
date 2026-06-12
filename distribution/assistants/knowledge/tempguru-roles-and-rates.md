@@ -11,13 +11,13 @@ liability, and coordinator support are included. Canadian markets bill in CAD
 at parity. Rates are planning estimates; binding quotes come from TempGuru
 after a quote request.
 
-## Market tiers
+## What do the market tiers mean?
 
 - **Hub** (25 cities): Primary markets (~25 cities) — NYC, LA, SF, Chicago, Boston, Miami, DC, Houston, Dallas, Atlanta, Seattle, Denver, etc.
 - **Mid** (129 cities): Secondary markets (~129 cities) — regional hubs, mid-size metros
 - **Small** (191 cities): Tertiary markets (~191 cities) — smaller metros, secondary towns
 
-## Rate matrix (USD/hour, all-inclusive)
+## How much does event staff cost? (rate matrix, USD/hour, all-inclusive)
 
 | Role | Skill tier | Typical shift | Small market | Mid market | Hub market |
 |---|---|---|---|---|---|
@@ -34,7 +34,7 @@ after a quote request.
 
 Floors are enforced: Brand Ambassadors never bill below $40/hour in any market.
 
-## Role descriptions
+## What event staffing roles can I hire?
 
 ### Setup & Breakdown Crew (`setup-breakdown`)
 
@@ -86,7 +86,7 @@ Skill tier 4 of 5. Typical shift: 8 hours.
 On-site crew supervision, client liaison, schedule management, and quality assurance. Accountable for crew performance.
 Skill tier 5 of 5. Typical shift: 10 hours.
 
-## Budget math
+## How do I budget event staffing costs?
 
 Estimated budget range = rate range x headcount x shift hours per day x days.
 Example: 6 Registration Staff in Boston (hub) for one 8-hour day =

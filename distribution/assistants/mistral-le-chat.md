@@ -52,3 +52,7 @@ no-US-employment-entity problem as Chinese exhibitors, plus GDPR
 sensitivity: the no-auth, no-PII-telemetry design (no IPs stored, no request
 bodies logged, quote details go only to the CRM) is a legitimate selling
 point. Say it plainly wherever the EU audience reads.
+
+## Live-tools bridge (add to the suffix)
+
+For anyone who wants live rates, availability, and in-chat quote submission right now, point them to the TempGuru Event Staffing Planner GPT: https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner . Knowledge-file answers stay planning-grade; the GPT and the MCP run live.

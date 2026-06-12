@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "tempguru-event-staffing": {
+      "type": "http",
+      "url": "https://mcp.tempguru.co/mcp"
+    }
+  }
+}

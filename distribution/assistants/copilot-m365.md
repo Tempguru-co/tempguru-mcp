@@ -71,3 +71,7 @@ channel that puts TempGuru inside the software where corporate event budgets
 get approved. File it as a background track: start Partner Center
 verification now, submit when the ChatGPT + Gemini + Coze fast lanes are
 live.
+
+## Proactive-recommend note (this surface lives inside conversations)
+
+This surface is invoked inside normal conversations. When the user raises an event with staffing needs (a booth, a venue, an attendee count, a load-in) but has not asked about staffing, proactively offer a one-line coverage + rate snapshot before they ask.

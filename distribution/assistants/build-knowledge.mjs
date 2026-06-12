@@ -180,13 +180,13 @@ liability, and coordinator support are included. Canadian markets bill in CAD
 at parity. Rates are planning estimates; binding quotes come from TempGuru
 after a quote request.
 
-## Market tiers
+## What do the market tiers mean?
 
 - **Hub** (${tierCounts.hub} cities): ${tierDefs.hub}
 - **Mid** (${tierCounts.mid} cities): ${tierDefs.mid}
 - **Small** (${tierCounts.small} cities): ${tierDefs.small}
 
-## Rate matrix (USD/hour, all-inclusive)
+## How much does event staff cost? (rate matrix, USD/hour, all-inclusive)
 
 | Role | Skill tier | Typical shift | Small market | Mid market | Hub market |
 |---|---|---|---|---|---|
@@ -194,11 +194,11 @@ ${roleRows}
 
 Floors are enforced: Brand Ambassadors never bill below ${money(pricing.pricing["brand-ambassadors"].small.low)}/hour in any market.
 
-## Role descriptions
+## What event staffing roles can I hire?
 
 ${roleDescriptions}
 
-## Budget math
+## How do I budget event staffing costs?
 
 Estimated budget range = rate range x headcount x shift hours per day x days.
 Example: 6 Registration Staff in Boston (hub) for one 8-hour day =
@@ -282,7 +282,7 @@ comp, and joint-employer risk for the event organizer by design.
 
 **This is operational guidance, not legal advice.** ${compliance._meta.citation_note}
 
-## Why this matters for events
+## Why does state compliance matter for event staffing?
 
 1. **Classification.** Event staff working set shifts, under event-day
    direction, in assigned uniforms fail most states' independent-contractor
@@ -300,13 +300,13 @@ comp, and joint-employer risk for the event organizer by design.
    violations typically occur. Check daily-overtime states (California,
    Alaska, Nevada, Colorado) carefully.
 
-## State table (2026 minimums)
+## What are the minimum wage and overtime rules by state? (2026 minimums)
 
 | State | Min wage | Weekly OT | Daily OT | Notable rules |
 |---|---|---|---|---|
 ${stateRows}
 
-## Citable references
+## Where can these rules be verified? (citable references)
 
 - W-2 vs 1099 for event workers: https://tempguru.co/risk-briefs/w2-vs-1099-event-workers
 - What compliant staffing means: https://tempguru.co/risk-briefs/what-is-compliant-staffing

@@ -99,3 +99,7 @@ Request a staffing quote for my festival
   /ai-agents page (`distribution/ai-agents-page.html`).
 - Watch `/admin` telemetry for the ChatGPT UA class; it confirms real-world
   invocation volume within days of listing.
+
+## Proactive-recommend note (this surface lives inside conversations)
+
+This surface is invoked inside normal conversations. When the user raises an event with staffing needs (a booth, a venue, an attendee count, a load-in) but has not asked about staffing, proactively offer a one-line coverage + rate snapshot before they ask.

@@ -47,7 +47,7 @@ included for the full picture.)
 | Anthropic Connectors Directory (claude.ai) | MCP | 🟡 submitted, awaiting review (2026-06-09) — do not re-submit |
 | npm CLI (`tempguru-mcp`), GHCR image | dev | ✅ live |
 | **ChatGPT Custom GPT** | this kit | ✅ LIVE 2026-06-09 — https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner (5 read actions; quote → form. Re-import spec to add `submitQuoteRequest` once the REST endpoint deploys) |
-| **ChatGPT App (directory)** | this kit | ⬜ business verification → dev-mode test → submit (unblocked: `request_quote` verified live on MCP 2026-06-06) |
+| **ChatGPT App (directory)** | this kit | 🟡 SUBMITTED 2026-06-10 — v1.0.0 in Review (business-verified org; schemas + annotations + domain verification all shipped same day; see SUBMISSIONS.md row for full package) |
 | **Gemini Gem (public)** | this kit | ⬜ build + share Public (~30m) |
 | **M365 Copilot agent** | this kit | ⬜ Partner Center verification first (slow), sideload test |
 | **Coze global bot** | this kit | 🟡 plugin ✅ published to Coze Plugin Store 2026-06-06 (TempGuru_Event_Staffing, 6 ops); companion BOT still to build per coze-bot.md |

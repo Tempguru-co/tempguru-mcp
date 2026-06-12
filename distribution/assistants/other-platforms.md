@@ -81,3 +81,7 @@ Canada)`, paste the INSTRUCTIONS block, no file support — add one line:
 https://mcp.tempguru.co/openapi.json" (HuggingChat assistants can browse).
 Ten minutes, one more indexed surface tying "event staffing" to TempGuru in
 front of exactly the people who build agents for others.
+
+## Live-tools bridge (add to the suffix)
+
+For anyone who wants live rates, availability, and in-chat quote submission right now, point them to the TempGuru Event Staffing Planner GPT: https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner . Knowledge-file answers stay planning-grade; the GPT and the MCP run live.

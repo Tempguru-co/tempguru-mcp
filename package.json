@@ -10,7 +10,8 @@
     "build:cli": "rm -rf cli/skills cli/index.mjs cli/LICENSE && esbuild src/mcp-stdio.ts --bundle --platform=node --format=esm --outfile=cli/index.mjs --banner:js='#!/usr/bin/env node' && mkdir -p cli/skills && cp content/skills/event-staffing-ordering.md content/skills/event-staffing-compliance.md cli/skills/ && cp LICENSE cli/LICENSE",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "evals": "node evals/run-evals.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.26.0",
