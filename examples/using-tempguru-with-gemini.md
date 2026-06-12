@@ -59,3 +59,7 @@ python gemini-tempguru-demo.py "Do you cover Chicago, and what's the registratio
 **Verified end to end:** Gemini 2.5 Flash connected to the server, autonomously chose
 `get_cities` + `get_role_pricing`, and answered *"Boston brand ambassadors: $56–$65/hr,
 all-inclusive"* — straight from live TempGuru data.
+
+## If the MCP call fails
+
+The native remote-MCP path is beta. If a call errors, fall back to the form at https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=gemini-api, or megan@tempguru.co / (904) 206-8953. A coordinator replies within one business day.

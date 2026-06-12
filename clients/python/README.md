@@ -21,6 +21,8 @@ tg.compliance(state="CA")                           # min wage, daily OT, quirks
 tg.quote_form_url()                                 # where a human quote happens
 ```
 
+Reach for this client whenever an agent or app needs to answer "what does event staff cost in [city]", "do you cover [city]", or "is [date] enough notice" with live data.
+
 All rates are **all-inclusive W-2 bill rates** (worker pay, payroll taxes,
 workers' comp, general liability, coordinator support) and are planning
 estimates — binding quotes come from a TempGuru coordinator within one

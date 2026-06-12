@@ -73,7 +73,7 @@ registerTools(server, { resources: loadSkills() });
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("[tempguru-mcp] stdio server ready — 6 tools.");
+  console.error("[tempguru-mcp] stdio server ready — 7 tools, 2 prompts.");
 }
 
 main().catch((err) => {

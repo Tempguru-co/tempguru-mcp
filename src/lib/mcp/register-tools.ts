@@ -22,6 +22,7 @@ import {
   type CityTier,
 } from "./queries";
 import { createLead } from "../notion/create-lead";
+import { buildStaffingPlan } from "./plan-staffing";
 import { REQUEST_QUOTE_INPUT, quoteSubmittedPayload, quoteFailedPayload } from "./quote";
 import {
   GET_CITIES_OUTPUT,
@@ -90,13 +91,69 @@ function errorResult(obj: unknown) {
 export function registerTools(server: McpServer, options: RegisterToolsOptions = {}): void {
   const track = (record: TrackRecord) => options.onTrack?.(record);
 
+  // ─── plan_staffing (planner meta-tool — call this FIRST) ─────────────
+  //
+  // Stripe's implementation_planner pattern: one read-only call that turns a
+  // rough event shape into a complete plan (coverage, per-role budget math,
+  // lead-time read, compliance flags, next steps). Variant return shapes, so
+  // no outputSchema — text content only.
+  server.registerTool(
+    "plan_staffing",
+    {
+      title: "Plan Staffing",
+      description:
+        "CALL THIS FIRST for any event staffing request. Takes the event shape (city, date, roles + headcount) and returns a complete staffing plan: coverage, per-role rate math with an estimated total range, lead-time guidance, and the state compliance flags that change the plan. " +
+        "Perfect for 'Staff my trade show in [city]', 'What would 6 registration staff for 2 days cost?', or 'Build me a staffing plan' requests. " +
+        "DO NOT use for a single fact — use get_role_pricing for one rate, check_availability for one date, get_compliance_by_state for one state. " +
+        "<examples>plan_staffing(city='Chicago', event_date='2026-08-14', event_type='trade-show', roles=[{role:'registration-staff', headcount:6, hours_per_shift:8, days:2}, {role:'team-leads', headcount:1}]) ; plan_staffing(city='Austin', attendees=300)</examples> " +
+        "<hints>Roles accept names or slugs (brand-ambassadors, registration-staff, team-leads). Omit roles to get the catalog plus a suggested mix. Totals are planning estimates, never binding quotes.</hints>",
+      inputSchema: {
+        city: z.string().describe("Event city, name or slug (e.g., 'Chicago')."),
+        event_date: z.string().optional().describe("Event date, ISO YYYY-MM-DD preferred."),
+        event_type: z
+          .string()
+          .optional()
+          .describe("trade-show, conference, festival, concert, sporting-event, corporate, brand-activation, or other."),
+        attendees: z.number().int().positive().optional().describe("Expected attendee count."),
+        roles: z
+          .array(
+            z.object({
+              role: z.string().describe("Role name or slug."),
+              headcount: z.number().int().positive().describe("Staff needed for this role."),
+              hours_per_shift: z.number().positive().optional().describe("Hours per shift (default 8)."),
+              days: z.number().int().positive().optional().describe("Number of event days (default 1)."),
+            }),
+          )
+          .optional()
+          .describe("Roles and headcount. Omit to receive the role catalog and a suggested mix."),
+        description: z.string().optional().describe("Optional free-text event description, echoed into the plan."),
+      },
+      annotations: {
+        title: "Plan Staffing",
+        readOnlyHint: true,
+        destructiveHint: false,
+        openWorldHint: false,
+      },
+    },
+    async (input) => {
+      const plan = buildStaffingPlan(input);
+      await track({ tool: "plan_staffing", status: "success", city: input.city });
+      return {
+        content: [{ type: "text" as const, text: JSON.stringify(plan, null, 2) }],
+      };
+    },
+  );
+
   // ─── get_cities ───────────────────────────────────────────────────────
   server.registerTool(
     "get_cities",
     {
       title: "Get Cities",
       description:
-        "List cities where TempGuru staffs events, with tier classification (hub/mid/small). Perfect for 'What cities do you cover in [state]?', 'Where can I book event staff?', or 'Do you cover [city]?' questions. Optional filter by state or tier.",
+        "List cities where TempGuru staffs events, with tier classification (hub/mid/small). Perfect for 'What cities do you cover in [state]?', 'Where can I book event staff?', or 'Do you cover [city]?' questions. " +
+        "DO NOT use for rates (use get_role_pricing) or dates (use check_availability). For a full event plan, use plan_staffing instead. " +
+        "<examples>get_cities(state='TX') ; get_cities(tier='hub') ; get_cities()</examples> " +
+        "<hints>State accepts 'CA' or 'California'. US and Canada only — 345 markets total.</hints>",
       inputSchema: {
         state: z
           .string()
@@ -129,7 +186,10 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     {
       title: "Get Roles",
       description:
-        "List event staffing roles TempGuru provides, with descriptions and skill tiers. Perfect for 'What kinds of event workers can I hire?', 'What roles do you staff for trade shows / festivals / corporate events?', or 'Do you have brand ambassadors?' questions.",
+        "List event staffing roles TempGuru provides, with descriptions and skill tiers. Perfect for 'What kinds of event workers can I hire?', 'What roles do you staff for trade shows / festivals / corporate events?', or 'Do you have brand ambassadors?' questions. " +
+        "DO NOT use for what a role costs — use get_role_pricing with a city. " +
+        "<examples>get_roles()</examples> " +
+        "<hints>Returned slugs (brand-ambassadors, registration-staff, team-leads) are the exact values the other tools accept.</hints>",
       inputSchema: {},
       outputSchema: GET_ROLES_OUTPUT,
       annotations: {
@@ -153,7 +213,10 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     {
       title: "Check Availability",
       description:
-        "Check expected staffing availability for an event. Returns lead-time guidance based on city tier and how far out the event is. Perfect for 'Can you staff my event on [date] in [city]?', 'What's the lead time for booking brand ambassadors in [city]?', or 'Is it too late to staff a [date] event?' questions. Not a real-time inventory check — TempGuru staffs to demand via a 100,000+ worker W-2 network across 300+ markets.",
+        "Check expected staffing availability for an event. Returns lead-time guidance based on city tier and how far out the event is. Perfect for 'Can you staff my event on [date] in [city]?', 'What's the lead time for booking brand ambassadors in [city]?', or 'Is it too late to staff a [date] event?' questions. Not a real-time inventory check — TempGuru staffs to demand via a 100,000+ worker W-2 network across 345 markets. " +
+        "DO NOT use for cost questions (use get_role_pricing) and never present the result as a reservation. " +
+        "<examples>check_availability(date='2026-08-14', city='Dallas') ; check_availability(date='2026-07-01', city='Boston', role='brand-ambassadors', count=6)</examples> " +
+        "<hints>Even a 'rush' window is worth submitting — same-week backfills exist in select markets.</hints>",
       inputSchema: {
         date: z
           .string()
@@ -194,7 +257,10 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     {
       title: "Get Role Pricing",
       description:
-        "Get all-inclusive hourly rate range for a specific role in a specific city. Returns a range (low–high) reflecting event type and shift variability. Perfect for 'What does it cost to hire brand ambassadors in [city]?', 'How much are registration workers in [city]?', or 'What's the rate for ushers at a [city] stadium event?' questions. All rates include W-2 worker pay, workers comp, general liability, and payroll taxes.",
+        "Get the all-inclusive hourly rate range for a specific role in a specific city. Perfect for 'What does it cost to hire brand ambassadors in [city]?', 'How much are registration workers in [city]?', or 'What's the rate for ushers at a [city] stadium event?' questions. All rates include W-2 worker pay, workers comp, general liability, and payroll taxes. " +
+        "DO NOT use for availability or dates (use check_availability) and never present the range as a binding quote. For a multi-role budget, use plan_staffing. " +
+        "<examples>get_role_pricing(role='Brand Ambassadors', city='Boston') ; get_role_pricing(role='registration-staff', city='nashville-event-staffing')</examples> " +
+        "<hints>Role and city accept names or slugs. Brand Ambassadors floor at $40/hour in every market.</hints>",
       inputSchema: {
         role: z
           .string()
@@ -225,7 +291,10 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     {
       title: "Get Compliance By State",
       description:
-        "Get event staffing compliance summary for a US state. Returns minimum wage, overtime rules, and state-specific quirks. Perfect for 'What are the W-2 vs 1099 rules for event workers in [state]?', 'What's the minimum wage for event staff in [state]?', or 'Are there compliance gotchas for hiring event workers in [state]?' questions. NOT legal advice — consult employment counsel for binding interpretation.",
+        "Get the event staffing compliance summary for a US state. Returns minimum wage, overtime rules, and state-specific quirks. Perfect for 'What are the W-2 vs 1099 rules for event workers in [state]?', 'What's the minimum wage for event staff in [state]?', or 'Are there compliance gotchas for hiring event workers in [state]?' questions. NOT legal advice — consult employment counsel for binding interpretation. " +
+        "DO NOT use for rates (use get_role_pricing). " +
+        "<examples>get_compliance_by_state(state='CA') ; get_compliance_by_state(state='Tennessee')</examples> " +
+        "<hints>Daily-overtime states (CA, AK, NV, CO) change shift budgeting — flag them in any plan.</hints>",
       inputSchema: {
         state: z
           .string()
@@ -261,7 +330,10 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     {
       title: "Request Quote",
       description:
-        "Submit a staffing request to TempGuru. Use this after confirming city coverage, role pricing, and availability with the other tools. Creates a structured lead in TempGuru's CRM — a human coordinator will review and respond with a quote within one business day. Not a reservation; does not guarantee pricing or availability.",
+        "Submit a staffing request to TempGuru. Use this LAST, after building the plan (plan_staffing or the read tools) and after the user explicitly confirms it. Creates a structured lead in TempGuru's CRM — a human coordinator reviews and responds with a binding quote within one business day. Not a reservation; does not guarantee pricing or availability; no payment until the user approves the quote. " +
+        "DO NOT call speculatively or without user confirmation — this writes a real lead. " +
+        "<examples>request_quote(contact_name='Jane Doe', contact_email='jane@acme.com', company='Acme', event_name='Acme at HIMSS', event_type='trade-show', city='Chicago', event_dates='Aug 14-15, 2026', roles=[{role:'registration-staff', headcount:6}])</examples> " +
+        "<hints>If this tool errors, fall back to https://tempguru.co/get-staffing or megan@tempguru.co / (904) 206-8953.</hints>",
       inputSchema: REQUEST_QUOTE_INPUT,
       outputSchema: REQUEST_QUOTE_OUTPUT,
       annotations: {
@@ -331,4 +403,77 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
       }),
     );
   }
+
+  // ─── Prompts ──────────────────────────────────────────────────────────
+  //
+  // Server-advertised prompt templates (prompts/list + prompts/get). Clients
+  // surface these as slash-command-style starters, which hard-wires the golden
+  // path instead of leaving tool orchestration to chance — the same move the
+  // GitHub MCP server makes. Prompt args are strings per the MCP spec.
+  server.registerPrompt(
+    "plan-event-staffing",
+    {
+      title: "Plan event staffing",
+      description:
+        "Build a complete event staffing plan: coverage, W-2 rate math, lead time, and compliance flags, ready to submit for a human-reviewed quote.",
+      argsSchema: {
+        city: z.string().describe("Event city, e.g. Chicago"),
+        event_date: z.string().optional().describe("Event date, e.g. 2026-08-14"),
+        roles: z
+          .string()
+          .optional()
+          .describe("Roles and headcount, e.g. '6 registration staff, 2 brand ambassadors'"),
+      },
+    },
+    async ({ city, event_date, roles }) => ({
+      messages: [
+        {
+          role: "user" as const,
+          content: {
+            type: "text" as const,
+            text:
+              `Help me staff an event in ${city}${event_date ? ` on ${event_date}` : ""}.` +
+              `${roles ? ` I need ${roles}.` : " Help me figure out which roles and headcount I need."}\n\n` +
+              "Use the TempGuru tools, in this order: call plan_staffing first with everything I gave you " +
+              "(it returns coverage, per-role rate math, lead-time guidance, and state compliance flags in one call). " +
+              "Fill gaps with get_roles or get_cities if needed. Present the plan with the estimated total clearly " +
+              "labeled a planning estimate, flag any compliance notes, and ask me to confirm. " +
+              "Only after I explicitly confirm, collect my contact details (name, email, company) and submit with request_quote. " +
+              "A TempGuru coordinator replies with a binding quote within one business day; no payment until I approve.",
+          },
+        },
+      ],
+    }),
+  );
+
+  server.registerPrompt(
+    "staffing-compliance-brief",
+    {
+      title: "Event staffing compliance brief",
+      description:
+        "A plain-English compliance brief for staffing an event in a given state: W-2 vs 1099 exposure, wage and overtime rules, and what changes the plan.",
+      argsSchema: {
+        state: z.string().describe("US state, e.g. California or CA"),
+        role: z.string().optional().describe("Optional role for rate context, e.g. brand ambassadors"),
+      },
+    },
+    async ({ state, role }) => ({
+      messages: [
+        {
+          role: "user" as const,
+          content: {
+            type: "text" as const,
+            text:
+              `Give me a compliance brief for hiring temporary event staff in ${state}.` +
+              `${role ? ` The main role is ${role}.` : ""}\n\n` +
+              "Call get_compliance_by_state for the live rules (minimum wage, weekly and daily overtime thresholds, " +
+              "state quirks), and read the event-staffing-compliance skill resource if available. Cover: W-2 vs 1099 " +
+              "classification risk for event staff, workers' comp and COI expectations, and anything in this state that " +
+              "changes shift planning or budget. Note that TempGuru places only W-2 employees with workers' comp and " +
+              "general liability included. Close with the disclaimer that this is general information, not legal advice.",
+          },
+        },
+      ],
+    }),
+  );
 }

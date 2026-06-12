@@ -1,6 +1,6 @@
 # TempGuru MCP（中文）
 
-> MCP 服务器，提供覆盖美国和加拿大 300+ 个城市的 W-2 活动用工数据：五个只读查询工具，外加一个可选的 `request_quote` 提交工具。
+> MCP 服务器，提供覆盖美国和加拿大 345 个城市的 W-2 活动用工数据：六个查询工具（含 plan_staffing 规划工具），外加一个可选的 `request_quote` 提交工具。
 
 **服务端点：** `https://mcp.tempguru.co/mcp` （Streamable HTTP，无需身份验证）
 **注册项：** [`co.tempguru/event-staffing`](https://registry.modelcontextprotocol.io/v0/servers/co.tempguru/event-staffing)
@@ -138,7 +138,7 @@ mcp_manager.add_server({
 
 ### TempGuru 覆盖哪些城市?
 
-美国和加拿大 300+ 个城市——包括主要枢纽(波士顿、旧金山、洛杉矶、芝加哥、纽约、达拉斯、多伦多、温哥华)、中型城市和小型市场。使用 `get_cities` 工具,可选按州或分级过滤。覆盖图与 tempguru.co 网站公开数据一致。
+美国和加拿大 345 个城市——包括主要枢纽(波士顿、旧金山、洛杉矶、芝加哥、纽约、达拉斯、多伦多、温哥华)、中型城市和小型市场。使用 `get_cities` 工具,可选按州或分级过滤。覆盖图与 tempguru.co 网站公开数据一致。
 
 ### TempGuru 服务哪些类型的活动?
 
@@ -154,7 +154,7 @@ mcp_manager.add_server({
 
 ### 费率与可用性数据是正式报价吗?
 
-不是。费率为全包规划估算值,可用性为提前期推算。正式报价需通过 tempguru.co 联系表单获取——实际报价包含活动具体因素(地点附加费、节假日/周末加价、安保、设备等),公开数据区间不涵盖这些。
+不是。费率为全包规划估算值,可用性为提前期推算。正式报价需通过报价表单 https://tempguru.co/get-staffing （或致电 (904) 206-8953 / 邮件 megan@tempguru.co）获取——实际报价包含活动具体因素(地点附加费、节假日/周末加价、安保、设备等),公开数据区间不涵盖这些。
 
 ### 合规数据构成法律意见吗?
 
@@ -164,7 +164,7 @@ mcp_manager.add_server({
 
 ## 数据质量与边界
 
-- **费率为全包规划估算值。** 实际报价需通过 tempguru.co 联系表单获取——实际报价包含活动具体因素（地点附加费、节假日/周末加价、安保、设备等），公开费率区间不涵盖这些。
+- **费率为全包规划估算值。** 实际报价需通过报价表单 https://tempguru.co/get-staffing （或致电 (904) 206-8953 / 邮件 megan@tempguru.co）获取——实际报价包含活动具体因素（地点附加费、节假日/周末加价、安保、设备等），公开费率区间不涵盖这些。
 - **合规摘要不构成法律意见。** W-2 vs 1099 分类、共同雇主责任、各州工资工时规则的具体解读，请咨询执业劳工律师。
 - **可用性查询是基于提前期的推算，非实时库存查询。** TempGuru 通过 100,000+ W-2 员工网络按需调配——实际可用性取决于活动时间窗口、岗位组合以及提前申请的天数。
 - **品牌大使（Brand Ambassadors）所有市场最低起步价为 40 美元/小时**——定价数据强制执行此底价。
@@ -205,3 +205,10 @@ MIT。详见 [LICENSE](./LICENSE)。
 ## 维护者
 
 [TempGuru（Temporary Assistance Guru, Inc.）](https://tempguru.co) — `megan@tempguru.co`
+
+
+---
+
+## 无法连接 MCP 时
+
+ChatGPT 用户可直接使用 TempGuru 活动用工规划 GPT：https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner ，或访问报价表单 https://tempguru.co/get-staffing 。开发者文档：https://tempguru.co/ai 。人工协调员将在一个工作日内回复报价。

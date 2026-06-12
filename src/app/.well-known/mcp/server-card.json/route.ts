@@ -16,9 +16,9 @@ const SERVER_CARD = {
   serverInfo: {
     name: "tempguru-event-staffing",
     title: "TempGuru Event Staffing",
-    version: "1.1.0",
+    version: "1.2.0",
     description:
-      "Model Context Protocol server for TempGuru event staffing data: city coverage (300+ US/Canada markets), staffing roles, lead-time guidance, all-inclusive W-2 rate ranges, and state-by-state compliance rules. Includes a request_quote write tool that submits structured staffing requests to TempGuru's pipeline.",
+      "Model Context Protocol server for TempGuru event staffing data: city coverage (345 US/Canada markets), staffing roles, lead-time guidance, all-inclusive W-2 rate ranges, and state-by-state compliance rules. Includes a plan_staffing planner tool, a request_quote write tool that submits structured staffing requests to TempGuru's pipeline, two skill resources, and guided prompt templates. For ChatGPT users without MCP, the TempGuru Event Staffing Planner GPT covers the same workflow: https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner",
     websiteUrl: "https://tempguru.co",
   },
   transport: {
@@ -28,8 +28,15 @@ const SERVER_CARD = {
   protocolVersion: "2025-03-26",
   capabilities: {
     tools: {},
+    resources: {},
+    prompts: {},
   },
   tools: [
+    {
+      name: "plan_staffing",
+      description:
+        "Planner meta-tool — call first. Turns an event shape (city, date, roles + headcount) into a complete plan: coverage, per-role W-2 rate math, lead-time guidance, and state compliance flags.",
+    },
     {
       name: "get_cities",
       description:
