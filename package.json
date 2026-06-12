@@ -2,7 +2,7 @@
   "name": "tempguru-mcp",
   "version": "1.0.0",
   "private": true,
-  "description": "TempGuru MCP server: five read-only event-staffing data tools plus an opt-in request_quote submission, for AI agents.",
+  "description": "TempGuru MCP server: plan_staffing planner, six read-only event-staffing lookups incl. the Rate Index benchmark, plus an opt-in request_quote submission, for AI agents across 345 US/CA markets.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

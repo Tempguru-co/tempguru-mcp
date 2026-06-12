@@ -7,64 +7,145 @@
       "event_date": "2027-03-10",
       "event_type": "trade-show",
       "roles": [
-        { "role": "registration-staff", "headcount": 6, "hours_per_shift": 8, "days": 2 },
-        { "role": "team-leads", "headcount": 1 }
+        {
+          "role": "registration-staff",
+          "headcount": 6,
+          "hours_per_shift": 8,
+          "days": 2
+        },
+        {
+          "role": "team-leads",
+          "headcount": 1
+        }
       ]
     },
-    "expect": ["\\\"status\\\": \\\"plan\\\"", "estimated_total_range", "lead_time", "compliance", "request_quote"]
+    "expect": [
+      "\\\"status\\\": \\\"plan\\\"",
+      "estimated_total_range",
+      "lead_time",
+      "compliance",
+      "request_quote"
+    ]
   },
   {
     "name": "plan_staffing flags the team-lead rule at 20+ staff",
     "tool": "plan_staffing",
     "arguments": {
       "city": "Austin",
-      "roles": [{ "role": "brand-ambassadors", "headcount": 22 }]
+      "roles": [
+        {
+          "role": "brand-ambassadors",
+          "headcount": 22
+        }
+      ]
     },
-    "expect": ["team lead", "20 or more"]
+    "expect": [
+      "team lead",
+      "20 or more"
+    ]
   },
   {
     "name": "plan_staffing without roles returns the catalog",
     "tool": "plan_staffing",
-    "arguments": { "city": "Boston", "attendees": 300 },
-    "expect": ["needs_roles", "available_roles"]
+    "arguments": {
+      "city": "Boston",
+      "attendees": 300
+    },
+    "expect": [
+      "needs_roles",
+      "available_roles"
+    ]
   },
   {
     "name": "plan_staffing warns on daily overtime in California",
     "tool": "plan_staffing",
     "arguments": {
       "city": "Los Angeles",
-      "roles": [{ "role": "brand-ambassadors", "headcount": 4, "hours_per_shift": 10 }]
+      "roles": [
+        {
+          "role": "brand-ambassadors",
+          "headcount": 4,
+          "hours_per_shift": 10
+        }
+      ]
     },
-    "expect": ["daily overtime", "OT"]
+    "expect": [
+      "daily overtime",
+      "OT"
+    ]
   },
   {
     "name": "get_role_pricing returns Boston brand-ambassador range",
     "tool": "get_role_pricing",
-    "arguments": { "role": "Brand Ambassadors", "city": "Boston" },
-    "expect": ["hourly_range_low", "Boston", "all_inclusive"]
+    "arguments": {
+      "role": "Brand Ambassadors",
+      "city": "Boston"
+    },
+    "expect": [
+      "hourly_range_low",
+      "Boston",
+      "all_inclusive"
+    ]
   },
   {
     "name": "get_role_pricing handles an unknown role gracefully",
     "tool": "get_role_pricing",
-    "arguments": { "role": "unicorn wranglers", "city": "Boston" },
-    "expect": ["role_found", "available_roles"]
+    "arguments": {
+      "role": "unicorn wranglers",
+      "city": "Boston"
+    },
+    "expect": [
+      "role_found",
+      "available_roles"
+    ]
   },
   {
     "name": "check_availability returns a lead-time read",
     "tool": "check_availability",
-    "arguments": { "date": "2027-03-10", "city": "Dallas" },
-    "expect": ["days_until_event", "recommendation", "lead time"]
+    "arguments": {
+      "date": "2027-03-10",
+      "city": "Dallas"
+    },
+    "expect": [
+      "days_until_event",
+      "recommendation",
+      "lead time"
+    ]
   },
   {
     "name": "get_compliance_by_state knows California daily OT",
     "tool": "get_compliance_by_state",
-    "arguments": { "state": "CA" },
-    "expect": ["overtime_threshold_daily_hours", "unique_rules", "W-2"]
+    "arguments": {
+      "state": "CA"
+    },
+    "expect": [
+      "overtime_threshold_daily_hours",
+      "unique_rules",
+      "W-2"
+    ]
   },
   {
     "name": "get_cities filters by state",
     "tool": "get_cities",
-    "arguments": { "state": "TX" },
-    "expect": ["tier_breakdown", "\\\"state_abbr\\\": \\\"TX\\\""]
+    "arguments": {
+      "state": "TX"
+    },
+    "expect": [
+      "tier_breakdown",
+      "\\\"state_abbr\\\": \\\"TX\\\""
+    ]
+  },
+  {
+    "name": "get_rate_benchmark returns the citable Rate Index",
+    "tool": "get_rate_benchmark",
+    "arguments": {
+      "role": "brand-ambassadors"
+    },
+    "expect": [
+      "Rate Index",
+      "citation",
+      "tier_definitions",
+      "hourly_usd"
+    ]
   }
 ]

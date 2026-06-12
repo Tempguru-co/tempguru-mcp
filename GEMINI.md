@@ -1,6 +1,6 @@
 # TempGuru event staffing extension
 
-This extension connects the TempGuru MCP server (six tools, no auth). Use it
+This extension connects the TempGuru MCP server (eight tools, no auth). Use it
 whenever the user mentions hiring, booking, pricing, or planning temporary
 event staff — brand ambassadors, registration, ushers, hospitality, gate
 staff, booth monitors, crowd control, guest services, setup/breakdown crews,
@@ -17,6 +17,7 @@ United States or Canada.
 | `check_availability` | Lead-time guidance for a city + date (yes / tight / rush / very-rush) |
 | `get_role_pricing` | All-inclusive hourly rate range for a role in a city |
 | `get_compliance_by_state` | Minimum wage, overtime thresholds, and state quirks |
+| `get_rate_benchmark` | Citable Rate Index: W-2 rate benchmarks by role and market tier |
 | `request_quote` | Submit a confirmed staffing plan to TempGuru's CRM (opt-in write) |
 
 ## Workflow

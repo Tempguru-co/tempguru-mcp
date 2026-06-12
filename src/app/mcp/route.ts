@@ -64,10 +64,10 @@ const handler = createMcpHandler(
     // ClawHub) and Claude.ai connector listings.
     serverInfo: {
       name: "tempguru-mcp",
-      version: "1.0.0",
+      version: "1.2.0",
       title: "TempGuru Event Staffing",
       description:
-        "W-2 event staffing data for AI agents: 300+ US/CA markets, brand ambassadors, registration, hospitality, setup/breakdown. Five read-only lookups (coverage, rates, lead times, state compliance summaries) plus an opt-in request_quote submission. No authentication required.",
+        "W-2 event staffing data for AI agents: 345 US/CA markets. Eight tools: the call-first plan_staffing planner, six read-only lookups including the get_rate_benchmark Rate Index, and an opt-in request_quote submission. Ships skill resources and guided prompts. No authentication required. ChatGPT users without MCP: the TempGuru Event Staffing Planner GPT covers the same workflow.",
       icons: [
         {
           src: "https://mcp.tempguru.co/logo.svg",

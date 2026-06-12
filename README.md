@@ -1,6 +1,6 @@
 # TempGuru MCP
 
-> MCP server for W-2 event staffing data across 345 US and Canadian markets: a `plan_staffing` planner, five read-only lookups, and an opt-in `request_quote` submission.
+> MCP server for W-2 event staffing data across 345 US and Canadian markets: a `plan_staffing` planner, six read-only lookups including the `get_rate_benchmark` Rate Index, and an opt-in `request_quote` submission.
 
 [![Install in Cursor](https://img.shields.io/badge/Cursor-Install_MCP-24bbea)](cursor://anysphere.cursor-deeplink/mcp/install?name=tempguru&config=eyJ1cmwiOiJodHRwczovL21jcC50ZW1wZ3VydS5jby9tY3AifQ==)
 [![Install in VS Code](https://img.shields.io/badge/VS_Code-Install_MCP-0078d4)](https://insiders.vscode.dev/redirect/mcp/install?name=tempguru&config=%7B%22type%22%3A%22http%22%2C%22url%22%3A%22https%3A%2F%2Fmcp.tempguru.co%2Fmcp%22%7D)
@@ -33,9 +33,10 @@ This MCP server lets AI agents query our published coverage, rates, lead-time gu
 | `check_availability` | Lead-time guidance for a city + date. Not a real-time inventory check. |
 | `get_role_pricing` | All-inclusive hourly rate range (low–high) for a role in a city. Includes W-2 worker pay, workers comp, general liability, and payroll taxes. |
 | `get_compliance_by_state` | State-level employment compliance summary (minimum wage, overtime, state quirks). NOT legal advice. |
+| `get_rate_benchmark` | The TempGuru Event Staffing Rate Index: full W-2 rate benchmark table by role and market tier, with methodology and citation line. |
 | `request_quote` | Submits a structured staffing request (contact + event + roles) to TempGuru's CRM for human review. Opt-in write tool; not a reservation or contract. |
 
-Six of the seven tools are read-only (`readOnlyHint: true`). `request_quote` is the one write tool, annotated `readOnlyHint: false`. The server also ships two skill resources and guided prompt templates (`plan-event-staffing`, `staffing-compliance-brief`).
+Seven of the eight tools are read-only (`readOnlyHint: true`). `request_quote` is the one write tool, annotated `readOnlyHint: false`. The server also ships two skill resources and guided prompt templates (`plan-event-staffing`, `staffing-compliance-brief`).
 
 ---
 

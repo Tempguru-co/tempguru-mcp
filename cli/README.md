@@ -1,6 +1,6 @@
 # TempGuru Event Staffing: MCP Server and CLI
 
-W-2 event staffing data for AI agents across 345 US and Canadian markets. Five read-only lookups (city coverage, role rates, availability, state compliance) plus an opt-in quote request. Runs locally over stdio, no authentication for the read tools.
+W-2 event staffing data for AI agents across 345 US and Canadian markets. A call-first planner, six read-only lookups (coverage, rates, availability, compliance, the Rate Index benchmark) plus an opt-in quote request. Runs locally over stdio, no authentication for the read tools.
 
 Hosted endpoint: `https://mcp.tempguru.co/mcp` · Agent docs: https://tempguru.co/ai
 
@@ -34,6 +34,7 @@ Works with Claude Desktop, Cursor, Windsurf, Claude Code, and other stdio MCP cl
 | `check_availability` | Lead-time guidance for a city and date |
 | `get_role_pricing` | All-inclusive W-2 hourly rate range for a role in a city |
 | `get_compliance_by_state` | Minimum wage, overtime, and classification rules by state |
+| `get_rate_benchmark` | The Rate Index: W-2 rate benchmark table by role and tier |
 | `request_quote` | Submit a staffing request to TempGuru |
 
 Use these tools to answer questions like "What do brand ambassadors cost in Boston?", "Do you staff trade shows in Chicago?", or "Is three weeks enough notice in Dallas?".

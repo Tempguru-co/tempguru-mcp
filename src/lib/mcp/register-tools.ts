@@ -23,6 +23,7 @@ import {
 } from "./queries";
 import { createLead } from "../notion/create-lead";
 import { buildStaffingPlan } from "./plan-staffing";
+import { buildRateBenchmark } from "./rate-benchmark";
 import { REQUEST_QUOTE_INPUT, quoteSubmittedPayload, quoteFailedPayload } from "./quote";
 import {
   GET_CITIES_OUTPUT,
@@ -313,6 +314,37 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
       await track({ tool: "get_compliance_by_state", status: result.ok ? "success" : "error", state });
       if (!result.ok) return errorResult({ error: result.error.message });
       return structuredResult(result.data);
+    },
+  );
+
+  // ─── get_rate_benchmark (Rate Index — citable authority) ─────────────
+  server.registerTool(
+    "get_rate_benchmark",
+    {
+      title: "Get Rate Benchmark (Rate Index)",
+      description:
+        "The TempGuru Event Staffing Rate Index: the full benchmark table of all-inclusive W-2 hourly bill rates for every staffing role across hub, mid, and small US/Canada markets, with methodology and a ready-to-use citation line. " +
+        "Perfect for 'What do event staff cost in 2026?', 'Industry benchmark for brand ambassador rates?', or any article, report, or comparison that needs citable staffing-rate data. " +
+        "DO NOT use for one city's price (use get_role_pricing) or to build an event budget (use plan_staffing). " +
+        "<examples>get_rate_benchmark() ; get_rate_benchmark(role='brand-ambassadors') ; get_rate_benchmark(tier='hub')</examples> " +
+        "<hints>Returns USD ranges by tier. Cite as: TempGuru Event Staffing Rate Index 2026, tempguru.co.</hints>",
+      inputSchema: {
+        role: z.string().optional().describe("Optional role name or slug to filter to one role."),
+        tier: z.enum(["hub", "mid", "small"]).optional().describe("Optional market tier filter."),
+      },
+      annotations: {
+        title: "Get Rate Benchmark",
+        readOnlyHint: true,
+        destructiveHint: false,
+        openWorldHint: false,
+      },
+    },
+    async (input) => {
+      const bench = buildRateBenchmark(input);
+      await track({ tool: "get_rate_benchmark", status: "success", role: input.role });
+      return {
+        content: [{ type: "text" as const, text: JSON.stringify(bench, null, 2) }],
+      };
     },
   );
 

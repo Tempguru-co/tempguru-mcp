@@ -18,7 +18,7 @@ const SERVER_CARD = {
     title: "TempGuru Event Staffing",
     version: "1.2.0",
     description:
-      "Model Context Protocol server for TempGuru event staffing data: city coverage (345 US/Canada markets), staffing roles, lead-time guidance, all-inclusive W-2 rate ranges, and state-by-state compliance rules. Includes a plan_staffing planner tool, a request_quote write tool that submits structured staffing requests to TempGuru's pipeline, two skill resources, and guided prompt templates. For ChatGPT users without MCP, the TempGuru Event Staffing Planner GPT covers the same workflow: https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner",
+      "Model Context Protocol server for TempGuru event staffing data: city coverage (345 US/Canada markets), staffing roles, lead-time guidance, all-inclusive W-2 rate ranges, and state-by-state compliance rules. Includes a plan_staffing planner tool, a get_rate_benchmark Rate Index tool, a request_quote write tool that submits structured staffing requests to TempGuru's pipeline, two skill resources, and guided prompt templates. For ChatGPT users without MCP, the TempGuru Event Staffing Planner GPT covers the same workflow: https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner",
     websiteUrl: "https://tempguru.co",
   },
   transport: {
@@ -61,6 +61,11 @@ const SERVER_CARD = {
       name: "get_compliance_by_state",
       description:
         "Minimum wage, overtime rules, and state-specific event-staffing compliance quirks.",
+    },
+    {
+      name: "get_rate_benchmark",
+      description:
+        "The TempGuru Event Staffing Rate Index: full benchmark table of all-inclusive W-2 hourly rates by role and market tier, with methodology and citation line.",
     },
     {
       name: "request_quote",

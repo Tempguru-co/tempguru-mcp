@@ -12,7 +12,7 @@ npm run build:stdio && npm run evals
 
 | Check | Result |
 |---|---|
-| tools/list advertises all 7 tools | PASS |
+| tools/list advertises all 8 tools | PASS |
 | prompts/list advertises both prompts | PASS |
 | plan_staffing builds a full plan (Chicago trade show) | PASS |
 | plan_staffing flags the team-lead rule at 20+ staff | PASS |
@@ -23,8 +23,9 @@ npm run build:stdio && npm run evals
 | check_availability returns a lead-time read | PASS |
 | get_compliance_by_state knows California daily OT | PASS |
 | get_cities filters by state | PASS |
+| get_rate_benchmark returns the citable Rate Index | PASS |
 
-**11/11 as of 2026-06-11** (commit of record in git history). Cases live in
+**12/12 as of 2026-06-12** (commit of record in git history). Cases live in
 [golden-cases.json](./golden-cases.json); add a case whenever a tool gains a
 behavior worth locking in.
 

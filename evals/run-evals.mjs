@@ -89,12 +89,13 @@ try {
   const tools = await rpc("tools/list", {});
   const toolNames = (tools.result?.tools ?? []).map((t) => t.name).sort();
   check(
-    "tools/list advertises all 7 tools",
+    "tools/list advertises all 8 tools",
     JSON.stringify(toolNames) ===
       JSON.stringify([
         "check_availability",
         "get_cities",
         "get_compliance_by_state",
+        "get_rate_benchmark",
         "get_role_pricing",
         "get_roles",
         "plan_staffing",
