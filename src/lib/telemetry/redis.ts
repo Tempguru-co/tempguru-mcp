@@ -1,4 +1,4 @@
-// Telemetry storage — Upstash Redis via Vercel Marketplace integration.
+// Telemetry storage, Upstash Redis via Vercel Marketplace integration.
 //
 // The integration sets KV_REST_API_URL + KV_REST_API_TOKEN automatically on
 // the tempguru-mcp project once Upstash is added from the Vercel Marketplace.
@@ -24,8 +24,7 @@ function client(): Redis | null {
 
 /**
  * Awaited execution against Redis. Returns the command's result, or null when
- * telemetry isn't configured (e.g. local dev / stdio). Does NOT swallow errors —
- * read callers want them surfaced; write callers (telemetry) wrap their own
+ * telemetry isn't configured (e.g. local dev / stdio). Does NOT swallow errors, * read callers want them surfaced; write callers (telemetry) wrap their own
  * try/catch so a Redis hiccup can never break a tool call.
  *
  * Telemetry writes are awaited via this same path (capped) rather than deferred:

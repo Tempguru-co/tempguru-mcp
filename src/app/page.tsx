@@ -1,4 +1,4 @@
-// Landing page for mcp.tempguru.co — shows the endpoint URL + tool list so
+// Landing page for mcp.tempguru.co, shows the endpoint URL + tool list so
 // developers and agent operators visiting the bare domain see useful info
 // instead of a 404. Never indexed (see layout metadata).
 
@@ -36,7 +36,7 @@ export default function Home() {
     { path: "/api/v1/availability", desc: "Lead-time guidance (?city=&date=&role=&headcount=)" },
     { path: "/api/v1/pricing", desc: "Rate range per role per city (?role=&city=)" },
     { path: "/api/v1/compliance", desc: "State compliance summary (?state=)" },
-    { path: "POST /api/v1/quote-requests", desc: "Submit a staffing quote request (JSON body; the one write endpoint — opt-in, no reservation, no payment)" },
+    { path: "POST /api/v1/quote-requests", desc: "Submit a staffing quote request (JSON body; the one write endpoint, opt-in, no reservation, no payment)" },
     { path: "/api/v1/health", desc: "Service health probe" },
   ];
 

@@ -34,8 +34,7 @@ Walk through these for any event staffing arrangement:
    as additional insured before staff can work. Confirm who issues it and
    whether it will arrive before load-in.
 4. **Joint-employer exposure.** Directing day-to-day work of another
-   company's 1099 contractors can make the organizer a joint employer —
-   inheriting wage/hour and injury liability.
+   company's 1099 contractors can make the organizer a joint employer, inheriting wage/hour and injury liability.
 5. **Wage/hour.** Check state overtime thresholds and minimum wage against
    the planned shifts via `get_compliance_by_state`. Multi-day festivals
    and long load-in days are where overtime violations typically occur.

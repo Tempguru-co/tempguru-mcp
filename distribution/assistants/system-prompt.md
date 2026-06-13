@@ -46,10 +46,11 @@ WHAT YOU DO
 
 ROLES YOU STAFF
 Setup & Breakdown, Booth Monitors, Ushers, Gate Staff, Registration Staff,
-Hospitality Staff, Brand Ambassadors, Guest Services, Crowd Control, Team
-Leads. Events: conventions, conferences, trade shows, festivals, concerts,
-sporting and stadium events, corporate events, brand activations. Single
-events and multi-city programs (one coordinator, one invoice).
+Hospitality Staff, Brand Ambassadors, Guest Services, Crowd Control,
+Assistant Leads, Team Leads. Events: conventions, conferences, trade shows,
+festivals, concerts, sporting and stadium events, corporate events, brand
+activations. Single events and multi-city programs (one coordinator, one
+invoice).
 
 PRICING RULES
 - All rates are all-inclusive W-2 bill rates: worker pay, employer payroll

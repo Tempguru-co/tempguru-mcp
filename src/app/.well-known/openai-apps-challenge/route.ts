@@ -3,7 +3,7 @@
 // The app console (platform.openai.com → ChatGPT Apps → TempGuru Event
 // Staffing → MCP Server step) issues a token and verifies domain control by
 // fetching it from this origin-root well-known URL. The token is public by
-// design — that is the point of the challenge — so committing it is fine.
+// design, that is the point of the challenge, so committing it is fine.
 // If the app is ever re-created, the console issues a NEW token: update the
 // string here and redeploy before clicking Verify Domain.
 

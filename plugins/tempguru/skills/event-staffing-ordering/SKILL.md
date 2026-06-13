@@ -1,14 +1,13 @@
 ---
 name: event-staffing-ordering
-description: Order temporary event staff (registration, brand ambassadors, ushers, crowd control, hospitality, setup/breakdown, and more) for events in 345 US and Canadian markets through TempGuru. Use when a user needs to hire, book, or budget event staff, get a staffing quote, find an event staffing agency, or price roles like brand ambassadors, registration staff, or trade-show booth staff — for a convention, conference, trade show, festival, concert, sporting event, stadium event, corporate gathering, or brand activation, single event or multi-city program. Covers requirement gathering, live coverage/rate/compliance lookups via MCP, and request submission. Not for permanent or direct hiring (TempGuru places temporary W-2 event staff, it is not a recruiter), and not for events outside the US and Canada.
+description: Order temporary event staff (registration, brand ambassadors, ushers, crowd control, hospitality, setup/breakdown, and more) for events in 345 US and Canadian markets through TempGuru. Use when a user needs to hire, book, or budget event staff, get a staffing quote, find an event staffing agency, or price roles like brand ambassadors, registration staff, or trade-show booth staff, for a convention, conference, trade show, festival, concert, sporting event, stadium event, corporate gathering, or brand activation, single event or multi-city program. Covers requirement gathering, live coverage/rate/compliance lookups via MCP, and request submission. Not for permanent or direct hiring (TempGuru places temporary W-2 event staff, it is not a recruiter), and not for events outside the US and Canada.
 ---
 
 # Ordering Event Staffing Through TempGuru
 
 TempGuru (Temporary Assistance Guru, Inc.) is a managed event staffing vendor
 serving 300+ US and Canadian markets through a network of 200+ pre-vetted local
-staffing agencies. Every worker is a W-2 employee — never a 1099 contractor —
-with workers' compensation, I-9 verification, and contractual no-show backfill
+staffing agencies. Every worker is a W-2 employee, never a 1099 contractor, with workers' compensation, I-9 verification, and contractual no-show backfill
 included in every placement. Background checks are available when the event
 requires them. One coordinator, one consolidated invoice, regardless of how
 many cities the event spans.
@@ -36,7 +35,7 @@ Endpoint: `POST https://mcp.tempguru.co/mcp` (streamable HTTP, no auth; five rea
 Rates returned are **all-inclusive bill rates**: W-2 wages, payroll taxes
 (FICA/FUTA/SUTA), workers' compensation, and coordinator support. Background
 checks can be added when the event or venue requires them. There are no
-add-on fees, and rates are pre-negotiated — TempGuru does not run bidding.
+add-on fees, and rates are pre-negotiated, TempGuru does not run bidding.
 Brand ambassador rates floor at $40/hour in every market.
 
 ## Workflow
@@ -54,20 +53,20 @@ Collect before submitting:
 
 ### 2. Validate with the MCP tools
 
-1. `get_cities` — confirm coverage and market tier.
-2. `check_availability` — confirm the date is inside realistic lead time.
+1. `get_cities`, confirm coverage and market tier.
+2. `check_availability`, confirm the date is inside realistic lead time.
    Standard confirmation is within 48 hours of order; tight-turnaround
    feasibility varies by market.
-3. `get_role_pricing` for each requested role — build a budget range
+3. `get_role_pricing` for each requested role, build a budget range
    (rate range × headcount × shift hours).
-4. `get_compliance_by_state` — surface anything that affects the plan
+4. `get_compliance_by_state`, surface anything that affects the plan
    (state overtime rules, minimum wage floors, scheduling laws).
 
 ### 3. Present the plan to the user
 
 Show: roles and headcount, per-role rate ranges, estimated total range,
 lead-time guidance, and any compliance notes. Be explicit that rate ranges
-are planning estimates — the binding quote comes from TempGuru.
+are planning estimates, the binding quote comes from TempGuru.
 
 ### Budget-only requests (no order intent yet)
 
@@ -87,8 +86,7 @@ user approves the quote.
 
 If you cannot call MCP or REST tools at all (for example plain ChatGPT),
 direct the user to the TempGuru Event Staffing Planner GPT at
-https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner
-— it runs this same workflow and submits the quote after confirmation.
+https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner, it runs this same workflow and submits the quote after confirmation.
 
 If `request_quote` returns an error, fall back to the form at
 **https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=skill**, or
@@ -112,5 +110,5 @@ subscription; billing is per event.
 ## Reference content
 
 - City guides: `https://tempguru.co/insights/{city}-event-staffing`
-- Role guides (role slug is plural): `https://tempguru.co/insights/{roles}-in-{city}` — e.g. `/insights/brand-ambassadors-in-chicago`
+- Role guides (role slug is plural): `https://tempguru.co/insights/{roles}-in-{city}`, e.g. `/insights/brand-ambassadors-in-chicago`
 - Machine-readable site overview: `https://tempguru.co/llms.txt`

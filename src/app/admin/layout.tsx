@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import { isAuthEnabled } from "@/lib/telemetry/auth";
 
 export const metadata: Metadata = {
-  title: "TempGuru MCP — Telemetry",
+  title: "TempGuru MCP, Telemetry",
   robots: { index: false, follow: false },
 };
 
-// Layout intentionally does NOT enforce auth — that's the page's job.
+// Layout intentionally does NOT enforce auth, that's the page's job.
 // (Putting the redirect here creates a loop because the login page itself
 //  is wrapped by this layout. Page-level gating via requireAuth() avoids it.)
 export default function AdminLayout({

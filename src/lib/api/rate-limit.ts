@@ -2,7 +2,7 @@
 //
 // Fixed-window counter in Upstash (the same Redis the telemetry layer uses):
 // INCR ratelimit:quote:{hash} + EXPIRE NX. Fails OPEN on any Redis absence,
-// error, or slow response — a broken limiter must never block a legitimate
+// error, or slow response, a broken limiter must never block a legitimate
 // quote submission, mirroring the telemetry layer's "never degrade the call"
 // posture.
 //
@@ -30,7 +30,7 @@ export type RateLimitVerdict =
 const ALLOWED: RateLimitVerdict = { allowed: true };
 
 export async function checkQuoteRateLimit(ip: string): Promise<RateLimitVerdict> {
-  // No client IP (local dev, direct invocation) — nothing meaningful to key
+  // No client IP (local dev, direct invocation), nothing meaningful to key
   // on, and on Vercel the header is always present. Fail open.
   if (!ip) return ALLOWED;
 
@@ -61,7 +61,7 @@ export async function checkQuoteRateLimit(ip: string): Promise<RateLimitVerdict>
     // null = Redis not configured (exec short-circuit) or check timed out.
     return verdict ?? ALLOWED;
   } catch {
-    return ALLOWED; // Redis hiccup — fail open
+    return ALLOWED; // Redis hiccup, fail open
   } finally {
     if (timer) clearTimeout(timer);
   }

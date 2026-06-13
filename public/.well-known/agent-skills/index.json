@@ -4,7 +4,7 @@
     {
       "name": "event-staffing-ordering",
       "type": "skill-md",
-      "description": "Use when a user needs to hire event staff, book brand ambassadors, get an event staffing quote, or budget W-2 event workers in the US or Canada — trade shows, conferences, festivals, concerts, stadium events, corporate events, brand activations. Gathers requirements, checks live city coverage, W-2 rate ranges, lead-time guidance, and state compliance via MCP, then produces a structured staffing request. Do not use for permanent hiring, non-event temp work, markets outside US/Canada, or 1099 gig-worker sourcing.",
+      "description": "Use when a user needs to hire event staff, book brand ambassadors, get an event staffing quote, or budget W-2 event workers in the US or Canada, trade shows, conferences, festivals, concerts, stadium events, corporate events, brand activations. Gathers requirements, checks live city coverage, W-2 rate ranges, lead-time guidance, and state compliance via MCP, then produces a structured staffing request. Do not use for permanent hiring, non-event temp work, markets outside US/Canada, or 1099 gig-worker sourcing.",
       "url": "https://tempguru.co/.well-known/agent-skills/event-staffing-ordering/SKILL.md",
       "digest": "sha256:615d9be1427b8c6b76167332f1d721828da0ff3303bc2434560ba51d78a0527d"
     },

@@ -1,6 +1,6 @@
 // Per-tool-invocation telemetry writer.
 //
-// Schema (Redis keys — all keyed by UTC date `YYYY-MM-DD`):
+// Schema (Redis keys, all keyed by UTC date `YYYY-MM-DD`):
 //
 //   tools:{date}                 HASH  tool_name → invocation count
 //   uas:{date}                   HASH  ua_class → invocation count
@@ -68,7 +68,7 @@ export async function track(input: TrackInput): Promise<void> {
   // Issue all writes in ONE Promise.allSettled so they race to completion in
   // parallel, then AWAIT the batch (capped) so it lands before the tool handler
   // returns its result. Non-awaited / after()-deferred writes were killed at
-  // Vercel function shutdown before reaching Upstash — awaiting in-handler is
+  // Vercel function shutdown before reaching Upstash, awaiting in-handler is
   // the only durable path on serverless.
   const write = exec(async (r) => {
     await Promise.allSettled([
@@ -88,7 +88,7 @@ export async function track(input: TrackInput): Promise<void> {
       input.state
         ? r.zincrby(`queries:states:${date}`, 1, input.state.toUpperCase().slice(0, 2))
         : Promise.resolve(),
-      // TTLs (idempotent — re-setting is safe)
+      // TTLs (idempotent, re-setting is safe)
       r.expire(`tools:${date}`, TTL_SECONDS),
       r.expire(`uas:${date}`, TTL_SECONDS),
       rawUnclassified ? r.expire(`ua:unclassified:${date}`, TTL_SECONDS) : Promise.resolve(),
@@ -97,9 +97,9 @@ export async function track(input: TrackInput): Promise<void> {
       r.expire(`queries:cities:${date}`, TTL_SECONDS),
       r.expire(`queries:roles:${date}`, TTL_SECONDS),
       r.expire(`queries:states:${date}`, TTL_SECONDS),
-      // dates:active ZSET — used by the time-series widget
+      // dates:active ZSET, used by the time-series widget
       r.zadd("dates:active", { score: Date.now(), member: date }),
-      // Ring buffer — lpush must complete before ltrim; chain with .then()
+      // Ring buffer, lpush must complete before ltrim; chain with .then()
       // so both are initiated in this batch but trim only fires after push.
       r.lpush("recent:invocations", event).then(() =>
         r.ltrim("recent:invocations", 0, RECENT_LIMIT - 1),

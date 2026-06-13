@@ -6,14 +6,14 @@ server on a user's behalf. No API key, no signup, no environment variables.
 ## What this server provides
 
 Live event staffing data for the US and Canada from TempGuru: city coverage
-(345+ markets), 10 staffing roles, all-inclusive W-2 hourly rate ranges,
+(345+ markets), 11 staffing roles, all-inclusive W-2 hourly rate ranges,
 booking lead-time guidance, state labor compliance summaries, and an opt-in
 `request_quote` tool that submits a staffing inquiry for a human-reviewed
-quote. Five tools are read-only (`readOnlyHint: true`); `request_quote` is
+quote. Seven tools are read-only (`readOnlyHint: true`); `request_quote` is
 the single write tool (`destructiveHint: false`) and should only be called
 after the user explicitly confirms the plan.
 
-## Option A — remote server (preferred, zero install)
+## Option A, remote server (preferred, zero install)
 
 Add to the client's MCP settings (for Cline: `cline_mcp_settings.json`):
 
@@ -30,7 +30,7 @@ Add to the client's MCP settings (for Cline: `cline_mcp_settings.json`):
 
 Transport is MCP Streamable HTTP (spec rev 2025-03-26). No auth headers.
 
-## Option B — local stdio via npm
+## Option B, local stdio via npm
 
 ```json
 {
@@ -49,10 +49,9 @@ returning TempGuru's contact info when run locally.
 
 ## Verify the install
 
-Call the `get_roles` tool. Expect a JSON catalog of 10 roles (brand
+Call the `get_roles` tool. Expect a JSON catalog of 11 roles (brand
 ambassadors, registration staff, ushers, etc.). Then try
-`get_role_pricing` with `role: "brand-ambassadors", city: "Boston"` —
-expect an hourly range of $56–65 (hub market).
+`get_role_pricing` with `role: "brand-ambassadors", city: "Boston"`, expect an hourly range of $56–65 (hub market).
 
 ## Troubleshooting
 

@@ -49,7 +49,7 @@ const declarativeAgent = {
   version: "v1.5",
   name: "TempGuru Event Staffing Planner",
   description:
-    "Plan and budget temporary W-2 event staff for US and Canadian events: live hourly rates for 10 roles across 345 cities, booking lead-time guidance, and state-by-state labor compliance from TempGuru's public API.",
+    "Plan and budget temporary W-2 event staff for US and Canadian events: live hourly rates for 11 roles across 345 cities, booking lead-time guidance, and state-by-state labor compliance from TempGuru's public API.",
   instructions,
   conversation_starters: [
     {
@@ -86,7 +86,7 @@ const aiPlugin = {
   description_for_human:
     "Event staffing coverage, hourly rates, lead times, and state labor compliance for 345+ US and Canadian markets.",
   description_for_model:
-    "Public data and quote submission for event staffing in the US and Canada from TempGuru. Use listCities for coverage, listRoles for the role catalog, checkAvailability for lead-time guidance on a city + date, getRolePricing for all-inclusive hourly rate ranges, and getComplianceByState for state wage and overtime rules. submitQuoteRequest is the single write operation: it submits a confirmed staffing plan to TempGuru's CRM for human review — call it only after the user explicitly confirms; it creates no reservation and requires no payment. No authentication.",
+    "Public data and quote submission for event staffing in the US and Canada from TempGuru. Use listCities for coverage, listRoles for the role catalog, checkAvailability for lead-time guidance on a city + date, getRolePricing for all-inclusive hourly rate ranges, and getComplianceByState for state wage and overtime rules. submitQuoteRequest is the single write operation: it submits a confirmed staffing plan to TempGuru's CRM for human review, call it only after the user explicitly confirms; it creates no reservation and requires no payment. No authentication.",
   contact_email: "megan@tempguru.co",
   namespace: "tempguru",
   legal_info_url: "https://tempguru.co/privacy-policy",

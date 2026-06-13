@@ -1,0 +1,23 @@
+# TempGuru, Event Staffing Knowledge
+
+> Managed W-2 event staffing across 345 US and Canada markets (brand ambassadors, registration, hospitality, ushers, gate, crowd control, setup/breakdown, team leads). Live, structured data for AI agents via MCP and REST; the full knowledge base ships as an Open Knowledge Format (OKF) bundle. All rates are all-inclusive W-2 bill rates.
+
+## Knowledge bundle (Open Knowledge Format v0.1)
+- [OKF bundle root](https://mcp.tempguru.co/okf/index.md): canonical event-staffing knowledge, roles, pricing, coverage, compliance, workflows
+- [OKF bundle tarball](https://mcp.tempguru.co/okf.tar.gz): downloadable archive of the full bundle
+- [Rate Index](https://mcp.tempguru.co/okf/rate-index.md): citable measured benchmark of all-inclusive W-2 hourly rates by role and tier
+- [Staffing roles](https://mcp.tempguru.co/okf/roles/index.md): the 11 roles with skill tiers and rate bands
+- [Rate card](https://mcp.tempguru.co/okf/pricing/rate-matrix.md): published per-role rates by market tier
+- [Market coverage](https://mcp.tempguru.co/okf/cities/index.md): the 345 markets, by tier
+- [State compliance](https://mcp.tempguru.co/okf/compliance/index.md): minimum wage and overtime for all 51 US jurisdictions
+- [Workflows](https://mcp.tempguru.co/okf/workflows/index.md): plan staffing, ordering, compliance, request a quote
+
+## Live tools (action layer)
+- [MCP server](https://mcp.tempguru.co/mcp): Streamable HTTP, no auth, plan_staffing, get_cities, get_roles, check_availability, get_role_pricing, get_compliance_by_state, get_rate_benchmark, request_quote
+- [REST API](https://mcp.tempguru.co/api/v1): HTTP mirror of the same query layer (OpenAPI 3.1 at https://mcp.tempguru.co/openapi.json)
+- [MCP discovery](https://mcp.tempguru.co/.well-known/mcp.json) · [OKF discovery](https://mcp.tempguru.co/.well-known/okf.json)
+
+## Contact
+- [Get staffing](https://tempguru.co/get-staffing)
+- [AI / developer docs](https://tempguru.co/ai)
+- Email: megan@tempguru.co · Phone: (904) 206-8953

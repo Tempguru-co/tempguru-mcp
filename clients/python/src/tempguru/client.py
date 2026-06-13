@@ -128,7 +128,7 @@ class TempGuru:
 
         Returns a recommendation in {yes, tight, rush, very-rush} based on
         the city's market tier and how far out the event is. This is
-        planning guidance, NOT a real-time reservation — do not present it
+        planning guidance, NOT a real-time reservation, do not present it
         as a promise of availability.
         """
         return self._get(

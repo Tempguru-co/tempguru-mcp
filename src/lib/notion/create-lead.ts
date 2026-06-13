@@ -2,13 +2,13 @@
 // quote request via the request_quote MCP tool.
 //
 // Uses the Notion REST API directly (no SDK) to keep the dependency footprint
-// small. All writes are fire-and-NOT-forgotten — we await the result so the
+// small. All writes are fire-and-NOT-forgotten, we await the result so the
 // MCP tool can confirm success or surface a clean error message.
 
 const NOTION_API_VERSION = "2022-06-28";
 // IMPORTANT: this is the Notion *database_id*, not the *data_source_id*.
 // The workspace notes list 2f87d2b7-68c5-81aa-928e-000bfa620bde, but that is
-// the data SOURCE (collection) id — passing it as parent.database_id returns
+// the data SOURCE (collection) id, passing it as parent.database_id returns
 // a 404 ("Could not find database"). The parent database that holds that
 // single data source is the id below. (Single-source DB, so the classic
 // parent:{database_id} form works on API version 2022-06-28.)
@@ -89,7 +89,7 @@ function buildCallNotes(input: CreateLeadInput): string {
 }
 
 export async function createLead(input: CreateLeadInput): Promise<CreateLeadResult> {
-  // Accept either casing — the Vercel env var was created as `Notion_API_Key`
+  // Accept either casing, the Vercel env var was created as `Notion_API_Key`
   // while convention (and this code) prefers `NOTION_API_KEY`. Read both so a
   // casing mismatch can't silently break quote submission again. Trim to drop
   // any stray whitespace/newline from a copy-paste.
@@ -98,18 +98,17 @@ export async function createLead(input: CreateLeadInput): Promise<CreateLeadResu
     return { success: false, error: "NOTION_API_KEY not configured" };
   }
   // Notion integration tokens are pure ASCII (ntn_… / secret_…). A non-ASCII
-  // char means the env var was pasted with smart-typography or extra prose —
-  // fail with a clear message instead of a cryptic ByteString error from the
+  // char means the env var was pasted with smart-typography or extra prose, // fail with a clear message instead of a cryptic ByteString error from the
   // fetch header encoder (which is what an em dash in the key produces).
   if (!/^[\x20-\x7E]+$/.test(apiKey)) {
     return {
       success: false,
       error:
-        "NOTION_API_KEY contains invalid (non-ASCII) characters — re-enter the raw Notion integration token (ntn_… or secret_…) in Vercel with no surrounding text.",
+        "NOTION_API_KEY contains invalid (non-ASCII) characters, re-enter the raw Notion integration token (ntn_… or secret_…) in Vercel with no surrounding text.",
     };
   }
 
-  const dealName = `Agent Quote — ${input.event_type} · ${input.city} · ${input.event_dates}`;
+  const dealName = `Agent Quote, ${input.event_type} · ${input.city} · ${input.event_dates}`;
   const today = new Date().toISOString().slice(0, 10);
   const callNotes = buildCallNotes(input);
 

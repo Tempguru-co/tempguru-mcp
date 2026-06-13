@@ -5,7 +5,7 @@
 -->
 # TempGuru: State-by-State Employment Compliance for Event Staffing
 
-Compliance summary for event staffing. Min wage values reflect 2026 state minimums. W-2 classification is TempGuru's standard for ALL workers in ALL states (not a state-specific requirement, just the model). Unique rules highlight known state quirks. NOT legal advice — consult employment counsel for binding interpretation.
+Compliance summary for event staffing. Min wage values reflect 2026 state minimums. W-2 classification is TempGuru's standard for ALL workers in ALL states (not a state-specific requirement, just the model). Unique rules highlight known state quirks. NOT legal advice, consult employment counsel for binding interpretation.
 
 W-2 classification is TempGuru's standard for ALL workers in ALL states. It is
 not a state mandate; it is the model that removes misclassification, workers'

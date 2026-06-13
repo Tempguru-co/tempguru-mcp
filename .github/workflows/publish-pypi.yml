@@ -1,5 +1,5 @@
 # Publishes clients/python to PyPI via Trusted Publishing (OIDC).
-# No API token anywhere — PyPI trusts this repo+workflow identity directly.
+# No API token anywhere, PyPI trusts this repo+workflow identity directly.
 #
 # First-time setup (one-time, in Megan's PyPI account):
 #   PyPI → Account → Publishing → "Add a new pending publisher"

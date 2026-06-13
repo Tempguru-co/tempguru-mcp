@@ -51,7 +51,7 @@ def get_tools(
 
     @_tool
     def event_staffing_roles() -> dict:
-        """List all 10 event staffing roles TempGuru offers (brand
+        """List all 11 event staffing roles TempGuru offers (brand
         ambassadors, registration staff, ushers, hospitality, gate staff,
         booth monitors, crowd control, guest services, setup/breakdown
         crews, team leads) with descriptions and skill tiers. The returned
@@ -65,7 +65,7 @@ def get_tools(
         """Get booking lead-time guidance for hiring temporary event staff
         in a city on an ISO date (YYYY-MM-DD). Returns a recommendation
         (yes / tight / rush / very-rush). Planning guidance only, NOT a
-        reservation — never promise availability to the user."""
+        reservation, never promise availability to the user."""
         return tg.availability(
             city=city, date=date, role=role or None, headcount=headcount or None
         )

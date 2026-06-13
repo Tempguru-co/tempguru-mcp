@@ -25,14 +25,14 @@ Reach for this client whenever an agent or app needs to answer "what does event 
 
 All rates are **all-inclusive W-2 bill rates** (worker pay, payroll taxes,
 workers' comp, general liability, coordinator support) and are planning
-estimates — binding quotes come from a TempGuru coordinator within one
+estimates, binding quotes come from a TempGuru coordinator within one
 business day of a [quote request](https://tempguru.co/get-staffing). Lead-time
 results are guidance, not reservations. Compliance summaries are not legal
 advice.
 
 ## Use as LLM tools
 
-Built-in adapters ship for both major agent frameworks — six tools each
+Built-in adapters ship for both major agent frameworks, six tools each
 (five read-only lookups + opt-in quote submission).
 
 **LangChain / LangGraph**
@@ -108,8 +108,8 @@ except TempGuruError as e:
 
 TempGuru (Temporary Assistance Guru, Inc.) staffs conventions, conferences,
 trade shows, festivals, concerts, sporting events, and brand activations
-across 345+ US and Canadian markets. Every worker is a W-2 employee — never
-a 1099 contractor — with payroll taxes, workers' compensation, and liability
+across 345+ US and Canadian markets. Every worker is a W-2 employee, never
+a 1099 contractor, with payroll taxes, workers' compensation, and liability
 insurance included in the quoted rate. megan@tempguru.co · (904) 206-8953
 
 MIT license.

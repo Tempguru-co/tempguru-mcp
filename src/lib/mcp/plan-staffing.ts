@@ -1,8 +1,8 @@
-// plan_staffing — the planner meta-tool (Stripe's implementation_planner pattern).
+// plan_staffing, the planner meta-tool (Stripe's implementation_planner pattern).
 //
 // Agents are told to call this FIRST: it takes a rough event shape and returns a
-// complete, structured staffing plan — coverage, per-role budget math, lead-time
-// read, and the state compliance flags that change the plan — plus the exact next
+// complete, structured staffing plan, coverage, per-role budget math, lead-time
+// read, and the state compliance flags that change the plan, plus the exact next
 // tool to call. It composes the same query layer the individual tools wrap, so a
 // plan is always consistent with what get_role_pricing / check_availability /
 // get_compliance_by_state would return one call at a time.
@@ -118,7 +118,7 @@ export function buildStaffingPlan(input: PlanStaffingInput) {
   const staffingNotes: string[] = [];
   if (biggestShift >= 20 && !hasLead) {
     staffingNotes.push(
-      "A team lead is TempGuru's standard at 20 or more staff per shift — add one team-leads line to the plan.",
+      "A team lead is TempGuru's standard at 20 or more staff per shift, add one team-leads line to the plan.",
     );
   }
   if (unresolved.length > 0) {
@@ -156,7 +156,7 @@ export function buildStaffingPlan(input: PlanStaffingInput) {
     const perDay = Math.max(...lines.map((l) => l.hours_per_shift));
     if (comp.data.overtime_threshold_daily_hours && perDay > comp.data.overtime_threshold_daily_hours) {
       staffingNotes.push(
-        `${comp.data.state} has daily overtime at ${comp.data.overtime_threshold_daily_hours}h — shifts of ${perDay}h will accrue OT. Budget accordingly or split shifts.`,
+        `${comp.data.state} has daily overtime at ${comp.data.overtime_threshold_daily_hours}h, shifts of ${perDay}h will accrue OT. Budget accordingly or split shifts.`,
       );
     }
   }

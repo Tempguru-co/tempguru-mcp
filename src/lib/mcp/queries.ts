@@ -1,10 +1,10 @@
-// Pure data query functions. No HTTP, no MCP, no I/O — just business logic.
+// Pure data query functions. No HTTP, no MCP, no I/O, just business logic.
 //
 // These functions are the single source of truth for what every public surface
 // (MCP tools, REST endpoints) returns. The MCP route and REST routes both call
 // these, so there can be no behavior drift between the two interfaces.
 //
-// Each function returns a Result type — { ok: true, data } | { ok: false, error }
+// Each function returns a Result type, { ok: true, data } | { ok: false, error }
 // so callers can translate to their own envelope (MCP tool result vs HTTP status).
 
 import {
@@ -200,7 +200,7 @@ export function queryAvailability(
     return ok({
       city_found: false,
       requested: input.city,
-      message: `TempGuru does not have a dedicated city page for "${input.city}". We serve 300+ markets — contact us at https://tempguru.co/get-staffing for coverage confirmation.`,
+      message: `TempGuru does not have a dedicated city page for "${input.city}". We serve 300+ markets, contact us at https://tempguru.co/get-staffing for coverage confirmation.`,
     });
   }
 
@@ -246,7 +246,7 @@ export function queryAvailability(
       `Typical lead time for ${cityMatch.tier} cities: ${leadHours} hours.`,
       daysUntilEvent < 0
         ? "Event date is in the past."
-        : `Event is ${daysUntilEvent} days out — ${recommendation} window.`,
+        : `Event is ${daysUntilEvent} days out, ${recommendation} window.`,
       "To book, visit https://tempguru.co/get-staffing or request a quote via the dashboard.",
     ],
   });
@@ -317,25 +317,31 @@ export function queryRolePricing(
       note: "City not in TempGuru's 345-page footprint. Showing pricing across all tiers as fallback.",
     });
   }
-  const pricing = PRICING[roleMatch.slug];
-  if (!pricing) {
-    return ok({ error: `No pricing data for role "${roleMatch.slug}".` });
+  // Published per-role rate card (role-pricing.json): a distinct rate per role,
+  // by market tier. Roles are NOT collapsed, Registration, Hospitality, Gate,
+  // Booth, Setup, and Guest Services each keep their own band. Per-city measured
+  // spreads live in the Rate Index (get_rate_benchmark), not here.
+  const cardBand = PRICING[roleMatch.slug]?.[cityMatch.tier];
+  if (!cardBand) {
+    return ok({
+      error: `No published rate card for ${roleMatch.name} in a ${cityMatch.tier}-tier market.`,
+    });
   }
-  const tierPricing = pricing[cityMatch.tier];
   return ok({
     role: roleMatch.name,
     role_slug: roleMatch.slug,
     city: cityMatch.name,
     state: cityMatch.state,
     city_tier: cityMatch.tier,
-    hourly_range_low: tierPricing.low,
-    hourly_range_high: tierPricing.high,
+    hourly_range_low: cardBand.low,
+    hourly_range_high: cardBand.high,
     currency: cityMatch.country === "CA" ? "CAD" : "USD",
     all_inclusive:
       "Workers comp, general liability, and payroll taxes (FICA/FUTA/SUTA) included.",
     tier_definition: PRICING_META.tier_definitions[cityMatch.tier],
-    all_tiers_for_context: pricing,
-    pricing_notes: PRICING_META.notes,
+    all_tiers_for_context: PRICING[roleMatch.slug],
+    pricing_notes:
+      "Published per-role rate card (all-inclusive W-2), by market tier. all_tiers_for_context shows this role's bands across small, mid, and hub. For the measured market benchmark across cities, call get_rate_benchmark (the Rate Index).",
   });
 }
 

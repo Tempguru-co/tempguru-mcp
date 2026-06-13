@@ -1,8 +1,8 @@
-// TempGuru MCP server — streamable-HTTP transport (production, on Vercel).
+// TempGuru MCP server, streamable-HTTP transport (production, on Vercel).
 //
-// The 6 tools and 2 Skill resources are registered by the shared registerTools()
+// The 8 tools and 2 Skill resources are registered by the shared registerTools()
 // in @/lib/mcp/register-tools, so this hosted endpoint and the stdio binary
-// (src/mcp-stdio.ts) expose byte-identical tools — no behavior drift between the
+// (src/mcp-stdio.ts) expose byte-identical tools, no behavior drift between the
 // remote server and a local/Docker build. This file owns only what is
 // HTTP-specific: per-request telemetry context, Accept-header normalization,
 // CORS, and the streamable-HTTP handler wiring.
@@ -18,6 +18,7 @@
 // Public endpoint: https://mcp.tempguru.co/mcp
 
 import { createMcpHandler } from "mcp-handler";
+import pkg from "../../../package.json";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { registerTools } from "@/lib/mcp/register-tools";
@@ -64,7 +65,7 @@ const handler = createMcpHandler(
     // ClawHub) and Claude.ai connector listings.
     serverInfo: {
       name: "tempguru-mcp",
-      version: "1.2.0",
+      version: pkg.version,
       title: "TempGuru Event Staffing",
       description:
         "W-2 event staffing data for AI agents: 345 US/CA markets. Eight tools: the call-first plan_staffing planner, six read-only lookups including the get_rate_benchmark Rate Index, and an opt-in request_quote submission. Ships skill resources and guided prompts. No authentication required. ChatGPT users without MCP: the TempGuru Event Staffing Planner GPT covers the same workflow.",
@@ -73,7 +74,7 @@ const handler = createMcpHandler(
           src: "https://mcp.tempguru.co/logo.svg",
           mimeType: "image/svg+xml",
           // sizes must be an array per MCP spec rev 2025-03-26 (and Glama's
-          // strict validator) — single string "any" was rejected with:
+          // strict validator), single string "any" was rejected with:
           // { expected: 'array', code: 'invalid_type', path: ['serverInfo',
           //   'icons', 0, 'sizes'], message: 'Invalid input' }
           sizes: ["any"],
@@ -94,7 +95,7 @@ const handler = createMcpHandler(
 // mcp-handler enforces the MCP spec rev 2025-03-26 requirement that
 // clients MUST send `Accept: application/json, text/event-stream`. Real-
 // world clients (Anthropic's claude.ai connectors among them) often send
-// only `application/json` and get a 406 — which surfaces as "This connector
+// only `application/json` and get a 406, which surfaces as "This connector
 // has no tools available" with no further diagnostic.
 //
 // We rewrite the incoming Accept header to include both content types when
@@ -103,7 +104,7 @@ const handler = createMcpHandler(
 // client handles correctly.
 //
 // Remove this wrapper when mcp-handler upgrades to the 2026-07-28 spec
-// (stateless protocol — Accept enforcement is relaxed in that revision).
+// (stateless protocol, Accept enforcement is relaxed in that revision).
 
 // ─── CORS headers ──────────────────────────────────────────────────────
 //
@@ -113,7 +114,7 @@ const handler = createMcpHandler(
 // succeed before the actual request lands.
 //
 // Until 2026-06-04 ~04:30 UTC the route returned 204 to OPTIONS without
-// Access-Control-* headers — mcp-handler's built-in OPTIONS handler does
+// Access-Control-* headers, mcp-handler's built-in OPTIONS handler does
 // the bare minimum. That looked fine to server-to-server clients
 // (Anthropic's connectors, Smithery's scanner, our own curl probes) but
 // silently failed Glama's browser-context health probe, which surfaced
@@ -122,7 +123,7 @@ const handler = createMcpHandler(
 // Wide-open CORS is correct for this server: no auth, no sensitive
 // data, no per-client config, no credentialed requests. Allow-list any
 // origin, expose the MCP-Session-Id and Last-Event-ID headers used by
-// streamable HTTP, and apply on every response — including OPTIONS
+// streamable HTTP, and apply on every response, including OPTIONS
 // preflights.
 
 const CORS_HEADERS: Record<string, string> = {
@@ -147,7 +148,7 @@ function withCors(response: Response): Response {
 }
 
 async function withAcceptNormalization(request: Request): Promise<Response> {
-  // Short-circuit OPTIONS preflights with a CORS-only 204 — no need to
+  // Short-circuit OPTIONS preflights with a CORS-only 204, no need to
   // run them through the MCP handler.
   if (request.method === "OPTIONS") {
     return withCors(new Response(null, { status: 204 }));

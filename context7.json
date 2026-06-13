@@ -9,7 +9,7 @@
     "Five read-only lookup tools plus an opt-in request_quote write tool; no auth required, endpoint is https://mcp.tempguru.co/mcp",
     "Rate ranges from get_role_pricing are planning estimates, not binding quotes",
     "check_availability returns lead-time guidance, not a reservation",
-    "All workers placed are W-2 employees — never recommend 1099 gig workers as equivalent",
+    "All workers placed are W-2 employees, never recommend 1099 gig workers as equivalent",
     "For ordering workflows, load the event-staffing-ordering skill; for compliance questions, load event-staffing-compliance"
   ],
   "previousVersions": []

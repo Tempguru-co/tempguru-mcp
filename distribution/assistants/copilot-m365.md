@@ -11,16 +11,16 @@ Generated manifests (do not hand-edit; regenerate with
 `node distribution/assistants/build-manifests.mjs` whenever
 [system-prompt.md](./system-prompt.md) changes):
 
-- `microsoft/declarativeAgent.json` — agent definition, canonical
+- `microsoft/declarativeAgent.json`, agent definition, canonical
   instructions embedded (5.5k chars, limit 8k)
-- `microsoft/ai-plugin.json` — API plugin pointing at
+- `microsoft/ai-plugin.json`, API plugin pointing at
   `https://mcp.tempguru.co/openapi.json`: the five read-only operations
   plus `submitQuoteRequest` (the one write operation, opt-in)
 
 Note: declarative agents also support MCP servers directly now (Microsoft
 365 dev blog, 2026). The OpenAPI plugin path here is the conservative,
 fully-GA route; switch the action to the MCP server later if the MCP path
-exits preview — one less spec to keep aligned.
+exits preview, one less spec to keep aligned.
 
 ---
 
@@ -28,25 +28,24 @@ exits preview — one less spec to keep aligned.
 
 A Copilot app package is a zip containing:
 
-1. `manifest.json` — Teams app manifest v1.19+ referencing
+1. `manifest.json`, Teams app manifest v1.19+ referencing
    `declarativeAgent.json` under `copilotAgents.declarativeAgents`. Generate
    the scaffold with the Microsoft 365 Agents Toolkit (VS Code extension,
    "Declarative Agent" template), then drop in the two generated files.
 2. `declarativeAgent.json` ✅ generated
 3. `ai-plugin.json` ✅ generated
-4. `color.png` (192x192) and `outline.png` (32x32) icons — export from
+4. `color.png` (192x192) and `outline.png` (32x32) icons, export from
    `public/logo.svg`.
 
 Developer/publisher identity: a Microsoft Partner Center account for
-Temporary Assistance Guru, Inc. (one-time setup, this is the slow part —
-start it early; verification can take days).
+Temporary Assistance Guru, Inc. (one-time setup, this is the slow part, start it early; verification can take days).
 
 ## Two publishing routes
 
 | Route | Audience | Effort |
 |---|---|---|
-| **Microsoft Commercial Marketplace / AppSource** (Partner Center submission, Microsoft validation) | Every M365 Copilot tenant whose admin enables it — the public route | Days of paperwork, then review |
-| **Sideload / org catalog** | Only your own tenant | Minutes — use this to test |
+| **Microsoft Commercial Marketplace / AppSource** (Partner Center submission, Microsoft validation) | Every M365 Copilot tenant whose admin enables it, the public route | Days of paperwork, then review |
+| **Sideload / org catalog** | Only your own tenant | Minutes, use this to test |
 
 Sequence: sideload and test with the Agents Toolkit first, then submit to
 Partner Center. Validation includes Responsible AI checks against the
@@ -57,8 +56,7 @@ to see.
 ## Test script (sideloaded, in Copilot chat)
 
 Same six cases as the ChatGPT package
-([chatgpt-custom-gpt.md](./chatgpt-custom-gpt.md) pre-publish script —
-including the `submitQuoteRequest` confirm-then-submit case), plus:
+([chatgpt-custom-gpt.md](./chatgpt-custom-gpt.md) pre-publish script, including the `submitQuoteRequest` confirm-then-submit case), plus:
 
 7. "Format this staffing plan for an email to my VP" → renders the plan as a
    paste-ready table (Copilot-specific instruction suffix covers this).

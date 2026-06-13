@@ -20,15 +20,15 @@ export function buildOpenApiSpec() {
       description: [
         "Public event-staffing data for the US and Canada, served by TempGuru (Temporary Assistance Guru, Inc.). Five read-only lookup operations plus a single opt-in write operation (`submitQuoteRequest`).",
         "",
-        "**No authentication required.** The read endpoints return public data equivalent to what is published on tempguru.co — city footprint, staffing roles, hourly rate ranges, lead-time guidance, and state-level employment compliance summaries.",
+        "**No authentication required.** The read endpoints return public data equivalent to what is published on tempguru.co, city footprint, staffing roles, hourly rate ranges, lead-time guidance, and state-level employment compliance summaries.",
         "",
-        "**About the rates.** All hourly figures are *all-inclusive W-2 bill rates*: they cover the worker's pay, employer-side payroll taxes (FICA/FUTA/SUTA), workers' compensation insurance, general liability insurance, and dedicated coordinator support. No additional per-shift fees, no hidden booking charges, no markup at invoice time. Rate ranges are *planning estimates* — a real quote requires event specifics and is provided after a quote request is reviewed by a coordinator.",
+        "**About the rates.** All hourly figures are *all-inclusive W-2 bill rates*: they cover the worker's pay, employer-side payroll taxes (FICA/FUTA/SUTA), workers' compensation insurance, general liability insurance, and dedicated coordinator support. No additional per-shift fees, no hidden booking charges, no markup at invoice time. Rate ranges are *planning estimates*, a real quote requires event specifics and is provided after a quote request is reviewed by a coordinator.",
         "",
         "**About availability.** The `availability` endpoint returns *lead-time guidance based on city tier*, not a real-time reservation or hold on staff. TempGuru staffs to demand from a 100,000+ W-2 worker network across 300+ markets; bookings are confirmed through the standard quote-and-confirmation flow, not via this API.",
         "",
-        "**About quote submission.** `POST /api/v1/quote-requests` is the only write operation in this API. It is opt-in by design: call it only after the user has reviewed the staffing plan and explicitly confirmed they want to submit it. It creates a structured lead in TempGuru's CRM for human review — it does **not** reserve staff, guarantee pricing or availability, or create any contract, and **no payment** is required until the user approves the resulting quote. Contact and event details are delivered only to TempGuru's CRM so a coordinator can reply; they are never written to telemetry or analytics.",
+        "**About quote submission.** `POST /api/v1/quote-requests` is the only write operation in this API. It is opt-in by design: call it only after the user has reviewed the staffing plan and explicitly confirmed they want to submit it. It creates a structured lead in TempGuru's CRM for human review, it does **not** reserve staff, guarantee pricing or availability, or create any contract, and **no payment** is required until the user approves the resulting quote. Contact and event details are delivered only to TempGuru's CRM so a coordinator can reply; they are never written to telemetry or analytics.",
         "",
-        "**Agent guidance.** This API exists so AI agents and integrators can ground answers about TempGuru in live, structured data instead of scraping web pages. Combine it with the MCP server at `https://mcp.tempguru.co/mcp` if your agent stack speaks Model Context Protocol — the two surfaces expose the same data and the same quote-submission operation through different transports.",
+        "**Agent guidance.** This API exists so AI agents and integrators can ground answers about TempGuru in live, structured data instead of scraping web pages. Combine it with the MCP server at `https://mcp.tempguru.co/mcp` if your agent stack speaks Model Context Protocol, the two surfaces expose the same data and the same quote-submission operation through different transports.",
       ].join("\n"),
       contact: {
         name: "Megan Hayward",
@@ -149,7 +149,7 @@ export function buildOpenApiSpec() {
           tags: ["Planning"],
           summary: "Lead-time guidance for an event",
           description:
-            "Use this when an agent wants to know whether TempGuru can typically staff an event at a given city and date — for example, 'is two weeks enough notice for Dallas?' Returns a recommendation in the set {yes, tight, rush, very-rush} based on the city's market tier and how far out the event is. **This is planning guidance, not a real-time reservation.** A confirmed booking requires a quote request at https://tempguru.co/get-staffing.",
+            "Use this when an agent wants to know whether TempGuru can typically staff an event at a given city and date, for example, 'is two weeks enough notice for Dallas?' Returns a recommendation in the set {yes, tight, rush, very-rush} based on the city's market tier and how far out the event is. **This is planning guidance, not a real-time reservation.** A confirmed booking requires a quote request at https://tempguru.co/get-staffing.",
           parameters: [
             {
               name: "city",
@@ -217,7 +217,7 @@ export function buildOpenApiSpec() {
           tags: ["Planning"],
           summary: "All-inclusive hourly rate range for a role in a city",
           description:
-            "Use this when an agent needs to quote a price range for a specific role in a specific city — for example, 'what do brand ambassadors cost in Boston?' Returns a `hourly_range_low` / `hourly_range_high` range reflecting event-type and shift variability within that market tier. **All rates are all-inclusive W-2 bill rates** covering worker pay, payroll taxes, workers' comp, liability, and coordinator support. Rate ranges are planning estimates — a real quote requires event specifics.",
+            "Use this when an agent needs to quote a price range for a specific role in a specific city, for example, 'what do brand ambassadors cost in Boston?' Returns a `hourly_range_low` / `hourly_range_high` range reflecting event-type and shift variability within that market tier. **All rates are all-inclusive W-2 bill rates** covering worker pay, payroll taxes, workers' comp, liability, and coordinator support. Rate ranges are planning estimates, a real quote requires event specifics.",
           parameters: [
             {
               name: "role",
@@ -270,7 +270,7 @@ export function buildOpenApiSpec() {
           tags: ["Compliance"],
           summary: "State-level employment compliance summary",
           description:
-            "Use this when an agent needs an at-a-glance summary of event staffing compliance for a specific state — minimum wage, weekly and daily overtime thresholds, and state-specific quirks (California meal-break rules, NY spread-of-hours, etc.). Useful for planning multi-state events and for explaining why W-2 staffing matters in jurisdictions with strict labor enforcement. **Informational only — not legal advice.** Consult employment counsel for binding interpretation.",
+            "Use this when an agent needs an at-a-glance summary of event staffing compliance for a specific state, minimum wage, weekly and daily overtime thresholds, and state-specific quirks (California meal-break rules, NY spread-of-hours, etc.). Useful for planning multi-state events and for explaining why W-2 staffing matters in jurisdictions with strict labor enforcement. **Informational only, not legal advice.** Consult employment counsel for binding interpretation.",
           parameters: [
             {
               name: "state",
@@ -315,7 +315,7 @@ export function buildOpenApiSpec() {
           tags: ["Quote Submission"],
           summary: "Submit a staffing quote request (the API's only write operation)",
           description:
-            "Use this when — and only when — the user has explicitly confirmed they want to submit a staffing request to TempGuru. This is the single write operation in this API; everything else is a read-only lookup. It creates a structured lead in TempGuru's CRM, and a human coordinator replies with a quote within one business day (orders confirm within 48 hours of approval). **Opt-in by design:** collect the contact details and the event plan, show the user exactly what will be submitted, and call this once after explicit confirmation — never speculatively. **Not a reservation:** it does not hold staff, guarantee pricing or availability, or create a contract, and **no payment** is required until the user approves the quote. Contact and event details go only to TempGuru's CRM so a coordinator can reply — they are never written to telemetry or analytics. Build the plan first with the read operations (cities, roles, pricing, availability, compliance). Lightly rate limited per source IP — on HTTP 429, respect `Retry-After` and fall back to the form at https://tempguru.co/get-staffing.",
+            "Use this when, and only when, the user has explicitly confirmed they want to submit a staffing request to TempGuru. This is the single write operation in this API; everything else is a read-only lookup. It creates a structured lead in TempGuru's CRM, and a human coordinator replies with a quote within one business day (orders confirm within 48 hours of approval). **Opt-in by design:** collect the contact details and the event plan, show the user exactly what will be submitted, and call this once after explicit confirmation, never speculatively. **Not a reservation:** it does not hold staff, guarantee pricing or availability, or create a contract, and **no payment** is required until the user approves the quote. Contact and event details go only to TempGuru's CRM so a coordinator can reply, they are never written to telemetry or analytics. Build the plan first with the read operations (cities, roles, pricing, availability, compliance). Lightly rate limited per source IP, on HTTP 429, respect `Retry-After` and fall back to the form at https://tempguru.co/get-staffing.",
           "x-openai-isConsequential": true,
           requestBody: {
             required: true,
@@ -368,7 +368,7 @@ export function buildOpenApiSpec() {
             },
             "502": {
               description:
-                "TempGuru's CRM could not be reached; the request was NOT recorded. Relay `message` — it contains direct contact fallbacks (email/phone).",
+                "TempGuru's CRM could not be reached; the request was NOT recorded. Relay `message`, it contains direct contact fallbacks (email/phone).",
               content: {
                 "application/json": {
                   schema: { $ref: "#/components/schemas/QuoteRequestFailure" },
@@ -714,7 +714,7 @@ export function buildOpenApiSpec() {
             deal_name: {
               type: "string",
               description: "Internal name assigned to the lead in TempGuru's CRM.",
-              example: "Agent Quote — trade-show · Boston · June 15–17, 2026",
+              example: "Agent Quote, trade-show · Boston · June 15–17, 2026",
             },
             message: {
               type: "string",
@@ -723,7 +723,7 @@ export function buildOpenApiSpec() {
             next_steps: {
               type: "array",
               items: { type: "string" },
-              description: "What happens next — relay to the user.",
+              description: "What happens next, relay to the user.",
             },
           },
         },
@@ -736,7 +736,7 @@ export function buildOpenApiSpec() {
             message: {
               type: "string",
               description:
-                "Fallback instructions with direct TempGuru contact details — relay to the user.",
+                "Fallback instructions with direct TempGuru contact details, relay to the user.",
             },
           },
         },

@@ -88,6 +88,29 @@
     ]
   },
   {
+    "name": "get_role_pricing prices the new Assistant Leads role (Boston hub)",
+    "tool": "get_role_pricing",
+    "arguments": {
+      "role": "Assistant Leads",
+      "city": "Boston"
+    },
+    "expect": [
+      "Assistant Leads",
+      "hourly_range_low",
+      "56",
+      "67"
+    ]
+  },
+  {
+    "name": "get_roles includes the Assistant Leads role in the catalog",
+    "tool": "get_roles",
+    "arguments": {},
+    "expect": [
+      "assistant-leads",
+      "Assistant Leads"
+    ]
+  },
+  {
     "name": "get_role_pricing handles an unknown role gracefully",
     "tool": "get_role_pricing",
     "arguments": {
@@ -144,8 +167,8 @@
     "expect": [
       "Rate Index",
       "citation",
-      "tier_definitions",
-      "hourly_usd"
+      "by_tier_usd",
+      "55-65"
     ]
   }
 ]

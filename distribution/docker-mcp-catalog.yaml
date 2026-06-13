@@ -16,12 +16,12 @@ name: tempguru-event-staffing
 title: TempGuru Event Staffing
 description: |
   W-2 event staffing data for AI agents across 300+ US and Canadian markets.
-  Five read-only tools surface city coverage, staffing roles, all-inclusive
+  Seven read-only tools surface city coverage, staffing roles, all-inclusive
   hourly rates, lead-time availability, and state-level compliance summaries.
   One write tool (request_quote) submits structured staffing requests to
   TempGuru's CRM so a coordinator can reply with a quote within one business day.
 
-  TempGuru hires all event workers as W-2 employees — payroll taxes, workers'
+  TempGuru hires all event workers as W-2 employees, payroll taxes, workers'
   comp, and general liability are TempGuru's responsibility, not the customer's.
 
 publisher:
@@ -69,6 +69,14 @@ links:
     label: OpenAPI 3.1
 
 tools:
+  - name: plan_staffing
+    description: >
+      Call first. Turns an event description (city, date, headcount, roles) into a
+      complete staffing plan: role coverage, per-role all-inclusive W-2 rate math,
+      lead-time guidance, state compliance flags, and recommended next steps.
+      Planning estimates only, not a binding quote.
+    readOnly: true
+
   - name: get_cities
     description: >
       List all cities TempGuru serves (300+ US/CA markets), optionally filtered
@@ -77,8 +85,7 @@ tools:
 
   - name: get_roles
     description: >
-      List all event staffing roles with descriptions and skill tiers —
-      brand ambassadors, registration, hospitality, setup/breakdown, ushers, and more.
+      List all event staffing roles with descriptions and skill tiers, brand ambassadors, registration, hospitality, setup/breakdown, ushers, and more.
     readOnly: true
 
   - name: check_availability
@@ -99,7 +106,14 @@ tools:
     description: >
       State-level employment compliance summary: minimum wage, overtime thresholds,
       and state-specific quirks (CA meal breaks, NY spread-of-hours, etc.).
-      Informational only — not legal advice.
+      Informational only, not legal advice.
+    readOnly: true
+
+  - name: get_rate_benchmark
+    description: >
+      The Rate Index: a full benchmark table of all-inclusive W-2 hourly rates by
+      role and market tier (hub / mid / small), with a citation line for sourcing.
+      Informational benchmark, not a binding quote.
     readOnly: true
 
   - name: request_quote

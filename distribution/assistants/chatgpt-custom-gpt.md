@@ -13,13 +13,13 @@ Status tracker lives in [README.md](./README.md).
 1. **Builder profile verification.** Settings → Builder profile → verify the
    `tempguru.co` domain (DNS TXT record). The GPT then shows "by tempguru.co"
    instead of a personal name. This is a trust signal the store ranks on.
-2. **Privacy policy** — required because the GPT uses Actions:
+2. **Privacy policy**, required because the GPT uses Actions:
    `https://tempguru.co/privacy-policy` (live, verified 2026-06-09).
 3. Knowledge files generated: run `node distribution/assistants/build-knowledge.mjs`.
 
 ---
 
-## Configure tab — paste these fields
+## Configure tab, paste these fields
 
 ### Name
 
@@ -121,8 +121,8 @@ Run these in Preview; all six must pass before publishing:
 5. "Are your workers contractors?" → W-2 story, no competitor names.
 6. "Submit a quote: [full plan + contact details]" → summarizes the plan,
    asks for explicit confirmation, then calls `submitQuoteRequest` exactly
-   once (ChatGPT also shows its own confirm dialog — the operation is marked
-   consequential). Use an obvious test payload (event name "TEST — please
+   once (ChatGPT also shows its own confirm dialog, the operation is marked
+   consequential). Use an obvious test payload (event name "TEST, please
    ignore", your own email) and delete the row from the Notion Inbound Deal
    Pipeline afterward.
 

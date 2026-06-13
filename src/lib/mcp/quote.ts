@@ -1,4 +1,4 @@
-// Shared request_quote contract — zod input schema + confirmation payloads.
+// Shared request_quote contract, zod input schema + confirmation payloads.
 //
 // Both write surfaces consume this:
 //   - src/lib/mcp/register-tools.ts             MCP tool `request_quote` (HTTP + stdio)
@@ -6,7 +6,7 @@
 //
 // Keeping the schema and the confirmation shapes here guarantees the REST
 // endpoint and the MCP tool validate identically and return byte-identical
-// payloads — the same single-source-of-truth promise queries.ts makes for
+// payloads, the same single-source-of-truth promise queries.ts makes for
 // the read-only surfaces. Edit the schema here and both surfaces (plus the
 // MCP tool's advertised JSON schema) move together; the OpenAPI spec in
 // src/lib/api/openapi.ts mirrors it by hand and must be kept in sync.
@@ -14,10 +14,10 @@
 import { z } from "zod";
 
 // Raw shape (not z.object) because McpServer.registerTool takes a ZodRawShape.
-// The REST route validates with RequestQuoteSchema below — same shape object.
+// The REST route validates with RequestQuoteSchema below, same shape object.
 //
 // Required text fields are trimmed and must be non-empty, and the staffing
-// plan needs at least one role — a lead with blank contact/event fields or
+// plan needs at least one role, a lead with blank contact/event fields or
 // no roles is garbage by the time it reaches the CRM (createLead writes
 // fields verbatim to Notion).
 export const REQUEST_QUOTE_INPUT = {

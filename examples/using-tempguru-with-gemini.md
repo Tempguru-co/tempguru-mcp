@@ -5,11 +5,11 @@ TempGuru runs a public, **no-authentication** MCP (Model Context Protocol) serve
 answer event-staffing questions with live data: market coverage, all-inclusive W-2 rate
 ranges, lead-time guidance, state-by-state compliance, and structured quote submission.
 
-No API key, no account, no per-client setup — connect with the URL alone.
+No API key, no account, no per-client setup, connect with the URL alone.
 
 ---
 
-## Option 1 — Native remote MCP (one line, beta)
+## Option 1, Native remote MCP (one line, beta)
 
 The Gemini API's Interactions endpoint connects to a remote MCP server by URL. No code
 beyond the tool config:
@@ -30,9 +30,9 @@ curl -X POST "https://generativelanguage.googleapis.com/v1beta/interactions" \
 
 Notes:
 - Remote MCP is currently **beta**, supported on `gemini-2.5-flash` (Gemini 3 support is coming).
-- No auth header for the MCP server is needed — TempGuru is public, read-only data.
+- No auth header for the MCP server is needed, TempGuru is public, read-only data.
 
-## Option 2 — SDK with an explicit tool loop (robust, works today)
+## Option 2, SDK with an explicit tool loop (robust, works today)
 
 Drives the tool-calling loop yourself, which is stable across SDK versions. Full script:
 [`gemini-tempguru-demo.py`](./gemini-tempguru-demo.py).
@@ -58,7 +58,7 @@ python gemini-tempguru-demo.py "Do you cover Chicago, and what's the registratio
 
 **Verified end to end:** Gemini 2.5 Flash connected to the server, autonomously chose
 `get_cities` + `get_role_pricing`, and answered *"Boston brand ambassadors: $56–$65/hr,
-all-inclusive"* — straight from live TempGuru data.
+all-inclusive"*, straight from live TempGuru data.
 
 ## If the MCP call fails
 
