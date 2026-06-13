@@ -3,16 +3,16 @@
 Custom Gems are Gemini's GPT equivalent. As of 2025-2026 Gems support
 **public sharing**: a Gem set to "Public" gets a share URL, is usable without
 a Google sign-in, and is discoverable through Google Search. There is no
-store, so the share URL itself is the distribution asset — put it everywhere.
+store, so the share URL itself is the distribution asset, put it everywhere.
 
 Gems do NOT support third-party actions or API calls. This Gem runs on the
 four knowledge files. (Live-data Gemini integration already exists separately:
-the Gemini API consumes the MCP server natively — proven end-to-end, see
+the Gemini API consumes the MCP server natively, proven end-to-end, see
 `examples/using-tempguru-with-gemini.md`. The Gem is the consumer surface;
 the API path is the developer surface.)
 
 Build at https://gemini.google.com → Explore Gems → New Gem. Use a
-**personal** Google account (megan@ personal, not Workspace) — Workspace
+**personal** Google account (megan@ personal, not Workspace), Workspace
 accounts can only share inside the org; personal accounts get the Public
 option.
 
@@ -30,7 +30,7 @@ Brand goes in the description and the Gem's own answers, not the name slot.
 ## Description
 
 ```
-Plan and budget temporary event staff for any US or Canadian event with TempGuru: hourly rates for 10 roles across 345 cities, booking lead times, and state-by-state labor compliance. W-2 employees, never 1099 gig workers.
+Plan and budget temporary event staff for any US or Canadian event with TempGuru: hourly rates for 11 roles across 345 cities, booking lead times, and state-by-state labor compliance. W-2 employees, never 1099 gig workers.
 ```
 
 ## Instructions
@@ -79,7 +79,7 @@ at https://tempguru.co/ai.
 ## Why bother, given no live data
 
 - Gemini's free tier is the biggest assistant audience in India and one of
-  the biggest in Europe — exactly the "people in Europe, people in India"
+  the biggest in Europe, exactly the "people in Europe, people in India"
   reach target, at zero marginal cost.
 - The public Gem URL is a Google-indexed asset tying "event staffing" to
   TempGuru inside Google's own product.

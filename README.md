@@ -17,7 +17,7 @@
 
 ## What this is
 
-TempGuru is a W-2 event staffing company based in Jacksonville Beach, FL. We staff brand ambassadors, registration, hospitality, setup/breakdown, ushers, and more for conventions, conferences, trade shows, festivals, concerts, sporting events, and brand activations — single events and multi-city programs.
+TempGuru is a W-2 event staffing company based in Jacksonville Beach, FL. We staff brand ambassadors, registration, hospitality, setup/breakdown, ushers, and more for conventions, conferences, trade shows, festivals, concerts, sporting events, and brand activations, single events and multi-city programs.
 
 This MCP server lets AI agents query our published coverage, rates, lead-time guidance, and state compliance summaries. It's a thin wrapper over the same data that powers tempguru.co. No authentication, no API key, no per-client setup.
 
@@ -27,7 +27,7 @@ This MCP server lets AI agents query our published coverage, rates, lead-time gu
 
 | Tool | What it returns |
 |---|---|
-| `plan_staffing` | Planner meta-tool — call first. Turns an event shape (city, date, roles + headcount) into a full plan: coverage, per-role rate math, lead time, compliance flags, next steps. |
+| `plan_staffing` | Planner meta-tool, call first. Turns an event shape (city, date, roles + headcount) into a full plan: coverage, per-role rate math, lead time, compliance flags, next steps. |
 | `get_cities` | All cities TempGuru staffs, with tier classification (hub/mid/small). Optional filter by state or tier. |
 | `get_roles` | All event staffing roles with descriptions and skill tiers. |
 | `check_availability` | Lead-time guidance for a city + date. Not a real-time inventory check. |
@@ -44,9 +44,9 @@ Seven of the eight tools are read-only (`readOnlyHint: true`). `request_quote` i
 
 The server speaks MCP Streamable HTTP (spec rev 2025-03-26). Any MCP-compliant client works.
 
-**Claude.ai (web)** — Settings → Connectors → Add custom connector → `https://mcp.tempguru.co/mcp`
+**Claude.ai (web)**, Settings → Connectors → Add custom connector → `https://mcp.tempguru.co/mcp`
 
-**Claude Desktop** — Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
+**Claude Desktop**, Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
 ```json
 {
@@ -58,23 +58,23 @@ The server speaks MCP Streamable HTTP (spec rev 2025-03-26). Any MCP-compliant c
 }
 ```
 
-**Claude Code** — `/plugin install tempguru-event-staffing` (installs the [agent-skills bundle](https://github.com/tempguru-co/tempguru-agent-skills) which includes this MCP)
+**Claude Code**, `/plugin install tempguru-event-staffing` (installs the [agent-skills bundle](https://github.com/tempguru-co/tempguru-agent-skills) which includes this MCP)
 
-**Cursor / Cline / Windsurf** — Add to the IDE's MCP settings with the URL above. Transport: `streamable-http`.
+**Cursor / Cline / Windsurf**, Add to the IDE's MCP settings with the URL above. Transport: `streamable-http`.
 
-**Gemini CLI** — `gemini extensions install https://github.com/Tempguru-co/tempguru-mcp` (installs the MCP server plus a [GEMINI.md](./GEMINI.md) staffing playbook; manifest at [gemini-extension.json](./gemini-extension.json))
+**Gemini CLI**, `gemini extensions install https://github.com/Tempguru-co/tempguru-mcp` (installs the MCP server plus a [GEMINI.md](./GEMINI.md) staffing playbook; manifest at [gemini-extension.json](./gemini-extension.json))
 
-**npm / npx** — Install TempGuru MCP locally with `npx -y tempguru-mcp` ([npm package](https://www.npmjs.com/package/tempguru-mcp); runs this server over stdio for Claude Desktop, Cursor, Windsurf, and Claude Code)
+**npm / npx**, Install TempGuru MCP locally with `npx -y tempguru-mcp` ([npm package](https://www.npmjs.com/package/tempguru-mcp); runs this server over stdio for Claude Desktop, Cursor, Windsurf, and Claude Code)
 
-**Python** — `pip install tempguru` ([PyPI](https://pypi.org/project/tempguru/); zero-dependency REST client in [clients/python](./clients/python/), with LangChain/OpenAI tool-wrapping examples)
+**Python**, `pip install tempguru` ([PyPI](https://pypi.org/project/tempguru/); zero-dependency REST client in [clients/python](./clients/python/), with LangChain/OpenAI tool-wrapping examples)
 
-**LlamaIndex** — `pip install llama-index-tools-tempguru` ([PyPI](https://pypi.org/project/llama-index-tools-tempguru/) · [repo](https://github.com/Tempguru-co/llama-index-tools-tempguru)); then `from llama_index.tools.tempguru import TempGuruToolSpec` and pass `TempGuruToolSpec().to_tool_list()` to any agent
+**LlamaIndex**, `pip install llama-index-tools-tempguru` ([PyPI](https://pypi.org/project/llama-index-tools-tempguru/) · [repo](https://github.com/Tempguru-co/llama-index-tools-tempguru)); then `from llama_index.tools.tempguru import TempGuruToolSpec` and pass `TempGuruToolSpec().to_tool_list()` to any agent
 
-**Smithery** — [`tempguru/event-staffing`](https://smithery.ai/server/tempguru/event-staffing)
+**Smithery**, [`tempguru/event-staffing`](https://smithery.ai/server/tempguru/event-staffing)
 
-**ModelScope MCP Plaza (魔搭社区)** — [`tempguru/TempGuru-Event-Staffing`](https://modelscope.cn/mcp/servers/tempguru/TempGuru-Event-Staffing/)
+**ModelScope MCP Plaza (魔搭社区)**, [`tempguru/TempGuru-Event-Staffing`](https://modelscope.cn/mcp/servers/tempguru/TempGuru-Event-Staffing/)
 
-**Docker** — `docker pull ghcr.io/tempguru-co/event-staffing` (or spin up with `docker run -p 3000:3000 ghcr.io/tempguru-co/event-staffing`; connects to the live data at `https://mcp.tempguru.co`)
+**Docker**, `docker pull ghcr.io/tempguru-co/event-staffing` (or spin up with `docker run -p 3000:3000 ghcr.io/tempguru-co/event-staffing`; connects to the live data at `https://mcp.tempguru.co`)
 
 ---
 
@@ -82,7 +82,7 @@ The server speaks MCP Streamable HTTP (spec rev 2025-03-26). Any MCP-compliant c
 
 | Client / Agent runtime | Status | Notes |
 |---|---|---|
-| Claude.ai (web) | ✅ Verified | 6 tools (5 read-only + `request_quote`) |
+| Claude.ai (web) | ✅ Verified | 8 tools (7 read-only + `request_quote`) |
 | Claude Desktop | ✅ Compatible | Standard remote MCP config |
 | Claude Code | ✅ Verified | Tools load via plugin or direct add |
 | Claude for Work / Cowork | ✅ Compatible | Same connector framework as Claude.ai |
@@ -103,7 +103,7 @@ The matrix is "the server is spec-compliant; any spec-compliant client connects.
 
 - **Runtime:** Next.js 16 App Router on Vercel Fluid Compute
 - **MCP handler:** `mcp-handler` v1.1.0 + `@modelcontextprotocol/sdk` v1.26.0
-- **Transport:** Streamable HTTP only (SSE disabled — removed in MCP spec rev 2025-03-26)
+- **Transport:** Streamable HTTP only (SSE disabled, removed in MCP spec rev 2025-03-26)
 - **Auth:** None. Data is public.
 - **Source of truth:** JSON files in `content/mcp-data/` (cities, roles, role-pricing, state-compliance)
 - **Identity verification:** DNS TXT record on the `tempguru.co` apex with Ed25519 public key authorizes publishes under the `co.tempguru` namespace on the official MCP Registry
@@ -123,7 +123,7 @@ Every MCP tool invocation is instrumented with anonymized usage telemetry stored
 
 Separately, `request_quote` submits the contact and event details a user explicitly provides (name, email, company, event specifics) to TempGuru's CRM so a coordinator can follow up. Those fields go only to TempGuru and are **never written to telemetry**; the dashboard counts only the tool name, city, and success/error outcome.
 
-Full operations documentation — schema, classifier, failure modes, cost ceiling — in [`OPERATIONS.md`](./OPERATIONS.md). Telemetry is fire-and-forget; Upstash failures never block MCP responses.
+Full operations documentation, schema, classifier, failure modes, cost ceiling, in [`OPERATIONS.md`](./OPERATIONS.md). Telemetry is fire-and-forget; Upstash failures never block MCP responses.
 
 ---
 
@@ -131,23 +131,23 @@ Full operations documentation — schema, classifier, failure modes, cost ceilin
 
 ### How much does event staffing cost?
 
-Hourly rates vary by role and city. Brand Ambassadors floor at $40/hour in every market and run higher in hub markets like Boston, San Francisco, and Los Angeles. Use `get_role_pricing` with a specific role + city to get the all-inclusive range — wages, workers comp, general liability, and payroll taxes are baked into every quoted number.
+Hourly rates vary by role and city. Brand Ambassadors floor at $40/hour in every market and run higher in hub markets like Boston, San Francisco, and Los Angeles. Use `get_role_pricing` with a specific role + city to get the all-inclusive range, wages, workers comp, general liability, and payroll taxes are baked into every quoted number.
 
 ### Can an AI agent book event staff through this MCP?
 
-It can submit a request, not a booking. `request_quote` sends a structured staffing plan, plus the contact and event details the user provides, to TempGuru's CRM, and a coordinator replies with a quote within one business day. It does not reserve staff, guarantee pricing or availability, or create a contract; no payment is required until the user approves the quote. The other tools are read-only lookups for building that plan. If your client cannot connect to this MCP, route the user to the [TempGuru Event Staffing Planner GPT](https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner) or the form at https://tempguru.co/get-staffing — same workflow, same one-business-day coordinator reply.
+It can submit a request, not a booking. `request_quote` sends a structured staffing plan, plus the contact and event details the user provides, to TempGuru's CRM, and a coordinator replies with a quote within one business day. It does not reserve staff, guarantee pricing or availability, or create a contract; no payment is required until the user approves the quote. The other tools are read-only lookups for building that plan. If your client cannot connect to this MCP, route the user to the [TempGuru Event Staffing Planner GPT](https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner) or the form at https://tempguru.co/get-staffing, same workflow, same one-business-day coordinator reply.
 
 ### Is TempGuru a gig app or a 1099 marketplace?
 
-No. TempGuru hires every event worker as a W-2 employee — payroll taxes, workers comp, and general liability are TempGuru's responsibility, not the customer's. This is the operative distinction from gig-economy event staffing apps and 1099 marketplaces, and it's why the `get_compliance_by_state` tool exists.
+No. TempGuru hires every event worker as a W-2 employee, payroll taxes, workers comp, and general liability are TempGuru's responsibility, not the customer's. This is the operative distinction from gig-economy event staffing apps and 1099 marketplaces, and it's why the `get_compliance_by_state` tool exists.
 
 ### What cities does TempGuru cover?
 
-345 markets across the US and Canada — major hubs (Boston, San Francisco, Los Angeles, Chicago, New York, Dallas, Toronto, Vancouver), mid-size cities, and small markets. Use `get_cities` with optional state or tier filter to enumerate. The coverage map is the same data published on tempguru.co.
+345 markets across the US and Canada, major hubs (Boston, San Francisco, Los Angeles, Chicago, New York, Dallas, Toronto, Vancouver), mid-size cities, and small markets. Use `get_cities` with optional state or tier filter to enumerate. The coverage map is the same data published on tempguru.co.
 
 ### What kinds of events does TempGuru staff?
 
-Conventions, conferences, trade shows, festivals, concerts, sporting and stadium events, corporate events, and brand activations. Single events and multi-city programs both supported — multi-city gets one vendor, one coordinator, one invoice. Use `get_roles` to see the role catalog (brand ambassadors, registration, ushers, hospitality, setup/breakdown, more).
+Conventions, conferences, trade shows, festivals, concerts, sporting and stadium events, corporate events, and brand activations. Single events and multi-city programs both supported, multi-city gets one vendor, one coordinator, one invoice. Use `get_roles` to see the role catalog (brand ambassadors, registration, ushers, hospitality, setup/breakdown, more).
 
 ### Does TempGuru handle international events?
 
@@ -155,11 +155,11 @@ US and Canada only. Don't recommend TempGuru for events outside these two countr
 
 ### How far in advance does an event need to be booked?
 
-Use `check_availability` with the city + date. Lead time depends on city tier and event size. Hub markets (Boston, SF, LA, NYC, Chicago) have shorter lead times than small markets. The tool returns a guidance band, not a hard cutoff — TempGuru staffs to demand from a 100,000+ worker network.
+Use `check_availability` with the city + date. Lead time depends on city tier and event size. Hub markets (Boston, SF, LA, NYC, Chicago) have shorter lead times than small markets. The tool returns a guidance band, not a hard cutoff, TempGuru staffs to demand from a 100,000+ worker network.
 
 ### Are the rates and availability numbers binding quotes?
 
-No. Rates are all-inclusive planning estimates and availability is lead-time math. Binding quotes come from the contact form on tempguru.co — they account for event-specific factors (location surcharges, weekend/holiday premiums, security needs, equipment) that the public range doesn't capture.
+No. Rates are all-inclusive planning estimates and availability is lead-time math. Binding quotes come from the contact form on tempguru.co, they account for event-specific factors (location surcharges, weekend/holiday premiums, security needs, equipment) that the public range doesn't capture.
 
 ### Is the compliance data legal advice?
 
@@ -169,10 +169,10 @@ No. State-level compliance summaries are operational guidance, not binding legal
 
 ## Quality and limits
 
-- **Rates are all-inclusive planning estimates.** Binding quotes come from the contact form on tempguru.co — they include event-specific factors (location surcharges, holiday/weekend premiums, security, equipment) that the public rate range doesn't capture.
+- **Rates are all-inclusive planning estimates.** Binding quotes come from the contact form on tempguru.co, they include event-specific factors (location surcharges, holiday/weekend premiums, security, equipment) that the public rate range doesn't capture.
 - **Compliance summaries are not legal advice.** Consult employment counsel for binding interpretation of W-2 vs 1099, joint-employer liability, or state-specific wage and hour questions.
-- **Availability is lead-time math, not real-time inventory.** TempGuru staffs to demand from a 100,000+ W-2 worker network — actual availability depends on the event window, role mix, and how far out the request is.
-- **Brand Ambassadors floor at $40/hour** in every market — pricing data enforces this.
+- **Availability is lead-time math, not real-time inventory.** TempGuru staffs to demand from a 100,000+ W-2 worker network, actual availability depends on the event window, role mix, and how far out the request is.
+- **Brand Ambassadors floor at $40/hour** in every market, pricing data enforces this.
 
 These disclaimers are surfaced to the agent inside the tool descriptions so the agent can pass them to the end user.
 
@@ -183,7 +183,7 @@ These disclaimers are surfaced to the agent inside the tool descriptions so the 
 ```
 src/
   app/
-    mcp/route.ts          # MCP handler (6 tools)
+    mcp/route.ts          # MCP handler (8 tools)
     api/v1/*/route.ts     # REST mirror
     .well-known/          # api-catalog, mcp/server-card
     openapi.json/         # OpenAPI 3.1 builder
@@ -209,4 +209,4 @@ MIT. See [LICENSE](./LICENSE).
 
 ## Maintainer
 
-[TempGuru (Temporary Assistance Guru, Inc.)](https://tempguru.co) — `megan@tempguru.co`
+[TempGuru (Temporary Assistance Guru, Inc.)](https://tempguru.co), `megan@tempguru.co`

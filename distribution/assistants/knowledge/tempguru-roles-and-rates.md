@@ -1,6 +1,6 @@
 <!--
   GENERATED FILE. Do not hand-edit.
-  Source: content/mcp-data/ (roles.json updated 2026-05-21, role-pricing.json updated 2026-05-21)
+  Source: content/mcp-data/ (roles.json updated 2026-06-13, role-pricing.json updated 2026-06-13)
   Regenerate: node distribution/assistants/build-knowledge.mjs
 -->
 # TempGuru: Staffing Roles and Hourly Rate Matrix
@@ -13,9 +13,9 @@ after a quote request.
 
 ## What do the market tiers mean?
 
-- **Hub** (25 cities): Primary markets (~25 cities) — NYC, LA, SF, Chicago, Boston, Miami, DC, Houston, Dallas, Atlanta, Seattle, Denver, etc.
-- **Mid** (129 cities): Secondary markets (~129 cities) — regional hubs, mid-size metros
-- **Small** (191 cities): Tertiary markets (~191 cities) — smaller metros, secondary towns
+- **Hub** (25 cities): Primary markets (~25 cities), NYC, LA, SF, Chicago, Boston, Miami, DC, Houston, Dallas, Atlanta, Seattle, Denver, etc.
+- **Mid** (129 cities): Secondary markets (~129 cities), regional hubs, mid-size metros
+- **Small** (191 cities): Tertiary markets (~191 cities), smaller metros, secondary towns
 
 ## How much does event staff cost? (rate matrix, USD/hour, all-inclusive)
 
@@ -30,6 +30,7 @@ after a quote request.
 | Brand Ambassadors | 4 | 6h | $40-$48 | $48-$56 | $56-$65 |
 | Guest Services | 4 | 8h | $40-$48 | $48-$56 | $56-$65 |
 | Crowd Control | 4 | 8h | $42-$50 | $50-$58 | $58-$68 |
+| Assistant Leads | 4 | 8h | $39-$47 | $47-$56 | $56-$67 |
 | Team Leads | 5 | 10h | $48-$58 | $58-$70 | $70-$85 |
 
 Floors are enforced: Brand Ambassadors never bill below $40/hour in any market.
@@ -79,6 +80,11 @@ Skill tier 4 of 5. Typical shift: 8 hours.
 ### Crowd Control (`crowd-control`)
 
 Crowd flow management, line control, queue management, and light de-escalation. Safety-trained, not licensed security.
+Skill tier 4 of 5. Typical shift: 8 hours.
+
+### Assistant Leads (`assistant-leads`)
+
+Section or zone supervision under a Team Lead: shift coordination, break rotations, headcount checks, and on-the-ground problem-solving for a cluster of staff. The bridge between front-line crew and the Team Lead.
 Skill tier 4 of 5. Typical shift: 8 hours.
 
 ### Team Leads (`team-leads`)

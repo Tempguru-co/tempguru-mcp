@@ -1,6 +1,6 @@
 <!--
   GENERATED FILE. Do not hand-edit.
-  Source: content/mcp-data/ (cities.json updated 2026-05-21, role-pricing.json updated 2026-05-21)
+  Source: content/mcp-data/ (cities.json updated 2026-05-21, role-pricing.json updated 2026-06-13)
   Regenerate: node distribution/assistants/build-knowledge.mjs
 -->
 # TempGuru: Company Overview and FAQ
@@ -10,7 +10,7 @@
 TempGuru (Temporary Assistance Guru, Inc.) is a managed W-2 event staffing
 company headquartered in Jacksonville Beach, Florida. It staffs brand
 ambassadors, registration staff, ushers, hospitality staff, gate staff, booth
-monitors, crowd control, guest services, setup/breakdown crews, and team leads
+monitors, crowd control, guest services, setup/breakdown crews, assistant leads, and team leads
 for conventions, conferences, trade shows, festivals, concerts, sporting and
 stadium events, corporate events, and brand activations.
 

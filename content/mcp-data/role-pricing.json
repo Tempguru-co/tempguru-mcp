@@ -1,13 +1,13 @@
 {
   "_meta": {
-    "version": "1.0.0",
-    "updated": "2026-05-21",
-    "notes": "All rates USD/hr, all-inclusive (worker pay + workers comp + general liability + payroll taxes). Canadian markets bill in CAD at parity; client invoicing converts. Floors enforced — Brand Ambassadors never below $40 anywhere.",
+    "version": "1.1.0",
+    "updated": "2026-06-13",
+    "notes": "All rates USD/hr, all-inclusive (worker pay + workers comp + general liability + payroll taxes). Canadian markets bill in CAD at parity; client invoicing converts. Floors enforced, Brand Ambassadors never below $40 anywhere. Assistant Leads priced at the per-tier midpoint between Event Staff and Team Leads.",
     "currency_default": "USD",
     "tier_definitions": {
-      "small": "Tertiary markets (~191 cities) — smaller metros, secondary towns",
-      "mid": "Secondary markets (~129 cities) — regional hubs, mid-size metros",
-      "hub": "Primary markets (~25 cities) — NYC, LA, SF, Chicago, Boston, Miami, DC, Houston, Dallas, Atlanta, Seattle, Denver, etc."
+      "small": "Tertiary markets (~191 cities), smaller metros, secondary towns",
+      "mid": "Secondary markets (~129 cities), regional hubs, mid-size metros",
+      "hub": "Primary markets (~25 cities), NYC, LA, SF, Chicago, Boston, Miami, DC, Houston, Dallas, Atlanta, Seattle, Denver, etc."
     }
   },
   "pricing": {
@@ -20,6 +20,7 @@
     "brand-ambassadors":   { "small": { "low": 40, "high": 48 }, "mid": { "low": 48, "high": 56 }, "hub": { "low": 56, "high": 65 } },
     "guest-services":      { "small": { "low": 40, "high": 48 }, "mid": { "low": 48, "high": 56 }, "hub": { "low": 56, "high": 65 } },
     "crowd-control":       { "small": { "low": 42, "high": 50 }, "mid": { "low": 50, "high": 58 }, "hub": { "low": 58, "high": 68 } },
+    "assistant-leads":     { "small": { "low": 39, "high": 47 }, "mid": { "low": 47, "high": 56 }, "hub": { "low": 56, "high": 67 } },
     "team-leads":          { "small": { "low": 48, "high": 58 }, "mid": { "low": 58, "high": 70 }, "hub": { "low": 70, "high": 85 } }
   }
 }

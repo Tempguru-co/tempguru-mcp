@@ -28,7 +28,7 @@ export function isAuthEnabled(): boolean {
 export async function isAuthenticated(): Promise<boolean> {
   const password = process.env.ADMIN_PASSWORD;
   if (!password) {
-    // Without ADMIN_PASSWORD set, the admin page is locked (403) — never
+    // Without ADMIN_PASSWORD set, the admin page is locked (403), never
     // ship an open-to-the-world dashboard. Megan must set this env var.
     return false;
   }
@@ -79,7 +79,7 @@ export async function logout(): Promise<void> {
  * current request isn't authenticated. Call at the top of any server
  * component under /admin/* that isn't itself /admin/login.
  *
- * Note: do NOT call this from a shared layout — that creates a redirect
+ * Note: do NOT call this from a shared layout, that creates a redirect
  * loop when the login page is wrapped by the same layout. The layout for
  * /admin/* should just provide shared UI; gating belongs at the page level.
  */

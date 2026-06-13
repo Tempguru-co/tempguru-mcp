@@ -1,9 +1,9 @@
-// User-agent classifier — buckets every inbound UA into one of ~15 categories
+// User-agent classifier, buckets every inbound UA into one of ~15 categories
 // so the dashboard can show a useful breakdown instead of 47 unique strings.
 //
 // Categories are roughly ordered by specificity. First match wins. The
 // `other` bucket catches everything that doesn't fit a known agent or crawler
-// pattern — useful for spotting new clients before we explicitly classify them.
+// pattern, useful for spotting new clients before we explicitly classify them.
 
 export type UaClass =
   // Anthropic surfaces
@@ -29,7 +29,7 @@ export type UaClass =
   | "mcp-client"
   // AI training / citation crawlers (index us for model answers, not interactive)
   | "ai-crawler"
-  // Plain browser UA — human in a browser, or a browser-context probe
+  // Plain browser UA, human in a browser, or a browser-context probe
   | "browser"
   // Directory / scanner probes
   | "glama-probe"
@@ -67,7 +67,7 @@ export function classifyUserAgent(raw: string | null | undefined): UaClass {
   }
 
   // Anthropic. claude-user is the UA on user-initiated fetches from Claude
-  // (connector/tool calls on claude.ai) — it must land here, not in "other";
+  // (connector/tool calls on claude.ai), it must land here, not in "other";
   // the comment above the ai-crawler block already promises this.
   if (/claude\.ai|anthropic-claude|claude-user/.test(ua)) return "claude-ai";
   if (/claude-code/.test(ua)) return "claude-code";
@@ -108,7 +108,7 @@ export function classifyUserAgent(raw: string | null | undefined): UaClass {
   if (/applebot/.test(ua)) return "applebot";
   if (/ccbot|commoncrawl/.test(ua)) return "common-crawl";
 
-  // AI training / citation crawlers — index the site to feed model answers.
+  // AI training / citation crawlers, index the site to feed model answers.
   // These were previously all falling into "other". Note the interactive
   // user-triggered fetches (chatgpt-user, claude-user) are matched ABOVE in
   // the Anthropic/OpenAI blocks so they stay in their interactive buckets.
@@ -120,7 +120,7 @@ export function classifyUserAgent(raw: string | null | undefined): UaClass {
     return "ai-crawler";
   }
 
-  // Generic MCP client libraries — the official SDKs and remote shims send
+  // Generic MCP client libraries, the official SDKs and remote shims send
   // these when an app hasn't set its own UA. Distinguishes real MCP traffic
   // from random noise.
   if (
@@ -136,7 +136,7 @@ export function classifyUserAgent(raw: string | null | undefined): UaClass {
     return "scripted";
   }
 
-  // Plain browser user-agent — a human poking the endpoint, or a
+  // Plain browser user-agent, a human poking the endpoint, or a
   // browser-context probe (some directory scanners fetch with an Origin).
   if (/mozilla\/|applewebkit|chrome\/|safari\/|firefox\/|edge\//.test(ua)) {
     return "browser";

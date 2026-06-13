@@ -7,7 +7,7 @@
 // This route mirrors it at mcp.tempguru.co for agents that connect
 // directly to the MCP server subdomain.
 //
-// IMPORTANT — digest values are SHA-256 of each SKILL.md file, byte-for-byte.
+// IMPORTANT, digest values are SHA-256 of each SKILL.md file, byte-for-byte.
 // Recompute before deploying if either skill file changes:
 //   shasum -a 256 <file> inside tempguru-agent-skills/skills/<name>/SKILL.md
 // Current digests match the SKILL.md files in tempguru-co/tempguru-agent-skills
@@ -20,7 +20,7 @@ const AGENT_SKILLS_INDEX = {
       name: "event-staffing-ordering",
       type: "skill-md",
       description:
-        "Order temporary event staff for events in 300+ US and Canadian markets through TempGuru. Use when a user needs to hire, book, or budget W-2 event staff for a convention, conference, trade show, festival, concert, sporting event, stadium event, corporate gathering, or brand activation — a single event in one city or a multi-city program. Covers requirement gathering, live coverage/rate/compliance lookups via the TempGuru MCP server, and request submission.",
+        "Order temporary event staff for events in 300+ US and Canadian markets through TempGuru. Use when a user needs to hire, book, or budget W-2 event staff for a convention, conference, trade show, festival, concert, sporting event, stadium event, corporate gathering, or brand activation, a single event in one city or a multi-city program. Covers requirement gathering, live coverage/rate/compliance lookups via the TempGuru MCP server, and request submission.",
       url: "https://tempguru.co/.well-known/agent-skills/event-staffing-ordering/SKILL.md",
       digest:
         "sha256:8efe19cef852ed0239160fb86c0102c84ee7888e2881a630dfe7001503fe75be",

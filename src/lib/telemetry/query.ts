@@ -1,4 +1,4 @@
-// Dashboard query layer — reads aggregated telemetry from Redis.
+// Dashboard query layer, reads aggregated telemetry from Redis.
 //
 // All queries return null-safe data so the admin page renders even when
 // Upstash isn't configured (e.g., local dev without env vars).
@@ -33,7 +33,7 @@ async function aggregateHash(prefix: string, dates: string[]): Promise<Record<st
 async function aggregateZSet(prefix: string, dates: string[], topN: number): Promise<Array<{ member: string; count: number }>> {
   const totals: Record<string, number> = {};
   for (const date of dates) {
-    // Get all members with their scores (small ZSETs only — we cap entries)
+    // Get all members with their scores (small ZSETs only, we cap entries)
     const entries = await exec((r) => r.zrange(`${prefix}:${date}`, 0, -1, { withScores: true, rev: true }));
     if (!entries || entries.length === 0) continue;
     // Format: [member1, score1, member2, score2, ...]
@@ -108,7 +108,7 @@ export async function getMetrics(windowDays = 7): Promise<DashboardMetrics> {
       exec((r) => r.lrange("recent:invocations", 0, 49)),
     ]);
 
-  // Top-N raw unclassified UA strings — the menu for the next classifier pass.
+  // Top-N raw unclassified UA strings, the menu for the next classifier pass.
   const unclassifiedUas = Object.entries(unclassifiedHash)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 25)
@@ -130,7 +130,7 @@ export async function getMetrics(windowDays = 7): Promise<DashboardMetrics> {
 
   // Upstash's client auto-deserializes JSON on read (automaticDeserialization
   // defaults to true), so each ring-buffer entry comes back already parsed as an
-  // object — not the raw string we lpush'd. Pass objects through; only JSON.parse
+  // object, not the raw string we lpush'd. Pass objects through; only JSON.parse
   // the string case. The previous JSON.parse(String(obj)) produced "[object
   // Object]", threw, and silently dropped every recent-invocation row.
   const recent = ((recentRaw ?? []) as unknown[])

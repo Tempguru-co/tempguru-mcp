@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // No image domains, no rewrites — pure API surface.
+  // No image domains, no rewrites, pure API surface.
   reactStrictMode: true,
 };
 

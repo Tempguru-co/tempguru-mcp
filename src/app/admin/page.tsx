@@ -37,7 +37,7 @@ function Header({ days }: { days: number }) {
     >
       <div>
         <h1 style={{ margin: 0, fontSize: 22, color: "#24BBEA" }}>
-          TempGuru MCP — Telemetry
+          TempGuru MCP, Telemetry
         </h1>
         <p style={{ margin: "4px 0 0", color: "#94a8c4", fontSize: 13 }}>
           mcp.tempguru.co · last {days} day{days === 1 ? "" : "s"}
@@ -135,11 +135,11 @@ function Dashboard({ m }: { m: DashboardMetrics }) {
         </Card>
       </div>
 
-      {/* Unclassified raw UAs — the menu for the next classifier pass */}
+      {/* Unclassified raw UAs, the menu for the next classifier pass */}
       <Card title="Unclassified user-agents (raw)">
         <KeyValueTable
           rows={m.unclassifiedUas.map((u) => [u.member, u.count])}
-          emptyMessage="No unclassified user-agents — every UA matched a known pattern."
+          emptyMessage="No unclassified user-agents, every UA matched a known pattern."
         />
       </Card>
 
@@ -363,7 +363,7 @@ function RecentTable({ rows }: { rows: DashboardMetrics["recent"] }) {
               </td>
               <td style={{ padding: "6px 8px" }}>{r.tool}</td>
               <td style={{ padding: "6px 8px" }}>{r.ua}</td>
-              <td style={{ padding: "6px 8px" }}>{r.country ?? "—"}</td>
+              <td style={{ padding: "6px 8px" }}>{r.country ?? "-"}</td>
               <td
                 style={{
                   padding: "6px 8px",
@@ -373,7 +373,7 @@ function RecentTable({ rows }: { rows: DashboardMetrics["recent"] }) {
                 {r.status}
               </td>
               <td style={{ padding: "6px 8px", color: "#94a8c4" }}>
-                {[r.city, r.role, r.state].filter(Boolean).join(" · ") || "—"}
+                {[r.city, r.role, r.state].filter(Boolean).join(" · ") || "-"}
               </td>
             </tr>
           ))}

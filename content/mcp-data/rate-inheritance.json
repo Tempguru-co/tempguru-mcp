@@ -1,0 +1,617 @@
+{
+ "ajax": {
+  "donor_key": "oshawa",
+  "donor_name": "Oshawa, ON",
+  "miles": 9.8
+ },
+ "anaheim": {
+  "donor_key": "costa mesa",
+  "donor_name": "Costa Mesa, CA",
+  "miles": 13.4
+ },
+ "arlington": {
+  "donor_key": "fort worth",
+  "donor_name": "Fort Worth, TX",
+  "miles": 12.4
+ },
+ "bellevue": {
+  "donor_key": "seattle",
+  "donor_name": "Seattle, WA",
+  "miles": 6.1
+ },
+ "conception-bay": {
+  "donor_key": "st. john's",
+  "donor_name": "St. John's, NL",
+  "miles": 14.2
+ },
+ "levis": {
+  "donor_key": "quebec",
+  "donor_name": "Quebec, QC",
+  "miles": 1.8
+ },
+ "mckinney": {
+  "donor_key": "frisco",
+  "donor_name": "Frisco, TX",
+  "miles": 12.5
+ },
+ "mesa": {
+  "donor_key": "scottsdale",
+  "donor_name": "Scottsdale, AZ",
+  "miles": 7.4
+ },
+ "miramar": {
+  "donor_key": "pembroke pines",
+  "donor_name": "Pembroke Pines, FL",
+  "miles": 1.2
+ },
+ "moreno-valley": {
+  "donor_key": "costa mesa",
+  "donor_name": "Costa Mesa, CA",
+  "miles": 44.5
+ },
+ "naperville": {
+  "donor_key": "chicago",
+  "donor_name": "Chicago, IL",
+  "miles": 26.0
+ },
+ "nashua": {
+  "donor_key": "manchester",
+  "donor_name": "Manchester, NH",
+  "miles": 15.9
+ },
+ "new-haven": {
+  "donor_key": "hartford",
+  "donor_name": "Hartford, CT",
+  "miles": 33.9
+ },
+ "newark": {
+  "donor_key": "jersey city",
+  "donor_name": "Jersey City, NJ",
+  "miles": 5.0
+ },
+ "norfolk": {
+  "donor_key": "chesapeake",
+  "donor_name": "Chesapeake, Virginia",
+  "miles": 2.0
+ },
+ "north-las-vegas": {
+  "donor_key": "las vegas",
+  "donor_name": "Las Vegas, NV",
+  "miles": 2.0
+ },
+ "oakland": {
+  "donor_key": "berkeley",
+  "donor_name": "Berkeley, CA",
+  "miles": 4.6
+ },
+ "olathe": {
+  "donor_key": "kansas city",
+  "donor_name": "Kansas City, MO",
+  "miles": 19.1
+ },
+ "ontario": {
+  "donor_key": "costa mesa",
+  "donor_name": "Costa Mesa, CA",
+  "miles": 33.0
+ },
+ "orange": {
+  "donor_key": "costa mesa",
+  "donor_name": "Costa Mesa, CA",
+  "miles": 10.8
+ },
+ "overland-park": {
+  "donor_key": "kansas city",
+  "donor_name": "Kansas City, MO",
+  "miles": 9.4
+ },
+ "oxnard": {
+  "donor_key": "culver city",
+  "donor_name": "Culver City, CA",
+  "miles": 46.3
+ },
+ "palmdale": {
+  "donor_key": "los angeles",
+  "donor_name": "Los Angeles, CA",
+  "miles": 37.1
+ },
+ "pasadena": {
+  "donor_key": "los angeles",
+  "donor_name": "Los Angeles, CA",
+  "miles": 8.7
+ },
+ "paterson": {
+  "donor_key": "paramus",
+  "donor_name": "Paramus",
+  "miles": 5.4
+ },
+ "pomona": {
+  "donor_key": "los angeles",
+  "donor_name": "Los Angeles, CA",
+  "miles": 28.1
+ },
+ "portsmouth": {
+  "donor_key": "manchester",
+  "donor_name": "Manchester, NH",
+  "miles": 35.7
+ },
+ "providence": {
+  "donor_key": "worcester",
+  "donor_name": "Worcester, MA",
+  "miles": 36.3
+ },
+ "quebec-city": {
+  "donor_key": "quebec",
+  "donor_name": "Quebec, QC",
+  "miles": 0.0
+ },
+ "reading": {
+  "donor_key": "media",
+  "donor_name": "Media, PA",
+  "miles": 40.6
+ },
+ "riverside": {
+  "donor_key": "costa mesa",
+  "donor_name": "Costa Mesa, CA",
+  "miles": 37.0
+ },
+ "sacramento": {
+  "donor_key": "rosemont",
+  "donor_name": "Rosemont, IL",
+  "miles": 7.3
+ },
+ "saint-paul": {
+  "donor_key": "minneapolis",
+  "donor_name": "Minneapolis, MN",
+  "miles": 8.7
+ },
+ "salinas": {
+  "donor_key": "monterey",
+  "donor_name": "Monterey, CA",
+  "miles": 14.3
+ },
+ "santa-ana": {
+  "donor_key": "costa mesa",
+  "donor_name": "Costa Mesa, CA",
+  "miles": 7.8
+ },
+ "santa-rosa": {
+  "donor_key": "berkeley",
+  "donor_name": "Berkeley, CA",
+  "miles": 46.1
+ },
+ "stamford": {
+  "donor_key": "paramus",
+  "donor_name": "Paramus",
+  "miles": 29.0
+ },
+ "sunnyvale": {
+  "donor_key": "san jose",
+  "donor_name": "San Jose, CA",
+  "miles": 8.0
+ },
+ "tacoma": {
+  "donor_key": "seattle",
+  "donor_name": "Seattle, WA",
+  "miles": 25.0
+ },
+ "whitby": {
+  "donor_key": "oshawa",
+  "donor_name": "Oshawa, ON",
+  "miles": 4.3
+ },
+ "white-plains": {
+  "donor_key": "paramus",
+  "donor_name": "Paramus",
+  "miles": 17.4
+ },
+ "wilmington": {
+  "donor_key": "media",
+  "donor_name": "Media, PA",
+  "miles": 14.5
+ },
+ "alexandria": {
+  "donor_key": "national harbor",
+  "donor_name": "National Harbor, MD",
+  "miles": 2.3
+ },
+ "allentown": {
+  "donor_key": "media",
+  "donor_name": "Media, PA",
+  "miles": 48.1
+ },
+ "appleton": {
+  "donor_key": "ashwaubenon",
+  "donor_name": "Ashwaubenon, WI",
+  "miles": 22.9
+ },
+ "aurora": {
+  "donor_key": "denver",
+  "donor_name": "Denver, CO",
+  "miles": 8.1
+ },
+ "bradenton": {
+  "donor_key": "sarasota",
+  "donor_name": "Sarasota, FL",
+  "miles": 11.5
+ },
+ "bridgeport": {
+  "donor_key": "hartford",
+  "donor_name": "Hartford, CT",
+  "miles": 48.1
+ },
+ "buffalo": {
+  "donor_key": "amherst",
+  "donor_name": "Amherst, MA",
+  "miles": 7.5
+ },
+ "cambridge": {
+  "donor_key": "boston",
+  "donor_name": "Boston, MA",
+  "miles": 2.6
+ },
+ "cape-coral": {
+  "donor_key": "fort myers",
+  "donor_name": "Fort Myers, FL",
+  "miles": 7.9
+ },
+ "carrollton": {
+  "donor_key": "plano",
+  "donor_name": "Plano, TX",
+  "miles": 12.0
+ },
+ "cary": {
+  "donor_key": "raleigh",
+  "donor_name": "Raleigh, NC",
+  "miles": 8.1
+ },
+ "champaign": {
+  "donor_key": "bloomington",
+  "donor_name": "Bloomington, IN",
+  "miles": 47.0
+ },
+ "chandler": {
+  "donor_key": "scottsdale",
+  "donor_name": "Scottsdale, AZ",
+  "miles": 14.4
+ },
+ "chula-vista": {
+  "donor_key": "san diego",
+  "donor_name": "San Diego, CA",
+  "miles": 7.0
+ },
+ "clarksville": {
+  "donor_key": "nashville",
+  "donor_name": "Nashville, TN",
+  "miles": 40.7
+ },
+ "concord": {
+  "donor_key": "manchester",
+  "donor_name": "Manchester, NH",
+  "miles": 15.3
+ },
+ "corona": {
+  "donor_key": "costa mesa",
+  "donor_name": "Costa Mesa, CA",
+  "miles": 25.9
+ },
+ "danbury": {
+  "donor_key": "paramus",
+  "donor_name": "Paramus",
+  "miles": 44.9
+ },
+ "davenport": {
+  "donor_key": "moline",
+  "donor_name": "Moline, IL",
+  "miles": 3.4
+ },
+ "dayton": {
+  "donor_key": "cincinnati",
+  "donor_name": "Cincinnati, OH",
+  "miles": 46.9
+ },
+ "daytona": {
+  "donor_key": "daytona",
+  "donor_name": "Daytona, FL",
+  "miles": 0.0
+ },
+ "denton": {
+  "donor_key": "frisco",
+  "donor_name": "Frisco, TX",
+  "miles": 18.4
+ },
+ "durham": {
+  "donor_key": "raleigh",
+  "donor_name": "Raleigh, NC",
+  "miles": 21.1
+ },
+ "elizabeth": {
+  "donor_key": "jersey city",
+  "donor_name": "Jersey City, NJ",
+  "miles": 8.3
+ },
+ "elk-grove": {
+  "donor_key": "rosemont",
+  "donor_name": "Rosemont, IL",
+  "miles": 9.9
+ },
+ "escondido": {
+  "donor_key": "oceanside",
+  "donor_name": "Oceanside, CA",
+  "miles": 17.8
+ },
+ "flint": {
+  "donor_key": "west bloomfield township",
+  "donor_name": "West Bloomfield Township, MI",
+  "miles": 34.3
+ },
+ "fontana": {
+  "donor_key": "costa mesa",
+  "donor_name": "Costa Mesa, CA",
+  "miles": 41.7
+ },
+ "fullerton": {
+  "donor_key": "costa mesa",
+  "donor_name": "Costa Mesa, CA",
+  "miles": 15.8
+ },
+ "galveston": {
+  "donor_key": "houston",
+  "donor_name": "Houston, TX",
+  "miles": 46.6
+ },
+ "garden-grove": {
+  "donor_key": "costa mesa",
+  "donor_name": "Costa Mesa, CA",
+  "miles": 9.3
+ },
+ "garland": {
+  "donor_key": "plano",
+  "donor_name": "Plano, TX",
+  "miles": 8.2
+ },
+ "gilbert": {
+  "donor_key": "scottsdale",
+  "donor_name": "Scottsdale, AZ",
+  "miles": 12.5
+ },
+ "glendale-ca": {
+  "donor_key": "los angeles",
+  "donor_name": "Los Angeles, CA",
+  "miles": 6.3
+ },
+ "glendale": {
+  "donor_key": "phoenix",
+  "donor_name": "Phoenix, AZ",
+  "miles": 9.0
+ },
+ "greeley": {
+  "donor_key": "fort collins",
+  "donor_name": "Fort Collins, CO",
+  "miles": 22.7
+ },
+ "green-bay": {
+  "donor_key": "ashwaubenon",
+  "donor_name": "Ashwaubenon, WI",
+  "miles": 3.6
+ },
+ "greenwich": {
+  "donor_key": "paramus",
+  "donor_name": "Paramus",
+  "miles": 24.0
+ },
+ "hampton": {
+  "donor_key": "chesapeake",
+  "donor_name": "Chesapeake, Virginia",
+  "miles": 15.1
+ },
+ "harrisburg": {
+  "donor_key": "north york",
+  "donor_name": "North York, ON",
+  "miles": 21.9
+ },
+ "hayward": {
+  "donor_key": "redwood city",
+  "donor_name": "Redwood City, CA",
+  "miles": 15.3
+ },
+ "henderson": {
+  "donor_key": "las vegas",
+  "donor_name": "Las Vegas, NV",
+  "miles": 12.7
+ },
+ "hialeah": {
+  "donor_key": "miami",
+  "donor_name": "Miami, FL",
+  "miles": 7.8
+ },
+ "huntington-beach": {
+  "donor_key": "costa mesa",
+  "donor_name": "Costa Mesa, CA",
+  "miles": 4.8
+ },
+ "irvine": {
+  "donor_key": "costa mesa",
+  "donor_name": "Costa Mesa, CA",
+  "miles": 5.8
+ },
+ "irving": {
+  "donor_key": "dallas",
+  "donor_name": "Dallas, TX",
+  "miles": 8.5
+ },
+ "joliet": {
+  "donor_key": "chicago",
+  "donor_name": "Chicago, IL",
+  "miles": 31.7
+ },
+ "kent": {
+  "donor_key": "seattle",
+  "donor_name": "Seattle, WA",
+  "miles": 16.2
+ },
+ "killeen": {
+  "donor_key": "georgetown",
+  "donor_name": "Georgetown, TX",
+  "miles": 33.6
+ },
+ "kissimmee": {
+  "donor_key": "orlando",
+  "donor_name": "Orlando, FL",
+  "miles": 16.3
+ },
+ "kitchener": {
+  "donor_key": "guelph",
+  "donor_name": "Guelph, ON",
+  "miles": 15.3
+ },
+ "lakewood": {
+  "donor_key": "denver",
+  "donor_name": "Denver, CO",
+  "miles": 5.7
+ },
+ "lancaster": {
+  "donor_key": "los angeles",
+  "donor_name": "Los Angeles, CA",
+  "miles": 45.0
+ },
+ "lawrence": {
+  "donor_key": "kansas city",
+  "donor_name": "Kansas City, MO",
+  "miles": 34.1
+ },
+ "lowell": {
+  "donor_key": "boston",
+  "donor_name": "Boston, MA",
+  "miles": 23.1
+ },
+ "mesquite": {
+  "donor_key": "dallas",
+  "donor_name": "Dallas, TX",
+  "miles": 12.1
+ },
+ "new-britain": {
+  "donor_key": "hartford",
+  "donor_name": "Hartford, CT",
+  "miles": 8.6
+ },
+ "new-london": {
+  "donor_key": "hartford",
+  "donor_name": "Hartford, CT",
+  "miles": 41.4
+ },
+ "norman": {
+  "donor_key": "oklahoma city",
+  "donor_name": "Oklahoma City, OK",
+  "miles": 17.5
+ },
+ "norwich": {
+  "donor_key": "hartford",
+  "donor_name": "Hartford, CT",
+  "miles": 35.5
+ },
+ "provo": {
+  "donor_key": "salt lake city",
+  "donor_name": "Salt Lake City, UT",
+  "miles": 38.4
+ },
+ "pueblo": {
+  "donor_key": "colorado springs",
+  "donor_name": "Colorado Springs, CO",
+  "miles": 41.6
+ },
+ "roseville": {
+  "donor_key": "rosemont",
+  "donor_name": "Rosemont, IL",
+  "miles": 14.4
+ },
+ "round-rock": {
+  "donor_key": "pflugerville",
+  "donor_name": "Pflugerville, TX",
+  "miles": 5.9
+ },
+ "san-bernardino": {
+  "donor_key": "costa mesa",
+  "donor_name": "Costa Mesa, CA",
+  "miles": 48.4
+ },
+ "santa-clarita": {
+  "donor_key": "culver city",
+  "donor_name": "Culver City, CA",
+  "miles": 26.9
+ },
+ "santa-cruz": {
+  "donor_key": "san jose",
+  "donor_name": "San Jose, CA",
+  "miles": 26.3
+ },
+ "sterling-heights": {
+  "donor_key": "birmingham mi",
+  "donor_name": "Birmingham, MI",
+  "miles": 9.5
+ },
+ "stockton": {
+  "donor_key": "modesto",
+  "donor_name": "Modesto, CA",
+  "miles": 27.2
+ },
+ "syracuse": {
+  "donor_key": "utica",
+  "donor_name": "Utica, MI",
+  "miles": 46.3
+ },
+ "tempe": {
+  "donor_key": "scottsdale",
+  "donor_name": "Scottsdale, AZ",
+  "miles": 6.6
+ },
+ "thornton": {
+  "donor_key": "denver",
+  "donor_name": "Denver, CO",
+  "miles": 8.9
+ },
+ "torrance": {
+  "donor_key": "long beach",
+  "donor_name": "Long Beach, CA",
+  "miles": 9.9
+ },
+ "trenton": {
+  "donor_key": "philadelphia",
+  "donor_name": "Philadelphia, PA",
+  "miles": 28.8
+ },
+ "tuscaloosa": {
+  "donor_key": "birmingham",
+  "donor_name": "Birmingham, AL",
+  "miles": 49.2
+ },
+ "warren": {
+  "donor_key": "ferndale",
+  "donor_name": "Ferndale, MI",
+  "miles": 6.5
+ },
+ "waterbury": {
+  "donor_key": "hartford",
+  "donor_name": "Hartford, CT",
+  "miles": 23.7
+ },
+ "west-jordan": {
+  "donor_key": "salt lake city",
+  "donor_name": "Salt Lake City, UT",
+  "miles": 10.7
+ },
+ "west-valley-city": {
+  "donor_key": "salt lake city",
+  "donor_name": "Salt Lake City, UT",
+  "miles": 7.5
+ },
+ "yonkers": {
+  "donor_key": "paramus",
+  "donor_name": "Paramus",
+  "miles": 9.3
+ },
+ "york": {
+  "donor_key": "north york",
+  "donor_name": "North York, ON",
+  "miles": 1.1
+ }
+}

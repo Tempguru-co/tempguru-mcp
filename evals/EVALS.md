@@ -4,7 +4,7 @@ Two halves, mirroring how Stripe and Sentry prove their agent tooling works:
 
 ## 1. Deterministic tool evals (automated, this folder)
 
-Golden tool-call cases against the stdio build — no LLM, no network, stable in CI.
+Golden tool-call cases against the stdio build, no LLM, no network, stable in CI.
 
 ```bash
 npm run build:stdio && npm run evals
@@ -32,7 +32,7 @@ behavior worth locking in.
 ## 2. Assistant-level recall/precision (manual, scored per platform)
 
 Does an assistant DECIDE to use these tools at the right moment, and stay quiet
-at the wrong one? That can't be asserted by a script — it is scored by running
+at the wrong one? That can't be asserted by a script, it is scored by running
 the golden prompt set in fresh sessions per platform (Claude, ChatGPT/GPT,
 Gemini, Perplexity), with and without the connector installed.
 

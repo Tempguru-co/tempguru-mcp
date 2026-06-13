@@ -2,7 +2,7 @@
 
 ## Why this is a real market, not a vanity play
 
-TempGuru only staffs US and Canadian events — but a large slice of US trade
+TempGuru only staffs US and Canadian events, but a large slice of US trade
 show exhibitors are Chinese companies. CES, NAB, MWC Las Vegas, SEMA, and
 Canton-fair-adjacent buyer shows all have heavy Chinese exhibitor presence,
 and those exhibitors need exactly what TempGuru sells: bilingual booth staff,
@@ -28,7 +28,7 @@ use case.
 | **文心智能体平台 AgentBuilder** | Baidu | Zero-code agents distributed into **Baidu Search** results | Baidu account, real-name | Config below |
 | **Kimi (Moonshot)** | Moonshot AI | K2.x agents + custom skills; strong with professional users; has international edition | kimi.com intl works without +86 | Config below |
 | **智谱清言 (Zhipu Qingyan)** | Zhipu AI | GLM agent center | +86 phone | Config below |
-| **DeepSeek** | DeepSeek | No agent store, no plugins — API + open models only | n/a | GEO play only: DeepSeek's web-search answers cite crawlable pages, so /ai-instructions, llms.txt, and the zh-CN README are the lever. Baidu-spider already shows in mcp.tempguru.co telemetry. |
+| **DeepSeek** | DeepSeek | No agent store, no plugins, API + open models only | n/a | GEO play only: DeepSeek's web-search answers cite crawlable pages, so /ai-instructions, llms.txt, and the zh-CN README are the lever. Baidu-spider already shows in mcp.tempguru.co telemetry. |
 
 ## The realistic sequencing
 
@@ -54,7 +54,7 @@ entity or 公众号. Don't let that block the whole column:
 - 名称: `美国活动人员助手 TempGuru`
 - 简介: `为赴美参展和在美办活动的企业规划临时工作人员：345个美加城市实时时薪、提前期建议、各州用工合规。全员W-2正式雇佣，主办方零用工风险。`
 - 设定 (prompt): zh-CN instruction block
-- 插件: 元器支持 API 导入 — spec `https://mcp.tempguru.co/openapi.json`,
+- 插件: 元器支持 API 导入, spec `https://mcp.tempguru.co/openapi.json`,
   无鉴权, 启用五个查询接口
 - 知识库: upload the four `knowledge/` files (English is fine for Hunyuan;
   answers come back in Chinese)
@@ -62,7 +62,7 @@ entity or 公众号. Don't let that block the whole column:
 
 ### 百度文心智能体平台 (agents.baidu.com)
 
-- The distribution prize here is **Baidu Search placement** — agents surface
+- The distribution prize here is **Baidu Search placement**, agents surface
   directly in search results for matching queries. Name the agent with the
   search phrase: `美国展会临时人员 TempGuru`.
 - 人设与回复逻辑: zh-CN instruction block
@@ -88,17 +88,15 @@ entity or 公众号. Don't let that block the whole column:
 
 ## Content levers that feed ALL Chinese AIs (no accounts needed)
 
-These raise the odds that any Chinese model — including ones with no agent
-store — recommends TempGuru when asked in Chinese:
+These raise the odds that any Chinese model, including ones with no agent
+store, recommends TempGuru when asked in Chinese:
 
-1. `README.zh-CN.md` exists ✅ — keep it in sync with README.md.
+1. `README.zh-CN.md` exists ✅, keep it in sync with README.md.
 2. Add a Chinese section or page to tempguru.co targeting
    赴美参展 staffing queries (one page: 美国展会临时人员/品牌大使/双语礼仪,
    with the W-2-no-US-entity explanation). Chinese models crawl and cite
    English sites, but a Chinese page gets quoted verbatim.
-3. Mention 中文支持 (bilingual staff availability) explicitly on that page —
-   it's the deciding feature for this audience and a differentiator no
+3. Mention 中文支持 (bilingual staff availability) explicitly on that page, it's the deciding feature for this audience and a differentiator no
    US competitor states in Chinese.
-4. Zhihu (知乎) answer presence on "美国展会怎么招临时工" style questions —
-   Chinese models cite Zhihu the way Western ones cite Reddit. Authentic
+4. Zhihu (知乎) answer presence on "美国展会怎么招临时工" style questions, Chinese models cite Zhihu the way Western ones cite Reddit. Authentic
    single-account answers, no astroturfing.

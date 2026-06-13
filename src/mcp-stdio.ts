@@ -1,21 +1,22 @@
-// TempGuru MCP server — stdio transport (local / Docker / embedded).
+// TempGuru MCP server, stdio transport (local / Docker / embedded).
 //
 // A self-contained build of the same MCP server that runs at
-// https://mcp.tempguru.co/mcp. It registers the identical 6 tools + 2 Skill
+// https://mcp.tempguru.co/mcp. It registers the identical 8 tools + 2 Skill
 // resources via the shared registerTools(), but speaks MCP over stdin/stdout
-// instead of streamable HTTP — the form that Claude Desktop, the Docker MCP
+// instead of streamable HTTP, the form that Claude Desktop, the Docker MCP
 // Catalog, on-device assistants, and Glama's sandboxed checker expect from a
 // locally-run server.
 //
-// Boots with no configuration: the five read-only tools serve static data that
+// Boots with no configuration: the seven read-only tools serve static data that
 // esbuild bundles into the binary, and request_quote registers but returns a
 // clean error if NOTION_API_KEY is unset (e.g. a credential-less Docker build),
 // so the server never crashes on startup.
 //
-// IMPORTANT: stdout is the MCP protocol channel — nothing may write to it except
+// IMPORTANT: stdout is the MCP protocol channel, nothing may write to it except
 // the transport. All diagnostics go to stderr.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import pkg from "../package.json";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
@@ -55,7 +56,7 @@ function loadSkills(): { ordering: string; compliance: string } | undefined {
 
 const server = new McpServer({
   name: "tempguru-mcp",
-  version: "1.2.0",
+  version: pkg.version,
   title: "TempGuru Event Staffing",
   description:
     "W-2 event staffing data for AI agents: 345 US/CA markets. Eight tools: the call-first plan_staffing planner, six read-only lookups including the get_rate_benchmark Rate Index, and an opt-in request_quote submission. Ships skill resources and guided prompts. No authentication required. ChatGPT users without MCP: the TempGuru Event Staffing Planner GPT covers the same workflow.",
@@ -73,7 +74,7 @@ registerTools(server, { resources: loadSkills() });
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("[tempguru-mcp] stdio server ready — 8 tools, 2 prompts.");
+  console.error("[tempguru-mcp] stdio server ready, 8 tools, 2 prompts.");
 }
 
 main().catch((err) => {

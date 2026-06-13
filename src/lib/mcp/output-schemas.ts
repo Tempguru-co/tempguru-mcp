@@ -1,17 +1,17 @@
-// MCP outputSchema definitions for the 6 tools — structured-output support
+// MCP outputSchema definitions for 6 of the 8 MCP tools (plan_staffing and get_rate_benchmark omit one), structured-output support
 // (spec rev 2025-06-18). Clients like ChatGPT Apps use these to render and
 // ground tool results ("Output schema recommended" flag in the app console).
 //
 // CRITICAL CONTRACT: these schemas must accept EVERY shape the query layer
 // returns as a successful result. queries.ts deliberately returns "expected
 // miss" states (city/role/state not found, invalid date) as success variants,
-// not errors — so each schema below is the FLATTENED union of its tool's
+// not errors, so each schema below is the FLATTENED union of its tool's
 // variants, with a discriminator field and everything else optional. The SDK
 // validates structuredContent against these on every call; a mismatch turns a
 // working tool into a broken one, so when queries.ts shapes change, change
 // this file in the same commit.
 //
-// Protocol errors (result.ok === false — unreachable in practice because the
+// Protocol errors (result.ok === false, unreachable in practice because the
 // zod input schemas catch bad params first) are returned with isError: true,
 // which exempts them from output validation.
 

@@ -1,4 +1,4 @@
-// Root layout — minimal since this app has no UI surface beyond a landing page.
+// Root layout, minimal since this app has no UI surface beyond a landing page.
 
 import type { Metadata } from "next";
 

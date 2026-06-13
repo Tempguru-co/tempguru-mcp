@@ -2,12 +2,12 @@
 
 Coze is ByteDance's GPT-builder. It matters twice:
 
-1. **coze.com (international)** — publish one bot to the Coze Agent Store
+1. **coze.com (international)**, publish one bot to the Coze Agent Store
    *plus* Discord, Telegram, Messenger, Slack, and more from a single
    config. No Chinese account needed; sign in with Google. This is the
    cheapest way to put TempGuru on the messaging platforms where event
    crews and small agencies actually coordinate.
-2. **coze.cn (扣子, China)** — same builder, publishes into **Doubao**
+2. **coze.cn (扣子, China)**, same builder, publishes into **Doubao**
    (豆包, China's most-used consumer AI app) and WeChat ecosystems. Needs a
    +86 phone + real-name verification; see
    [china-platforms.md](./china-platforms.md) for sequencing.
@@ -22,7 +22,7 @@ Build at https://www.coze.com → Create bot.
 - **Description:**
 
   ```
-  Plan and budget temporary event staff for US and Canadian events with TempGuru. Live hourly rates for 10 roles in 345 cities, booking lead times, and state labor compliance. W-2 employees, never gig workers. Quote in one business day.
+  Plan and budget temporary event staff for US and Canadian events with TempGuru. Live hourly rates for 11 roles in 345 cities, booking lead times, and state labor compliance. W-2 employees, never gig workers. Quote in one business day.
   ```
 
 - **Avatar:** upload `public/logo.svg` (Coze accepts SVG/PNG).
@@ -63,7 +63,7 @@ Coze imports OpenAPI directly (Plugins → Create plugin → Import from URL):
 After import, run each operation once in the plugin debugger (Coze requires
 a successful test call before a plugin can be enabled in a bot). Debugging
 `submitQuoteRequest` creates a **real lead** in the Notion Inbound Deal
-Pipeline — use an obvious test payload (event name "TEST — please ignore",
+Pipeline, use an obvious test payload (event name "TEST, please ignore",
 your own email) and delete the row afterward.
 
 ## Knowledge
@@ -76,7 +76,7 @@ chunking. Set the bot's knowledge recall to Auto.
 - **Opening message:**
 
   ```
-  I plan and price temporary event staff anywhere in the US and Canada — rates, lead times, and labor compliance, with a real quote one business day after you submit. What's the event?
+  I plan and price temporary event staff anywhere in the US and Canada, rates, lead times, and labor compliance, with a real quote one business day after you submit. What's the event?
   ```
 
 - **Suggested questions:** reuse the four conversation starters from the
@@ -84,14 +84,14 @@ chunking. Set the bot's knowledge recall to Auto.
 
 ## Publish targets (in order)
 
-1. **Coze Agent Store** — category Business/Tools; store listing copy =
+1. **Coze Agent Store**, category Business/Tools; store listing copy =
    description above.
-2. **Telegram bot** — name `@TempGuruStaffingBot` (or nearest available);
+2. **Telegram bot**, name `@TempGuruStaffingBot` (or nearest available);
    put the handle on tempguru.co/ai.
-3. **Discord** — publishable app; useful for event-industry and
+3. **Discord**, publishable app; useful for event-industry and
    experiential-marketing servers (join as the brand, don't spam: answer
    staffing questions when asked).
-4. **Messenger / WhatsApp** — connect when there's a Meta business app to
+4. **Messenger / WhatsApp**, connect when there's a Meta business app to
    attach (see [other-platforms.md](./other-platforms.md), Meta AI Studio
    section; one Meta business setup serves both).
 

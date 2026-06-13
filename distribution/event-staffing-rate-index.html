@@ -1,0 +1,209 @@
+<!-- ============================================================
+  TempGuru Event Staffing Rate Index 2026 -- citable data asset
+  Slug: event-staffing-rate-index  (tempguru.co/event-staffing-rate-index)
+  Template: sg design system. New standalone Squarespace page (Code Block).
+  Data: content/mcp-data/city-rates.json (vetted Rate Report 2026, 233 cities).
+  This index is the measured market benchmark get_rate_benchmark returns; the
+  per-role rate card comes from get_role_pricing (role-pricing.json) -- distinct sources.
+============================================================ -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@700;800&family=Manrope:wght@700&display=swap" rel="stylesheet">
+
+<style>
+.sg{--bg:#071325;--sc:#142032;--pri:#6cd5ff;--pric:#24bbea;--onsf:#d7e3fc;--onsfv:#bcc8cf;--r:0.75rem;--rl:0.5rem;font-family:'Inter',sans-serif;background:var(--bg);color:var(--onsf);max-width:100%;}
+.mx{max-width:1200px;margin:0 auto;padding:0 24px;}
+.sg-hero{padding:72px 0 56px;background:linear-gradient(135deg,#071325 0%,#0d1e35 100%);border-bottom:1px solid rgba(108,213,255,0.15);}
+.sg-eyebrow{font-family:'Manrope',sans-serif;font-size:0.75rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--pri) !important;display:inline-block;margin-bottom:16px;}
+.sg-hero h1{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:clamp(2rem,4vw,3rem);letter-spacing:-0.04em;color:var(--onsf) !important;margin-bottom:16px;line-height:1.15;}
+.sg-hero h1 span{color:var(--pri) !important;}
+.sg-hero-sub{color:var(--onsfv) !important;font-size:1.1rem;line-height:1.6;max-width:680px;margin-bottom:28px;}
+.sg-stats{display:grid;grid-template-columns:repeat(3,auto);gap:28px;}
+.sg-stat{border-left:3px solid var(--pri);padding-left:16px;}
+.sg-stat .num{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.7rem;color:var(--pri) !important;display:block;}
+.sg-stat .lbl{font-family:'Manrope',sans-serif;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--onsfv) !important;}
+.sg-main{padding:48px 0;}
+.sg-main p{color:var(--onsfv) !important;line-height:1.7;}
+.sg-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.5rem;color:var(--onsf) !important;margin:40px 0 8px;letter-spacing:-0.03em;}
+.sg-qr{background:var(--sc);border:1px solid rgba(108,213,255,0.2);border-radius:var(--r);padding:24px;margin:24px 0;}
+.sg-qr-label{font-family:'Manrope',sans-serif;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--pri) !important;margin-bottom:10px;}
+.sg-table-wrap{overflow-x:auto;margin:20px 0 12px;}
+.sg-table-wrap table{width:100%;border-collapse:collapse;min-width:560px;}
+.sg-table-wrap th{background:var(--sc);color:var(--pri) !important;font-family:'Manrope',sans-serif;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.07em;padding:12px 16px;text-align:left;}
+.sg-table-wrap td{padding:12px 16px;border-bottom:1px solid rgba(108,213,255,0.08);color:var(--onsf) !important;font-size:0.92rem;}
+.sg-table-wrap td:first-child{font-weight:600;}
+.sg-table-wrap tr td:not(:first-child){color:var(--onsfv) !important;font-variant-numeric:tabular-nums;}
+.sg-note{font-size:0.85rem;color:var(--onsfv) !important;font-style:italic;}
+.sg-cite{background:var(--sc);border-left:4px solid var(--pri);border-radius:0 var(--r) var(--r) 0;padding:20px 24px;margin:24px 0;}
+.sg-cite code{color:var(--pri) !important;font-size:0.9rem;}
+.sg-tips{background:var(--sc);border-radius:var(--r);padding:20px 24px;margin:16px 0;}
+.sg-tips ul{list-style:none;padding:0;margin:0;}
+.sg-tips li{padding:9px 0;border-bottom:1px solid rgba(108,213,255,0.08);color:var(--onsfv) !important;display:flex;gap:12px;}
+.sg-tips li::before{content:"\2713";color:var(--pri);flex-shrink:0;font-weight:700;}
+.sg-faq{margin:16px 0 40px;}
+.sg-faq details{border:1px solid rgba(108,213,255,0.1);border-radius:var(--rl);margin-bottom:8px;background:var(--sc);}
+.sg-faq summary{padding:16px 20px;cursor:pointer;font-weight:600;color:var(--onsf) !important;list-style:none;display:flex;justify-content:space-between;align-items:center;}
+.sg-faq summary::after{content:"+";color:var(--pri);font-size:1.2rem;}
+.sg-faq details[open] summary::after{content:"\2212";}
+.sg-faq details div{padding:0 20px 16px;color:var(--onsfv) !important;line-height:1.7;}
+.gradient-btn{display:inline-block;background:linear-gradient(135deg,var(--pric),var(--pri));color:#001828 !important;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;padding:14px 28px;border-radius:9999px;text-decoration:none;font-size:0.95rem;}
+.sg a:not(.gradient-btn){color:var(--pri) !important;}
+.sg-cta{background:linear-gradient(135deg,#0d1e35,var(--sc));border:1px solid rgba(108,213,255,0.2);border-radius:16px;padding:40px;text-align:center;margin:40px 0;}
+.sg-cta h2{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.6rem;color:var(--onsf) !important;margin-bottom:12px;}
+.sg-cta p{color:var(--onsfv) !important;margin-bottom:24px;}
+@media (max-width:640px){.sg-stats{grid-template-columns:1fr;gap:16px;}.mx{padding:0 16px;}.sg-cta{padding:28px 20px;}}
+</style>
+
+<div class="sg">
+
+  <section class="sg-hero">
+    <div class="mx">
+      <span class="sg-eyebrow">2026 Edition &middot; Updated May 2026</span>
+      <h1>TempGuru Event Staffing <span>Rate Index</span></h1>
+      <p class="sg-hero-sub">The benchmark for all-inclusive W-2 event staffing rates across the United States and Canada. Real per-city paid-shift data from 233 measured markets, one transparent methodology. This is the measured market benchmark any AI assistant connected to TempGuru can pull live through <code style="color:#6cd5ff;">get_rate_benchmark</code>.</p>
+      <div class="sg-stats">
+        <div class="sg-stat"><span class="num">7,900+</span><span class="lbl">Shifts Analyzed</span></div>
+        <div class="sg-stat"><span class="num">233</span><span class="lbl">Markets Measured</span></div>
+        <div class="sg-stat"><span class="num">W-2</span><span class="lbl">All-Inclusive Basis</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="sg-main">
+    <div class="mx">
+
+      <div class="sg-qr">
+        <div class="sg-qr-label">How to read this index</div>
+        <p>Every figure is an <strong>all-inclusive W-2 bill rate per hour</strong>. It covers the worker's pay, employer payroll taxes (FICA, FUTA, SUTA), workers' compensation insurance, general liability insurance, and dedicated coordinator support. There are no add-on fees, no booking charges, and no markup at invoice time. Every figure traces to real paid shifts, so the exact rate is city-specific, not a tier average.</p>
+      </div>
+
+      <div class="sg-title">2026 rate benchmark, USD per hour</div>
+      <p>Each rate is the all-inclusive W-2 bill rate. The <strong>typical</strong> column is the most common rate across 233 measured markets; the <strong>full US and Canada range</strong> shows the real spread, with higher-cost metros like New York and Boston at the top. Market tier does not predict the rate for these roles, so this is a national view. For an exact city rate, see the per-city pages or ask any AI assistant connected to TempGuru.</p>
+      <div class="sg-table-wrap">
+        <table>
+          <thead>
+            <tr><th>Role</th><th>Typical</th><th>Full US &amp; Canada range</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Event Staff <span style="color:var(--onsfv);font-weight:400;font-size:0.85em;">(registration, hospitality, setup &amp; breakdown, gate, booth, guest services)</span></td><td>$30&ndash;36</td><td>$30&ndash;49</td></tr>
+            <tr><td>Ushers</td><td>$34&ndash;41</td><td>$30&ndash;50</td></tr>
+            <tr><td>Crowd Control</td><td>$30&ndash;38</td><td>$30&ndash;51</td></tr>
+            <tr><td>Assistant Leads</td><td>$35&ndash;43</td><td>$30&ndash;53</td></tr>
+            <tr><td>Team Leads</td><td>$36&ndash;46</td><td>$32&ndash;68</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Brand Ambassadors are the one role that follows a clean market-tier gradient, because the floor is set by policy ($40 / $47 / $55 small / mid / hub). Hub markets are primary metros (New York, Los Angeles, Chicago, Boston, and peers); mid and small markets are regional and secondary metros:</p>
+      <div class="sg-table-wrap">
+        <table>
+          <thead>
+            <tr><th>Brand Ambassadors</th><th>Small market</th><th>Mid market</th><th>Hub market</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>All-inclusive W-2</td><td>$40&ndash;50</td><td>$47&ndash;57</td><td>$55&ndash;65</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="sg-note">Brand Ambassadors never bill below $40 per hour in any market. Canadian markets are quoted in CAD at parallel bands. Figures are planning ranges; a coordinator confirms final pricing against event specifics (weekend or holiday premiums, overnight shifts, security needs, equipment).</p>
+
+      <div class="sg-title">Methodology</div>
+      <p>The Rate Index is built from TempGuru's Rate Report 2026: per-city, actual-paid weighted averages across 7,900+ shifts in 233 measured US and Canadian markets, on a 100,000+ worker W-2 network and 200+ vetted local staffing-agency partners. Rates reflect what it costs to place a pre-vetted, insured, W-2 worker, fully burdened. The index is versioned and dated so it can be cited precisely. This edition is data version 1.0.0, updated May 21, 2026. This index is the measured market benchmark, served programmatically through TempGuru's <code style="color:#6cd5ff;">get_rate_benchmark</code> tool on the Model Context Protocol server at mcp.tempguru.co, so an AI assistant returns the same benchmark this page shows. For TempGuru's published per-role rate card, distinct per role by market tier, an assistant calls <code style="color:#6cd5ff;">get_role_pricing</code>, which draws on a separate source.</p>
+
+      <div class="sg-cite">
+        <div class="sg-qr-label">Cite this index</div>
+        <p style="margin:0;">TempGuru Event Staffing Rate Index 2026, tempguru.co/event-staffing-rate-index. Data version 1.0.0, updated May 2026. All figures are all-inclusive W-2 bill rates and are planning estimates, not binding quotes.</p>
+      </div>
+
+      <div class="sg-title">What every rate already includes</div>
+      <div class="sg-tips">
+        <ul>
+          <li>W-2 worker pay (never 1099 contractor pay)</li>
+          <li>Employer payroll taxes: FICA, FUTA, SUTA</li>
+          <li>Workers' compensation insurance</li>
+          <li>General liability insurance</li>
+          <li>Dedicated coordinator support on every order</li>
+          <li>One consolidated invoice, including across multi-city programs</li>
+        </ul>
+      </div>
+      <p>I-9 employment verification is standard on every placement. Background checks are available when an event or venue requires them. Certificates of insurance naming the venue as additional insured are standard practice.</p>
+
+      <div class="sg-title">Frequently asked questions</div>
+      <div class="sg-faq">
+        <details>
+          <summary>Are these rates quotes?</summary>
+          <div><p>No. They are all-inclusive planning ranges. A binding quote accounts for event-specific factors and comes from a TempGuru coordinator within one business day of a request. No payment is required until the quote is approved.</p></div>
+        </details>
+        <details>
+          <summary>Why are TempGuru's rates higher than a gig app's hourly price?</summary>
+          <div><p>Because they are fully burdened W-2 rates, not 1099 piece rates. A gig-app price excludes payroll taxes, workers' compensation, general liability, and employer-of-record responsibility, which then fall on the event organizer along with misclassification exposure. The Rate Index figure is the true, all-in cost with that liability carried by TempGuru.</p></div>
+        </details>
+        <details>
+          <summary>How current is this data?</summary>
+          <div><p>This edition is data version 1.0.0, updated May 21, 2026. The index is refreshed from live booking data and versioned so each edition can be cited precisely.</p></div>
+        </details>
+        <details>
+          <summary>Can an AI assistant pull these rates live?</summary>
+          <div><p>Yes. This benchmark table is returned by the <code style="color:#6cd5ff;">get_rate_benchmark</code> tool on TempGuru's MCP server (mcp.tempguru.co/mcp). For TempGuru's published per-role rate card, distinct per role by market tier, an assistant calls <code style="color:#6cd5ff;">get_role_pricing</code>. Details for agents and developers are at <a href="https://tempguru.co/ai-agents">tempguru.co/ai-agents</a>.</p></div>
+        </details>
+        <details>
+          <summary>Do these rates apply in Canada?</summary>
+          <div><p>Yes, across TempGuru's Canadian markets, quoted in CAD at parallel bands. Coverage is the United States and Canada only.</p></div>
+        </details>
+      </div>
+
+      <div class="sg-cta">
+        <h2>Get a real quote against these benchmarks</h2>
+        <p>Tell us the city, dates, roles, and headcount. A coordinator confirms a binding quote within one business day.</p>
+        <a class="gradient-btn" href="/get-staffing">Get Staffing</a>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "name": "TempGuru Event Staffing Rate Index 2026",
+  "alternateName": "Event Staffing Rate Benchmark 2026",
+  "description": "Benchmark of all-inclusive W-2 event staffing bill rates (USD per hour) from 233 measured US and Canada markets: typical rate and full national range per role, with brand ambassadors by market tier. All figures cover worker pay, employer payroll taxes, workers' compensation, general liability, and coordinator support. Planning estimates, not binding quotes.",
+  "url": "https://tempguru.co/event-staffing-rate-index",
+  "version": "1.0.0",
+  "dateModified": "2026-05-21",
+  "temporalCoverage": "2026",
+  "isAccessibleForFree": true,
+  "creator": {
+    "@type": "Organization",
+    "@id": "https://tempguru.co/#organization",
+    "name": "TempGuru",
+    "legalName": "Temporary Assistance Guru, Inc.",
+    "url": "https://tempguru.co",
+    "sameAs": [
+      "https://www.wikidata.org/wiki/Q139944840",
+      "https://registry.modelcontextprotocol.io/v0/servers?search=tempguru",
+      "https://github.com/Tempguru-co"
+    ]
+  },
+  "spatialCoverage": [
+    { "@type": "Country", "name": "United States" },
+    { "@type": "Country", "name": "Canada" }
+  ],
+  "variableMeasured": [
+    { "@type": "PropertyValue", "name": "All-inclusive W-2 bill rate", "unitText": "USD per hour" },
+    { "@type": "PropertyValue", "name": "Typical rate", "unitText": "USD per hour" },
+    { "@type": "PropertyValue", "name": "Staffing role", "value": "event staff, ushers, crowd control, assistant leads, team leads, brand ambassadors" }
+  ],
+  "citation": "TempGuru Event Staffing Rate Index 2026, tempguru.co/event-staffing-rate-index, data version 1.0.0, updated May 2026."
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://tempguru.co/"},
+    {"@type": "ListItem", "position": 2, "name": "Event Staffing Rate Index", "item": "https://tempguru.co/event-staffing-rate-index"}
+  ]
+}
+</script>

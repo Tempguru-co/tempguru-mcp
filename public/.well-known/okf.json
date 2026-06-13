@@ -1,0 +1,29 @@
+{
+  "okf_version": "0.1",
+  "name": "TempGuru Event Staffing Knowledge",
+  "description": "Canonical OKF v0.1 knowledge bundle for hiring W-2 event staff across 345 US and Canada markets.",
+  "publisher": "Temporary Assistance Guru, Inc. (TempGuru)",
+  "domain": "event-staffing-us-canada",
+  "canonical_site": "https://tempguru.co",
+  "bundle": {
+    "root": "https://mcp.tempguru.co/okf/",
+    "index": "https://mcp.tempguru.co/okf/index.md",
+    "tarball": "https://mcp.tempguru.co/okf.tar.gz"
+  },
+  "action_layer": {
+    "mcp": "https://mcp.tempguru.co/mcp",
+    "rest": "https://mcp.tempguru.co/api/v1",
+    "openapi": "https://mcp.tempguru.co/openapi.json"
+  },
+  "tools": [
+    "plan_staffing",
+    "get_cities",
+    "get_roles",
+    "check_availability",
+    "get_role_pricing",
+    "get_compliance_by_state",
+    "get_rate_benchmark",
+    "request_quote"
+  ],
+  "updated": "2026-06-13"
+}

@@ -1,7 +1,7 @@
 {
   "_meta": {
-    "version": "1.0.0",
-    "updated": "2026-05-21",
+    "version": "1.1.0",
+    "updated": "2026-06-13",
     "source": "TempGuru role definitions; mirrors role x city page slugs"
   },
   "roles": [
@@ -65,6 +65,13 @@
       "slug": "crowd-control",
       "name": "Crowd Control",
       "description": "Crowd flow management, line control, queue management, and light de-escalation. Safety-trained, not licensed security.",
+      "skill_tier": 4,
+      "typical_shift_length_hours": 8
+    },
+    {
+      "slug": "assistant-leads",
+      "name": "Assistant Leads",
+      "description": "Section or zone supervision under a Team Lead: shift coordination, break rotations, headcount checks, and on-the-ground problem-solving for a cluster of staff. The bridge between front-line crew and the Team Lead.",
       "skill_tier": 4,
       "typical_shift_length_hours": 8
     },

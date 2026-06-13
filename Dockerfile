@@ -5,7 +5,7 @@
 # image over a remote-URL pointer.
 #
 # Production deploy continues to run on Vercel (Fluid Compute, App Router).
-# This image is NOT the production runtime — it's a self-contained reference
+# This image is NOT the production runtime, it's a self-contained reference
 # implementation. Connect to the live server directly at https://mcp.tempguru.co/mcp.
 #
 # Two-stage build keeps the runtime image small. Final image runs
@@ -54,7 +54,7 @@ COPY --from=builder /app/package.json ./package.json
 
 EXPOSE 3000
 
-# Health check — Glama and other scanners use this to know when the
+# Health check, Glama and other scanners use this to know when the
 # server is ready to accept requests.
 HEALTHCHECK --interval=10s --timeout=3s --start-period=20s --retries=3 \
   CMD wget --quiet --tries=1 --spider http://localhost:3000/api/v1/health || exit 1

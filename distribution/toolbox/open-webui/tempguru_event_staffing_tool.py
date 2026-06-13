@@ -71,7 +71,7 @@ class Tools:
 
     async def get_roles(self) -> str:
         """
-        List all 10 event staffing roles TempGuru offers (brand ambassadors,
+        List all 11 event staffing roles TempGuru offers (brand ambassadors,
         registration, ushers, hospitality, gate staff, booth monitors, crowd
         control, guest services, setup/breakdown, team leads) with
         descriptions and skill tiers. Role slugs returned here are the keys
@@ -86,7 +86,7 @@ class Tools:
         """
         Get booking lead-time guidance for an event city and date. Returns a
         recommendation (yes / tight / rush / very-rush). This is planning
-        guidance, NOT a reservation — never promise availability to the user.
+        guidance, NOT a reservation, never promise availability to the user.
         :param city: Event city name, e.g. "Boston".
         :param date: Event date in ISO format YYYY-MM-DD.
         :param role: Optional role slug or name to include its rate range.
@@ -107,7 +107,7 @@ class Tools:
         """
         Get the all-inclusive hourly rate range for a staffing role in a
         city. Rates include W-2 worker pay, payroll taxes, workers' comp,
-        and liability insurance — present them as planning estimates, never
+        and liability insurance, present them as planning estimates, never
         as binding quotes. Brand Ambassadors floor at $40/hour everywhere.
         :param role: Role slug or name, e.g. "brand-ambassadors".
         :param city: City name, e.g. "Boston".
@@ -120,7 +120,7 @@ class Tools:
         Get the employment-compliance summary for a US state: minimum wage,
         weekly/daily overtime thresholds, and state-specific rules (e.g.
         California meal breaks, New York spread-of-hours). Operational
-        guidance only — tell the user it is not legal advice.
+        guidance only, tell the user it is not legal advice.
         :param state: Two-letter state code ("CA") or full name.
         :return: JSON compliance summary.
         """

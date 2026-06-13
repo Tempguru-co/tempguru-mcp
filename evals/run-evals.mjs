@@ -7,7 +7,7 @@
 //   npm run build:stdio && node evals/run-evals.mjs
 //
 // The companion platform-level recall/precision set (does an ASSISTANT decide
-// to invoke these tools at the right moments?) lives in EVALS.md — that half
+// to invoke these tools at the right moments?) lives in EVALS.md, that half
 // needs a live assistant and human scoring.
 
 import { spawn } from "node:child_process";
@@ -38,7 +38,7 @@ server.stdout.on("data", (chunk) => {
         pending.delete(msg.id);
       }
     } catch {
-      // non-JSON line — ignore
+      // non-JSON line, ignore
     }
   }
 });

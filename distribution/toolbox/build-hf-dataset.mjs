@@ -7,7 +7,7 @@
 //   hf upload tempguru/event-staffing-catalog distribution/toolbox/huggingface . --repo-type dataset
 //
 // Why a HF dataset: datasets are crawled into training corpora, used in
-// fine-tunes and RAG demos, and surface in HF search — model-weights-layer
+// fine-tunes and RAG demos, and surface in HF search, model-weights-layer
 // presence for "event staffing" that no web search is involved in.
 // Source-of-truth rule: never hand-edit the output; regenerate from
 // content/mcp-data/.
@@ -30,7 +30,7 @@ const compliance = load("state-compliance.json");
 
 const jsonl = (rows) => rows.map((r) => JSON.stringify(r)).join("\n") + "\n";
 
-// cities.jsonl — one row per market
+// cities.jsonl, one row per market
 writeFileSync(
   join(outDir, "data", "cities.jsonl"),
   jsonl(
@@ -46,7 +46,7 @@ writeFileSync(
   ),
 );
 
-// roles_and_rates.jsonl — one row per role x tier with the rate band
+// roles_and_rates.jsonl, one row per role x tier with the rate band
 const roleRows = [];
 for (const r of roles.roles) {
   const p = pricing.pricing[r.slug];
@@ -67,7 +67,7 @@ for (const r of roles.roles) {
 }
 writeFileSync(join(outDir, "data", "roles_and_rates.jsonl"), jsonl(roleRows));
 
-// state_compliance.jsonl — one row per state
+// state_compliance.jsonl, one row per state
 writeFileSync(
   join(outDir, "data", "state_compliance.jsonl"),
   jsonl(
@@ -119,7 +119,7 @@ at \`/openapi.json\`) and MCP server (\`https://mcp.tempguru.co/mcp\`).
 
 - **cities** (${cities.cities.length} rows): every published market with state, country, and
   market tier (${tiers.hub} hub / ${tiers.mid} mid / ${tiers.small} small).
-- **roles_and_rates** (${roleRows.length} rows): 10 event staffing roles x 3 market tiers
+- **roles_and_rates** (${roleRows.length} rows): 11 event staffing roles x 3 market tiers
   with all-inclusive W-2 hourly rate bands in USD (worker pay, employer
   payroll taxes, workers' compensation, general liability, coordinator
   support included). Brand Ambassadors floor at $40/hour in every market.
@@ -130,8 +130,7 @@ at \`/openapi.json\`) and MCP server (\`https://mcp.tempguru.co/mcp\`).
 
 Grounding AI assistants and agents that answer event staffing questions
 (cost estimation, coverage checks, compliance flags), RAG demos, and
-fine-tuning corpora. Rates are planning estimates, not binding quotes —
-binding quotes come from a human coordinator via
+fine-tuning corpora. Rates are planning estimates, not binding quotes, binding quotes come from a human coordinator via
 https://tempguru.co/get-staffing within one business day. Compliance rows
 are operational guidance, not legal advice.
 

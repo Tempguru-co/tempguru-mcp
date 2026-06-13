@@ -61,7 +61,7 @@ class TempGuruToolSpec(BaseToolSpec):
         return self._tg.cities(state=state or None, tier=tier or None)
 
     def event_staffing_roles(self) -> dict:
-        """List all 10 event staffing roles (brand ambassadors, registration,
+        """List all 11 event staffing roles (brand ambassadors, registration,
         ushers, hospitality, gate staff, booth monitors, crowd control,
         guest services, setup/breakdown, team leads) with descriptions and
         skill tiers. Returned slugs key the pricing/availability tools."""
@@ -72,7 +72,7 @@ class TempGuruToolSpec(BaseToolSpec):
     ) -> dict:
         """Booking lead-time guidance for event staff in a city on an ISO
         date (YYYY-MM-DD): returns yes / tight / rush / very-rush. Planning
-        guidance only, NOT a reservation — never promise availability."""
+        guidance only, NOT a reservation, never promise availability."""
         return self._tg.availability(
             city=city, date=date, role=role or None, headcount=headcount or None
         )

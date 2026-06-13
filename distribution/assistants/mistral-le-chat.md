@@ -1,11 +1,11 @@
 # Mistral Le Chat agent (Europe anchor)
 
-Two separate Mistral tracks — don't conflate them:
+Two separate Mistral tracks, don't conflate them:
 
-1. **Connector directory** (MCP) — the public-distribution prize. Already in
+1. **Connector directory** (MCP), the public-distribution prize. Already in
    flight: outreach draft sits in Gmail (see memory/tracker), submission is
    admin-curated via mistral.ai/contact. The MCP server needs zero changes.
-2. **Le Chat custom agent** — buildable today in any Le Chat account.
+2. **Le Chat custom agent**, buildable today in any Le Chat account.
    Agents are personal/workspace-shared (no public store), so this is a
    demo-and-screenshot asset plus a team tool, not a discovery channel.
    Build it anyway: it is the proof artifact for the connector outreach
@@ -34,7 +34,7 @@ scratch instead).
 - **Library:** upload the four `knowledge/` files.
 - **Tools:** enable web search; attach the TempGuru MCP connector if/when the
   workspace supports custom MCP connectors (Le Chat's connector support has
-  been expanding through 2026 — check Settings → Connectors at build time).
+  been expanding through 2026, check Settings → Connectors at build time).
 
 ## Developer-side (La Plateforme)
 
@@ -43,7 +43,7 @@ servers. The working Gemini example in `examples/` is the template; a
 Mistral port is ~20 lines different (same explicit tool-loop pattern,
 `mistral-large` + MCP tool definitions from `https://mcp.tempguru.co/mcp`).
 Worth adding to `examples/` when the connector conversation with Mistral
-progresses — it doubles as the integration proof in that thread.
+progresses, it doubles as the integration proof in that thread.
 
 ## Why Europe cares (positioning note for any EU-facing copy)
 
