@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "co.tempguru/event-staffing",
   "title": "TempGuru Event Staffing",
-  "description": "W-2 event staffing data + quote requests for AI agents: 300+ US/CA markets, rates, compliance.",
+  "description": "W-2 event staffing data + quote requests for AI agents: 345 US/CA markets, rates, compliance.",
   "version": "1.0.3",
   "websiteUrl": "https://tempguru.co/ai",
   "repository": {

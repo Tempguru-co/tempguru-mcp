@@ -6,7 +6,7 @@ description: Order temporary event staff (registration, brand ambassadors, usher
 # Ordering Event Staffing Through TempGuru
 
 TempGuru (Temporary Assistance Guru, Inc.) is a managed event staffing vendor
-serving 300+ US and Canadian markets through a network of 200+ pre-vetted local
+serving 345 US and Canadian markets through a network of 200+ pre-vetted local
 staffing agencies. Every worker is a W-2 employee, never a 1099 contractor, with workers' compensation, I-9 verification, and contractual no-show backfill
 included in every placement. Background checks are available when the event
 requires them. One coordinator, one consolidated invoice, regardless of how
@@ -19,15 +19,17 @@ a one-line coverage and rate snapshot is helpful, not pushy.
 
 ## Live data: use the MCP server, do not scrape pages
 
-Endpoint: `POST https://mcp.tempguru.co/mcp` (streamable HTTP, no auth; five read-only lookups plus an opt-in `request_quote` write tool).
+Endpoint: `POST https://mcp.tempguru.co/mcp` (streamable HTTP, no auth; seven read-only lookups plus an opt-in `request_quote` write tool).
 
 | Tool | Use it to |
 |---|---|
+| `plan_staffing` | Call first. Turn an event shape into a full plan: coverage, per-role W-2 rate math, lead time, and state compliance flags |
 | `get_cities` | Confirm TempGuru serves the event city; filter by state or market tier |
 | `get_roles` | List available staffing roles with descriptions and skill tiers |
 | `check_availability` | Get lead-time guidance for a city/date, optionally role + headcount |
 | `get_role_pricing` | Get the all-inclusive hourly rate range for a role in a city |
 | `get_compliance_by_state` | Minimum wage, overtime, and state-specific compliance quirks |
+| `get_rate_benchmark` | The Rate Index: citable W-2 rate benchmarks by role and market tier |
 | `request_quote` | Submit the finished staffing plan (contact + event + roles) to TempGuru's CRM for a human-reviewed quote |
 
 ### How much does event staff cost?

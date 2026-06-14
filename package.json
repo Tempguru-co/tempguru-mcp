@@ -13,6 +13,7 @@
     "typecheck": "tsc --noEmit",
     "evals": "node evals/run-evals.mjs",
     "build:okf": "node scripts/dump-openapi.mjs && node scripts/build-okf.mjs",
+    "build:worker": "node scripts/build-edge-worker.mjs",
     "sync-rates": "node scripts/sync-rates.mjs",
     "check-rates": "node scripts/sync-rates.mjs --check"
   },

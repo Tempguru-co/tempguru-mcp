@@ -132,10 +132,12 @@ const rootDoc = (body) =>
 
 rmSync(outDir, { recursive: true, force: true });
 let fileCount = 0;
+const writtenPaths = []; // bundle-relative paths of every file, drives the sitemap
 const write = (relPath, content) => {
   const full = join(outDir, relPath);
   mkdirSync(dirname(full), { recursive: true });
   writeFileSync(full, content);
+  writtenPaths.push(relPath);
   fileCount += 1;
 };
 
@@ -1196,6 +1198,37 @@ try {
   /* tar not present, git-clone remains the distribution path */
 }
 
+// ── sitemap.xml + robots.txt ─────────────────────────────────────────────────
+// Make the bundle crawlable and indexable: every knowledge page gets a canonical
+// URL in the sitemap, and robots.txt welcomes AI crawlers and points at it. Both
+// reproducible (lastmod is the data date, paths are sorted), so no clock drift.
+const ORIGIN = new URL(BUNDLE_URL).origin;
+const sitemapUrls = [
+  `${BUNDLE_URL}/`,
+  `${ORIGIN}/llms.txt`,
+  ...writtenPaths
+    .filter((p) => p.endsWith(".md"))
+    .sort()
+    .map((p) => `${BUNDLE_URL}/${p}`),
+];
+const sitemap =
+  `<?xml version="1.0" encoding="UTF-8"?>\n` +
+  `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
+  sitemapUrls
+    .map((u) => `  <url>\n    <loc>${u}</loc>\n    <lastmod>${DATA_DATE}</lastmod>\n  </url>`)
+    .join("\n") +
+  `\n</urlset>\n`;
+writeFileSync(join(publicDir, "sitemap.xml"), sitemap);
+
+const robots =
+  `# TempGuru, Event Staffing Knowledge. AI agents and crawlers welcome.\n` +
+  `# Canonical knowledge ships as an Open Knowledge Format bundle under /okf/.\n` +
+  `# See /llms.txt and /.well-known/okf.json for the bundle and discovery doc.\n` +
+  `User-agent: *\n` +
+  `Allow: /\n\n` +
+  `Sitemap: ${ORIGIN}/sitemap.xml\n`;
+writeFileSync(join(publicDir, "robots.txt"), robots);
+
 console.log(`Wrote ${fileCount} OKF files to ${outDir}`);
-console.log(`Wrote public/llms.txt, public/.well-known/okf.json, ${tarballNote}`);
+console.log(`Wrote public/llms.txt, public/.well-known/okf.json, public/sitemap.xml, public/robots.txt, ${tarballNote}`);
 console.log(`  data v${cities._meta.version} (${DATA_DATE}) · ${cities.cities.length} markets · ${measuredTotal} measured · 51 states · ${roles.roles.length} roles · ${TOOLS.length} tools · ${API_OPS.filter((o) => o.path !== "/api/v1/health").length} endpoints`);

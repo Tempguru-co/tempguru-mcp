@@ -77,6 +77,19 @@ const SERVER_CARD = {
   ],
   authentication: { required: false },
   documentationUrl: "https://mcp.tempguru.co/",
+  // Knowledge layer: the same data the tools serve, published as a static
+  // Open Knowledge Format (OKF v0.1) bundle that agents can read or ingest
+  // directly. The tools above are the action layer (how to plan, price, and
+  // submit); this is the knowledge layer (what the roles, rates, and rules mean).
+  knowledge: {
+    format: "OKF",
+    okfVersion: "0.1",
+    description:
+      "Canonical Open Knowledge Format bundle: staffing roles, all-inclusive W-2 rate card, the Rate Index benchmark, 345-market coverage, state compliance, and quote workflows.",
+    bundle: "https://mcp.tempguru.co/okf/index.md",
+    tarball: "https://mcp.tempguru.co/okf.tar.gz",
+    discovery: "https://mcp.tempguru.co/.well-known/okf.json",
+  },
 } as const;
 
 export async function GET() {

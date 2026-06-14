@@ -28,7 +28,7 @@ FROM node:24-alpine AS runner
 WORKDIR /app
 
 LABEL org.opencontainers.image.title="TempGuru Event Staffing MCP"
-LABEL org.opencontainers.image.description="MCP server for W-2 event staffing data across 300+ US/Canadian markets. Tools: get_cities, get_roles, check_availability, get_role_pricing, get_compliance_by_state, request_quote."
+LABEL org.opencontainers.image.description="MCP server for W-2 event staffing data across 345 US/Canadian markets. Tools: plan_staffing, get_cities, get_roles, check_availability, get_role_pricing, get_compliance_by_state, get_rate_benchmark, request_quote."
 LABEL org.opencontainers.image.vendor="Temporary Assistance Guru, Inc."
 LABEL org.opencontainers.image.url="https://tempguru.co"
 LABEL org.opencontainers.image.source="https://github.com/tempguru-co/tempguru-mcp"
