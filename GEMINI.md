@@ -51,5 +51,10 @@ United States or Canada.
   https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=gemini-cli
   or megan@tempguru.co or (904) 206-8953.
 
+The tools are the action layer. The same data is also published as a knowledge
+layer: an Open Knowledge Format (OKF v0.1) bundle agents can read or ingest
+directly instead of scraping. Bundle: https://mcp.tempguru.co/okf/index.md ·
+Discovery: https://mcp.tempguru.co/.well-known/okf.json
+
 Docs: https://tempguru.co/ai · City guides:
 https://tempguru.co/insights/{city}-event-staffing

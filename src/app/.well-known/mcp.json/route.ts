@@ -24,6 +24,7 @@ const MCP_DISCOVERY = {
       authentication: { type: "none" },
       documentation: "https://tempguru.co/ai",
       serverCard: "https://mcp.tempguru.co/.well-known/mcp/server-card.json",
+      knowledge: "https://mcp.tempguru.co/.well-known/okf.json",
     },
   ],
 } as const;

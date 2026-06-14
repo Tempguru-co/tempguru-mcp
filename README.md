@@ -40,6 +40,21 @@ Seven of the eight tools are read-only (`readOnlyHint: true`). `request_quote` i
 
 ---
 
+## Knowledge layer (Open Knowledge Format)
+
+The tools above are the **action layer**, how to plan, price, check compliance, and submit a quote. The same data is also published as a **knowledge layer**: a static [Open Knowledge Format](https://github.com/GoogleCloudPlatform/knowledge-catalog) (OKF v0.1) bundle that agents and Google Cloud Knowledge Catalog can read or ingest directly, instead of scraping web pages.
+
+| Resource | URL |
+|---|---|
+| OKF bundle root | [`/okf/index.md`](https://mcp.tempguru.co/okf/index.md) |
+| Downloadable tarball | [`/okf.tar.gz`](https://mcp.tempguru.co/okf.tar.gz) |
+| Discovery document | [`/.well-known/okf.json`](https://mcp.tempguru.co/.well-known/okf.json) |
+| Rate Index (measured benchmark) | [`/okf/rate-index.md`](https://mcp.tempguru.co/okf/rate-index.md) |
+
+The bundle is generated from the same source data as the tools (`npm run build:okf`), so the two layers never drift. It covers roles, the all-inclusive W-2 rate card, market coverage, state compliance, and the quote workflows.
+
+---
+
 ## Connect
 
 The server speaks MCP Streamable HTTP (spec rev 2025-03-26). Any MCP-compliant client works.

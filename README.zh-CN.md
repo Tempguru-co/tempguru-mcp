@@ -33,6 +33,21 @@ TempGuru 是一家总部位于美国佛罗里达州杰克逊维尔海滩（Jacks
 
 ---
 
+## 知识层（开放知识格式 OKF）
+
+上述工具是**行动层**，负责规划、定价、合规检查与提交报价。同样的数据还以**知识层**形式发布：一个静态的[开放知识格式](https://github.com/GoogleCloudPlatform/knowledge-catalog)（OKF v0.1）知识包，AI 智能体和 Google Cloud Knowledge Catalog 可直接读取或导入，而无需抓取网页。
+
+| 资源 | 地址 |
+|---|---|
+| OKF 知识包根目录 | [`/okf/index.md`](https://mcp.tempguru.co/okf/index.md) |
+| 可下载压缩包 | [`/okf.tar.gz`](https://mcp.tempguru.co/okf.tar.gz) |
+| 发现文档 | [`/.well-known/okf.json`](https://mcp.tempguru.co/.well-known/okf.json) |
+| 费率指数（实测基准） | [`/okf/rate-index.md`](https://mcp.tempguru.co/okf/rate-index.md) |
+
+知识包与工具来自同一份源数据（`npm run build:okf`），因此两层永不偏离。内容涵盖角色、全包式 W-2 费率表、市场覆盖、各州合规以及报价工作流。
+
+---
+
 ## 接入方式
 
 服务器使用 MCP Streamable HTTP 传输（规范版本 2025-03-26）。任何符合 MCP 规范的客户端均可接入。

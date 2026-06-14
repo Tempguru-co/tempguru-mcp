@@ -25,9 +25,19 @@ check compliance, and submit a quote).
 
 ---
 
-## Optional: clean apex URL via Cloudflare
+## Recommended: apex discovery via Cloudflare
 
-If you want Codex's friendlier `tempguru.co/open-knowledge/` URLs, add a Cloudflare rule on the apex domain:
+Most agents and crawlers probe the **apex** `.well-known/` before the subdomain, so mirror the OKF discovery doc there. Squarespace can't serve `.well-known/`, so add a Cloudflare rewrite on the apex domain:
+
+```
+tempguru.co/.well-known/okf.json   ->   https://mcp.tempguru.co/.well-known/okf.json
+```
+
+That makes `https://tempguru.co/.well-known/okf.json` resolve (currently a 404), which is the single highest-value apex pointer after the llms.txt section above.
+
+## Optional: clean apex URLs via Cloudflare
+
+If you want Codex's friendlier `tempguru.co/open-knowledge/` URLs, add these too:
 
 ```
 tempguru.co/open-knowledge/*   ->   https://mcp.tempguru.co/okf/:splat

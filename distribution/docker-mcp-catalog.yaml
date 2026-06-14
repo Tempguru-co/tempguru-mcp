@@ -15,7 +15,7 @@
 name: tempguru-event-staffing
 title: TempGuru Event Staffing
 description: |
-  W-2 event staffing data for AI agents across 300+ US and Canadian markets.
+  W-2 event staffing data for AI agents across 345 US and Canadian markets.
   Seven read-only tools surface city coverage, staffing roles, all-inclusive
   hourly rates, lead-time availability, and state-level compliance summaries.
   One write tool (request_quote) submits structured staffing requests to
@@ -79,7 +79,7 @@ tools:
 
   - name: get_cities
     description: >
-      List all cities TempGuru serves (300+ US/CA markets), optionally filtered
+      List all cities TempGuru serves (345 US/CA markets), optionally filtered
       by state or market tier (hub / mid / small).
     readOnly: true
 

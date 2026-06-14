@@ -124,6 +124,24 @@
 
   <hr>
 
+  <h2>Knowledge Bundle (Open Knowledge Format)</h2>
+
+  <p>The MCP tools and REST API are the <strong>action layer</strong>, how an agent plans, prices, checks compliance, and submits a quote. The same data is also published as a <strong>knowledge layer</strong>: a static <a href="https://github.com/GoogleCloudPlatform/knowledge-catalog">Open Knowledge Format</a> (OKF v0.1) bundle that agents and Google Cloud Knowledge Catalog can read or ingest directly, no scraping. It is generated from the same source data as the live tools, so the two layers never drift.</p>
+
+  <table class="tg-table">
+    <thead>
+      <tr><th>Resource</th><th>URL</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>OKF Bundle Root</td><td><code>https://mcp.tempguru.co/okf/index.md</code></td></tr>
+      <tr><td>OKF Bundle (tarball)</td><td><code>https://mcp.tempguru.co/okf.tar.gz</code></td></tr>
+      <tr><td>OKF Discovery</td><td><code>https://mcp.tempguru.co/.well-known/okf.json</code></td></tr>
+      <tr><td>Rate Index (measured benchmark)</td><td><code>https://mcp.tempguru.co/okf/rate-index.md</code></td></tr>
+    </tbody>
+  </table>
+
+  <hr>
+
   <h2>Live Endpoints</h2>
 
   <table class="tg-table">
@@ -135,6 +153,8 @@
       <tr><td>MCP Discovery</td><td><code>https://mcp.tempguru.co/.well-known/mcp.json</code></td></tr>
       <tr><td>MCP Server Card</td><td><code>https://mcp.tempguru.co/.well-known/mcp/server-card.json</code></td></tr>
       <tr><td>REST API (OpenAPI 3.1)</td><td><code>https://mcp.tempguru.co/openapi.json</code></td></tr>
+      <tr><td>OKF Knowledge Bundle</td><td><code>https://mcp.tempguru.co/okf/index.md</code></td></tr>
+      <tr><td>OKF Discovery</td><td><code>https://mcp.tempguru.co/.well-known/okf.json</code></td></tr>
       <tr><td>API Catalog</td><td><code>https://tempguru.co/.well-known/api-catalog</code></td></tr>
       <tr><td>Agent Skills (agentskills.io)</td><td><code>https://tempguru.co/.well-known/agent-skills/index.json</code></td></tr>
       <tr><td>Agent Skills (Hermes)</td><td><code>https://tempguru.co/.well-known/skills/index.json</code></td></tr>

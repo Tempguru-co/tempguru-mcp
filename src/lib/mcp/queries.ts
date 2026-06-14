@@ -200,7 +200,7 @@ export function queryAvailability(
     return ok({
       city_found: false,
       requested: input.city,
-      message: `TempGuru does not have a dedicated city page for "${input.city}". We serve 300+ markets, contact us at https://tempguru.co/get-staffing for coverage confirmation.`,
+      message: `TempGuru does not have a dedicated city page for "${input.city}". We serve 345 markets, contact us at https://tempguru.co/get-staffing for coverage confirmation.`,
     });
   }
 

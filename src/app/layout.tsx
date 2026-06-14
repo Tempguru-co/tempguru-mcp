@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "TempGuru MCP Server",
   description:
-    "Model Context Protocol server for TempGuru event staffing data: five read-only lookup tools (cities, roles, pricing, availability, state compliance) plus an opt-in request_quote submission.",
+    "Model Context Protocol server for TempGuru event staffing data: seven read-only tools (plan_staffing planner, cities, roles, pricing, availability, state compliance, rate benchmark) plus an opt-in request_quote submission.",
   robots: { index: false, follow: false },
 };
 

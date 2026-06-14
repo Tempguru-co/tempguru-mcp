@@ -1,0 +1,7 @@
+# TempGuru, Event Staffing Knowledge. AI agents and crawlers welcome.
+# Canonical knowledge ships as an Open Knowledge Format bundle under /okf/.
+# See /llms.txt and /.well-known/okf.json for the bundle and discovery doc.
+User-agent: *
+Allow: /
+
+Sitemap: https://mcp.tempguru.co/sitemap.xml

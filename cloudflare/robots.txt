@@ -1,0 +1,141 @@
+# ------------------------------
+# TIER 1 - AI Citation Engines (explicit allow - never block these)
+# ------------------------------
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+Crawl-delay: 10
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: BraveBot
+Allow: /
+
+# Anthropic three-bot framework (split Feb 2026)
+User-agent: Claude-User
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+# Perplexity user-triggered fetch (separate from index bot)
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Kimi-SearchBot
+Allow: /
+
+User-agent: Kimi-User
+Allow: /
+
+User-agent: MistralAI-Index
+Allow: /
+
+User-agent: MistralAI-User
+Allow: /
+
+User-agent: Qwantbot
+Allow: /
+
+User-agent: MojeekBot
+Allow: /
+
+User-agent: SeznamBot
+Allow: /
+
+User-agent: YandexBot
+Allow: /
+
+# Bytespider (ByteDance/TikTok)
+User-agent: Bytespider
+Allow: /
+
+# ------------------------------
+# TIER 1.5 - Chinese AI / search ecosystem (explicit allow)
+# ------------------------------
+# Baiduspider - powers Baidu Search + ERNIE Bot (Baidu's LLM)
+User-agent: Baiduspider
+Allow: /
+# YisouSpider - Shenma/UC/Quark (Alibaba ecosystem) - relevant for Qwen / DashScope discoverability
+User-agent: YisouSpider
+Allow: /
+# Sogou web spider - Tencent ecosystem (powers Yuanbao)
+User-agent: Sogou web spider
+Allow: /
+# 360Spider - Qihoo 360 Search
+User-agent: 360Spider
+Allow: /
+
+# ------------------------------
+# TIER 2 - AI/Search Indexing + open-corpus training (allow)
+# ------------------------------
+User-agent: Google-Extended
+Allow: /
+
+User-agent: GoogleOther
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: FacebookBot
+Allow: /
+
+User-agent: meta-externalagent
+Allow: /
+
+User-agent: meta-externalfetcher
+Allow: /
+
+# CommonCrawl - feeds the open-model ecosystem (Llama/Mistral/Qwen + the C4/FineWeb/RefinedWeb/Dolma
+# corpora derived from it). Same "pure training opt-in" category as Google-Extended/Applebot-Extended.
+User-agent: CCBot
+Allow: /
+
+# Inert alias (real UA is CCBot/2.0) - kept to document intent.
+User-agent: CommonCrawl
+Allow: /
+
+# ------------------------------
+# ALL OTHER BOTS - Squarespace defaults
+# ------------------------------
+User-agent: *
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
+Disallow: /config
+Disallow: /search
+Disallow: /account$
+Disallow: /account/
+Disallow: /commerce/digital-download/
+Disallow: /api/
+Allow: /api/ui-extensions/
+Disallow: /static/
+Disallow: /*?format=json
+Disallow: /*&format=json
+Disallow: /*?format=page-context
+Disallow: /*&format=page-context
+Disallow: /*?format=main-content
+Disallow: /*&format=main-content
+Disallow: /*?format=json-pretty
+Disallow: /*&format=json-pretty
+Disallow: /*?format=ical
+Disallow: /*&format=ical
+Disallow: /*?reversePaginate=*
+Disallow: /*&reversePaginate=*
+
+# ------------------------------
+Sitemap: https://tempguru.co/sitemap.xml
