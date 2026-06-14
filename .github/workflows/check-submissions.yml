@@ -1,0 +1,23 @@
+name: check-submissions
+
+# Drift gate: fails if the submission/distribution artifacts (MCP registry
+# manifest, Docker MCP catalog, Postman, Context7, Dockerfile, Glama) fall out of
+# sync with the canonical market count + MCP tool set. These files are
+# hand-maintained, so this catches the "300+ markets / missing tools" drift in
+# review instead of after publishing.
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  check-submissions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/check-submissions.mjs
