@@ -119,6 +119,9 @@ mcp_manager.add_server({
 - **身份验证：** 无。数据为公开数据。
 - **数据源：** `content/mcp-data/` 下的 JSON 文件（城市、岗位、岗位定价、州合规）
 - **身份认证：** `tempguru.co` 根域的 DNS TXT 记录承载 Ed25519 公钥，授权在官方 MCP 注册中心以 `co.tempguru` 命名空间发布
+- **知识层：** 同一份数据还以静态 Open Knowledge Format（OKF v0.1）知识包形式发布，位于 `/okf/`（含 `/.well-known/okf.json`、`/okf.tar.gz`、`/sitemap.xml`、`/robots.txt`），由 `npm run build:okf` 从 `content/mcp-data/` 生成（已接入 `npm run build`），因此行动层与知识层永不偏离
+- **根域发现：** `tempguru.co` 的 `.well-known/*`、`robots.txt`、`llms.txt`、`llms-full.txt` 由两个 Cloudflare worker 提供，分别通过 `npm run build:worker` 和 `npm run build:llms-worker` 从规范源生成（输出在 `cloudflare/`）
+- **漂移门禁：** `npm run check:submissions`（CI）与 `npm run check-rates` 确保注册/目录文件与费率数据同规范源保持一致
 
 每个工具同时提供 REST 接口镜像，位于 `mcp.tempguru.co/api/v1/*`，OpenAPI 3.1 规范见 `/openapi.json`，RFC 9727 api-catalog 见 `/.well-known/api-catalog`。
 
@@ -197,18 +200,28 @@ src/
   app/
     mcp/route.ts          # MCP 处理器（8 个工具）
     api/v1/*/route.ts     # REST 镜像
-    .well-known/          # api-catalog 与 mcp/server-card
+    .well-known/          # api-catalog、mcp.json、mcp/server-card、agent-skills
     openapi.json/         # OpenAPI 3.1 构建器
   lib/
     mcp/queries.ts        # 纯查询函数，MCP 与 REST 共用
     mcp/data.ts           # JSON 加载器
     api/responses.ts      # JSON/错误/CORS 辅助函数
 content/
-  mcp-data/
-    cities.json
-    roles.json
-    role-pricing.json
-    state-compliance.json
+  mcp-data/               # 数据源：城市、岗位、岗位定价、州合规、openapi.json
+  skills/                 # SKILL.md 源文件（防漂移输入）
+public/
+  okf/                    # 生成的 OKF v0.1 知识包（90 个文件）— 请勿手动编辑
+  okf.tar.gz · sitemap.xml · robots.txt · llms.txt
+  .well-known/okf.json    # OKF 发现文档
+  schemas/                # event-staffing-request.schema.json
+scripts/
+  build-okf.mjs · dump-openapi.mjs          # 知识包 + openapi（npm run build:okf）
+  build-edge-worker.mjs · build-llms-worker.mjs  # 根域 Cloudflare worker
+  check-submissions.mjs · sync-rates.mjs    # 漂移门禁
+cloudflare/
+  worker.js               # 根域 .well-known/* + robots（生成）
+  llms-worker.js          # 根域 llms.txt + llms-full.txt（生成）
+distribution/okf/         # openapi-to-okf 生成器 + Google knowledge-catalog 贡献
 server.json               # MCP 注册中心清单
 public/logo.svg           # 方形 SVG 标识
 ```
