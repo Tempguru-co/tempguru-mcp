@@ -9,6 +9,8 @@ Internal documentation for the telemetry layer added 2026-06-04. The MCP server 
 - **Source repo:** [`Tempguru-co/tempguru-mcp`](https://github.com/Tempguru-co/tempguru-mcp) (GitHub, public)
 - **Vercel project:** `temp-guru/tempguru-mcp` (team `temp-guru`)
 - **Auto-deploy:** every push to `main` ships to **Production** via Vercel's GitHub App, no manual `vercel --prod` needed.
+- **OKF bundle + discovery:** `npm run build` runs `build:okf` first, so `public/okf/`, `llms.txt`, `sitemap.xml`, `robots.txt`, and `.well-known/okf.json` regenerate from `content/mcp-data/` on every deploy. Never hand-edit `public/okf/`.
+- **Apex (`tempguru.co`) discovery is NOT Vercel.** Two Cloudflare workers serve it: `.well-known/*` + `robots.txt` from `cloudflare/worker.js`, and `llms.txt` + `llms-full.txt` from `cloudflare/llms-worker.js`. Both are generated (`npm run build:worker`, `npm run build:llms-worker`), version-controlled in `cloudflare/` as the source of truth, and deployed **manually** by pasting the file into the Cloudflare worker editor. The `check-submissions` CI gate guards them against drift. (Pasting non-code text or a partial file into that editor deploys instantly and can wipe live content; the Cloudflare Deployments tab offers rollback.)
 
 > **Failure mode, pushes stop deploying after a repo transfer/rename.** Vercel's Git integration breaks *silently*: `git push` no longer triggers a build, and the last good deploy keeps serving, so nothing looks broken until you notice prod is stale. Root cause: a GitHub repo transfer does **not** carry the Vercel GitHub App installation to the new owner/org (the org ends up with zero app installations).
 >

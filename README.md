@@ -122,6 +122,9 @@ The matrix is "the server is spec-compliant; any spec-compliant client connects.
 - **Auth:** None. Data is public.
 - **Source of truth:** JSON files in `content/mcp-data/` (cities, roles, role-pricing, state-compliance)
 - **Identity verification:** DNS TXT record on the `tempguru.co` apex with Ed25519 public key authorizes publishes under the `co.tempguru` namespace on the official MCP Registry
+- **Knowledge layer:** the same data is published as a static Open Knowledge Format (OKF v0.1) bundle at `/okf/` (+ `/.well-known/okf.json`, `/okf.tar.gz`, `/sitemap.xml`, `/robots.txt`), generated from `content/mcp-data/` by `npm run build:okf` (wired into `npm run build`) so the action and knowledge layers never drift
+- **Apex discovery:** `tempguru.co`'s `.well-known/*`, `robots.txt`, `llms.txt`, and `llms-full.txt` are served by two Cloudflare workers generated from canonical sources by `npm run build:worker` and `npm run build:llms-worker` (output in `cloudflare/`)
+- **Drift gates:** `npm run check:submissions` (CI) and `npm run check-rates` keep the registry/catalog files and rate data in sync with the canonical sources
 
 A REST mirror of every tool is also available at `mcp.tempguru.co/api/v1/*` with OpenAPI 3.1 at `/openapi.json` and RFC 9727 api-catalog at `/.well-known/api-catalog`. That includes the write tool: `POST /api/v1/quote-requests` (operationId `submitQuoteRequest`) shares the MCP tool's validation schema, CRM write, and confirmation payload via the same shared modules, and adds a light per-IP rate limit since it is a no-auth public write. Like the MCP tool, it is opt-in, creates no reservation, and requires no payment.
 
@@ -200,18 +203,29 @@ src/
   app/
     mcp/route.ts          # MCP handler (8 tools)
     api/v1/*/route.ts     # REST mirror
-    .well-known/          # api-catalog, mcp/server-card
+    .well-known/          # api-catalog, mcp.json, mcp/server-card, agent-skills
     openapi.json/         # OpenAPI 3.1 builder
   lib/
     mcp/queries.ts        # Pure query functions, shared by MCP + REST
     mcp/data.ts           # JSON loaders
     api/responses.ts      # JSON/error/CORS helpers
 content/
-  mcp-data/
-    cities.json
-    roles.json
-    role-pricing.json
-    state-compliance.json
+  mcp-data/               # source of truth: cities, roles, role-pricing,
+                          # state-compliance, openapi.json
+  skills/                 # SKILL.md sources (drift-proof inputs)
+public/
+  okf/                    # generated OKF v0.1 bundle (90 files) — never hand-edit
+  okf.tar.gz · sitemap.xml · robots.txt · llms.txt
+  .well-known/okf.json    # OKF discovery doc
+  schemas/                # event-staffing-request.schema.json
+scripts/
+  build-okf.mjs · dump-openapi.mjs          # bundle + openapi (npm run build:okf)
+  build-edge-worker.mjs · build-llms-worker.mjs  # apex Cloudflare workers
+  check-submissions.mjs · sync-rates.mjs    # drift gates
+cloudflare/
+  worker.js               # apex .well-known/* + robots (generated)
+  llms-worker.js          # apex llms.txt + llms-full.txt (generated)
+distribution/okf/         # openapi-to-okf producer + Google knowledge-catalog contribution
 server.json               # MCP Registry manifest
 public/logo.svg           # Square SVG logo
 ```
