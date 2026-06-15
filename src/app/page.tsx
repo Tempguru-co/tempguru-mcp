@@ -5,6 +5,10 @@
 export default function Home() {
   const tools = [
     {
+      name: "plan_staffing",
+      desc: "Planner meta-tool, call first. Turns an event shape (city, date, roles + headcount) into a full plan: coverage, per-role W-2 rate math, lead-time guidance, and state compliance flags.",
+    },
+    {
       name: "get_cities",
       desc: "List all cities TempGuru serves, optionally filtered by state or tier.",
     },
@@ -25,19 +29,23 @@ export default function Home() {
       desc: "Minimum wage, overtime rules, and state-specific event-staffing compliance quirks.",
     },
     {
+      name: "get_rate_benchmark",
+      desc: "The Rate Index: a measured benchmark of all-inclusive W-2 hourly rates by role and market tier, with methodology and citation line.",
+    },
+    {
       name: "request_quote",
       desc: "Submit a structured staffing request to TempGuru's CRM for human review. Opt-in write tool; not a reservation or contract.",
     },
   ];
 
   const restEndpoints = [
-    { path: "/api/v1/cities", desc: "List cities (?state=&tier=)" },
-    { path: "/api/v1/roles", desc: "List staffing roles" },
-    { path: "/api/v1/availability", desc: "Lead-time guidance (?city=&date=&role=&headcount=)" },
-    { path: "/api/v1/pricing", desc: "Rate range per role per city (?role=&city=)" },
-    { path: "/api/v1/compliance", desc: "State compliance summary (?state=)" },
-    { path: "POST /api/v1/quote-requests", desc: "Submit a staffing quote request (JSON body; the one write endpoint, opt-in, no reservation, no payment)" },
-    { path: "/api/v1/health", desc: "Service health probe" },
+    { method: "GET", path: "/api/v1/cities", desc: "List cities (?state=&tier=)" },
+    { method: "GET", path: "/api/v1/roles", desc: "List staffing roles" },
+    { method: "GET", path: "/api/v1/availability", desc: "Lead-time guidance (?city=&date=&role=&headcount=)" },
+    { method: "GET", path: "/api/v1/pricing", desc: "Rate range per role per city (?role=&city=)" },
+    { method: "GET", path: "/api/v1/compliance", desc: "State compliance summary (?state=)" },
+    { method: "POST", path: "/api/v1/quote-requests", desc: "Submit a staffing quote request (JSON body; the one write endpoint, opt-in, no reservation, no payment)" },
+    { method: "GET", path: "/api/v1/health", desc: "Service health probe" },
   ];
 
   const sectionStyle: React.CSSProperties = { marginBottom: 32 };
@@ -66,7 +74,7 @@ export default function Home() {
       </h1>
       <p style={{ color: "#9ab0cc", fontSize: 16, marginBottom: 32 }}>
         Model Context Protocol server and public REST API for TempGuru
-        event staffing data. Five read-only lookup tools plus an opt-in
+        event staffing data. Seven read-only lookup tools plus an opt-in
         request_quote submission.
       </p>
 
@@ -100,7 +108,7 @@ export default function Home() {
         <ul style={{ listStyle: "none", padding: 0 }}>
           {restEndpoints.map((e) => (
             <li key={e.path} style={cardStyle}>
-              <code style={codeNameStyle}>GET {e.path}</code>
+              <code style={codeNameStyle}>{e.method} {e.path}</code>
               <div style={descStyle}>{e.desc}</div>
             </li>
           ))}
