@@ -1,0 +1,57 @@
+name: publish-registry
+
+# Auto-publish server.json to the official MCP Registry
+# (registry.modelcontextprotocol.io) whenever its version changes on main, so the
+# live listing never goes stale. Also runnable on demand (workflow_dispatch) — use
+# that for the first publish after adding the secret.
+#
+# Auth: the DNS-verified `co.tempguru` namespace (Ed25519). Add the private key as
+# the repo secret MCP_PRIVATE_KEY (64 hex chars; its public half is the Ed25519 key
+# in the tempguru.co DNS TXT record). Settings -> Secrets and variables -> Actions.
+#
+# The registry rejects re-publishing an existing version, so the version-guard skips
+# when server.json's version already matches what the registry serves (a server.json
+# change without a version bump is a no-op, not a failure).
+
+on:
+  push:
+    branches: [main]
+    paths: ["server.json"]
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compare local vs published version
+        id: ver
+        run: |
+          LOCAL=$(jq -r .version server.json)
+          PUBLISHED=$(curl -s "https://registry.modelcontextprotocol.io/v0/servers?search=co.tempguru/event-staffing" | jq -r '.servers[0].server.version // "none"')
+          echo "local=$LOCAL  published=$PUBLISHED"
+          if [ "$LOCAL" = "$PUBLISHED" ]; then
+            echo "Already published v$LOCAL; nothing to do."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install mcp-publisher
+        if: steps.ver.outputs.skip == 'false'
+        run: |
+          curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+
+      - name: Publish to MCP Registry (DNS auth)
+        if: steps.ver.outputs.skip == 'false'
+        env:
+          MCP_PRIVATE_KEY: ${{ secrets.MCP_PRIVATE_KEY }}
+        run: |
+          if [ -z "$MCP_PRIVATE_KEY" ]; then
+            echo "::error::MCP_PRIVATE_KEY secret is not set. Add it under Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+          ./mcp-publisher login dns --domain tempguru.co --private-key "$MCP_PRIVATE_KEY"
+          ./mcp-publisher publish
+          echo "Published $(jq -r .version server.json) to the MCP Registry."
