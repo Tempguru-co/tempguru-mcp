@@ -41,6 +41,8 @@ const FILES = [
   { path: "distribution/docker-mcp-catalog.yaml", mcpTools: true },
   { path: "distribution/postman-collection.json", mcpTools: false },
   { path: "public/.well-known/glama.json", mcpTools: false },
+  { path: "cloudflare/worker.js", mcpTools: true },
+  { path: "cloudflare/llms-worker.js", mcpTools: true },
 ];
 
 const errors = [];
