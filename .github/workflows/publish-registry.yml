@@ -26,13 +26,13 @@ jobs:
     # declare the environment to read it. (Production has no protection rules.)
     environment: Production
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Compare local vs published version
         id: ver
         run: |
           LOCAL=$(jq -r .version server.json)
-          PUBLISHED=$(curl -s "https://registry.modelcontextprotocol.io/v0/servers?search=co.tempguru/event-staffing" | jq -r '.servers[0].server.version // "none"')
+          PUBLISHED=$(curl -s "https://registry.modelcontextprotocol.io/v0/servers?search=co.tempguru/event-staffing&version=latest" | jq -r '.servers[0].server.version // "none"')
           echo "local=$LOCAL  published=$PUBLISHED"
           if [ "$LOCAL" = "$PUBLISHED" ]; then
             echo "Already published v$LOCAL; nothing to do."
