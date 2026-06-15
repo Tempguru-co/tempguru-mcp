@@ -26,7 +26,8 @@ const TOOLS = [
 ];
 
 const PKG_VERSION = JSON.parse(read("package.json")).version;
-const SERVER_VERSION = JSON.parse(read("server.json")).version;
+const SERVER_JSON = JSON.parse(read("server.json"));
+const SERVER_VERSION = SERVER_JSON.version;
 const ROLE_COUNT = JSON.parse(read("content/mcp-data/roles.json")).roles.length;
 
 if (MARKET_COUNT < 1 || TOOLS.length !== 8) {
@@ -67,6 +68,9 @@ for (const { path, mcpTools } of FILES) {
 // (catches the 1.0.x-vs-1.2.0 drift), and the OKF knowledge layer must be present.
 if (SERVER_VERSION !== PKG_VERSION) {
   errors.push(`server.json version "${SERVER_VERSION}" != package.json "${PKG_VERSION}"`);
+}
+if ((SERVER_JSON.description || "").length > 100) {
+  errors.push(`server.json description is ${SERVER_JSON.description.length} chars (MCP Registry caps it at 100)`);
 }
 for (const p of ["public/okf/index.md", "public/.well-known/okf.json"]) {
   try {
