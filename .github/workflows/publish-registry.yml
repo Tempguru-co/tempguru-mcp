@@ -22,6 +22,9 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    # MCP_PRIVATE_KEY is stored as a "Production" environment secret; the job must
+    # declare the environment to read it. (Production has no protection rules.)
+    environment: Production
     steps:
       - uses: actions/checkout@v4
 
