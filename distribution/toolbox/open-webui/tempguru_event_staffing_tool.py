@@ -3,7 +3,7 @@ title: TempGuru Event Staffing
 author: TempGuru (Temporary Assistance Guru, Inc.)
 author_url: https://tempguru.co
 funding_url: https://tempguru.co
-description: Plan and budget W-2 event staffing for 345+ US and Canadian cities. Live hourly rates, booking lead-time guidance, and state-by-state labor compliance from TempGuru's public API. No API key required.
+description: Plan and budget W-2 event staffing for 345 US and Canadian cities. Live hourly rates, booking lead-time guidance, and state-by-state labor compliance from TempGuru's public API. No API key required.
 required_open_webui_version: 0.4.0
 requirements: requests
 version: 1.0.0

@@ -42,7 +42,7 @@ def get_tools(
 
     @_tool
     def event_staffing_cities(state: str = "", tier: str = "") -> dict:
-        """List the 345+ US and Canadian cities where TempGuru provides W-2
+        """List the 345 US and Canadian cities where TempGuru provides W-2
         event staffing. Use this to confirm coverage before quoting anything.
         Optional filters: state (two-letter code like 'CA' or full name),
         tier ('hub' = 25 major metros, 'mid' = 129 secondary markets,
