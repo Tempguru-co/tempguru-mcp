@@ -102,8 +102,10 @@ export default function Home() {
         <h2 style={{ fontSize: 18, marginBottom: 12 }}>Public REST API</h2>
         <p style={{ color: "#9ab0cc", fontSize: 14, marginBottom: 12 }}>
           Same data as the MCP tools, exposed as plain HTTP for clients that
-          don&apos;t speak MCP. No authentication, JSON responses, CORS open,
-          1-hour public cache.
+          don&apos;t speak MCP. No authentication, JSON responses, CORS open.
+          The read endpoints have a 1-hour public cache; the quote endpoint
+          (<code style={codeNameStyle}>POST /api/v1/quote-requests</code>) is
+          no-store and rate-limited.
         </p>
         <ul style={{ listStyle: "none", padding: 0 }}>
           {restEndpoints.map((e) => (

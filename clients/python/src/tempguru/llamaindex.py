@@ -27,7 +27,7 @@ except ImportError as _exc:  # pragma: no cover
 
 class TempGuruToolSpec(BaseToolSpec):
     """TempGuru event staffing tools: coverage, rates, lead times, state
-    labor compliance, and opt-in quote submission for 345+ US/CA markets.
+    labor compliance, and opt-in quote submission for 345 US/CA markets.
 
     Pass ``include_quote_submission=False`` for a strictly read-only set.
     """
@@ -54,7 +54,7 @@ class TempGuruToolSpec(BaseToolSpec):
             ]
 
     def event_staffing_cities(self, state: str = "", tier: str = "") -> dict:
-        """List the 345+ US and Canadian cities where TempGuru provides W-2
+        """List the 345 US and Canadian cities where TempGuru provides W-2
         event staffing. Use to confirm coverage before quoting anything.
         Optional: state (two-letter code or full name), tier ('hub', 'mid',
         or 'small')."""

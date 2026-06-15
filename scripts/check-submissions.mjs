@@ -25,6 +25,10 @@ const TOOLS = [
   ),
 ];
 
+const PKG_VERSION = JSON.parse(read("package.json")).version;
+const SERVER_VERSION = JSON.parse(read("server.json")).version;
+const ROLE_COUNT = JSON.parse(read("content/mcp-data/roles.json")).roles.length;
+
 if (MARKET_COUNT < 1 || TOOLS.length !== 8) {
   console.error(`Canonical sources look wrong: ${MARKET_COUNT} markets, ${TOOLS.length} tools. Aborting.`);
   process.exit(2);
@@ -59,7 +63,20 @@ for (const { path, mcpTools } of FILES) {
   }
 }
 
-console.log(`Canonical: ${MARKET_COUNT} markets, ${TOOLS.length} MCP tools.`);
+// cross-file consistency: the MCP Registry manifest version must track package.json
+// (catches the 1.0.x-vs-1.2.0 drift), and the OKF knowledge layer must be present.
+if (SERVER_VERSION !== PKG_VERSION) {
+  errors.push(`server.json version "${SERVER_VERSION}" != package.json "${PKG_VERSION}"`);
+}
+for (const p of ["public/okf/index.md", "public/.well-known/okf.json"]) {
+  try {
+    read(p);
+  } catch {
+    errors.push(`OKF artifact missing: ${p}`);
+  }
+}
+
+console.log(`Canonical: ${MARKET_COUNT} markets, ${ROLE_COUNT} roles, ${TOOLS.length} MCP tools, v${PKG_VERSION}.`);
 if (errors.length) {
   console.error(`\nSubmission drift detected (${errors.length}):`);
   for (const e of errors) console.error("  - " + e);

@@ -1,7 +1,7 @@
 ## Overview
 
 Adds integration docs for [TempGuru](https://tempguru.co), a W-2 event staffing platform
-covering 345+ US and Canadian cities. The [`tempguru`](https://pypi.org/project/tempguru/)
+covering 345 US and Canadian cities. The [`tempguru`](https://pypi.org/project/tempguru/)
 package ([source](https://github.com/Tempguru-co/tempguru-mcp/tree/main/clients/python))
 ships a `langchain` extra providing six tools over TempGuru's free, no-auth public API:
 

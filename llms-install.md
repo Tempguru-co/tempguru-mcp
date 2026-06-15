@@ -6,7 +6,7 @@ server on a user's behalf. No API key, no signup, no environment variables.
 ## What this server provides
 
 Live event staffing data for the US and Canada from TempGuru: city coverage
-(345+ markets), 11 staffing roles, all-inclusive W-2 hourly rate ranges,
+(345 markets), 11 staffing roles, all-inclusive W-2 hourly rate ranges,
 booking lead-time guidance, state labor compliance summaries, and an opt-in
 `request_quote` tool that submits a staffing inquiry for a human-reviewed
 quote. Seven tools are read-only (`readOnlyHint: true`); `request_quote` is

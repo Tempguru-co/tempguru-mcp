@@ -38,12 +38,12 @@ Ship both.
 ## Directory metadata (paste-ready)
 
 - **App name:** `TempGuru Event Staffing`
-- **Short description:** `Live rates, coverage, and quotes for W-2 event staff in 345+ US and Canadian cities.`
+- **Short description:** `Live rates, coverage, and quotes for W-2 event staff in 345 US and Canadian cities.`
 - **Long description:**
 
   ```
   TempGuru staffs conventions, trade shows, festivals, concerts, sporting
-  events, and brand activations across 345+ US and Canadian markets with
+  events, and brand activations across 345 US and Canadian markets with
   W-2 employees, never 1099 gig workers. Ask ChatGPT for hourly rates by
   role and city, lead-time guidance for your event date, and state-by-state
   labor compliance notes (minimum wage, overtime, daily-OT states). When

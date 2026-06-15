@@ -108,7 +108,7 @@ except TempGuruError as e:
 
 TempGuru (Temporary Assistance Guru, Inc.) staffs conventions, conferences,
 trade shows, festivals, concerts, sporting events, and brand activations
-across 345+ US and Canadian markets. Every worker is a W-2 employee, never
+across 345 US and Canadian markets. Every worker is a W-2 employee, never
 a 1099 contractor, with payroll taxes, workers' compensation, and liability
 insurance included in the quoted rate. megan@tempguru.co · (904) 206-8953
 
