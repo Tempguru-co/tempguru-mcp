@@ -14,6 +14,7 @@ export type UaClass =
   | "openai-chatgpt"
   | "openai-codex"
   | "openai-agents-sdk"
+  | "openai-mcp"
   // Other Western agent surfaces
   | "cursor"
   | "cline"
@@ -35,6 +36,7 @@ export type UaClass =
   | "glama-probe"
   | "smithery-probe"
   | "modelscope-probe"
+  | "mcp-scoring-probe"
   | "mcp-inspector"
   // Search engine crawlers
   | "baidu-spider"
@@ -77,6 +79,7 @@ export function classifyUserAgent(raw: string | null | undefined): UaClass {
   if (/chatgpt-user|openai-chatgpt/.test(ua)) return "openai-chatgpt";
   if (/codex/.test(ua)) return "openai-codex";
   if (/openai-agents/.test(ua)) return "openai-agents-sdk";
+  if (/openai-mcp/.test(ua)) return "openai-mcp"; // OpenAI's MCP client (a real agent connection)
 
   // Other Western agents
   if (/cursor/.test(ua)) return "cursor";
@@ -95,6 +98,7 @@ export function classifyUserAgent(raw: string | null | undefined): UaClass {
   if (/glama/.test(ua)) return "glama-probe";
   if (/smithery/.test(ua)) return "smithery-probe";
   if (/modelscope/.test(ua)) return "modelscope-probe";
+  if (/mcpscoringengine|mcp-scoring/.test(ua)) return "mcp-scoring-probe"; // registry quality-scoring bot
   if (/mcp-inspector|mcp inspector/.test(ua)) return "mcp-inspector";
 
   // Search engine crawlers
