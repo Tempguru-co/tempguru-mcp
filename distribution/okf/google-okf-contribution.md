@@ -1,63 +1,51 @@
-# Contribution draft: openapi-to-okf producer for Google's OKF repo
+# Google OKF repo contribution (knowledge-catalog)
 
 **Target repo:** https://github.com/GoogleCloudPlatform/knowledge-catalog
-**Requires:** signing Google's CLA once (https://cla.developers.google.com/), then fork, PR, code review. See the repo CONTRIBUTING.md.
+**CLA:** Google individual CLA signed once as `kissmyabs32` (https://cla.developers.google.com/); the `cla/google` check is green on both PRs.
+**Fork:** https://github.com/kissmyabs32/knowledge-catalog
 
-The framing is deliberate: this is an **ecosystem contribution** (a reusable producer that helps any API publisher), not a request to list a company. That is far more likely to be welcomed, and it puts TempGuru in the canonical repo as the real-world validation example.
+The framing is an **ecosystem contribution** (a reusable producer + a real-world sample bundle), not a request to list a company — far more likely to be welcomed, and it puts TempGuru in the canonical repo as a validation example.
 
----
+## Status: FILED 2026-06-16, awaiting maintainer review
 
-## Suggested issue (open first, to gauge interest)
+The repo actively merges external community PRs, so the path is a PR, not waiting on an issue (issues there sit untriaged — #56 had no maintainer reply). Two PRs are open:
 
-**Title:** Producer: turn any OpenAPI 3.x spec into an OKF bundle
+| PR | What | Path in their repo |
+|---|---|---|
+| [#75](https://github.com/GoogleCloudPlatform/knowledge-catalog/pull/75) | **openapi-to-okf producer** — dependency-free Node converter + example bundle + a `node:test` conformance test | `toolbox/openapi-to-okf/` |
+| [#76](https://github.com/GoogleCloudPlatform/knowledge-catalog/pull/76) | **TempGuru event-staffing sample bundle** — 82 concepts / 118 edges, `viz.html` | `okf/bundles/tempguru_event_staffing/` |
 
-**Body:**
+Issue [#56](https://github.com/GoogleCloudPlatform/knowledge-catalog/issues/56) (the producer proposal) auto-closes when #75 merges. Both PR bodies offer to adapt naming/layout/scope to maintainer preference. Their `check-changes` CI only runs after a maintainer approves the workflow (standard first-time-contributor gate); `cla/google` is already green.
 
-OKF v0.1 needs producers. Most public services and internal platforms already publish an OpenAPI description, so an OpenAPI to OKF bridge is a low-friction on-ramp: a publisher can expose its existing API catalog as agent-readable knowledge with no hand-authoring.
+> Placement note: this was originally drafted to land under `producers/openapi-to-okf/`, but the repo's real convention is `toolbox/` for tools and `okf/bundles/` for sample bundles — which is where the PRs put them.
 
-I have a small, dependency-free Node producer that reads an OpenAPI 3.x document and emits a conformant OKF v0.1 bundle:
+## The producer (PR #75)
 
-- one concept file per operation (`type: "API Operation"`), with method, path, parameters, and links to the schemas it references
+A small, dependency-free Node producer that reads an OpenAPI 3.x document and emits a conformant OKF v0.1 bundle:
+
+- one concept file per operation (`type: "API Operation"`) with method, path, parameters, and links to the schemas it references
 - one concept file per `components.schemas` entry (`type: "Schema"`)
-- frontmatter-free `index.md` directory listings and `log.md`, per the spec
-- a bundle-root `index.md` that declares `okf_version` only
+- frontmatter-free `index.md` / `log.md` per the spec; the bundle-root `index.md` declares `okf_version` only
 
-It is validated against a real production API. Would a generic `producers/openapi-to-okf` example be welcome in the repo? I am happy to open a PR and adapt to whatever layout and conventions you prefer.
+Conformance checks (the `node:test` in `test/`, run with `npm test`):
 
----
-
-## Suggested PR description (after the issue gets a thumbs-up)
-
-**Title:** Add `openapi-to-okf`: generic OpenAPI 3.x to OKF v0.1 producer + example bundle
-
-**Body:**
-
-This adds a reusable producer that converts any OpenAPI 3.x spec into a conformant OKF v0.1 bundle, plus one example bundle generated from a real production API.
-
-**Why:** OpenAPI is the most widely published API description format. A generic OpenAPI to OKF producer lets a large existing population of APIs participate in OKF with no manual authoring, which helps the producer side of the ecosystem grow.
-
-**What it does:**
-- `producers/openapi-to-okf/openapi-to-okf.mjs` (no runtime dependencies)
-- Operations become concept docs (`type: "API Operation"`); schemas become concept docs (`type: "Schema"`); markdown links connect operations to the schemas they use.
-- Honors the reserved-file rules: non-root `index.md` and `log.md` carry no frontmatter; the bundle-root `index.md` carries only `okf_version`.
-
-**Conformance checks I ran:**
 - every concept file has a non-empty `type`
 - `okf_version: "0.1"` appears only in the bundle-root `index.md`
-- all internal relative links resolve
-- no Obsidian `[[wiki]]` link syntax (standard relative markdown links only)
+- all internal links are plain relative markdown (no Obsidian `[[wiki]]` syntax)
 
-**Validation against a real spec:** TempGuru's public event-staffing API (7 operations, 13 schemas) produced a clean 24-file bundle. The producer faithfully emits every operation in the spec, so it renders 7 operations including the health probe, versus the 6 business endpoints TempGuru documents (the health endpoint is excluded from the canonical hand-built bundle). Example output is included under `producers/openapi-to-okf/example/` and can be regenerated with:
+Validated against TempGuru's public event-staffing API (7 operations, 13 schemas → a clean 24-file example bundle, committed under `toolbox/openapi-to-okf/example/`). The producer faithfully emits every operation in the spec, so it renders 7 operations including the health probe, versus the 6 business endpoints the hand-built live bundle documents.
 
-```
-node openapi-to-okf.mjs path/to/openapi.json out/ --base https://api.example.com
-```
+## The sample bundle (PR #76)
 
-**License/CLA:** I will sign the Google CLA before submitting. Happy to adjust naming, directory layout, or scope to match the project's direction.
+The live TempGuru OKF bundle (`https://mcp.tempguru.co/okf/`, generated by `scripts/build-okf.mjs`), contributed as `okf/bundles/tempguru_event_staffing/`:
 
----
+- 82 concepts, 118 edges (per the repo's `enrichment-agent visualize` tool); `viz.html` included
+- generated deterministically from `content/mcp-data/` (not via an LLM enrichment pass), so fully reproducible
+- every concept carries `type` / `title` / `description` / `timestamp`; relative markdown links; 0 broken links; passes the repo's strict frontmatter validator
+- the first services / operational-catalog domain in the repo (the existing samples — ga4, stackoverflow, crypto_bitcoin — are all data-catalog style)
 
-## What to attach / link
+We did not edit the repo's `okf/README.md` showcase list (left to maintainers).
 
-- The producer: `distribution/okf/openapi-to-okf.mjs` (rename to the repo's preferred path on submission).
-- An example bundle: the producer's own output, generated by running it against the TempGuru OpenAPI (`https://mcp.tempguru.co/openapi.json`) and committed under `producers/openapi-to-okf/example/`. This is the ~24-file operations-and-schemas bundle the producer emits, which is distinct from the 90-file hand-built knowledge bundle served live at `https://mcp.tempguru.co/okf/` (do not point reviewers there as the producer's example output).
+## If maintainers ask for changes
+
+The fork is wired up at `kissmyabs32/knowledge-catalog` (local clone kept). Regenerate `viz.html` with `enrichment-agent visualize --bundle <dir>` (needs `pip install -e okf/`, which pulls google-adk + bigquery; `visualize` itself needs no credentials). The producer source-of-truth lives in this repo at `distribution/okf/knowledge-catalog-contrib/openapi-to-okf/`.
