@@ -59,6 +59,10 @@ export interface DashboardMetrics {
   unclassifiedUas: Array<{ member: string; count: number }>;
   byCountry: Record<string, number>;
   topCities: Array<{ member: string; count: number }>;
+  // Present-but-unrecognized city inputs (junk, typos, markets we don't cover).
+  // Kept out of topCities so the demand chart stays clean; surfaced here so the
+  // junk is reviewable, the same way unclassifiedUas surfaces "other" UAs.
+  unmatchedCities: Array<{ member: string; count: number }>;
   topRoles: Array<{ member: string; count: number }>;
   topStates: Array<{ member: string; count: number }>;
   recent: Array<{
@@ -86,6 +90,7 @@ export async function getMetrics(windowDays = 7): Promise<DashboardMetrics> {
       unclassifiedUas: [],
       byCountry: {},
       topCities: [],
+      unmatchedCities: [],
       topRoles: [],
       topStates: [],
       recent: [],
@@ -95,21 +100,39 @@ export async function getMetrics(windowDays = 7): Promise<DashboardMetrics> {
 
   const dates = lastNDates(windowDays);
 
-  const [byTool, byUa, byStatus, byCountry, unclassifiedHash, topCities, topRoles, topStates, recentRaw] =
-    await Promise.all([
-      aggregateHash("tools", dates),
-      aggregateHash("uas", dates),
-      aggregateHash("status", dates),
-      aggregateHash("countries", dates),
-      aggregateHash("ua:unclassified", dates),
-      aggregateZSet("queries:cities", dates, 20),
-      aggregateZSet("queries:roles", dates, 20),
-      aggregateZSet("queries:states", dates, 20),
-      exec((r) => r.lrange("recent:invocations", 0, 49)),
-    ]);
+  const [
+    byTool,
+    byUa,
+    byStatus,
+    byCountry,
+    unclassifiedHash,
+    topCities,
+    unmatchedCityHash,
+    topRoles,
+    topStates,
+    recentRaw,
+  ] = await Promise.all([
+    aggregateHash("tools", dates),
+    aggregateHash("uas", dates),
+    aggregateHash("status", dates),
+    aggregateHash("countries", dates),
+    aggregateHash("ua:unclassified", dates),
+    aggregateZSet("queries:cities", dates, 20),
+    aggregateHash("queries:cities:unmatched", dates),
+    aggregateZSet("queries:roles", dates, 20),
+    aggregateZSet("queries:states", dates, 20),
+    exec((r) => r.lrange("recent:invocations", 0, 49)),
+  ]);
 
   // Top-N raw unclassified UA strings, the menu for the next classifier pass.
   const unclassifiedUas = Object.entries(unclassifiedHash)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 25)
+    .map(([member, count]) => ({ member, count }));
+
+  // Top-N unrecognized city inputs, the menu for spotting uncovered demand,
+  // typos worth aliasing, or junk worth ignoring.
+  const unmatchedCities = Object.entries(unmatchedCityHash)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 25)
     .map(([member, count]) => ({ member, count }));
@@ -156,6 +179,7 @@ export async function getMetrics(windowDays = 7): Promise<DashboardMetrics> {
     unclassifiedUas,
     byCountry,
     topCities,
+    unmatchedCities,
     topRoles,
     topStates,
     recent,
