@@ -171,6 +171,15 @@ function Dashboard({ m }: { m: DashboardMetrics }) {
         </Card>
       </div>
 
+      {/* Unrecognized city inputs, kept out of the demand chart above. The menu
+          for spotting uncovered demand, typos worth aliasing, or junk to ignore. */}
+      <Card title="Unrecognized city inputs (raw)">
+        <KeyValueTable
+          rows={m.unmatchedCities.map((c) => [c.member, c.count])}
+          emptyMessage="No unrecognized city inputs, every city query matched a known market."
+        />
+      </Card>
+
       {/* By country */}
       {Object.keys(m.byCountry).length > 0 && (
         <Card title="By country (from Vercel edge geolocation)">
