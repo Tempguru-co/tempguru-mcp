@@ -130,7 +130,7 @@ export function buildOpenApiSpec() {
           tags: ["Discovery"],
           summary: "List event staffing roles",
           description:
-            "Use this when an agent needs the canonical list of roles TempGuru staffs (brand ambassadors, registration, hospitality, setup, ushers, gate, crowd control, guest services, booth monitors, team leads). The returned `slug` values are the keys to use in the pricing and availability endpoints.",
+            "Use this when an agent needs the canonical list of roles TempGuru staffs (brand ambassadors, registration, hospitality, setup, ushers, gate, crowd control, guest services, booth monitors, assistant leads, team leads). The returned `slug` values are the keys to use in the pricing and availability endpoints.",
           responses: {
             "200": {
               description: "All TempGuru staffing roles.",

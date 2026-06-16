@@ -29,7 +29,7 @@ Endpoint: `POST https://mcp.tempguru.co/mcp` (streamable HTTP, no auth; seven re
 | `check_availability` | Get lead-time guidance for a city/date, optionally role + headcount |
 | `get_role_pricing` | Get the all-inclusive hourly rate range for a role in a city |
 | `get_compliance_by_state` | Minimum wage, overtime, and state-specific compliance quirks |
-| `get_rate_benchmark` | The Rate Index: citable W-2 rate benchmarks by role and market tier |
+| `get_rate_benchmark` | The Rate Index: citable W-2 rate benchmarks by role (typical + national range; Brand Ambassadors by tier) |
 | `request_quote` | Submit the finished staffing plan (contact + event + roles) to TempGuru's CRM for a human-reviewed quote |
 
 ### How much does event staff cost?

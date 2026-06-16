@@ -18,7 +18,7 @@ United States or Canada.
 | `check_availability` | Lead-time guidance for a city + date (yes / tight / rush / very-rush) |
 | `get_role_pricing` | All-inclusive hourly rate range for a role in a city |
 | `get_compliance_by_state` | Minimum wage, overtime thresholds, and state quirks |
-| `get_rate_benchmark` | Citable Rate Index: W-2 rate benchmarks by role and market tier |
+| `get_rate_benchmark` | Citable Rate Index: W-2 rate benchmarks by role (typical + national range; Brand Ambassadors by tier) |
 | `request_quote` | Submit a confirmed staffing plan to TempGuru's CRM (opt-in write) |
 
 ## Workflow

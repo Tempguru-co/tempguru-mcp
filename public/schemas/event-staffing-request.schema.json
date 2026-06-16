@@ -61,7 +61,7 @@
         "properties": {
           "role": {
             "type": "string",
-            "description": "Staffing role. Common values: registration_staff, brand_ambassadors, hospitality_staff, ushers, gate_staff, crowd_control, setup_breakdown, team_leads, booth_monitors, guest_services. Use get_roles for the full live list."
+            "description": "Staffing role. Common values: registration_staff, brand_ambassadors, hospitality_staff, ushers, gate_staff, crowd_control, setup_breakdown, assistant_leads, team_leads, booth_monitors, guest_services. Use get_roles for the full live list."
           },
           "headcount": { "type": "integer", "minimum": 1 },
           "attire": { "type": "string", "description": "Uniform or dress code, e.g. 'all black, closed-toe shoes'" },
