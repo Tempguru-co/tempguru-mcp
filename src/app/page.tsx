@@ -30,7 +30,7 @@ export default function Home() {
     },
     {
       name: "get_rate_benchmark",
-      desc: "The Rate Index: a measured benchmark of all-inclusive W-2 hourly rates by role and market tier, with methodology and citation line.",
+      desc: "The Rate Index: a measured benchmark of all-inclusive W-2 hourly rates by role (typical + national range; Brand Ambassadors by tier), with methodology and citation line.",
     },
     {
       name: "request_quote",
@@ -74,7 +74,7 @@ export default function Home() {
       </h1>
       <p style={{ color: "#9ab0cc", fontSize: 16, marginBottom: 32 }}>
         Model Context Protocol server and public REST API for TempGuru
-        event staffing data. Seven read-only lookup tools plus an opt-in
+        event staffing data. Eight tools: a planner, six read-only lookups, and an opt-in
         request_quote submission.
       </p>
 

@@ -56,6 +56,18 @@ function fix(s, full) {
   }
   // counts + em-dash strip
   s = s.split("300+").join("345").split("2,500+").join("5,000+");
+  // stale repo owner: the live /llms.txt still points at the old kissmyabs32
+  // fork of the agent-skills repo (it now lives under the tempguru-co org).
+  s = s
+    .split("github.com/kissmyabs32/tempguru-agent-skills")
+    .join("github.com/tempguru-co/tempguru-agent-skills");
+  // tell non-MCP agents about the GPT path and that quotes submit in-chat
+  s = s
+    .split("- Reference repo: https://github.com/tempguru-co/tempguru-agent-skills")
+    .join(
+      "- Reference repo: https://github.com/tempguru-co/tempguru-agent-skills\n" +
+        "- ChatGPT users without MCP: the TempGuru Event Staffing Planner GPT runs the same plan-to-quote workflow and submits the request in-chat (request_quote / submitQuoteRequest): https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner",
+    );
   s = s.split(` ${EM} `).join(", ").split(EM).join(", ");
   return s;
 }

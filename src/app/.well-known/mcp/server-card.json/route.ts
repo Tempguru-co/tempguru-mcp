@@ -67,7 +67,7 @@ const SERVER_CARD = {
     {
       name: "get_rate_benchmark",
       description:
-        "The TempGuru Event Staffing Rate Index: full benchmark table of all-inclusive W-2 hourly rates by role and market tier, with methodology and citation line.",
+        "The TempGuru Event Staffing Rate Index: full benchmark table of all-inclusive W-2 hourly rates by role (typical + national range; Brand Ambassadors by tier), with methodology and citation line.",
     },
     {
       name: "request_quote",

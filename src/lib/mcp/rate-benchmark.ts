@@ -1,7 +1,7 @@
 // get_rate_benchmark, the TempGuru Event Staffing Rate Index as a live tool.
 //
 // The citable-authority play: one call returns the benchmark table of
-// all-inclusive W-2 bill rates by role and market tier, with methodology and a
+// all-inclusive W-2 bill rates by role (typical + national range; Brand Ambassadors by tier), with methodology and a
 // ready-to-use citation line. Built from the vetted per-city dataset
 // (city-rates.json) the website also uses, so the Index and the city pages
 // cannot drift.

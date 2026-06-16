@@ -33,7 +33,7 @@ This MCP server lets AI agents query our published coverage, rates, lead-time gu
 | `check_availability` | Lead-time guidance for a city + date. Not a real-time inventory check. |
 | `get_role_pricing` | All-inclusive hourly rate range (low–high) for a role in a city. Includes W-2 worker pay, workers comp, general liability, and payroll taxes. |
 | `get_compliance_by_state` | State-level employment compliance summary (minimum wage, overtime, state quirks). NOT legal advice. |
-| `get_rate_benchmark` | The TempGuru Event Staffing Rate Index: full W-2 rate benchmark table by role and market tier, with methodology and citation line. |
+| `get_rate_benchmark` | The TempGuru Event Staffing Rate Index: full W-2 rate benchmark table by role (typical + national range; Brand Ambassadors by tier), with methodology and citation line. |
 | `request_quote` | Submits a structured staffing request (contact + event + roles) to TempGuru's CRM for human review. Opt-in write tool; not a reservation or contract. |
 
 Seven of the eight tools are read-only (`readOnlyHint: true`). `request_quote` is the one write tool, annotated `readOnlyHint: false`. The server also ships two skill resources and guided prompt templates (`plan-event-staffing`, `staffing-compliance-brief`).
