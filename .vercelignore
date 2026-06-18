@@ -1,0 +1,5 @@
+# The site/ working area (city-v2 page fleet, cached sources, generated images)
+# is ~3.4GB of build-time scratch that the Next.js app never serves. It is
+# untracked in git, so git-based deploys already exclude it; this keeps local
+# `vercel --prod` uploads from dragging it in too.
+site/
