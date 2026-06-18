@@ -36,5 +36,5 @@ the measured benchmark behind the [Rate Index](../rate-index.md).
 
 ## Per-city rate card `{ tier, name, event_staff, ushers, crowd, asst_lead, team_lead, brand_amb, overall, avg_staff }`
 
-Each role key is a `[low, high]` pair in USD/hour. 233 measured cities feed
+Each role key is a `[low, high]` pair in USD/hour. 446 measured cities feed
 the [Rate Index](../rate-index.md). See [MCP tools](mcp-tools.md).

@@ -110,10 +110,15 @@ Ordered by leverage. ✅ = already live from earlier pushes.
 11. **awesome-mcp-servers**, 🟡 TWO PRs open: appcypher #7373 +
     punkpeye #7373 (Glama badge added, `has-glama` set, awaiting merge).
     Do not file new ones.
-12. **Goose extensions**, 🟡 PR OPEN 2026-06-10:
-    aaif-goose/goose#9721 (repo moved from block/goose; directory now at
-    goose-docs.ai). servers.json entry (streamable-http, no auth) + tutorial
-    page with a live-data example transcript. Awaiting maintainer review.
+12. **Goose extensions**, ❌ CLOSED 2026-06-16 (resubmit later, NOT a quality
+    issue): PR aaif-goose/goose#9721 closed by maintainer Douwe Osinga. The
+    registry is freezing one-by-one PR additions while they build a scalable
+    self-service listing flow; he praised the PR and explicitly invited a
+    resubmit once that lands. Nothing to fix. Do NOT resubmit now (will be
+    auto-closed under the freeze). The servers.json entry (streamable-http, no
+    auth) + tutorial page with a live-data transcript are preserved in the PR;
+    reuse them when the self-service registry opens. Watch the goose repo /
+    goose-docs.ai for the new extensions-registry announcement.
 13. **Windsurf**, 🟡 half-covered: skills reach Windsurf via skills.sh, and
     the npm CLI README ships a Windsurf config. Only a Windsurf-STORE
     listing would be net-new; low priority.
