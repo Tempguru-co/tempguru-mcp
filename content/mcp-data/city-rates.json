@@ -8386,5 +8386,7673 @@
 34,
 40
 ]
+},
+"akron": {
+"tier": "mid",
+"name": "Akron, OH",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"alexandria": {
+"tier": "small",
+"name": "Alexandria, VA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"allentown": {
+"tier": "small",
+"name": "Allentown, PA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"ann-arbor": {
+"tier": "small",
+"name": "Ann Arbor, MI",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"appleton": {
+"tier": "small",
+"name": "Appleton, WI",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"arlington": {
+"tier": "mid",
+"name": "Arlington, TX",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"asheville": {
+"tier": "small",
+"name": "Asheville, NC",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"atlantic-city": {
+"tier": "small",
+"name": "Atlantic City, NJ",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"bakersfield": {
+"tier": "mid",
+"name": "Bakersfield, CA",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"bangor": {
+"tier": "small",
+"name": "Bangor, ME",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"baton-rouge": {
+"tier": "small",
+"name": "Baton Rouge, LA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"binghamton": {
+"tier": "small",
+"name": "Binghamton, NY",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"boise": {
+"tier": "mid",
+"name": "Boise, ID",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"bowling-green": {
+"tier": "small",
+"name": "Bowling Green, KY",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"bradenton": {
+"tier": "small",
+"name": "Bradenton, FL",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"bridgeport": {
+"tier": "small",
+"name": "Bridgeport, CT",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"buffalo": {
+"tier": "small",
+"name": "Buffalo, NY",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"cambridge": {
+"tier": "small",
+"name": "Cambridge, MA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"canton": {
+"tier": "small",
+"name": "Canton, OH",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"cape-coral": {
+"tier": "small",
+"name": "Cape Coral, FL",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"carrollton": {
+"tier": "small",
+"name": "Carrollton, TX",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"cary": {
+"tier": "small",
+"name": "Cary, NC",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"cedar-rapids": {
+"tier": "small",
+"name": "Cedar Rapids, IA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"champaign": {
+"tier": "small",
+"name": "Champaign, IL",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"chandler": {
+"tier": "small",
+"name": "Chandler, AZ",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"charleston-wv": {
+"tier": "small",
+"name": "Charleston, WV",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"charlottesville": {
+"tier": "small",
+"name": "Charlottesville, VA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"chula-vista": {
+"tier": "small",
+"name": "Chula Vista, CA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"clarksville": {
+"tier": "small",
+"name": "Clarksville, TN",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"cleveland": {
+"tier": "mid",
+"name": "Cleveland, OH",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"college-station": {
+"tier": "small",
+"name": "College Station, TX",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"colorado-springs": {
+"tier": "small",
+"name": "Colorado Springs, CO",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"columbus": {
+"tier": "mid",
+"name": "Columbus, OH",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"concord": {
+"tier": "small",
+"name": "Concord, NH",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"coral-springs": {
+"tier": "small",
+"name": "Coral Springs, FL",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"corona": {
+"tier": "small",
+"name": "Corona, CA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"corpus-christi": {
+"tier": "small",
+"name": "Corpus Christi, TX",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"danbury": {
+"tier": "small",
+"name": "Danbury, CT",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"davenport": {
+"tier": "small",
+"name": "Davenport, IA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"dayton": {
+"tier": "small",
+"name": "Dayton, OH",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"denton": {
+"tier": "small",
+"name": "Denton, TX",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"des-moines": {
+"tier": "small",
+"name": "Des Moines, IA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"duluth": {
+"tier": "small",
+"name": "Duluth, MN",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"durham": {
+"tier": "small",
+"name": "Durham, NC",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"el-paso": {
+"tier": "mid",
+"name": "El Paso, TX",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"elizabeth": {
+"tier": "small",
+"name": "Elizabeth, NJ",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"elk-grove": {
+"tier": "small",
+"name": "Elk Grove, CA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"erie": {
+"tier": "small",
+"name": "Erie, PA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"escondido": {
+"tier": "small",
+"name": "Escondido, CA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"eugene": {
+"tier": "small",
+"name": "Eugene, OR",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"fargo": {
+"tier": "small",
+"name": "Fargo, ND",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"fayetteville": {
+"tier": "small",
+"name": "Fayetteville, AR",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"flagstaff": {
+"tier": "small",
+"name": "Flagstaff, AZ",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"flint": {
+"tier": "small",
+"name": "Flint, MI",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"fontana": {
+"tier": "small",
+"name": "Fontana, CA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"fort-collins": {
+"tier": "small",
+"name": "Fort Collins, CO",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"fort-lauderdale": {
+"tier": "small",
+"name": "Fort Lauderdale, FL",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"fort-myers": {
+"tier": "small",
+"name": "Fort Myers, FL",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"fort-wayne": {
+"tier": "small",
+"name": "Fort Wayne, IN",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"fort-worth": {
+"tier": "small",
+"name": "Fort Worth, TX",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"fresno": {
+"tier": "small",
+"name": "Fresno, CA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"fullerton": {
+"tier": "small",
+"name": "Fullerton, CA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"galveston": {
+"tier": "small",
+"name": "Galveston, TX",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"garden-grove": {
+"tier": "small",
+"name": "Garden Grove, CA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"garland": {
+"tier": "small",
+"name": "Garland, TX",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"gilbert": {
+"tier": "small",
+"name": "Gilbert, AZ",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"glendale": {
+"tier": "small",
+"name": "Glendale, AZ",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"glendale-ca": {
+"tier": "small",
+"name": "Glendale, CA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"grand-forks": {
+"tier": "small",
+"name": "Grand Forks, ND",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"grand-rapids": {
+"tier": "small",
+"name": "Grand Rapids, MI",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"greeley": {
+"tier": "small",
+"name": "Greeley, CO",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"green-bay": {
+"tier": "small",
+"name": "Green Bay, WI",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"greensboro": {
+"tier": "small",
+"name": "Greensboro, NC",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"greenwich": {
+"tier": "small",
+"name": "Greenwich, CT",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"hampton": {
+"tier": "small",
+"name": "Hampton, VA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"harrisburg": {
+"tier": "small",
+"name": "Harrisburg, PA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"hayward": {
+"tier": "small",
+"name": "Hayward, CA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"henderson": {
+"tier": "small",
+"name": "Henderson, NV",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"hialeah": {
+"tier": "small",
+"name": "Hialeah, FL",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"huntington-beach": {
+"tier": "small",
+"name": "Huntington Beach, CA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"idaho-falls": {
+"tier": "small",
+"name": "Idaho Falls, ID",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"iowa-city": {
+"tier": "small",
+"name": "Iowa City, IA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"irvine": {
+"tier": "small",
+"name": "Irvine, CA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"irving": {
+"tier": "small",
+"name": "Irving, TX",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"ithaca": {
+"tier": "small",
+"name": "Ithaca, NY",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"jackson": {
+"tier": "small",
+"name": "Jackson, MS",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"jacksonville": {
+"tier": "mid",
+"name": "Jacksonville, FL",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"jersey-city": {
+"tier": "small",
+"name": "Jersey City, NJ",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"joliet": {
+"tier": "small",
+"name": "Joliet, IL",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"joplin": {
+"tier": "small",
+"name": "Joplin, MO",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"kansas-city": {
+"tier": "mid",
+"name": "Kansas City, MO",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"kansas-city-ks": {
+"tier": "small",
+"name": "Kansas City, KS",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"kent": {
+"tier": "small",
+"name": "Kent, WA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"key-west": {
+"tier": "small",
+"name": "Key West, FL",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"killeen": {
+"tier": "small",
+"name": "Killeen, TX",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"kissimmee": {
+"tier": "small",
+"name": "Kissimmee, FL",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"lake-charles": {
+"tier": "small",
+"name": "Lake Charles, LA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"lakewood": {
+"tier": "small",
+"name": "Lakewood, CO",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"lancaster": {
+"tier": "small",
+"name": "Lancaster, CA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"laredo": {
+"tier": "small",
+"name": "Laredo, TX",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"lawrence": {
+"tier": "small",
+"name": "Lawrence, KS",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"lexington": {
+"tier": "small",
+"name": "Lexington, KY",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"little-rock": {
+"tier": "small",
+"name": "Little Rock, AR",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"long-beach": {
+"tier": "small",
+"name": "Long Beach, CA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"lowell": {
+"tier": "small",
+"name": "Lowell, MA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"lubbock": {
+"tier": "small",
+"name": "Lubbock, TX",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"macon": {
+"tier": "mid",
+"name": "Macon, GA",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"mankato": {
+"tier": "small",
+"name": "Mankato, MN",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"mcallen": {
+"tier": "mid",
+"name": "McAllen, TX",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"mckinney": {
+"tier": "mid",
+"name": "McKinney, TX",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"mesa": {
+"tier": "mid",
+"name": "Mesa, AZ",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"mesquite": {
+"tier": "small",
+"name": "Mesquite, TX",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"midland": {
+"tier": "small",
+"name": "Midland, TX",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"miramar": {
+"tier": "mid",
+"name": "Miramar, FL",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"mobile": {
+"tier": "mid",
+"name": "Mobile, AL",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"montgomery": {
+"tier": "mid",
+"name": "Montgomery, AL",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"moreno-valley": {
+"tier": "mid",
+"name": "Moreno Valley, CA",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"myrtle-beach": {
+"tier": "small",
+"name": "Myrtle Beach, SC",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"napa-valley": {
+"tier": "small",
+"name": "Napa Valley, CA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"naperville": {
+"tier": "mid",
+"name": "Naperville, IL",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"nashua": {
+"tier": "mid",
+"name": "Nashua, NH",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"new-britain": {
+"tier": "small",
+"name": "New Britain, CT",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"new-haven": {
+"tier": "mid",
+"name": "New Haven, CT",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"new-london": {
+"tier": "small",
+"name": "New London, CT",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"new-orleans": {
+"tier": "mid",
+"name": "New Orleans, LA",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"newark": {
+"tier": "mid",
+"name": "Newark, NJ",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"norfolk": {
+"tier": "mid",
+"name": "Norfolk, VA",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"norman": {
+"tier": "small",
+"name": "Norman, OK",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"north-las-vegas": {
+"tier": "mid",
+"name": "North Las Vegas, NV",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"norwich": {
+"tier": "small",
+"name": "Norwich, CT",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"oakland": {
+"tier": "mid",
+"name": "Oakland, CA",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"oklahoma-city": {
+"tier": "mid",
+"name": "Oklahoma City, OK",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"olathe": {
+"tier": "mid",
+"name": "Olathe, KS",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"ontario": {
+"tier": "mid",
+"name": "Ontario, CA",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"orange": {
+"tier": "mid",
+"name": "Orange, CA",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"overland-park": {
+"tier": "mid",
+"name": "Overland Park, KS",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"oxnard": {
+"tier": "mid",
+"name": "Oxnard, CA",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"palm-springs": {
+"tier": "small",
+"name": "Palm Springs, CA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"palmdale": {
+"tier": "mid",
+"name": "Palmdale, CA",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"panama-city": {
+"tier": "small",
+"name": "Panama City, FL",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"pasadena": {
+"tier": "mid",
+"name": "Pasadena, CA",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"paterson": {
+"tier": "mid",
+"name": "Paterson, NJ",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"pembroke-pines": {
+"tier": "small",
+"name": "Pembroke Pines, FL",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"pomona": {
+"tier": "mid",
+"name": "Pomona, CA",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"port-st-lucie": {
+"tier": "mid",
+"name": "Port St. Lucie, FL",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"portland": {
+"tier": "mid",
+"name": "Portland, OR",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"portland-me": {
+"tier": "mid",
+"name": "Portland, ME",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"portsmouth": {
+"tier": "mid",
+"name": "Portsmouth, NH",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"poughkeepsie": {
+"tier": "mid",
+"name": "Poughkeepsie, NY",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"providence": {
+"tier": "mid",
+"name": "Providence, RI",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"provo": {
+"tier": "small",
+"name": "Provo, UT",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"pueblo": {
+"tier": "small",
+"name": "Pueblo, CO",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"rapid-city": {
+"tier": "small",
+"name": "Rapid City, SD",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"reading": {
+"tier": "mid",
+"name": "Reading, PA",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"reno": {
+"tier": "mid",
+"name": "Reno, NV",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"riverside": {
+"tier": "mid",
+"name": "Riverside, CA",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"rochester": {
+"tier": "small",
+"name": "Rochester, NY",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"rochester-mn": {
+"tier": "small",
+"name": "Rochester, MN",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"roseville": {
+"tier": "small",
+"name": "Roseville, CA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"round-rock": {
+"tier": "small",
+"name": "Round Rock, TX",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"sacramento": {
+"tier": "mid",
+"name": "Sacramento, CA",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"saginaw": {
+"tier": "small",
+"name": "Saginaw, MI",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"saint-paul": {
+"tier": "mid",
+"name": "Saint Paul, MN",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"salinas": {
+"tier": "mid",
+"name": "Salinas, CA",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"salt-lake-city": {
+"tier": "mid",
+"name": "Salt Lake City, UT",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"san-antonio": {
+"tier": "mid",
+"name": "San Antonio, TX",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"san-bernardino": {
+"tier": "small",
+"name": "San Bernardino, CA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"san-jose": {
+"tier": "mid",
+"name": "San Jose, CA",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"san-luis-obispo": {
+"tier": "small",
+"name": "San Luis Obispo, CA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"santa-ana": {
+"tier": "mid",
+"name": "Santa Ana, CA",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"santa-barbara": {
+"tier": "mid",
+"name": "Santa Barbara, CA",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"santa-clarita": {
+"tier": "small",
+"name": "Santa Clarita, CA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"santa-cruz": {
+"tier": "small",
+"name": "Santa Cruz, CA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"santa-fe": {
+"tier": "small",
+"name": "Santa Fe, NM",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"santa-rosa": {
+"tier": "mid",
+"name": "Santa Rosa, CA",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"scranton": {
+"tier": "mid",
+"name": "Scranton, PA",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"shreveport": {
+"tier": "mid",
+"name": "Shreveport, LA",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"sioux-falls": {
+"tier": "mid",
+"name": "Sioux Falls, SD",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"south-bend": {
+"tier": "mid",
+"name": "South Bend, IN",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"springfield-ma": {
+"tier": "mid",
+"name": "Springfield, MA",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"springfield-mo": {
+"tier": "small",
+"name": "Springfield, MO",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"st-louis": {
+"tier": "mid",
+"name": "St. Louis, MO",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"st-petersburg": {
+"tier": "mid",
+"name": "St. Petersburg, FL",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"stamford": {
+"tier": "mid",
+"name": "Stamford, CT",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"state-college": {
+"tier": "small",
+"name": "State College, PA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"sterling-heights": {
+"tier": "small",
+"name": "Sterling Heights, MI",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"stockton": {
+"tier": "small",
+"name": "Stockton, CA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"sunnyvale": {
+"tier": "mid",
+"name": "Sunnyvale, CA",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"syracuse": {
+"tier": "small",
+"name": "Syracuse, NY",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"tacoma": {
+"tier": "mid",
+"name": "Tacoma, WA",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"tempe": {
+"tier": "small",
+"name": "Tempe, AZ",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"terre-haute": {
+"tier": "small",
+"name": "Terre Haute, IN",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"thornton": {
+"tier": "small",
+"name": "Thornton, CO",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"topeka": {
+"tier": "small",
+"name": "Topeka, KS",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"torrance": {
+"tier": "small",
+"name": "Torrance, CA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"trenton": {
+"tier": "small",
+"name": "Trenton, NJ",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"tuscaloosa": {
+"tier": "small",
+"name": "Tuscaloosa, AL",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"vail": {
+"tier": "small",
+"name": "Vail, CO",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"vancouver-wa": {
+"tier": "small",
+"name": "Vancouver, WA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"ventura": {
+"tier": "small",
+"name": "Ventura, CA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"virginia-beach": {
+"tier": "mid",
+"name": "Virginia Beach, VA",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"visalia": {
+"tier": "small",
+"name": "Visalia, CA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"warren": {
+"tier": "small",
+"name": "Warren, MI",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"waterbury": {
+"tier": "small",
+"name": "Waterbury, CT",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"west-jordan": {
+"tier": "small",
+"name": "West Jordan, UT",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"west-valley-city": {
+"tier": "small",
+"name": "West Valley City, UT",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"white-plains": {
+"tier": "mid",
+"name": "White Plains, NY",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"wichita": {
+"tier": "small",
+"name": "Wichita, KS",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"wilmington": {
+"tier": "mid",
+"name": "Wilmington, DE",
+"event_staff": [
+31,
+37
+],
+"ushers": [
+33,
+40
+],
+"crowd": [
+31,
+39
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+37,
+47
+],
+"brand_amb": [
+47,
+57
+],
+"avg_staff": [
+31,
+37
+],
+"overall": [
+31,
+57
+]
+},
+"winston-salem": {
+"tier": "small",
+"name": "Winston-Salem, NC",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"yonkers": {
+"tier": "small",
+"name": "Yonkers, NY",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"york": {
+"tier": "small",
+"name": "York, PA",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
+},
+"youngstown": {
+"tier": "small",
+"name": "Youngstown, OH",
+"event_staff": [
+30,
+36
+],
+"ushers": [
+34,
+41
+],
+"crowd": [
+30,
+38
+],
+"asst_lead": [
+35,
+43
+],
+"team_lead": [
+36,
+46
+],
+"brand_amb": [
+40,
+50
+],
+"avg_staff": [
+30,
+36
+],
+"overall": [
+30,
+50
+]
 }
 }

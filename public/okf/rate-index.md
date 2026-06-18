@@ -19,8 +19,8 @@ timestamp: "2026-06-13T00:00:00Z"
 # TempGuru Event Staffing Rate Index 2026
 
 The citable benchmark of **all-inclusive W-2 hourly bill rates** for event staff in
-the US and Canada, measured across **233 cities** with vetted per-city rate
-cards (small 126, mid 78, hub 29). Built from the same data as the live
+the US and Canada, measured across **446 cities** with vetted per-city rate
+cards (small 273, mid 144, hub 29). Built from the same data as the live
 `get_rate_benchmark` MCP tool and the website's city pages, so the Index cannot
 drift from what the market actually paid.
 
