@@ -107,9 +107,10 @@ Ordered by leverage. ✅ = already live from earlier pushes.
 10. **PulseMCP**, 🟡 auto-ingests from the Official MCP Registry weekly
     (confirmed by PulseMCP); expect listing ~June 11. Email
     hello@pulsemcp.com only if absent after that.
-11. **awesome-mcp-servers**, 🟡 TWO PRs open: appcypher #7373 +
-    punkpeye #7373 (Glama badge added, `has-glama` set, awaiting merge).
-    Do not file new ones.
+11. **awesome-mcp-servers**, ✅ MERGED 2026-06-11:
+    punkpeye/awesome-mcp-servers#7373 (Glama badge added, `has-glama` set).
+    The earlier "appcypher #7373" entry was a tracking error, that PR never
+    existed (404). Only the punkpeye list carries TempGuru. Do not file new ones.
 12. **Goose extensions**, ❌ CLOSED 2026-06-16 (resubmit later, NOT a quality
     issue): PR aaif-goose/goose#9721 closed by maintainer Douwe Osinga. The
     registry is freezing one-by-one PR additions while they build a scalable
