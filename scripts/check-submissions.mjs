@@ -5,6 +5,9 @@
 // from the canonical sources:
 //   - market count: content/mcp-data/cities.json
 //   - MCP tool set:  src/lib/mcp/register-tools.ts
+//   - Rate Index phrasing: bans the stale "by role and market tier" on the agent-
+//     facing surfaces that describe the Index (only Brand Ambassadors are tiered)
+//   - role coverage: Assistant Leads present in the REST role list + quote schema
 //
 //   node scripts/check-submissions.mjs   (npm run check:submissions)
 
@@ -80,6 +83,67 @@ for (const p of ["public/okf/index.md", "public/.well-known/okf.json"]) {
   }
 }
 
+// ── Rate Index phrasing ──────────────────────────────────────────────────────
+// The Index gives each role a typical rate + national range; ONLY Brand
+// Ambassadors are tiered. "by role and market tier" implies every role is tiered,
+// which is false and misleading. Ban that stale phrasing on the agent-facing
+// surfaces that describe the Index. This is the drift that slipped the gate once:
+// it lived only on hand-authored copies, not generated-from-canonical files, so
+// nothing caught it until a manual review. (The general "rates vary by role and
+// market tier" line in distribution/assistants/build-knowledge.mjs is a different
+// statement and is intentionally not gated here.)
+const RATE_INDEX_SURFACES = [
+  "CLAUDE.md",
+  "AGENTS.md",
+  "README.md",
+  "GEMINI.md",
+  ".github/copilot-instructions.md",
+  "content/skills/event-staffing-ordering.md",
+  "plugins/tempguru/skills/event-staffing-ordering/SKILL.md",
+  "src/app/page.tsx",
+  "src/app/.well-known/mcp/server-card.json/route.ts",
+  "src/lib/mcp/rate-benchmark.ts",
+  "scripts/build-okf.mjs",
+  "distribution/ai-agents-page.html",
+  "public/okf/rate-index.md",
+  "public/okf/workflows/event-staffing-ordering.md",
+  "cloudflare/worker.js",
+  "cloudflare/llms-worker.js",
+];
+for (const p of RATE_INDEX_SURFACES) {
+  let body;
+  try {
+    body = read(p);
+  } catch {
+    errors.push(`Rate Index surface missing: ${p}`);
+    continue;
+  }
+  if (/by role and market tier/i.test(body)) {
+    errors.push(
+      `${p}: stale Rate Index phrasing "by role and market tier" (canonical: "by role (typical + national range; Brand Ambassadors by tier)")`,
+    );
+  }
+}
+
+// The agent-facing source-of-truth tool description (register-tools.ts) must keep
+// the correct Rate Index framing so the downstream copies above can't drift back
+// to a misleading tier-grid. "national range" + "typical" are its signature.
+const registerTools = read("src/lib/mcp/register-tools.ts");
+if (!/national range/i.test(registerTools) || !/typical/i.test(registerTools)) {
+  errors.push(
+    `src/lib/mcp/register-tools.ts: get_rate_benchmark description lost its canonical framing (expects a "typical" rate plus the "national range")`,
+  );
+}
+
+// ── role coverage ────────────────────────────────────────────────────────────
+// Assistant Leads is a canonical role (rate card asst_lead); it was silently
+// omitted from the REST role list and the quote-request schema. Guard both.
+for (const p of ["src/lib/api/openapi.ts", "public/schemas/event-staffing-request.schema.json"]) {
+  if (!/assistant[ _]lead/i.test(read(p))) {
+    errors.push(`${p}: role list omits Assistant Leads (assistant_leads)`);
+  }
+}
+
 console.log(`Canonical: ${MARKET_COUNT} markets, ${ROLE_COUNT} roles, ${TOOLS.length} MCP tools, v${PKG_VERSION}.`);
 if (errors.length) {
   console.error(`\nSubmission drift detected (${errors.length}):`);
@@ -87,4 +151,6 @@ if (errors.length) {
   console.error("\nUpdate the file(s) to match the canonical sources, then re-run.");
   process.exit(1);
 }
-console.log(`OK: ${FILES.length} submission/distribution files match the canonical sources.`);
+console.log(
+  `OK: ${FILES.length} submission/distribution files match; Rate Index phrasing clean across ${RATE_INDEX_SURFACES.length} surfaces; role coverage intact.`,
+);
