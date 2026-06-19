@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/tempguru-co-tempguru-mcp-badge.png)](https://mseep.ai/app/tempguru-co-tempguru-mcp)
+
 # TempGuru MCP
 
 > MCP server for W-2 event staffing data across 345 US and Canadian markets: a `plan_staffing` planner, six read-only lookups including the `get_rate_benchmark` Rate Index, and an opt-in `request_quote` submission.
