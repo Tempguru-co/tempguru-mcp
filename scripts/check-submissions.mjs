@@ -125,6 +125,29 @@ for (const p of RATE_INDEX_SURFACES) {
   }
 }
 
+// Chinese Rate Index surfaces: same misframing, different language. The English
+// regex above can't match 按岗位和市场分级 ("by role and market tier"), so the
+// zh-CN surfaces are guarded explicitly. This exact phrasing slipped the gate
+// once on README.zh-CN.md before it was caught in manual review.
+const ZH_RATE_INDEX_SURFACES = [
+  "README.zh-CN.md",
+  "distribution/ai-agents-page.zh-CN.html",
+];
+for (const p of ZH_RATE_INDEX_SURFACES) {
+  let body;
+  try {
+    body = read(p);
+  } catch {
+    errors.push(`Rate Index surface missing: ${p}`);
+    continue;
+  }
+  if (/按岗位和市场分级/.test(body)) {
+    errors.push(
+      `${p}: stale Rate Index phrasing "按岗位和市场分级" (canonical: "按岗位列出（典型值 + 全国区间；品牌大使按市场分级）")`,
+    );
+  }
+}
+
 // The agent-facing source-of-truth tool description (register-tools.ts) must keep
 // the correct Rate Index framing so the downstream copies above can't drift back
 // to a misleading tier-grid. "national range" + "typical" are its signature.
@@ -152,5 +175,5 @@ if (errors.length) {
   process.exit(1);
 }
 console.log(
-  `OK: ${FILES.length} submission/distribution files match; Rate Index phrasing clean across ${RATE_INDEX_SURFACES.length} surfaces; role coverage intact.`,
+  `OK: ${FILES.length} submission/distribution files match; Rate Index phrasing clean across ${RATE_INDEX_SURFACES.length + ZH_RATE_INDEX_SURFACES.length} surfaces (incl. ${ZH_RATE_INDEX_SURFACES.length} zh-CN); role coverage intact.`,
 );
