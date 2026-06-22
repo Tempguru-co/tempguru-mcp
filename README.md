@@ -214,7 +214,7 @@ content/
                           # state-compliance, openapi.json
   skills/                 # SKILL.md sources (drift-proof inputs)
 public/
-  okf/                    # generated OKF v0.1 bundle (90 files) — never hand-edit
+  okf/                    # generated OKF v0.1 bundle (99 files) — never hand-edit
   okf.tar.gz · sitemap.xml · robots.txt · llms.txt
   .well-known/okf.json    # OKF discovery doc
   schemas/                # event-staffing-request.schema.json
