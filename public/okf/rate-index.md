@@ -3,7 +3,7 @@ type: "Rate Index"
 title: "TempGuru Event Staffing Rate Index 2026"
 description: "Citable benchmark of all-inclusive W-2 hourly event-staffing rates by role (typical + national range; Brand Ambassadors by tier), measured across vetted per-city data."
 edition: "2026"
-data_version: "1.1.0"
+data_version: "1.2.0"
 resource: "https://tempguru.co/event-staffing-rate-index"
 citation: "TempGuru Event Staffing Rate Index 2026, tempguru.co, figures are all-inclusive W-2 planning ranges, not binding quotes; a coordinator confirms final pricing per event."
 tags:

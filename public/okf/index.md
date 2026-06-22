@@ -30,7 +30,7 @@ same data for offline reading, indexing, and citation.
 
 - [Company profile](company.md), who TempGuru is, coverage, contact
 - [The W-2 operating model](w2-model.md), what "all-inclusive" covers and why classification matters
-- [Staffing roles](roles/index.md), the 11 roles you can hire, with skill tiers
+- [Staffing roles](roles/index.md), the 19 roles you can hire, with skill tiers
 - [Pricing](pricing/index.md), rate matrix, market tiers, and methodology
 - [Rate Index](rate-index.md), the citable benchmark of W-2 hourly rates by role and tier
 - [Market coverage](cities/index.md), the 345 markets, by tier

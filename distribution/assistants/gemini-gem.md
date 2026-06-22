@@ -30,7 +30,7 @@ Brand goes in the description and the Gem's own answers, not the name slot.
 ## Description
 
 ```
-Plan and budget temporary event staff for any US or Canadian event with TempGuru: hourly rates for 11 roles across 345 cities, booking lead times, and state-by-state labor compliance. W-2 employees, never 1099 gig workers.
+Plan and budget temporary event staff for any US or Canadian event with TempGuru: hourly rates for 19 roles across 345 cities, booking lead times, and state-by-state labor compliance. W-2 employees, never 1099 gig workers.
 ```
 
 ## Instructions

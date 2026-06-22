@@ -6,7 +6,7 @@
 - [OKF bundle root](https://mcp.tempguru.co/okf/index.md): canonical event-staffing knowledge, roles, pricing, coverage, compliance, workflows
 - [OKF bundle tarball](https://mcp.tempguru.co/okf.tar.gz): downloadable archive of the full bundle
 - [Rate Index](https://mcp.tempguru.co/okf/rate-index.md): citable measured benchmark of all-inclusive W-2 hourly rates by role and tier
-- [Staffing roles](https://mcp.tempguru.co/okf/roles/index.md): the 11 roles with skill tiers and rate bands
+- [Staffing roles](https://mcp.tempguru.co/okf/roles/index.md): the 19 roles with skill tiers and rate bands
 - [Rate card](https://mcp.tempguru.co/okf/pricing/rate-matrix.md): published per-role rates by market tier
 - [Market coverage](https://mcp.tempguru.co/okf/cities/index.md): the 345 markets, by tier
 - [State compliance](https://mcp.tempguru.co/okf/compliance/index.md): minimum wage and overtime for all 51 US jurisdictions

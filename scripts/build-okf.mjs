@@ -198,8 +198,9 @@ const roleKeyFor = (role) => {
   if (n.includes("usher")) return "ushers";
   if (n.includes("crowd")) return "crowd";
   if (n.includes("asst lead") || n.includes("assistant lead")) return "asst_lead";
+  if (n.includes("ops support") || n.includes("ops-support") || n.includes("operations support")) return "team_lead";
   if (n.includes("team lead") || n.includes("supervisor") || n.includes("lead")) return "team_lead";
-  return "event_staff"; // registration, hospitality, setup, gate, booth, guest services
+  return "event_staff"; // registration, hospitality, setup, gate, booth, guest services, general/event labor (parking, load/cleanup crew, concessions, merchandise, line management)
 };
 const CARD_LABEL = {
   event_staff: "Event Staff",
