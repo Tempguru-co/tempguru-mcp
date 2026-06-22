@@ -22,7 +22,7 @@ This bundle and the live tools are generated from these canonical datasets
 
 ## Role `{ slug, name, description, skill_tier, typical_shift_length_hours }`
 
-`skill_tier` is 1–5. 11 roles.
+`skill_tier` is 1–5. 19 roles.
 
 ## Role pricing `{ [role_slug]: { small, mid, hub } }` (published rate card)
 

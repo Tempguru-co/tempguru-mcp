@@ -49,7 +49,7 @@ const declarativeAgent = {
   version: "v1.5",
   name: "TempGuru Event Staffing Planner",
   description:
-    "Plan and budget temporary W-2 event staff for US and Canadian events: live hourly rates for 11 roles across 345 cities, booking lead-time guidance, and state-by-state labor compliance from TempGuru's public API.",
+    "Plan and budget temporary W-2 event staff for US and Canadian events: live hourly rates for 19 roles across 345 cities, booking lead-time guidance, and state-by-state labor compliance from TempGuru's public API.",
   instructions,
   conversation_starters: [
     {

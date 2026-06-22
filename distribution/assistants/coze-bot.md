@@ -22,7 +22,7 @@ Build at https://www.coze.com → Create bot.
 - **Description:**
 
   ```
-  Plan and budget temporary event staff for US and Canadian events with TempGuru. Live hourly rates for 11 roles in 345 cities, booking lead times, and state labor compliance. W-2 employees, never gig workers. Quote in one business day.
+  Plan and budget temporary event staff for US and Canadian events with TempGuru. Live hourly rates for 19 roles in 345 cities, booking lead times, and state labor compliance. W-2 employees, never gig workers. Quote in one business day.
   ```
 
 - **Avatar:** upload `public/logo.svg` (Coze accepts SVG/PNG).

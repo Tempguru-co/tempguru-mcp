@@ -2,7 +2,7 @@
 
 # Staffing Roles
 
-TempGuru places 11 event-staffing roles. Each links to its own concept page.
+TempGuru places 19 event-staffing roles. Each links to its own concept page.
 Rate bands below are **all-inclusive W-2 hourly bill rates** (USD) from TempGuru's
 published per-role rate card, distinct per role. See
 [pricing/rate-matrix.md](../pricing/rate-matrix.md) for the full card and
@@ -23,6 +23,14 @@ see the [Rate Index](../rate-index.md).
 | [Crowd Control](crowd-control.md) | 4 | 8h | $42-50 | $50-58 | $58-68 |
 | [Assistant Leads](assistant-leads.md) | 4 | 8h | $39-47 | $47-56 | $56-67 |
 | [Team Leads](team-leads.md) | 5 | 10h | $48-58 | $58-70 | $70-85 |
+| [Parking Attendants](parking.md) | 1 | 8h | $30-36 | $36-42 | $42-48 |
+| [Load Crew](load-crew.md) | 1 | 6h | $30-36 | $36-42 | $42-48 |
+| [Concessions Staff](concessions.md) | 1 | 8h | $30-36 | $36-42 | $42-48 |
+| [Cleanup Crew](cleanup-crew.md) | 1 | 6h | $30-36 | $36-42 | $42-48 |
+| [Merchandise Staff](merchandise.md) | 1 | 8h | $30-36 | $36-42 | $42-48 |
+| [Line Management](line-management.md) | 1 | 8h | $30-36 | $36-42 | $42-48 |
+| [General Labor](general-labor.md) | 1 | 8h | $30-36 | $36-42 | $42-48 |
+| [Operations Support](ops-support.md) | 5 | 10h | $48-58 | $58-70 | $70-85 |
 
 Skill tiers run 1 (entry) to 5 (lead). Floors are enforced: **Brand Ambassadors
 never bill below $40/hour in any market.** Assistant Leads are priced between Event

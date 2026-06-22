@@ -14,7 +14,7 @@ United States or Canada.
 |---|---|
 | `plan_staffing` | Call first. Event shape in, complete plan out: coverage, per-role W-2 rate math, lead time, state compliance flags, next steps |
 | `get_cities` | Confirm TempGuru serves the event city; filter by state or tier (hub/mid/small) |
-| `get_roles` | List the 11 staffing roles with descriptions and skill tiers |
+| `get_roles` | List the 19 staffing roles with descriptions and skill tiers |
 | `check_availability` | Lead-time guidance for a city + date (yes / tight / rush / very-rush) |
 | `get_role_pricing` | All-inclusive hourly rate range for a role in a city |
 | `get_compliance_by_state` | Minimum wage, overtime thresholds, and state quirks |

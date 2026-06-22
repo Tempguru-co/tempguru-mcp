@@ -3,7 +3,7 @@ type: "Rate Card"
 title: "Event Staffing Rate Card"
 description: "TempGuru's published all-inclusive W-2 hourly bill rates for every role across small, mid, and hub markets."
 currency: "USD"
-data_version: "1.1.0"
+data_version: "1.2.0"
 tags:
   - "pricing"
   - "rates"
@@ -37,6 +37,14 @@ role cost" vs "what does the market pay") and are not expected to be identical.
 | Crowd Control | 4 | $42-50 | $50-58 | $58-68 |
 | Assistant Leads | 4 | $39-47 | $47-56 | $56-67 |
 | Team Leads | 5 | $48-58 | $58-70 | $70-85 |
+| Parking Attendants | 1 | $30-36 | $36-42 | $42-48 |
+| Load Crew | 1 | $30-36 | $36-42 | $42-48 |
+| Concessions Staff | 1 | $30-36 | $36-42 | $42-48 |
+| Cleanup Crew | 1 | $30-36 | $36-42 | $42-48 |
+| Merchandise Staff | 1 | $30-36 | $36-42 | $42-48 |
+| Line Management | 1 | $30-36 | $36-42 | $42-48 |
+| General Labor | 1 | $30-36 | $36-42 | $42-48 |
+| Operations Support | 5 | $48-58 | $58-70 | $70-85 |
 
 **Floors enforced:** Brand Ambassadors never bill below $40/hour in any market.
 Assistant Leads are priced at the per-tier midpoint between Event Staff and Team Leads.

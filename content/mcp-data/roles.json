@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "version": "1.1.0",
+    "version": "1.2.0",
     "updated": "2026-06-13",
     "source": "TempGuru role definitions; mirrors role x city page slugs"
   },
@@ -79,6 +79,62 @@
       "slug": "team-leads",
       "name": "Team Leads",
       "description": "On-site crew supervision, client liaison, schedule management, and quality assurance. Accountable for crew performance.",
+      "skill_tier": 5,
+      "typical_shift_length_hours": 10
+    },
+    {
+      "slug": "parking",
+      "name": "Parking Attendants",
+      "description": "Vehicle direction, lot and structure management, valet-coordination support, and pedestrian flow at entrances.",
+      "skill_tier": 1,
+      "typical_shift_length_hours": 8
+    },
+    {
+      "slug": "load-crew",
+      "name": "Load Crew",
+      "description": "Load-in and load-out labor: trucks, freight, staging, equipment moves, and dock handling before and after events.",
+      "skill_tier": 1,
+      "typical_shift_length_hours": 6
+    },
+    {
+      "slug": "concessions",
+      "name": "Concessions Staff",
+      "description": "Concession-stand and point-of-sale service: food and beverage vending, cash and card handling, and restocking.",
+      "skill_tier": 1,
+      "typical_shift_length_hours": 8
+    },
+    {
+      "slug": "cleanup-crew",
+      "name": "Cleanup Crew",
+      "description": "Post-event cleaning and venue reset: waste removal, breakdown support, and turnaround between sessions.",
+      "skill_tier": 1,
+      "typical_shift_length_hours": 6
+    },
+    {
+      "slug": "merchandise",
+      "name": "Merchandise Staff",
+      "description": "Merchandise-booth sales and handling: point-of-sale, inventory, restocking, and fan transactions at concerts and tours.",
+      "skill_tier": 1,
+      "typical_shift_length_hours": 8
+    },
+    {
+      "slug": "line-management",
+      "name": "Line Management",
+      "description": "Queue and line management: organizing entry lines, wristband and ticket checks, and entry-flow control.",
+      "skill_tier": 1,
+      "typical_shift_length_hours": 8
+    },
+    {
+      "slug": "general-labor",
+      "name": "General Labor",
+      "description": "Flexible hands-on event support across setup, breakdown, staging, and on-site tasks as needed.",
+      "skill_tier": 1,
+      "typical_shift_length_hours": 8
+    },
+    {
+      "slug": "ops-support",
+      "name": "Operations Support",
+      "description": "On-site operational coordination: running the event comms/command center, monitoring radio traffic, logging incidents, dispatching runners, distributing shift briefings, and managing real-time staffing adjustments across zones.",
       "skill_tier": 5,
       "typical_shift_length_hours": 10
     }
