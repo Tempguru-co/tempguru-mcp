@@ -95,13 +95,15 @@ export async function POST(request: Request) {
   }
 
   // ── CRM write, then telemetry awaited in-handler (no PII in telemetry) ─
-  const result = await createLead(input);
+  const userAgent = request.headers.get("user-agent") ?? "";
+  const ipCountry = request.headers.get("x-vercel-ip-country") ?? "";
+  const result = await createLead({ ...input, source: { userAgent, ipCountry } });
   await track({
     tool: "request_quote",
     status: result.success ? "success" : "error",
     city: input.city,
-    userAgent: request.headers.get("user-agent") ?? "",
-    ipCountry: request.headers.get("x-vercel-ip-country") ?? "",
+    userAgent,
+    ipCountry,
   });
 
   if (!result.success) {
