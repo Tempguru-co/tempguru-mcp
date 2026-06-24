@@ -22,6 +22,7 @@ import {
   type CityTier,
 } from "./queries";
 import { createLead } from "../notion/create-lead";
+import { currentContext } from "../telemetry/context";
 import { buildStaffingPlan } from "./plan-staffing";
 import { buildRateBenchmark } from "./rate-benchmark";
 import { REQUEST_QUOTE_INPUT, quoteSubmittedPayload, quoteFailedPayload } from "./quote";
@@ -377,7 +378,14 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
       },
     },
     async (input) => {
-      const result = await createLead(input);
+      // Caller provenance for lead-trust scoring (request-scoped UA + edge
+      // country). currentContext() returns empty defaults under stdio, which
+      // the scorer treats as an unrecognized source (medium, not blocked).
+      const ctx = currentContext();
+      const result = await createLead({
+        ...input,
+        source: { userAgent: ctx.userAgent, ipCountry: ctx.ipCountry },
+      });
       await track({ tool: "request_quote", status: result.success ? "success" : "error", city: input.city });
 
       if (!result.success) {

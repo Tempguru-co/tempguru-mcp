@@ -5,6 +5,8 @@
 // small. All writes are fire-and-NOT-forgotten, we await the result so the
 // MCP tool can confirm success or surface a clean error message.
 
+import { scoreLeadTrust, renderTrustBlock, type LeadTrust, type LeadTrustSource } from "./lead-trust";
+
 const NOTION_API_VERSION = "2022-06-28";
 // IMPORTANT: this is the Notion *database_id*, not the *data_source_id*.
 // The workspace notes list 2f87d2b7-68c5-81aa-928e-000bfa620bde, but that is
@@ -39,10 +41,14 @@ export interface CreateLeadInput {
   attire?: string;
   special_requirements?: string;
   compliance_notes?: string;
+
+  // Request provenance for lead-trust scoring (UA + edge country). Optional so
+  // stdio / Docker callers without a request context still create leads.
+  source?: LeadTrustSource;
 }
 
 export type CreateLeadResult =
-  | { success: true; notion_page_url: string; deal_name: string }
+  | { success: true; notion_page_url: string; deal_name: string; trust: LeadTrust }
   | { success: false; error: string };
 
 function richText(content: string) {
@@ -50,9 +56,11 @@ function richText(content: string) {
   return [{ text: { content: content.slice(0, 1999) } }];
 }
 
-function buildCallNotes(input: CreateLeadInput): string {
+function buildCallNotes(input: CreateLeadInput, trustBlock: string): string {
   const lines: string[] = [
     `SOURCE: AI Agent (MCP)`,
+    ``,
+    trustBlock,
     ``,
     `EVENT`,
     `  Name:   ${input.event_name}`,
@@ -110,7 +118,8 @@ export async function createLead(input: CreateLeadInput): Promise<CreateLeadResu
 
   const dealName = `Agent Quote, ${input.event_type} · ${input.city} · ${input.event_dates}`;
   const today = new Date().toISOString().slice(0, 10);
-  const callNotes = buildCallNotes(input);
+  const trust = await scoreLeadTrust(input, input.source);
+  const callNotes = buildCallNotes(input, renderTrustBlock(trust));
 
   const body = {
     parent: { database_id: DB_ID },
@@ -153,6 +162,7 @@ export async function createLead(input: CreateLeadInput): Promise<CreateLeadResu
       success: true,
       notion_page_url: page.url,
       deal_name: dealName,
+      trust,
     };
   } catch (e) {
     return { success: false, error: String(e) };
