@@ -49,7 +49,7 @@ const handler = createMcpHandler(
     registerTools(server, {
       onTrack: async (record) => {
         const ctx = currentContext();
-        await track({ ...record, userAgent: ctx.userAgent, ipCountry: ctx.ipCountry });
+        await track({ ...record, userAgent: ctx.userAgent, ipCountry: ctx.ipCountry, source: ctx.source });
       },
       resources: { ordering: ORDERING_SKILL, compliance: COMPLIANCE_SKILL },
     });
@@ -159,6 +159,12 @@ async function withAcceptNormalization(request: Request): Promise<Response> {
   const ctx = {
     userAgent: request.headers.get("user-agent") ?? "",
     ipCountry: request.headers.get("x-vercel-ip-country") ?? "",
+    // Attribution tag from a surface we control. Header first, `?source=` param
+    // as a fallback for clients that can't set custom headers.
+    source:
+      request.headers.get("x-tempguru-source") ??
+      new URL(request.url).searchParams.get("source") ??
+      "",
   };
 
   return runWithContext(ctx, async () => {

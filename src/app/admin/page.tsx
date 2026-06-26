@@ -135,6 +135,17 @@ function Dashboard({ m }: { m: DashboardMetrics }) {
         </Card>
       </div>
 
+      {/* Attribution: which of OUR controlled surfaces (custom_gpt, website_widget,
+          manual_test, team_demo) set the X-TempGuru-Source tag. Untagged calls are
+          organic/unattributed and don't appear here, so subtracting these from the
+          total isolates the candidate-real external pool. */}
+      <Card title="By source (our tagged surfaces)">
+        <KeyValueTable
+          rows={toRows(m.bySource)}
+          emptyMessage="No tagged traffic yet. Tag the GPT / widget / test scripts with the X-TempGuru-Source header; untagged calls are organic."
+        />
+      </Card>
+
       {/* Unclassified raw UAs, the menu for the next classifier pass */}
       <Card title="Unclassified user-agents (raw)">
         <KeyValueTable
