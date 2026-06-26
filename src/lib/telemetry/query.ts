@@ -58,6 +58,10 @@ export interface DashboardMetrics {
   byUa: Record<string, number>;
   unclassifiedUas: Array<{ member: string; count: number }>;
   byCountry: Record<string, number>;
+  // Attribution tags from surfaces we control (custom_gpt, website_widget,
+  // manual_test, team_demo). Subtract these from the total to isolate organic
+  // candidate-real traffic. Empty for untagged/organic calls.
+  bySource: Record<string, number>;
   topCities: Array<{ member: string; count: number }>;
   // Present-but-unrecognized city inputs (junk, typos, markets we don't cover).
   // Kept out of topCities so the demand chart stays clean; surfaced here so the
@@ -74,6 +78,7 @@ export interface DashboardMetrics {
     city: string | null;
     role: string | null;
     state: string | null;
+    source: string | null;
   }>;
   dailyTotals: Array<{ date: string; count: number }>;
 }
@@ -89,6 +94,7 @@ export async function getMetrics(windowDays = 7): Promise<DashboardMetrics> {
       byUa: {},
       unclassifiedUas: [],
       byCountry: {},
+      bySource: {},
       topCities: [],
       unmatchedCities: [],
       topRoles: [],
@@ -105,6 +111,7 @@ export async function getMetrics(windowDays = 7): Promise<DashboardMetrics> {
     byUa,
     byStatus,
     byCountry,
+    bySource,
     unclassifiedHash,
     topCities,
     unmatchedCityHash,
@@ -116,6 +123,7 @@ export async function getMetrics(windowDays = 7): Promise<DashboardMetrics> {
     aggregateHash("uas", dates),
     aggregateHash("status", dates),
     aggregateHash("countries", dates),
+    aggregateHash("sources", dates),
     aggregateHash("ua:unclassified", dates),
     aggregateZSet("queries:cities", dates, 20),
     aggregateHash("queries:cities:unmatched", dates),
@@ -178,6 +186,7 @@ export async function getMetrics(windowDays = 7): Promise<DashboardMetrics> {
     byUa,
     unclassifiedUas,
     byCountry,
+    bySource,
     topCities,
     unmatchedCities,
     topRoles,

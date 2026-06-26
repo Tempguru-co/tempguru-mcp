@@ -97,6 +97,15 @@ export async function POST(request: Request) {
   // ── CRM write, then telemetry awaited in-handler (no PII in telemetry) ─
   const userAgent = request.headers.get("user-agent") ?? "";
   const ipCountry = request.headers.get("x-vercel-ip-country") ?? "";
+  // Attribution tag for telemetry: header first, else a `source` field a website
+  // widget posts in its body (zod strips it from `input`, so read raw `body`).
+  // NB: distinct from createLead's `source` (UA + country for trust scoring),
+  // same word, different jobs.
+  const rawBodySource =
+    body && typeof body === "object" && typeof (body as Record<string, unknown>).source === "string"
+      ? ((body as Record<string, unknown>).source as string)
+      : "";
+  const sourceTag = request.headers.get("x-tempguru-source") ?? rawBodySource;
   const result = await createLead({ ...input, source: { userAgent, ipCountry } });
   await track({
     tool: "request_quote",
@@ -104,6 +113,7 @@ export async function POST(request: Request) {
     city: input.city,
     userAgent,
     ipCountry,
+    source: sourceTag,
   });
 
   if (!result.success) {

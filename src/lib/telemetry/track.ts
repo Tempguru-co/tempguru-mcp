@@ -7,6 +7,7 @@
 //   ua:unclassified:{date}       HASH  raw UA string → count (only "other" bucket)
 //   countries:{date}             HASH  iso2_country → invocation count
 //   status:{date}                HASH  "success"|"error" → count
+//   sources:{date}               HASH  attribution tag → count (our controlled surfaces)
 //   queries:cities:{date}        ZSET  canonical city slug → invocation count (sorted)
 //   queries:cities:unmatched:{date}  HASH  unrecognized city input → count (diagnostic)
 //   queries:roles:{date}         ZSET  role slug → invocation count (sorted)
@@ -36,6 +37,9 @@ export interface TrackInput {
   city?: string;
   role?: string;
   state?: string;
+  // Attribution tag set by a surface we control (X-TempGuru-Source header or
+  // ?source= param). Empty/undefined for organic/unattributed traffic.
+  source?: string;
 }
 
 const utcDate = (): string => new Date().toISOString().slice(0, 10);
@@ -66,6 +70,18 @@ export async function track(input: TrackInput): Promise<void> {
   const canonicalCity = cityMatch ? cityMatch.slug.replace(/-event-staffing$/, "") : null;
   const unmatchedCity = input.city && !cityMatch ? slug(input.city) : null;
 
+  // Attribution tag from a controlled surface (custom_gpt / website_widget /
+  // manual_test / team_demo / ...). Sanitized to [a-z0-9_-], capped. Only our
+  // own surfaces set it; organic traffic has none, which is the whole point:
+  // subtract the tagged-known to see the untagged candidate-real pool.
+  const sourceTag =
+    (input.source ?? "")
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 40) || null;
+
   // Build the ring-buffer payload before entering the async context so it is
   // already serialised when the Promise.allSettled batch fires.
   const event = JSON.stringify({
@@ -79,6 +95,7 @@ export async function track(input: TrackInput): Promise<void> {
     city: canonicalCity ?? unmatchedCity,
     role: input.role ? slug(input.role) : null,
     state: input.state ? input.state.toUpperCase().slice(0, 2) : null,
+    source: sourceTag,
   });
 
   // Issue all writes in ONE Promise.allSettled so they race to completion in
@@ -99,6 +116,7 @@ export async function track(input: TrackInput): Promise<void> {
       input.ipCountry
         ? r.hincrby(`countries:${date}`, input.ipCountry.toUpperCase(), 1)
         : Promise.resolve(),
+      sourceTag ? r.hincrby(`sources:${date}`, sourceTag, 1) : Promise.resolve(),
       // Real markets feed the sorted demand chart; unrecognized inputs land in
       // a separate diagnostic HASH so junk never pollutes "Top cities queried".
       canonicalCity ? r.zincrby(`queries:cities:${date}`, 1, canonicalCity) : Promise.resolve(),
@@ -115,6 +133,7 @@ export async function track(input: TrackInput): Promise<void> {
       rawUnclassified ? r.expire(`ua:unclassified:${date}`, TTL_SECONDS) : Promise.resolve(),
       r.expire(`status:${date}`, TTL_SECONDS),
       r.expire(`countries:${date}`, TTL_SECONDS),
+      sourceTag ? r.expire(`sources:${date}`, TTL_SECONDS) : Promise.resolve(),
       r.expire(`queries:cities:${date}`, TTL_SECONDS),
       unmatchedCity ? r.expire(`queries:cities:unmatched:${date}`, TTL_SECONDS) : Promise.resolve(),
       r.expire(`queries:roles:${date}`, TTL_SECONDS),
