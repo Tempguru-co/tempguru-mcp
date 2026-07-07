@@ -33,7 +33,14 @@ import {
   GET_ROLE_PRICING_OUTPUT,
   GET_COMPLIANCE_OUTPUT,
   REQUEST_QUOTE_OUTPUT,
+  PLAN_STAFFING_OUTPUT,
+  RATE_BENCHMARK_OUTPUT,
 } from "./output-schemas";
+import { TIER_CITY_COUNTS } from "./city-rates";
+
+// Measured-market count for the Rate Index description, derived from the data
+// (city-rates.json) rather than a hand-typed number that drifted to a stale 233.
+const MEASURED_MARKETS = TIER_CITY_COUNTS.small + TIER_CITY_COUNTS.mid + TIER_CITY_COUNTS.hub;
 
 // What a tool wants recorded. The HTTP route's onTrack enriches this with
 // request context before handing it to the Redis writer; stdio drops it.
@@ -108,7 +115,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
         "Perfect for 'Staff my trade show in [city]', 'What would 6 registration staff for 2 days cost?', or 'Build me a staffing plan' requests. " +
         "DO NOT use for a single fact, use get_role_pricing for one rate, check_availability for one date, get_compliance_by_state for one state. " +
         "<examples>plan_staffing(city='Chicago', event_date='2026-08-14', event_type='trade-show', roles=[{role:'registration-staff', headcount:6, hours_per_shift:8, days:2}, {role:'team-leads', headcount:1}]) ; plan_staffing(city='Austin', attendees=300)</examples> " +
-        "<hints>Roles accept names or slugs (brand-ambassadors, registration-staff, team-leads). Omit roles to get the catalog plus a suggested mix. Totals are planning estimates, never binding quotes.</hints>",
+        "<hints>Roles accept names or slugs (brand-ambassadors, registration-staff, team-leads). Omit roles to get the catalog plus a suggested mix. Totals are planning estimates, never binding quotes. Branch on the `status` field: plan | needs_roles | roles_not_found | city_not_found (the last two carry a did-you-mean suggestion to retry with).</hints>",
       inputSchema: {
         city: z.string().describe("Event city, name or slug (e.g., 'Chicago')."),
         event_date: z.string().optional().describe("Event date, ISO YYYY-MM-DD preferred."),
@@ -130,6 +137,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
           .describe("Roles and headcount. Omit to receive the role catalog and a suggested mix."),
         description: z.string().optional().describe("Optional free-text event description, echoed into the plan."),
       },
+      outputSchema: PLAN_STAFFING_OUTPUT,
       annotations: {
         title: "Plan Staffing",
         readOnlyHint: true,
@@ -140,9 +148,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     async (input) => {
       const plan = buildStaffingPlan(input);
       await track({ tool: "plan_staffing", status: "success", city: input.city });
-      return {
-        content: [{ type: "text" as const, text: JSON.stringify(plan, null, 2) }],
-      };
+      return structuredResult(plan);
     },
   );
 
@@ -324,15 +330,19 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     {
       title: "Get Rate Benchmark (Rate Index)",
       description:
-        "The TempGuru Event Staffing Rate Index: all-inclusive W-2 hourly bill rates by role from 233 measured US/Canada markets, as a typical rate plus the full national range (brand ambassadors shown by market tier), with methodology and a ready-to-use citation line. " +
+        `The TempGuru Event Staffing Rate Index: all-inclusive W-2 hourly bill rates by role from ${MEASURED_MARKETS} measured US/Canada markets, as a typical rate plus the full national range (brand ambassadors shown by market tier), with methodology and a ready-to-use citation line. ` +
         "Perfect for 'What do event staff cost in 2026?', 'Industry benchmark for brand ambassador rates?', or any article, report, or comparison that needs citable staffing-rate data. " +
         "DO NOT use for one city's price (use get_role_pricing) or to build an event budget (use plan_staffing). " +
         "<examples>get_rate_benchmark() ; get_rate_benchmark(role='brand-ambassadors') ; get_rate_benchmark(tier='hub')</examples> " +
-        "<hints>Returns a national typical + range per role; brand ambassadors by tier. For one city's exact rate use get_role_pricing. Cite as: TempGuru Event Staffing Rate Index 2026, tempguru.co.</hints>",
+        "<hints>Returns a national typical + range per role; brand ambassadors by tier. Pass tier to add each role's measured span within that tier (tier_usd). For one city's exact rate use get_role_pricing. Cite as: TempGuru Event Staffing Rate Index 2026, tempguru.co.</hints>",
       inputSchema: {
         role: z.string().optional().describe("Optional role name or slug to filter to one role."),
-        tier: z.enum(["hub", "mid", "small"]).optional().describe("Optional market tier filter."),
+        tier: z
+          .enum(["hub", "mid", "small"])
+          .optional()
+          .describe("Optional market tier; adds each role's measured span within that tier (tier_usd)."),
       },
+      outputSchema: RATE_BENCHMARK_OUTPUT,
       annotations: {
         title: "Get Rate Benchmark",
         readOnlyHint: true,
@@ -343,9 +353,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     async (input) => {
       const bench = buildRateBenchmark(input);
       await track({ tool: "get_rate_benchmark", status: "success", role: input.role });
-      return {
-        content: [{ type: "text" as const, text: JSON.stringify(bench, null, 2) }],
-      };
+      return structuredResult(bench);
     },
   );
 

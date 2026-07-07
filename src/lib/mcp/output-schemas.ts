@@ -32,6 +32,17 @@ const CITY_TIER = z
   .enum(["hub", "mid", "small"])
   .describe("Market tier: hub = 25 major metros, mid = 129 secondary markets, small = 191 tertiary markets.");
 
+// Did-you-mean handed back on a city/role miss so the agent can auto-retry with
+// the resolved slug rather than relaying "not covered".
+const SUGGESTION = z
+  .object({
+    kind: z.enum(["city", "role"]),
+    slug: z.string(),
+    name: z.string(),
+  })
+  .optional()
+  .describe("Closest known city/role for a miss; retry with this slug.");
+
 // ─── get_cities ──────────────────────────────────────────────────────────
 
 export const GET_CITIES_OUTPUT = {
@@ -78,6 +89,7 @@ export const CHECK_AVAILABILITY_OUTPUT = {
     .describe("false = city not in the published footprint (see message); true = guidance below."),
   // city-not-found variant
   requested: z.string().optional().describe("Echo of the unmatched city input."),
+  suggestion: SUGGESTION,
   message: z.string().optional().describe("Present when city_found is false."),
   // invalid-date variant
   error: z.string().optional().describe("Present when the date could not be parsed."),
@@ -119,6 +131,7 @@ export const GET_ROLE_PRICING_OUTPUT = {
   fallback_pricing: ALL_TIERS.optional().describe("All-tier pricing shown when the city didn't match."),
   note: z.string().optional(),
   requested: z.string().optional().describe("Echo of the unmatched input."),
+  suggestion: SUGGESTION,
   // no-data variant
   error: z.string().optional(),
   // priced variant
@@ -162,6 +175,147 @@ export const GET_COMPLIANCE_OUTPUT = {
   liability_coverage_included: z.boolean().optional(),
   workers_comp_included: z.boolean().optional(),
   citation_note: z.string().optional().describe("Operational guidance, not legal advice."),
+};
+
+// ─── plan_staffing (plan / needs_roles / roles_not_found / city_not_found) ──
+// Flattened union: `status` discriminates, everything else optional so every
+// variant validates. Keep in lockstep with buildStaffingPlan's return shapes.
+
+const ROLES_CATALOG = z
+  .object({
+    total: z.number().int(),
+    roles: z.array(
+      z.object({
+        slug: z.string(),
+        name: z.string(),
+        description: z.string().optional(),
+        skill_tier: z.number().optional(),
+        typical_shift_length_hours: z.number().optional(),
+        url: z.string().optional(),
+      }),
+    ),
+  })
+  .nullable()
+  .optional();
+
+const PLAN_LINE = z.object({
+  role: z.string(),
+  role_slug: z.string(),
+  headcount: z.number().int(),
+  hours_per_shift: z.number(),
+  days: z.number().int(),
+  hourly_range: PRICE_BAND,
+  estimated_total_range: z.object({ low: z.number(), high: z.number() }),
+});
+
+export const PLAN_STAFFING_OUTPUT = {
+  status: z
+    .enum(["plan", "needs_roles", "roles_not_found", "city_not_found"])
+    .describe("Discriminator. Branch on this before reading the rest."),
+  message: z.string().optional(),
+  tip: z.string().optional(),
+  available_roles: ROLES_CATALOG,
+  // city_not_found
+  requested_city: z.string().optional(),
+  suggestion: SUGGESTION,
+  next_steps: z.array(z.string()).optional(),
+  // roles_not_found
+  requested_roles: z.array(z.string()).optional(),
+  unresolved_roles: z
+    .array(z.object({ role: z.string(), suggestion: SUGGESTION }))
+    .optional(),
+  // plan / roles_not_found event block
+  event: z
+    .object({
+      city: z.string(),
+      state: z.string(),
+      market_tier: z.string(),
+      event_type: z.string().nullable().optional(),
+      event_date: z.string().nullable().optional(),
+      attendees: z.number().nullable().optional(),
+      description: z.string().nullable().optional(),
+    })
+    .optional(),
+  // plan
+  plan_lines: z.array(PLAN_LINE).optional(),
+  estimated_total_range: z
+    .object({
+      low: z.number(),
+      high: z.number(),
+      currency: z.enum(["USD", "CAD"]),
+      basis: z.string(),
+    })
+    .optional(),
+  overtime_adjusted_total_range: z
+    .object({
+      low: z.number(),
+      high: z.number(),
+      currency: z.enum(["USD", "CAD"]),
+      note: z.string(),
+    })
+    .nullable()
+    .optional()
+    .describe("Present (non-null) only when daily/weekly OT applies to the schedule."),
+  lead_time: z
+    .object({
+      event_date: z.string(),
+      days_until_event: z.number().int(),
+      recommendation: z.enum(["yes", "tight", "rush", "very-rush"]),
+      note: z.string(),
+    })
+    .nullable()
+    .optional(),
+  compliance: z
+    .object({
+      state: z.string(),
+      min_wage_usd: z.number(),
+      overtime_weekly_hours: z.number().int(),
+      overtime_daily_hours: z.number().int().nullable(),
+      unique_rules: z.array(z.string()),
+      note: z.string(),
+    })
+    .nullable()
+    .optional(),
+  staffing_notes: z.array(z.string()).optional(),
+};
+
+// ─── get_rate_benchmark (full Index / role-not-found) ─────────────────────
+
+export const RATE_BENCHMARK_OUTPUT = {
+  // role-not-found variant
+  role_found: z.literal(false).optional(),
+  requested: z.string().optional(),
+  available_roles: z.array(z.string()).optional(),
+  // full index variant
+  index: z.string().optional(),
+  edition: z.string().optional(),
+  data_version: z.string().optional(),
+  updated: z.string().optional(),
+  methodology: z.string().optional(),
+  markets_measured: z
+    .object({ small: z.number().int(), mid: z.number().int(), hub: z.number().int() })
+    .optional(),
+  basis: z.string().optional(),
+  requested_tier: z.enum(["hub", "mid", "small"]).optional(),
+  reading_note: z.string().optional(),
+  rates: z
+    .array(
+      z.object({
+        role: z.string(),
+        role_key: z.string(),
+        typical_usd: z.string().optional(),
+        national_range_usd: z.string().optional(),
+        by_tier_usd: z
+          .object({ small: z.string(), mid: z.string(), hub: z.string() })
+          .optional(),
+        tier: z.enum(["hub", "mid", "small"]).optional(),
+        tier_usd: z.string().optional(),
+      }),
+    )
+    .optional(),
+  floors: z.string().optional(),
+  citation: z.string().optional(),
+  methodology_url: z.string().optional(),
 };
 
 // ─── request_quote (submitted / graceful failure) ────────────────────────

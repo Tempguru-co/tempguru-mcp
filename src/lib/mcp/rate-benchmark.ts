@@ -58,29 +58,36 @@ export function buildRateBenchmark(input: RateBenchmarkInput = {}) {
     }
   }
 
+  const tier = input.tier;
+  const span = (key: CardKey, t: "hub" | "mid" | "small") =>
+    `$${TIER_SPANS[t][key][0]}-${TIER_SPANS[t][key][1]}/hr`;
+
   // Brand Ambassadors is the one role with a real geographic gradient (its floor
   // is policy-set: $40/$47/$55 small/mid/hub). Every other role is tier-flat, so
-  // we publish a national typical + range, not a misleading tier grid.
+  // we publish a national typical + range, not a misleading tier grid. When a
+  // tier is requested, each row also carries that tier's MEASURED span
+  // (tier_usd), so the previously-ignored `tier` param now returns real data.
   const rates = rows.map((r) => {
     if (r.key === "brand_amb") {
-      // BA is the one role with a real geographic gradient; show it by tier, no
-      // single "typical" (a national mode would undersell hub markets).
-      return {
-        role: r.label,
-        role_key: r.key,
-        by_tier_usd: {
-          small: `$${TIER_SPANS.small[r.key][0]}-${TIER_SPANS.small[r.key][1]}/hr`,
-          mid: `$${TIER_SPANS.mid[r.key][0]}-${TIER_SPANS.mid[r.key][1]}/hr`,
-          hub: `$${TIER_SPANS.hub[r.key][0]}-${TIER_SPANS.hub[r.key][1]}/hr`,
-        },
-      };
+      const base = { role: r.label, role_key: r.key };
+      return tier
+        ? { ...base, tier, tier_usd: span(r.key, tier) }
+        : {
+            ...base,
+            by_tier_usd: {
+              small: span(r.key, "small"),
+              mid: span(r.key, "mid"),
+              hub: span(r.key, "hub"),
+            },
+          };
     }
-    return {
+    const base = {
       role: r.label,
       role_key: r.key,
       typical_usd: `$${TYPICAL[r.key][0]}-${TYPICAL[r.key][1]}/hr`,
       national_range_usd: `$${NATIONAL_RANGE[r.key][0]}-${NATIONAL_RANGE[r.key][1]}/hr`,
     };
+    return tier ? { ...base, tier, tier_usd: span(r.key, tier) } : base;
   });
 
   return {
@@ -91,8 +98,10 @@ export function buildRateBenchmark(input: RateBenchmarkInput = {}) {
     methodology: CITY_RATES_META.source,
     markets_measured: { small: TIER_CITY_COUNTS.small, mid: TIER_CITY_COUNTS.mid, hub: TIER_CITY_COUNTS.hub },
     basis: CITY_RATES_META.basis,
-    reading_note:
-      "typical_usd is the most common rate across measured cities; national_range_usd is the full spread (higher-cost metros like New York and Boston sit at the top). Market tier does NOT predict the rate for most roles, only Brand Ambassadors follows a tier gradient. For an exact city rate, call get_role_pricing with the city name.",
+    ...(tier ? { requested_tier: tier } : {}),
+    reading_note: tier
+      ? `tier_usd is the measured rate span across ${tier}-tier markets for each role. Most roles are tier-flat (typical_usd/national_range_usd still shown for context); only Brand Ambassadors follows a real tier gradient. For an exact city rate, call get_role_pricing with the city name.`
+      : "typical_usd is the most common rate across measured cities; national_range_usd is the full spread (higher-cost metros like New York and Boston sit at the top). Market tier does NOT predict the rate for most roles, only Brand Ambassadors follows a tier gradient. For an exact city rate, call get_role_pricing with the city name.",
     rates,
     floors: "Brand Ambassadors never bill below $40/hour in any market.",
     citation:

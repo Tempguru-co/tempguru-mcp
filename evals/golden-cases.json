@@ -170,5 +170,71 @@
       "by_tier_usd",
       "55-65"
     ]
+  },
+  {
+    "name": "plan_staffing: valid city + unmatched role returns roles_not_found (not city_not_found)",
+    "tool": "plan_staffing",
+    "arguments": {
+      "city": "Chicago",
+      "roles": [
+        {
+          "role": "sword swallowers",
+          "headcount": 3
+        }
+      ]
+    },
+    "expect": [
+      "roles_not_found",
+      "Chicago",
+      "available_roles"
+    ]
+  },
+  {
+    "name": "plan_staffing: alias city (NYC) + role synonym (security) resolve, structured output emitted",
+    "tool": "plan_staffing",
+    "arguments": {
+      "city": "NYC",
+      "roles": [
+        {
+          "role": "security",
+          "headcount": 5
+        }
+      ]
+    },
+    "expect": [
+      "New York City",
+      "Crowd Control",
+      "plan_lines",
+      "structuredContent"
+    ]
+  },
+  {
+    "name": "plan_staffing: unknown city returns city_not_found with a did-you-mean suggestion",
+    "tool": "plan_staffing",
+    "arguments": {
+      "city": "Gothamm",
+      "roles": [
+        {
+          "role": "brand-ambassadors",
+          "headcount": 2
+        }
+      ]
+    },
+    "expect": [
+      "city_not_found",
+      "suggestion"
+    ]
+  },
+  {
+    "name": "get_rate_benchmark tier filter adds the measured tier span (tier_usd)",
+    "tool": "get_rate_benchmark",
+    "arguments": {
+      "tier": "hub"
+    },
+    "expect": [
+      "requested_tier",
+      "tier_usd",
+      "Rate Index"
+    ]
   }
 ]
