@@ -137,7 +137,7 @@
     ]
   },
   {
-    "name": "get_compliance_by_state knows California daily OT",
+    "name": "get_compliance_by_state knows California daily OT + 2026 min wage + sourcing",
     "tool": "get_compliance_by_state",
     "arguments": {
       "state": "CA"
@@ -145,7 +145,10 @@
     "expect": [
       "overtime_threshold_daily_hours",
       "unique_rules",
-      "W-2"
+      "W-2",
+      "16.9",
+      "min_wage_source",
+      "data_current_as_of"
     ]
   },
   {

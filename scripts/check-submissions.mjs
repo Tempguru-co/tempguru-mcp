@@ -238,6 +238,28 @@ for (const [p, re] of nameChecks) {
   }
 }
 
+// ── state-compliance data freshness ───────────────────────────────────────
+// Minimum wages change every January (plus mid-year in AK/DC/OR/FL). Stale
+// compliance data presented as current is a liability for a compliance-brand
+// company, so fail if the dataset hasn't been re-verified in over 6 months.
+// Reset by re-checking values against state DOL sources and bumping _meta.updated.
+try {
+  const sc = JSON.parse(read("content/mcp-data/state-compliance.json"));
+  const updated = new Date(`${sc._meta.updated}T00:00:00Z`);
+  if (isNaN(updated.getTime())) {
+    errors.push("state-compliance.json _meta.updated is not a valid ISO date (YYYY-MM-DD)");
+  } else {
+    const ageMonths = (Date.now() - updated.getTime()) / (1000 * 60 * 60 * 24 * 30.44);
+    if (ageMonths > 6) {
+      errors.push(
+        `state-compliance.json is ${ageMonths.toFixed(1)} months stale (updated ${sc._meta.updated}); minimum wages change every January, re-verify against state DOL sources and bump _meta.updated.`,
+      );
+    }
+  }
+} catch (e) {
+  errors.push(`could not read state-compliance.json for freshness check: ${e.message}`);
+}
+
 console.log(`Canonical: ${MARKET_COUNT} markets, ${ROLE_COUNT} roles, ${TOOLS.length} MCP tools, v${PKG_VERSION}.`);
 if (errors.length) {
   console.error(`\nSubmission drift detected (${errors.length}):`);

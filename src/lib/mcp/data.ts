@@ -43,6 +43,8 @@ export type StateCompliance = {
   overtime_weekly: number;
   overtime_daily: number | null;
   unique_rules: string[];
+  min_wage_as_of?: string;
+  min_wage_source?: string;
 };
 
 // ─── Loaders (validated, exported) ────────────────────────────────────────

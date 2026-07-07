@@ -174,6 +174,10 @@ export const GET_COMPLIANCE_OUTPUT = {
   unique_rules: z.array(z.string()).optional(),
   liability_coverage_included: z.boolean().optional(),
   workers_comp_included: z.boolean().optional(),
+  min_wage_as_of: z.string().nullable().optional().describe("Effective date of this state's stored minimum wage."),
+  min_wage_source: z.string().nullable().optional().describe("Authoritative source URL for the minimum wage figure."),
+  data_current_as_of: z.string().optional().describe("Date the compliance dataset was last verified (YYYY-MM-DD)."),
+  currency_note: z.string().optional().describe("Reminder that wages change annually; verify before relying."),
   citation_note: z.string().optional().describe("Operational guidance, not legal advice."),
 };
 

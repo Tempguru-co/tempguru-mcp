@@ -390,6 +390,10 @@ export type StateComplianceData = {
   unique_rules: string[];
   liability_coverage_included: boolean;
   workers_comp_included: boolean;
+  min_wage_as_of: string | null;
+  min_wage_source: string | null;
+  data_current_as_of: string;
+  currency_note: string;
   citation_note: string;
 };
 
@@ -421,6 +425,11 @@ export function queryStateCompliance(
     unique_rules: match.data.unique_rules,
     liability_coverage_included: true,
     workers_comp_included: true,
+    min_wage_as_of: match.data.min_wage_as_of ?? null,
+    min_wage_source: match.data.min_wage_source ?? null,
+    data_current_as_of: STATE_META.updated,
+    currency_note:
+      "Minimum wages change every January (and mid-year in some states); local ordinances may set higher floors. Verify against the state DOL (min_wage_source) before relying on it.",
     citation_note: STATE_META.citation_note,
   });
 }

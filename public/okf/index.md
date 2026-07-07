@@ -12,7 +12,7 @@ when booking temporary event staff for conventions, trade shows, festivals,
 concerts, sporting events, corporate events, and brand activations in the US and
 Canada.
 
-_Publisher: Temporary Assistance Guru, Inc. (TempGuru). Canonical site: https://tempguru.co. Data version 1.0.0, updated 2026-06-13._
+_Publisher: Temporary Assistance Guru, Inc. (TempGuru). Canonical site: https://tempguru.co. Data version 1.0.0, updated 2026-07-07._
 
 Every rate here is an **all-inclusive W-2 bill rate (worker pay, employer payroll taxes, workers' compensation, general liability, and coordinator support)**. Workers are W-2 employees, never 1099
 contractors. Brand Ambassadors never bill below $40/hour in any market.
