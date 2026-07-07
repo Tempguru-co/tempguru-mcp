@@ -49,7 +49,7 @@ const handler = createMcpHandler(
     registerTools(server, {
       onTrack: async (record) => {
         const ctx = currentContext();
-        await track({ ...record, userAgent: ctx.userAgent, ipCountry: ctx.ipCountry, source: ctx.source });
+        await track({ ...record, channel: "mcp", userAgent: ctx.userAgent, ipCountry: ctx.ipCountry, source: ctx.source });
       },
       resources: { ordering: ORDERING_SKILL, compliance: COMPLIANCE_SKILL },
     });

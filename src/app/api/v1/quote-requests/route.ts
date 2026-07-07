@@ -111,6 +111,7 @@ export async function POST(request: Request) {
     tool: "request_quote",
     status: result.success ? "success" : "error",
     city: input.city,
+    channel: "rest",
     userAgent,
     ipCountry,
     source: sourceTag,

@@ -219,6 +219,25 @@ if (!mcpJsonProto || !serverCardProto) {
   errors.push(`discovery docs still advertise the stale protocolVersion 2025-03-26 (live server negotiates a newer revision)`);
 }
 
+// The server identity must be one string everywhere a client can read it: the
+// two discovery docs and the runtime serverInfo (HTTP route + stdio binary).
+// (The MCP Registry namespace co.tempguru/event-staffing in server.json is a
+// separate, intentionally-different identifier and is not checked here.)
+const RUNTIME_NAME = "tempguru-mcp";
+const nameOf = (p, re) => (read(p).match(re) || [])[1];
+const nameChecks = [
+  ["src/app/.well-known/mcp.json/route.ts", /name:\s*"([^"]+)"/],
+  ["src/app/.well-known/mcp/server-card.json/route.ts", /serverInfo:\s*\{[\s\S]*?name:\s*"([^"]+)"/],
+  ["src/app/mcp/route.ts", /serverInfo:\s*\{\s*\n\s*name:\s*"([^"]+)"/],
+  ["src/mcp-stdio.ts", /new McpServer\(\{\s*\n\s*name:\s*"([^"]+)"/],
+];
+for (const [p, re] of nameChecks) {
+  const got = nameOf(p, re);
+  if (got !== RUNTIME_NAME) {
+    errors.push(`${p}: MCP server name "${got ?? "unreadable"}" != canonical "${RUNTIME_NAME}"`);
+  }
+}
+
 console.log(`Canonical: ${MARKET_COUNT} markets, ${ROLE_COUNT} roles, ${TOOLS.length} MCP tools, v${PKG_VERSION}.`);
 if (errors.length) {
   console.error(`\nSubmission drift detected (${errors.length}):`);

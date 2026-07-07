@@ -12,6 +12,7 @@ import {
   requireParam,
   optionsPreflight,
 } from "@/lib/api/responses";
+import { trackRest } from "@/lib/api/track-rest";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -27,6 +28,7 @@ export async function GET(request: Request) {
 
   const input: StateComplianceQuery = { state };
   const result = queryStateCompliance(input);
+  await trackRest(request, { tool: "get_compliance_by_state", status: result.ok ? "success" : "error", state });
   if (!result.ok) return jsonError(result.error);
 
   if (isComplianceNotFound(result.data)) {

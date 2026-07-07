@@ -15,6 +15,7 @@ import {
   optionalIntParam,
   optionsPreflight,
 } from "@/lib/api/responses";
+import { trackRest } from "@/lib/api/track-rest";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -32,6 +33,7 @@ export async function GET(request: Request) {
 
   const input: AvailabilityQuery = { city, date, role, headcount };
   const result = queryAvailability(input);
+  await trackRest(request, { tool: "check_availability", status: result.ok ? "success" : "error", city, role });
   if (!result.ok) return jsonError(result.error);
 
   // The query function returns successful payloads with shape variants for
