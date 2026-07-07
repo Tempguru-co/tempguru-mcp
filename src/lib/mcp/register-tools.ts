@@ -176,10 +176,11 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     {
       title: "Get Cities",
       description:
-        "List cities where TempGuru staffs events, with tier classification (hub/mid/small). Perfect for 'What cities do you cover in [state]?', 'Where can I book event staff?', or 'Do you cover [city]?' questions. " +
+        "List the cities where TempGuru staffs events (tier hub/mid/small), or check coverage of ONE city. Perfect for 'What cities do you cover in [state]?', 'Do you cover [city]?', or 'Which Canadian markets do you serve?'. " +
+        "For 'Do you cover [city]?' pass city='[name]' to get a direct yes/no + a did-you-mean, instead of scanning the whole list. " +
         "DO NOT use for rates (use get_role_pricing) or dates (use check_availability). For a full event plan, use plan_staffing instead. " +
-        "<examples>get_cities(state='TX') ; get_cities(tier='hub') ; get_cities()</examples> " +
-        "<hints>State accepts 'CA' or 'California'. US and Canada only, 345 markets total.</hints>",
+        "<examples>get_cities(city='Brooklyn') ; get_cities(state='TX') ; get_cities(tier='hub', country='CA') ; get_cities(limit=25)</examples> " +
+        "<hints>State accepts 'CA' or 'California'; country accepts US or CA. city='' resolves nicknames/boroughs (NYC, Vegas, Brooklyn). An unfiltered list is capped, use filters or limit. 345 markets total.</hints>",
       inputSchema: {
         state: z
           .string()
@@ -189,6 +190,20 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
           .enum(["hub", "mid", "small"])
           .optional()
           .describe("Optional filter to one tier only."),
+        country: z
+          .string()
+          .optional()
+          .describe("Optional country filter: 'US' or 'CA'."),
+        city: z
+          .string()
+          .optional()
+          .describe("Optional single-city coverage check (nickname/borough aware). Returns covered yes/no + suggestion."),
+        limit: z
+          .number()
+          .int()
+          .positive()
+          .optional()
+          .describe("Optional cap on the number of cities returned (full counts still in total/tier_breakdown)."),
       },
       outputSchema: GET_CITIES_OUTPUT,
       annotations: {
@@ -198,9 +213,9 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
         openWorldHint: false,
       },
     },
-    async ({ state, tier }) => {
-      const result = queryCities({ state, tier: tier as CityTier | undefined });
-      await track({ tool: "get_cities", status: result.ok ? "success" : "error", state });
+    async ({ state, tier, country, city, limit }) => {
+      const result = queryCities({ state, tier: tier as CityTier | undefined, country, city, limit });
+      await track({ tool: "get_cities", status: result.ok ? "success" : "error", state, city });
       if (!result.ok) return errorResult({ error: result.error.message });
       return structuredResult(result.data);
     },

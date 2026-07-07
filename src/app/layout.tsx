@@ -3,10 +3,12 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "TempGuru MCP Server",
+  title: "TempGuru MCP Server, W-2 Event Staffing Data for AI Agents",
   description:
-    "Model Context Protocol server for TempGuru event staffing data: seven read-only tools (plan_staffing planner, cities, roles, pricing, availability, state compliance, rate benchmark) plus an opt-in request_quote submission.",
-  robots: { index: false, follow: false },
+    "MCP server and REST API for TempGuru event staffing: all-inclusive W-2 hourly rates, role catalog, city coverage across 345 US/Canada markets, lead times, and state compliance, plus the Event Staffing Rate Index and an opt-in quote request.",
+  // Indexable: this subdomain is the natural ranking target for 'event staffing
+  // MCP' / 'TempGuru MCP' queries and passes crawlers to /okf/, llms.txt, and the
+  // OpenAPI spec. /admin sets its own noindex via src/app/admin/layout.tsx.
 };
 
 export default function RootLayout({

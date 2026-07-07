@@ -21,3 +21,19 @@ jobs:
         with:
           node-version: 22
       - run: node scripts/check-submissions.mjs
+
+  # Quality gate: typecheck + the MCP eval suite + the pure-logic unit tests.
+  # Previously none of these ran in CI, so a type error or a behavior regression
+  # (e.g. a tool/schema drift) could merge silently. Runs on the same triggers.
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run build:stdio
+      - run: npm run test:unit
+      - run: npm run evals

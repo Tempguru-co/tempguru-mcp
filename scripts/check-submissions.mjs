@@ -238,6 +238,57 @@ for (const [p, re] of nameChecks) {
   }
 }
 
+// ── generated knowledge-file / HF-dataset role-coverage drift ──────────────
+// distribution/assistants/knowledge/*.md (uploaded to the GPT/Poe/Coze) and the
+// HF dataset are generated from content/mcp-data but had no self-check, so they
+// silently served an 11-role catalog for weeks after roles.json grew to 19.
+// Assert every canonical role name appears in both, forcing a regenerate
+// (node distribution/assistants/build-knowledge.mjs && node distribution/toolbox/build-hf-dataset.mjs).
+{
+  const roleNames = JSON.parse(read("content/mcp-data/roles.json")).roles.map((r) => r.name);
+  const targets = [
+    "distribution/assistants/knowledge/tempguru-roles-and-rates.md",
+    "distribution/toolbox/huggingface/data/roles_and_rates.jsonl",
+  ];
+  for (const p of targets) {
+    let body;
+    try {
+      body = read(p);
+    } catch {
+      errors.push(`generated role file missing: ${p}`);
+      continue;
+    }
+    const missing = roleNames.filter((n) => !body.includes(n));
+    if (missing.length) {
+      errors.push(
+        `${p}: missing ${missing.length} role(s) from roles.json (${missing.slice(0, 3).join(", ")}${missing.length > 3 ? ", ..." : ""}); regenerate build-knowledge.mjs / build-hf-dataset.mjs`,
+      );
+    }
+  }
+}
+
+// ── state-compliance data freshness ───────────────────────────────────────
+// Minimum wages change every January (plus mid-year in AK/DC/OR/FL). Stale
+// compliance data presented as current is a liability for a compliance-brand
+// company, so fail if the dataset hasn't been re-verified in over 6 months.
+// Reset by re-checking values against state DOL sources and bumping _meta.updated.
+try {
+  const sc = JSON.parse(read("content/mcp-data/state-compliance.json"));
+  const updated = new Date(`${sc._meta.updated}T00:00:00Z`);
+  if (isNaN(updated.getTime())) {
+    errors.push("state-compliance.json _meta.updated is not a valid ISO date (YYYY-MM-DD)");
+  } else {
+    const ageMonths = (Date.now() - updated.getTime()) / (1000 * 60 * 60 * 24 * 30.44);
+    if (ageMonths > 6) {
+      errors.push(
+        `state-compliance.json is ${ageMonths.toFixed(1)} months stale (updated ${sc._meta.updated}); minimum wages change every January, re-verify against state DOL sources and bump _meta.updated.`,
+      );
+    }
+  }
+} catch (e) {
+  errors.push(`could not read state-compliance.json for freshness check: ${e.message}`);
+}
+
 console.log(`Canonical: ${MARKET_COUNT} markets, ${ROLE_COUNT} roles, ${TOOLS.length} MCP tools, v${PKG_VERSION}.`);
 if (errors.length) {
   console.error(`\nSubmission drift detected (${errors.length}):`);

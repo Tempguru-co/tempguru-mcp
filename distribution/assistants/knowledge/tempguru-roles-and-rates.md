@@ -32,6 +32,14 @@ after a quote request.
 | Crowd Control | 4 | 8h | $42-$50 | $50-$58 | $58-$68 |
 | Assistant Leads | 4 | 8h | $39-$47 | $47-$56 | $56-$67 |
 | Team Leads | 5 | 10h | $48-$58 | $58-$70 | $70-$85 |
+| Parking Attendants | 1 | 8h | $30-$36 | $36-$42 | $42-$48 |
+| Load Crew | 1 | 6h | $30-$36 | $36-$42 | $42-$48 |
+| Concessions Staff | 1 | 8h | $30-$36 | $36-$42 | $42-$48 |
+| Cleanup Crew | 1 | 6h | $30-$36 | $36-$42 | $42-$48 |
+| Merchandise Staff | 1 | 8h | $30-$36 | $36-$42 | $42-$48 |
+| Line Management | 1 | 8h | $30-$36 | $36-$42 | $42-$48 |
+| General Labor | 1 | 8h | $30-$36 | $36-$42 | $42-$48 |
+| Operations Support | 5 | 10h | $48-$58 | $58-$70 | $70-$85 |
 
 Floors are enforced: Brand Ambassadors never bill below $40/hour in any market.
 
@@ -90,6 +98,46 @@ Skill tier 4 of 5. Typical shift: 8 hours.
 ### Team Leads (`team-leads`)
 
 On-site crew supervision, client liaison, schedule management, and quality assurance. Accountable for crew performance.
+Skill tier 5 of 5. Typical shift: 10 hours.
+
+### Parking Attendants (`parking`)
+
+Vehicle direction, lot and structure management, valet-coordination support, and pedestrian flow at entrances.
+Skill tier 1 of 5. Typical shift: 8 hours.
+
+### Load Crew (`load-crew`)
+
+Load-in and load-out labor: trucks, freight, staging, equipment moves, and dock handling before and after events.
+Skill tier 1 of 5. Typical shift: 6 hours.
+
+### Concessions Staff (`concessions`)
+
+Concession-stand and point-of-sale service: food and beverage vending, cash and card handling, and restocking.
+Skill tier 1 of 5. Typical shift: 8 hours.
+
+### Cleanup Crew (`cleanup-crew`)
+
+Post-event cleaning and venue reset: waste removal, breakdown support, and turnaround between sessions.
+Skill tier 1 of 5. Typical shift: 6 hours.
+
+### Merchandise Staff (`merchandise`)
+
+Merchandise-booth sales and handling: point-of-sale, inventory, restocking, and fan transactions at concerts and tours.
+Skill tier 1 of 5. Typical shift: 8 hours.
+
+### Line Management (`line-management`)
+
+Queue and line management: organizing entry lines, wristband and ticket checks, and entry-flow control.
+Skill tier 1 of 5. Typical shift: 8 hours.
+
+### General Labor (`general-labor`)
+
+Flexible hands-on event support across setup, breakdown, staging, and on-site tasks as needed.
+Skill tier 1 of 5. Typical shift: 8 hours.
+
+### Operations Support (`ops-support`)
+
+On-site operational coordination: running the event comms/command center, monitoring radio traffic, logging incidents, dispatching runners, distributing shift briefings, and managing real-time staffing adjustments across zones.
 Skill tier 5 of 5. Typical shift: 10 hours.
 
 ## How do I budget event staffing costs?

@@ -45,24 +45,33 @@ const SUGGESTION = z
 
 // ─── get_cities ──────────────────────────────────────────────────────────
 
+const CITY_ROW = z.object({
+  slug: z.string(),
+  name: z.string(),
+  state: z.string(),
+  state_abbr: z.string(),
+  country: z.string().describe("US or CA."),
+  tier: CITY_TIER,
+  url: z.string().describe("City detail page on tempguru.co."),
+});
+
+// Two variants: a filtered LIST, or a single-city COVERAGE check (coverage_check:true).
 export const GET_CITIES_OUTPUT = {
-  total: z.number().int().describe("Number of cities matching the filter."),
-  tier_breakdown: z.object({
-    hub: z.number().int(),
-    mid: z.number().int(),
-    small: z.number().int(),
-  }),
-  cities: z.array(
-    z.object({
-      slug: z.string(),
-      name: z.string(),
-      state: z.string(),
-      state_abbr: z.string(),
-      country: z.string().describe("US or CA."),
-      tier: CITY_TIER,
-      url: z.string().describe("City detail page on tempguru.co."),
-    }),
-  ),
+  // list variant
+  total: z.number().int().optional().describe("Total cities matching the filter (before limit)."),
+  returned: z.number().int().optional().describe("Number of cities in the cities array (after limit)."),
+  tier_breakdown: z
+    .object({ hub: z.number().int(), mid: z.number().int(), small: z.number().int() })
+    .optional(),
+  cities: z.array(CITY_ROW).optional(),
+  note: z.string().optional().describe("Present when the list was truncated by limit."),
+  // coverage-check variant (city param)
+  coverage_check: z.literal(true).optional().describe("Present when a single-city coverage check was requested."),
+  covered: z.boolean().optional(),
+  requested: z.string().optional(),
+  suggestion: SUGGESTION,
+  city: CITY_ROW.nullable().optional().describe("The matched market (coverage check), or null if not covered."),
+  message: z.string().optional(),
 };
 
 // ─── get_roles ───────────────────────────────────────────────────────────
@@ -174,6 +183,10 @@ export const GET_COMPLIANCE_OUTPUT = {
   unique_rules: z.array(z.string()).optional(),
   liability_coverage_included: z.boolean().optional(),
   workers_comp_included: z.boolean().optional(),
+  min_wage_as_of: z.string().nullable().optional().describe("Effective date of this state's stored minimum wage."),
+  min_wage_source: z.string().nullable().optional().describe("Authoritative source URL for the minimum wage figure."),
+  data_current_as_of: z.string().optional().describe("Date the compliance dataset was last verified (YYYY-MM-DD)."),
+  currency_note: z.string().optional().describe("Reminder that wages change annually; verify before relying."),
   citation_note: z.string().optional().describe("Operational guidance, not legal advice."),
 };
 
