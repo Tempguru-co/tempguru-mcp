@@ -1,11 +1,12 @@
-// GET /api/v1/cities?state={name}&tier={hub|mid|small}
-// List cities TempGuru serves. Both query params optional.
+// GET /api/v1/cities?state={name}&tier={hub|mid|small}&country={US|CA}&city={name}&limit={n}
+// List cities TempGuru serves, or (with city=) a single coverage check. All optional.
 
 import { queryCities, type CitiesQuery, type CityTier } from "@/lib/mcp/queries";
 import {
   jsonOk,
   jsonError,
   optionalParam,
+  optionalIntParam,
   optionsPreflight,
 } from "@/lib/api/responses";
 import { trackRest } from "@/lib/api/track-rest";
@@ -15,6 +16,9 @@ const VALID_TIERS: CityTier[] = ["hub", "mid", "small"];
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const state = optionalParam(url, "state");
+  const country = optionalParam(url, "country");
+  const city = optionalParam(url, "city");
+  const limit = optionalIntParam(url, "limit");
   const tierRaw = optionalParam(url, "tier");
   const tier =
     tierRaw && (VALID_TIERS as string[]).includes(tierRaw)
@@ -23,9 +27,9 @@ export async function GET(request: Request) {
       ? (tierRaw as unknown as CityTier)
       : undefined;
 
-  const input: CitiesQuery = { state, tier };
+  const input: CitiesQuery = { state, tier, country, city, limit };
   const result = queryCities(input);
-  await trackRest(request, { tool: "get_cities", status: result.ok ? "success" : "error", state });
+  await trackRest(request, { tool: "get_cities", status: result.ok ? "success" : "error", state, city });
   if (!result.ok) return jsonError(result.error);
   return jsonOk(input, result.data);
 }

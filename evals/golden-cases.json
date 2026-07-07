@@ -163,6 +163,30 @@
     ]
   },
   {
+    "name": "get_cities single-city coverage check (borough resolves to parent metro)",
+    "tool": "get_cities",
+    "arguments": {
+      "city": "Brooklyn"
+    },
+    "expect": [
+      "coverage_check",
+      "covered",
+      "New York City"
+    ]
+  },
+  {
+    "name": "get_cities caps an unfiltered list with limit + note",
+    "tool": "get_cities",
+    "arguments": {
+      "limit": 5
+    },
+    "expect": [
+      "returned",
+      "note",
+      "tier_breakdown"
+    ]
+  },
+  {
     "name": "get_rate_benchmark returns the citable Rate Index",
     "tool": "get_rate_benchmark",
     "arguments": {

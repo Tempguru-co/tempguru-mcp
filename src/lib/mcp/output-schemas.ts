@@ -45,24 +45,33 @@ const SUGGESTION = z
 
 // ─── get_cities ──────────────────────────────────────────────────────────
 
+const CITY_ROW = z.object({
+  slug: z.string(),
+  name: z.string(),
+  state: z.string(),
+  state_abbr: z.string(),
+  country: z.string().describe("US or CA."),
+  tier: CITY_TIER,
+  url: z.string().describe("City detail page on tempguru.co."),
+});
+
+// Two variants: a filtered LIST, or a single-city COVERAGE check (coverage_check:true).
 export const GET_CITIES_OUTPUT = {
-  total: z.number().int().describe("Number of cities matching the filter."),
-  tier_breakdown: z.object({
-    hub: z.number().int(),
-    mid: z.number().int(),
-    small: z.number().int(),
-  }),
-  cities: z.array(
-    z.object({
-      slug: z.string(),
-      name: z.string(),
-      state: z.string(),
-      state_abbr: z.string(),
-      country: z.string().describe("US or CA."),
-      tier: CITY_TIER,
-      url: z.string().describe("City detail page on tempguru.co."),
-    }),
-  ),
+  // list variant
+  total: z.number().int().optional().describe("Total cities matching the filter (before limit)."),
+  returned: z.number().int().optional().describe("Number of cities in the cities array (after limit)."),
+  tier_breakdown: z
+    .object({ hub: z.number().int(), mid: z.number().int(), small: z.number().int() })
+    .optional(),
+  cities: z.array(CITY_ROW).optional(),
+  note: z.string().optional().describe("Present when the list was truncated by limit."),
+  // coverage-check variant (city param)
+  coverage_check: z.literal(true).optional().describe("Present when a single-city coverage check was requested."),
+  covered: z.boolean().optional(),
+  requested: z.string().optional(),
+  suggestion: SUGGESTION,
+  city: CITY_ROW.nullable().optional().describe("The matched market (coverage check), or null if not covered."),
+  message: z.string().optional(),
 };
 
 // ─── get_roles ───────────────────────────────────────────────────────────

@@ -82,23 +82,80 @@ export function recommendationLabel(daysUntilEvent: number, leadHours: number) {
 
 // ─── Cities ──────────────────────────────────────────────────────────────
 
-export type CitiesQuery = { state?: string; tier?: CityTier };
+export type CitiesQuery = {
+  state?: string;
+  tier?: CityTier;
+  country?: string;
+  limit?: number;
+  /** When set, answers a single "do you cover X?" coverage check instead of listing. */
+  city?: string;
+};
+
+type CityRow = {
+  slug: string;
+  name: string;
+  state: string;
+  state_abbr: string;
+  country: string;
+  tier: CityTier;
+  url: string;
+};
+
+const cityRow = (c: (typeof CITIES)[number]): CityRow => ({
+  slug: c.slug,
+  name: c.name,
+  state: c.state,
+  state_abbr: c.state_abbr,
+  country: c.country,
+  tier: c.tier,
+  url: `https://tempguru.co/insights/${c.slug}`,
+});
 
 export type CitiesData = {
   total: number;
+  returned: number;
   tier_breakdown: Record<CityTier, number>;
-  cities: Array<{
-    slug: string;
-    name: string;
-    state: string;
-    state_abbr: string;
-    country: string;
-    tier: CityTier;
-    url: string;
-  }>;
+  cities: CityRow[];
+  note?: string;
 };
 
-export function queryCities(input: CitiesQuery): QueryResult<CitiesData> {
+export type CityCoverage = {
+  coverage_check: true;
+  requested: string;
+  covered: boolean;
+  city: CityRow | null;
+  suggestion?: EntitySuggestion;
+  message: string;
+};
+
+export function queryCities(input: CitiesQuery): QueryResult<CitiesData | CityCoverage> {
+  // Single-city coverage check: "do you cover Brooklyn?" resolves through the
+  // alias/borough-aware findCity and returns a direct yes/no + did-you-mean,
+  // instead of dumping the whole catalog for the agent to scan.
+  if (input.city) {
+    const match = findCity(input.city);
+    if (match) {
+      return ok({
+        coverage_check: true,
+        requested: input.city,
+        covered: true,
+        city: cityRow(match),
+        message: `Yes, TempGuru staffs ${match.name}, ${match.state_abbr} (${match.tier}-tier market).`,
+      });
+    }
+    const suggestion = citySuggestion(input.city);
+    return ok({
+      coverage_check: true,
+      requested: input.city,
+      covered: false,
+      city: null,
+      suggestion,
+      message: suggestion
+        ? `No exact match for "${input.city}" in TempGuru's 345 US/CA markets. Closest covered market: ${suggestion.name}, confirm with the user before assuming. Coverage: https://tempguru.co/get-staffing.`
+        : `"${input.city}" is not in TempGuru's 345 US/CA markets. Confirm coverage at https://tempguru.co/get-staffing.`,
+    });
+  }
+
   let result = CITIES;
   if (input.tier) {
     if (input.tier !== "hub" && input.tier !== "mid" && input.tier !== "small") {
@@ -117,22 +174,33 @@ export function queryCities(input: CitiesQuery): QueryResult<CitiesData> {
       (c) => c.state_abbr === s || c.state.toLowerCase() === sLower,
     );
   }
+  if (input.country) {
+    const cc = input.country.trim().toUpperCase();
+    // Accept "US"/"USA"/"United States" and "CA"/"CAN"/"Canada".
+    const want = cc.startsWith("US") || cc.startsWith("UNITED") ? "US" : cc.startsWith("CA") || cc.startsWith("CAN") ? "CA" : cc;
+    result = result.filter((c) => c.country.toUpperCase() === want);
+  }
+
+  const total = result.length;
+  const tier_breakdown = {
+    hub: result.filter((c) => c.tier === "hub").length,
+    mid: result.filter((c) => c.tier === "mid").length,
+    small: result.filter((c) => c.tier === "small").length,
+  };
+  // Cap the returned array so an unfiltered call doesn't dump ~35KB (345 rows)
+  // into the model's context. The full counts are always in total/tier_breakdown.
+  const limit = input.limit && input.limit > 0 ? Math.min(input.limit, 1000) : total;
+  const capped = result.slice(0, limit);
   return ok({
-    total: result.length,
-    tier_breakdown: {
-      hub: result.filter((c) => c.tier === "hub").length,
-      mid: result.filter((c) => c.tier === "mid").length,
-      small: result.filter((c) => c.tier === "small").length,
-    },
-    cities: result.map((c) => ({
-      slug: c.slug,
-      name: c.name,
-      state: c.state,
-      state_abbr: c.state_abbr,
-      country: c.country,
-      tier: c.tier,
-      url: `https://tempguru.co/insights/${c.slug}`,
-    })),
+    total,
+    returned: capped.length,
+    tier_breakdown,
+    cities: capped.map(cityRow),
+    ...(capped.length < total
+      ? {
+          note: `Showing ${capped.length} of ${total} matching markets. Narrow with state/tier/country, pass city='<name>' for a single coverage check, or raise limit.`,
+        }
+      : {}),
   });
 }
 
