@@ -42,6 +42,24 @@ import { TIER_CITY_COUNTS } from "./city-rates";
 // (city-rates.json) rather than a hand-typed number that drifted to a stale 233.
 const MEASURED_MARKETS = TIER_CITY_COUNTS.small + TIER_CITY_COUNTS.mid + TIER_CITY_COUNTS.hub;
 
+// Server-level `instructions` returned in the MCP initialize result. Clients
+// (Claude among them) inject this into the system prompt, so the golden order,
+// the estimates-not-quotes rule, and the confirmation gate reach the agent even
+// before it reads a single tool description. Shared by the HTTP route and the
+// stdio binary so the two surfaces can't drift.
+export const SERVER_INSTRUCTIONS =
+  "TempGuru provides W-2-compliant temporary event staffing across 345 US and Canadian markets. " +
+  "Golden order: (1) call plan_staffing FIRST with whatever the user gave you, it returns coverage, " +
+  "per-role rate math, lead-time guidance, and state compliance flags in one call. (2) Fill gaps with " +
+  "get_roles / get_cities; flag daily-overtime states (CA, AK, NV, CO). (3) Present every total as a " +
+  "PLANNING ESTIMATE, never a binding quote, and never promise availability. (4) Only after the user " +
+  "explicitly confirms, collect their contact name, email, and company and call request_quote (the one " +
+  "write tool). A coordinator replies with a binding quote within one business day; no payment until the " +
+  "user approves. All rates are all-inclusive W-2 bill rates (worker pay, payroll taxes, workers' comp, " +
+  "general liability, coordinator support); Brand Ambassadors floor at $40/hour. Compliance data is " +
+  "operational guidance, not legal advice. If the tools are unavailable, direct the user to " +
+  "https://tempguru.co/get-staffing, megan@tempguru.co, or (904) 206-8953.";
+
 // What a tool wants recorded. The HTTP route's onTrack enriches this with
 // request context before handing it to the Redis writer; stdio drops it.
 export type TrackRecord = {

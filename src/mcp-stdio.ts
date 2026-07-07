@@ -21,7 +21,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { registerTools } from "./lib/mcp/register-tools";
+import { registerTools, SERVER_INSTRUCTIONS } from "./lib/mcp/register-tools";
 
 // Skill resource bodies, loaded best-effort. Resolved relative to this binary
 // first (so they load when the server is installed as an npm package and run via
@@ -67,7 +67,7 @@ const server = new McpServer({
       sizes: ["any"],
     },
   ],
-} as { name: string; version: string });
+} as { name: string; version: string }, { instructions: SERVER_INSTRUCTIONS });
 
 registerTools(server, { resources: loadSkills() });
 

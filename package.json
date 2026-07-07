@@ -1,6 +1,6 @@
 {
   "name": "tempguru-mcp",
-  "version": "1.2.0",
+  "version": "1.4.0",
   "private": true,
   "description": "TempGuru MCP server: plan_staffing planner, six read-only event-staffing lookups incl. the Rate Index benchmark, plus an opt-in request_quote submission, for AI agents across 345 US/CA markets.",
   "scripts": {
@@ -12,7 +12,8 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "evals": "node evals/run-evals.mjs",
-    "build:okf": "node scripts/dump-openapi.mjs && node scripts/build-okf.mjs",
+    "test:unit": "node evals/unit.test.mjs",
+    "build:okf": "node scripts/gen-skill-digests.mjs && node scripts/dump-openapi.mjs && node scripts/build-okf.mjs",
     "build:worker": "node scripts/build-edge-worker.mjs",
     "sync-rates": "node scripts/sync-rates.mjs",
     "check-rates": "node scripts/sync-rates.mjs --check",

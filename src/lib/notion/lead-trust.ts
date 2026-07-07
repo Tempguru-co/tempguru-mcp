@@ -94,18 +94,39 @@ function resolveMxSafe(domain: string): Promise<boolean | null> {
   ]);
 }
 
-// Pull a best-effort START date out of a free-text range like
-// "January 6-9, 2026" / "Aug 14-15, 2026" / "June 15–17 2026".
-function parseEventStart(s: string): Date | null {
+// Pull a best-effort START date out of an event-dates string. Handles the ISO
+// and US-numeric forms FIRST (plan_staffing's own schema recommends ISO
+// YYYY-MM-DD), then the free-text month-name form ("January 6-9, 2026" /
+// "Aug 14-15, 2026" / "June 15-17 2026"). Returns null when no month can be
+// identified, rather than silently defaulting to January, which previously made
+// every ISO date ("2026-08-14") parse as Jan 8 and trip the past-event flag.
+// Exported for unit testing.
+export function parseEventStart(s: string): Date | null {
+  // ISO: 2026-08-14 or 2026/08/14
+  const iso = s.match(/\b(20[2-9]\d)[-/](\d{1,2})[-/](\d{1,2})\b/);
+  if (iso) {
+    const mi = Number(iso[2]) - 1;
+    const day = Number(iso[3]);
+    if (mi >= 0 && mi <= 11 && day >= 1 && day <= 31) return new Date(Date.UTC(Number(iso[1]), mi, day));
+  }
+  // US numeric: 8/14/2026 or 8-14-2026 (month first, year last)
+  const us = s.match(/\b(\d{1,2})[-/](\d{1,2})[-/](20[2-9]\d)\b/);
+  if (us) {
+    const mi = Number(us[1]) - 1;
+    const day = Number(us[2]);
+    if (mi >= 0 && mi <= 11 && day >= 1 && day <= 31) return new Date(Date.UTC(Number(us[3]), mi, day));
+  }
+  // Free-text month-name form.
   const years = [...s.matchAll(/\b(20[2-9]\d)\b/g)].map((m) => Number(m[1]));
   if (!years.length) return null;
   const year = Math.max(...years);
   const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
   const lower = s.toLowerCase();
-  let monthIdx = 0;
+  let monthIdx = -1;
   for (let i = 0; i < 12; i++) {
     if (lower.includes(months[i])) { monthIdx = i; break; }
   }
+  if (monthIdx < 0) return null; // no month token -> unparseable (soft flag), not January
   let day = 1;
   const dm = lower.replace(/20[2-9]\d/g, " ").match(/\b([0-3]?\d)\b/);
   if (dm) { const d = Number(dm[1]); if (d >= 1 && d <= 31) day = d; }
