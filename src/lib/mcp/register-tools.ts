@@ -410,6 +410,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
       const ctx = currentContext();
       const result = await createLead({
         ...input,
+        channel: "mcp",
         source: { userAgent: ctx.userAgent, ipCountry: ctx.ipCountry },
       });
       await track({ tool: "request_quote", status: result.success ? "success" : "error", city: input.city });
@@ -418,7 +419,9 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
         return structuredResult(quoteFailedPayload(result.error));
       }
 
-      return structuredResult(quoteSubmittedPayload(input.contact_email, result.deal_name));
+      return structuredResult(
+        quoteSubmittedPayload(input.contact_email, result.deal_name, result.reference, result.captured),
+      );
     },
   );
 

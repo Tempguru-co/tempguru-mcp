@@ -26,7 +26,7 @@ from the server.
 | `check_availability` | read | Check expected staffing availability for an event. |
 | `get_role_pricing` | read | Get the all-inclusive hourly rate range for a specific role in a specific city. |
 | `get_compliance_by_state` | read | Get the event staffing compliance summary for a US state. |
-| `get_rate_benchmark` | read | The TempGuru Event Staffing Rate Index: all-inclusive W-2 hourly bill rates by role from 233 measured US/Canada markets, as a typical rate plus the full national range (brand ambassadors shown by market tier), with methodology and a ready-to-use citation line. |
+| `get_rate_benchmark` | read | Get Rate Benchmark (Rate Index) |
 | `request_quote` | write | Submit a staffing request to TempGuru. |
 
 ## Golden order

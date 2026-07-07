@@ -323,8 +323,9 @@ export const RATE_BENCHMARK_OUTPUT = {
 export const REQUEST_QUOTE_OUTPUT = {
   submitted: z
     .boolean()
-    .describe("true = lead created in TempGuru's CRM; false = submission failed (see error)."),
+    .describe("true = lead created in TempGuru's CRM (or durably queued); false = submission failed (see error)."),
   deal_name: z.string().optional().describe("CRM deal name, present when submitted."),
+  reference: z.string().optional().describe("Short reference code the buyer can quote when following up."),
   message: z.string().describe("Human-readable outcome to relay to the user."),
   next_steps: z.array(z.string()).optional().describe("Present when submitted."),
   error: z.string().optional().describe("Present when submission failed."),
