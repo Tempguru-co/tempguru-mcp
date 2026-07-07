@@ -106,11 +106,12 @@ export async function POST(request: Request) {
       ? ((body as Record<string, unknown>).source as string)
       : "";
   const sourceTag = request.headers.get("x-tempguru-source") ?? rawBodySource;
-  const result = await createLead({ ...input, source: { userAgent, ipCountry } });
+  const result = await createLead({ ...input, channel: "rest", source: { userAgent, ipCountry } });
   await track({
     tool: "request_quote",
     status: result.success ? "success" : "error",
     city: input.city,
+    channel: "rest",
     userAgent,
     ipCountry,
     source: sourceTag,
@@ -122,7 +123,9 @@ export async function POST(request: Request) {
     return jsonWrite(quoteFailedPayload(result.error), 502);
   }
 
-  return jsonWrite(quoteSubmittedPayload(input.contact_email, result.deal_name));
+  return jsonWrite(
+    quoteSubmittedPayload(input.contact_email, result.deal_name, result.reference, result.captured),
+  );
 }
 
 export async function OPTIONS() {

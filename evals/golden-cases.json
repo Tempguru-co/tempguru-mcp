@@ -71,7 +71,8 @@
     },
     "expect": [
       "daily overtime",
-      "OT"
+      "OT",
+      "overtime_adjusted_total_range"
     ]
   },
   {
@@ -169,6 +170,84 @@
       "citation",
       "by_tier_usd",
       "55-65"
+    ]
+  },
+  {
+    "name": "plan_staffing: valid city + unmatched role returns roles_not_found (not city_not_found)",
+    "tool": "plan_staffing",
+    "arguments": {
+      "city": "Chicago",
+      "roles": [
+        {
+          "role": "sword swallowers",
+          "headcount": 3
+        }
+      ]
+    },
+    "expect": [
+      "roles_not_found",
+      "Chicago",
+      "available_roles"
+    ]
+  },
+  {
+    "name": "plan_staffing: alias city (NYC) + role synonym (security) resolve, structured output emitted",
+    "tool": "plan_staffing",
+    "arguments": {
+      "city": "NYC",
+      "roles": [
+        {
+          "role": "security",
+          "headcount": 5
+        }
+      ]
+    },
+    "expect": [
+      "New York City",
+      "Crowd Control",
+      "plan_lines",
+      "structuredContent"
+    ]
+  },
+  {
+    "name": "plan_staffing: misspelled city is NOT auto-resolved; returns city_not_found + did-you-mean",
+    "tool": "plan_staffing",
+    "arguments": {
+      "city": "Chicagoo",
+      "roles": [
+        {
+          "role": "brand-ambassadors",
+          "headcount": 2
+        }
+      ]
+    },
+    "expect": [
+      "city_not_found",
+      "suggestion",
+      "Chicago"
+    ]
+  },
+  {
+    "name": "get_rate_benchmark: unknown role returns role_found:false, not Event Staff rates",
+    "tool": "get_rate_benchmark",
+    "arguments": {
+      "role": "wizard"
+    },
+    "expect": [
+      "role_found",
+      "available_roles"
+    ]
+  },
+  {
+    "name": "get_rate_benchmark tier filter adds the measured tier span (tier_usd)",
+    "tool": "get_rate_benchmark",
+    "arguments": {
+      "tier": "hub"
+    },
+    "expect": [
+      "requested_tier",
+      "tier_usd",
+      "Rate Index"
     ]
   }
 ]

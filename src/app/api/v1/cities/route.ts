@@ -8,6 +8,7 @@ import {
   optionalParam,
   optionsPreflight,
 } from "@/lib/api/responses";
+import { trackRest } from "@/lib/api/track-rest";
 
 const VALID_TIERS: CityTier[] = ["hub", "mid", "small"];
 
@@ -24,6 +25,7 @@ export async function GET(request: Request) {
 
   const input: CitiesQuery = { state, tier };
   const result = queryCities(input);
+  await trackRest(request, { tool: "get_cities", status: result.ok ? "success" : "error", state });
   if (!result.ok) return jsonError(result.error);
   return jsonOk(input, result.data);
 }

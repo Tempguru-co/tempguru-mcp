@@ -14,6 +14,7 @@ import {
   requireParam,
   optionsPreflight,
 } from "@/lib/api/responses";
+import { trackRest } from "@/lib/api/track-rest";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -29,6 +30,7 @@ export async function GET(request: Request) {
 
   const input: RolePricingQuery = { role, city };
   const result = queryRolePricing(input);
+  await trackRest(request, { tool: "get_role_pricing", status: result.ok ? "success" : "error", role, city });
   if (!result.ok) return jsonError(result.error);
 
   if (isPricingRoleNotFound(result.data)) {

@@ -16,7 +16,9 @@ const SERVER_CARD = {
   $comment:
     "MCP Server Card per SEP-1649 (schema in standardization at modelcontextprotocol PR #2127). Update if the final schema diverges.",
   serverInfo: {
-    name: "tempguru-event-staffing",
+    // Matches serverInfo.name from the live initialize + the npm package id
+    // (check:submissions gates this against mcp.json and the runtime).
+    name: "tempguru-mcp",
     title: "TempGuru Event Staffing",
     version: pkg.version,
     description:
@@ -27,7 +29,9 @@ const SERVER_CARD = {
     type: "streamable-http",
     url: "https://mcp.tempguru.co/mcp",
   },
-  protocolVersion: "2025-03-26",
+  // Matches the version the live server actually negotiates on initialize.
+  // Keep in sync with /.well-known/mcp.json (check:submissions gates this).
+  protocolVersion: "2025-06-18",
   capabilities: {
     tools: {},
     resources: {},

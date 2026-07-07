@@ -76,42 +76,337 @@ export const STATE_META = stateData._meta as {
   citation_note: string;
 };
 
-// ─── Lookups ──────────────────────────────────────────────────────────────
+// ─── Fuzzy + normalization helpers ──────────────────────────────────────────
+//
+// Real agent inputs are messy: "NYC", "Vegas", "Washington DC", "Austin TX",
+// "brand ambassador" (singular), "security", "Cincinatti" (typo). The resolver
+// below folds punctuation/case, expands common nicknames and role synonyms,
+// parses a trailing "ST"/state, and falls back to a bounded edit-distance match,
+// so the funnel's first query ("brand ambassadors in New York") resolves instead
+// of returning not-found. Nearest-match is deliberately conservative (only a
+// unique match within edit distance 2 auto-resolves); looser suggestions are
+// surfaced separately via suggestCity/suggestRole for a did-you-mean.
+
+/** Bounded Levenshtein: returns cap+1 as soon as it is certain the true
+ *  distance exceeds cap, so a full O(mn) fill is avoided for far-apart strings. */
+function levenshtein(a: string, b: string, cap: number): number {
+  const m = a.length;
+  const n = b.length;
+  if (Math.abs(m - n) > cap) return cap + 1;
+  let prev = Array.from({ length: n + 1 }, (_, j) => j);
+  for (let i = 1; i <= m; i++) {
+    const cur = [i];
+    let rowMin = i;
+    for (let j = 1; j <= n; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost);
+      if (cur[j] < rowMin) rowMin = cur[j];
+    }
+    if (rowMin > cap) return cap + 1;
+    prev = cur;
+  }
+  return prev[n];
+}
+
+/** Nearest key by edit distance, with a uniqueness flag (false when >1 key ties
+ *  at the minimum distance, so callers can refuse an ambiguous auto-correction). */
+function nearestKey(
+  keys: string[],
+  q: string,
+  cap = 4,
+): { key: string; dist: number; unique: boolean } | null {
+  let best = cap + 1;
+  let bestKey = "";
+  for (const k of keys) {
+    const d = levenshtein(q, k, best);
+    if (d < best) {
+      best = d;
+      bestKey = k;
+    }
+  }
+  if (!bestKey || best > cap) return null;
+  let ties = 0;
+  for (const k of keys) if (levenshtein(q, k, best) <= best) ties++;
+  return { key: bestKey, dist: best, unique: ties === 1 };
+}
+
+/** Fold a city string to a comparison key: lowercase, punctuation stripped,
+ *  saint/mount/fort expanded to st/mt/ft, whitespace collapsed. Applied to both
+ *  the user input and the canonical names so "St. Louis", "Saint Louis", and
+ *  "st louis" all collide on the same key. */
+function normCity(s: string): string {
+  return s
+    .trim()
+    .toLowerCase()
+    .replace(/\./g, "")
+    .replace(/\bsaint\b/g, "st")
+    .replace(/\bmount\b/g, "mt")
+    .replace(/\bfort\b/g, "ft")
+    .replace(/[^a-z0-9 ]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function normRole(s: string): string {
+  return s
+    .trim()
+    .toLowerCase()
+    .replace(/[_-]+/g, " ")
+    .replace(/[^a-z0-9 ]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+// ─── City lookups ───────────────────────────────────────────────────────────
 
 const CITY_BY_SLUG = new Map(CITIES.map((c) => [c.slug.toLowerCase(), c]));
-const CITY_BY_NAME = new Map(CITIES.map((c) => [c.name.toLowerCase(), c]));
 
-const ROLE_BY_SLUG = new Map(ROLES.map((r) => [r.slug.toLowerCase(), r]));
-const ROLE_BY_NAME = new Map(ROLES.map((r) => [r.name.toLowerCase(), r]));
+// Grouped by normalized name because some names collide across states
+// (Portland OR/ME, Kansas City MO/KS, Springfield MA/MO). First-in-data wins for
+// a bare name; a supplied state disambiguates via CITY_BY_NORM_STATE.
+const CITY_BY_NORM = new Map<string, City[]>();
+const CITY_BY_NORM_STATE = new Map<string, City>();
+for (const c of CITIES) {
+  const key = normCity(c.name);
+  (CITY_BY_NORM.get(key) ?? CITY_BY_NORM.set(key, []).get(key)!).push(c);
+  const nsKey = `${key}|${c.state_abbr.toUpperCase()}`;
+  if (!CITY_BY_NORM_STATE.has(nsKey)) CITY_BY_NORM_STATE.set(nsKey, c);
+}
 
-/** Find a city by slug, name, or "name, state" patterns. Returns null if not found. */
-export function findCity(query: string): City | null {
-  if (!query) return null;
-  const q = query.trim().toLowerCase();
-  // Try slug exact match
-  const bySlug = CITY_BY_SLUG.get(q);
-  if (bySlug) return bySlug;
-  // Try slug with -event-staffing suffix
-  const bySlugWithSuffix = CITY_BY_SLUG.get(`${q}-event-staffing`);
-  if (bySlugWithSuffix) return bySlugWithSuffix;
-  // Try city name only
-  const byName = CITY_BY_NAME.get(q);
-  if (byName) return byName;
-  // Try "name, state" or "name state", take everything before the first comma or last space
-  const commaIdx = q.indexOf(",");
-  if (commaIdx > 0) {
-    const cityPart = q.slice(0, commaIdx).trim();
-    const byPart = CITY_BY_NAME.get(cityPart);
-    if (byPart) return byPart;
+const KNOWN_STATE_ABBRS = new Set<string>(CITIES.map((c) => c.state_abbr.toUpperCase()));
+const STATE_NAME_TO_ABBR = new Map<string, string>(
+  CITIES.map((c) => [c.state.toLowerCase(), c.state_abbr.toUpperCase()]),
+);
+
+// Nicknames / metros → a canonical city name. Boroughs and near-in suburbs route
+// to their parent market (TempGuru staffs the metro, not the sub-municipality).
+// Unresolvable targets are dropped at build so a data change can't ship a dead alias.
+const RAW_CITY_ALIASES: Record<string, string> = {
+  nyc: "New York City",
+  "new york": "New York City",
+  manhattan: "New York City",
+  brooklyn: "New York City",
+  queens: "New York City",
+  bronx: "New York City",
+  "the bronx": "New York City",
+  "big apple": "New York City",
+  vegas: "Las Vegas",
+  la: "Los Angeles",
+  "l a": "Los Angeles",
+  sf: "San Francisco",
+  "san fran": "San Francisco",
+  frisco: "San Francisco",
+  philly: "Philadelphia",
+  dc: "Washington D.C.",
+  washington: "Washington D.C.",
+  "washington dc": "Washington D.C.",
+  nola: "New Orleans",
+  "big easy": "New Orleans",
+  "chi town": "Chicago",
+  atl: "Atlanta",
+  mississauga: "Toronto",
+  gta: "Toronto",
+};
+const CITY_ALIAS = new Map<string, City>();
+for (const [alias, canonical] of Object.entries(RAW_CITY_ALIASES)) {
+  const arr = CITY_BY_NORM.get(normCity(canonical));
+  if (arr && arr.length) CITY_ALIAS.set(normCity(alias), arr[0]);
+}
+
+function resolveStateToken(tok: string): string | null {
+  const t = tok.trim().replace(/\./g, "");
+  if (t.length === 2 && KNOWN_STATE_ABBRS.has(t.toUpperCase())) return t.toUpperCase();
+  return STATE_NAME_TO_ABBR.get(t.toLowerCase()) ?? null;
+}
+
+/** Peel a trailing state off "City, ST" / "City, State" / "City ST" / "City State".
+ *  Returns null when no state-like trailer is present. */
+function stripTrailingState(raw: string): { city: string; abbr: string | null } | null {
+  if (raw.includes(",")) {
+    const idx = raw.indexOf(",");
+    return { city: raw.slice(0, idx).trim(), abbr: resolveStateToken(raw.slice(idx + 1)) };
+  }
+  const toks = raw.split(" ");
+  if (toks.length >= 2) {
+    const last = toks[toks.length - 1].replace(/\./g, "");
+    if (last.length === 2 && KNOWN_STATE_ABBRS.has(last.toUpperCase())) {
+      return { city: toks.slice(0, -1).join(" "), abbr: last.toUpperCase() };
+    }
+    for (let take = Math.min(3, toks.length - 1); take >= 1; take--) {
+      const abbr = STATE_NAME_TO_ABBR.get(toks.slice(toks.length - take).join(" "));
+      if (abbr) return { city: toks.slice(0, toks.length - take).join(" "), abbr };
+    }
   }
   return null;
 }
 
-/** Find a role by slug or name. Returns null if not found. */
+// A close typo of a covered city ("Chcago") is a real, DIFFERENT city just as
+// often as it is a misspelling ("Dover" is edit-distance 2 from "Denver",
+// "Gary" is 1 from "Cary"). So resolution here is DETERMINISTIC only, exact
+// slug / nickname / name / "City, ST". Typos never auto-resolve, they fall to
+// null and the caller surfaces suggestCity() as a did-you-mean for the user to
+// confirm, so the tool can never silently price/plan the wrong market.
+export function findCity(query: string): City | null {
+  if (!query) return null;
+  const raw = query.trim().toLowerCase().replace(/\s+/g, " ");
+  // 1. slug (raw and with the -event-staffing suffix the site pages use)
+  const bySlug = CITY_BY_SLUG.get(raw) ?? CITY_BY_SLUG.get(`${raw}-event-staffing`);
+  if (bySlug) return bySlug;
+  const nq = normCity(query);
+  if (!nq) return null;
+  // 2. nickname / borough
+  const alias = CITY_ALIAS.get(nq);
+  if (alias) return alias;
+  // 3. exact normalized name (bare collision names resolve to the first-in-data
+  //    entry, but note the -event-staffing slug in step 1 wins for some names).
+  const byName = CITY_BY_NORM.get(nq);
+  if (byName && byName.length) return byName[0];
+  // 4. "City ST" / "City, State".
+  const parsed = stripTrailingState(raw);
+  if (parsed) {
+    const cityN = normCity(parsed.city);
+    if (parsed.abbr) {
+      // An explicit state was given. Only accept a covered city of that name in
+      // THAT state (or a nickname whose city sits in that state). Do NOT fall
+      // through to a same-named city in a different state, that would silently
+      // discard the state the user typed ("Springfield, IL" -> Springfield, MA).
+      const byNS = CITY_BY_NORM_STATE.get(`${cityN}|${parsed.abbr}`);
+      if (byNS) return byNS;
+      const aliasS = CITY_ALIAS.get(cityN);
+      if (aliasS && aliasS.state_abbr.toUpperCase() === parsed.abbr) return aliasS;
+      return null;
+    }
+    const aliasC = CITY_ALIAS.get(cityN);
+    if (aliasC) return aliasC;
+    const arr = CITY_BY_NORM.get(cityN);
+    if (arr && arr.length) return arr[0];
+  }
+  return null;
+}
+
+// Did-you-mean for a genuine miss. Gated on a LENGTH-RELATIVE distance so a
+// short query can't match a far, unrelated market (flat caps let "Bozeman"
+// suggest "Norman"); the caller presents it for confirmation, never auto-uses it.
+function suggestKey(keys: string[], nq: string): string | null {
+  if (nq.length < 4) return null; // too short to suggest safely
+  const near = nearestKey(keys, nq, 4);
+  if (!near) return null;
+  const maxDist = Math.max(1, Math.floor(nq.length / 4));
+  return near.dist <= maxDist ? near.key : null;
+}
+
+export function suggestCity(query: string): City | null {
+  const nq = normCity(query);
+  if (!nq) return null;
+  const key = suggestKey([...CITY_BY_NORM.keys()], nq);
+  if (!key) return null;
+  const arr = CITY_BY_NORM.get(key);
+  return arr && arr.length ? arr[0] : null;
+}
+
+// ─── Role lookups ───────────────────────────────────────────────────────────
+
+const ROLE_BY_NORM = new Map<string, Role>();
+for (const r of ROLES) {
+  ROLE_BY_NORM.set(normRole(r.slug), r);
+  ROLE_BY_NORM.set(normRole(r.name), r);
+}
+
+// Synonyms the resolver should accept for a real role slug. Kept deliberately
+// conditional on the target existing so a role-catalog change can't ship a dead
+// synonym. "event staff"/"staff" default to registration-staff, the canonical
+// general event worker, so a generic ask resolves instead of dead-ending.
+const RAW_ROLE_SYNONYMS: Record<string, string> = {
+  security: "crowd-control",
+  "security staff": "crowd-control",
+  "security guard": "crowd-control",
+  guard: "crowd-control",
+  bouncer: "crowd-control",
+  "crowd management": "crowd-control",
+  greeter: "guest-services",
+  greeters: "guest-services",
+  "check in": "registration-staff",
+  checkin: "registration-staff",
+  "check in staff": "registration-staff",
+  registration: "registration-staff",
+  "registration desk": "registration-staff",
+  "badge pickup": "registration-staff",
+  "promo model": "brand-ambassadors",
+  "promo models": "brand-ambassadors",
+  "promotional model": "brand-ambassadors",
+  "promotional models": "brand-ambassadors",
+  "brand rep": "brand-ambassadors",
+  "brand reps": "brand-ambassadors",
+  "brand ambassador": "brand-ambassadors",
+  usher: "ushers",
+  supervisor: "team-leads",
+  supervisors: "team-leads",
+  "team lead": "team-leads",
+  lead: "team-leads",
+  leads: "team-leads",
+  "assistant lead": "assistant-leads",
+  hospitality: "hospitality-staff",
+  hostess: "hospitality-staff",
+  host: "hospitality-staff",
+  setup: "setup-breakdown",
+  "set up": "setup-breakdown",
+  breakdown: "setup-breakdown",
+  teardown: "setup-breakdown",
+  "load in": "setup-breakdown",
+  booth: "booth-monitors",
+  "booth staff": "booth-monitors",
+  "booth monitor": "booth-monitors",
+  gate: "gate-staff",
+  "ticket taker": "gate-staff",
+  "parking attendant": "parking",
+  valet: "parking",
+  concession: "concessions",
+  "concession staff": "concessions",
+  merch: "merchandise",
+  "merch staff": "merchandise",
+  cleanup: "cleanup-crew",
+  "clean up": "cleanup-crew",
+  janitorial: "cleanup-crew",
+  loader: "load-crew",
+  "line control": "line-management",
+  laborer: "general-labor",
+  "general laborer": "general-labor",
+  "event staff": "registration-staff",
+  "event staffing": "registration-staff",
+  "event worker": "registration-staff",
+  "event workers": "registration-staff",
+  "event crew": "registration-staff",
+  staff: "registration-staff",
+  "operations support": "ops-support",
+};
+const ROLE_SYNONYM = new Map<string, Role>();
+for (const [k, slug] of Object.entries(RAW_ROLE_SYNONYMS)) {
+  const r = ROLE_BY_NORM.get(normRole(slug));
+  if (r) ROLE_SYNONYM.set(normRole(k), r);
+}
+
+// Deterministic (exact / synonym / singular-plural) only, same principle as
+// findCity: a typo never silently resolves to a possibly-wrong role. Misses
+// fall to null and the caller offers suggestRole() plus the full catalog.
 export function findRole(query: string): Role | null {
   if (!query) return null;
-  const q = query.trim().toLowerCase();
-  return ROLE_BY_SLUG.get(q) ?? ROLE_BY_NAME.get(q) ?? null;
+  const nq = normRole(query);
+  if (!nq) return null;
+  const direct = ROLE_BY_NORM.get(nq) ?? ROLE_SYNONYM.get(nq);
+  if (direct) return direct;
+  // singular <-> plural
+  const alt = nq.endsWith("s") ? nq.slice(0, -1) : `${nq}s`;
+  const byAlt = ROLE_BY_NORM.get(alt) ?? ROLE_SYNONYM.get(alt);
+  if (byAlt) return byAlt;
+  return null;
+}
+
+/** Did-you-mean role for a genuine miss, length-relative gate (see suggestKey). */
+export function suggestRole(query: string): Role | null {
+  const nq = normRole(query);
+  if (!nq) return null;
+  const key = suggestKey([...ROLE_BY_NORM.keys()], nq);
+  return key ? ROLE_BY_NORM.get(key) ?? null : null;
 }
 
 /** Look up state compliance by 2-letter abbreviation OR full state name. */

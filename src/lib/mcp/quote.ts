@@ -23,6 +23,7 @@ import { z } from "zod";
 export const REQUEST_QUOTE_INPUT = {
   contact_name: z.string().trim().min(1).describe("Full name of the contact person"),
   contact_email: z.string().trim().email().describe("Contact email address for the quote response"),
+  contact_phone: z.string().trim().optional().describe("Optional phone number for the coordinator to reach the buyer (event ops is phone-first; include when known)"),
   company: z.string().trim().min(1).describe("Company or organization name"),
   event_name: z.string().trim().min(1).describe("Name of the event (e.g. 'HIMSS 2026', 'Brand Fest Austin')"),
   event_type: z.string().trim().min(1).describe("Event type: trade-show, conference, festival, concert, sporting-event, corporate, brand-activation, or other"),
@@ -51,13 +52,25 @@ export type RequestQuoteInput = z.infer<typeof RequestQuoteSchema>;
 // The exact objects both surfaces return. The REST route serializes them
 // directly; the MCP tool wraps them in a text content block.
 
-export function quoteSubmittedPayload(contactEmail: string, dealName: string) {
+export function quoteSubmittedPayload(
+  contactEmail: string,
+  dealName: string,
+  reference: string,
+  captured: "notion" | "queued" = "notion",
+) {
+  const receiptNote =
+    captured === "queued"
+      ? "Your request is captured and queued; a coordinator will follow up within one business day."
+      : "A coordinator will review the details and respond with a quote within one business day.";
   return {
     submitted: true as const,
     deal_name: dealName,
+    reference,
     message:
-      "Your staffing request has been submitted to TempGuru. A coordinator will review the details and respond with a quote within one business day. Orders are confirmed within 48 hours of approval. Contact megan@tempguru.co or (904) 206-8953 for urgent requests.",
+      `Your staffing request has been submitted to TempGuru (reference ${reference}). ${receiptNote} ` +
+      "Orders are confirmed within 48 hours of approval. Contact megan@tempguru.co or (904) 206-8953 for urgent requests.",
     next_steps: [
+      "Save your reference: " + reference,
       "Watch for a quote email at " + contactEmail,
       "TempGuru may follow up to confirm shift details or attire",
       "No payment or commitment is required until you approve the quote",

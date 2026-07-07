@@ -37,6 +37,10 @@ export interface TrackInput {
   city?: string;
   role?: string;
   state?: string;
+  // Which surface served the call: the MCP tool endpoint or the REST mirror.
+  // Lets the dashboard split MCP vs REST volume (REST read routes were invisible
+  // before). Defaults to "mcp" when unset.
+  channel?: "mcp" | "rest";
   // Attribution tag set by a surface we control (X-TempGuru-Source header or
   // ?source= param). Empty/undefined for organic/unattributed traffic.
   source?: string;
@@ -84,10 +88,13 @@ export async function track(input: TrackInput): Promise<void> {
 
   // Build the ring-buffer payload before entering the async context so it is
   // already serialised when the Promise.allSettled batch fires.
+  const channel = input.channel === "rest" ? "rest" : "mcp";
+
   const event = JSON.stringify({
     ts: new Date().toISOString(),
     tool: input.tool,
     ua,
+    channel,
     country: input.ipCountry || null,
     status: input.status,
     // Recent feed shows reality: canonical slug when matched, slugified raw
@@ -113,6 +120,7 @@ export async function track(input: TrackInput): Promise<void> {
         ? r.hincrby(`ua:unclassified:${date}`, rawUnclassified, 1)
         : Promise.resolve(),
       r.hincrby(`status:${date}`, input.status, 1),
+      r.hincrby(`channels:${date}`, channel, 1),
       input.ipCountry
         ? r.hincrby(`countries:${date}`, input.ipCountry.toUpperCase(), 1)
         : Promise.resolve(),
@@ -132,6 +140,7 @@ export async function track(input: TrackInput): Promise<void> {
       r.expire(`uas:${date}`, TTL_SECONDS),
       rawUnclassified ? r.expire(`ua:unclassified:${date}`, TTL_SECONDS) : Promise.resolve(),
       r.expire(`status:${date}`, TTL_SECONDS),
+      r.expire(`channels:${date}`, TTL_SECONDS),
       r.expire(`countries:${date}`, TTL_SECONDS),
       sourceTag ? r.expire(`sources:${date}`, TTL_SECONDS) : Promise.resolve(),
       r.expire(`queries:cities:${date}`, TTL_SECONDS),

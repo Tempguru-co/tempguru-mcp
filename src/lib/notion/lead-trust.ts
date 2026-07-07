@@ -94,18 +94,50 @@ function resolveMxSafe(domain: string): Promise<boolean | null> {
   ]);
 }
 
-// Pull a best-effort START date out of a free-text range like
-// "January 6-9, 2026" / "Aug 14-15, 2026" / "June 15–17 2026".
-function parseEventStart(s: string): Date | null {
+// Pull a best-effort START date out of an event-dates string. Handles the ISO
+// and US-numeric forms FIRST (plan_staffing's own schema recommends ISO
+// YYYY-MM-DD), then the free-text month-name form ("January 6-9, 2026" /
+// "Aug 14-15, 2026" / "June 15-17 2026"). Returns null when no month can be
+// identified, rather than silently defaulting to January, which previously made
+// every ISO date ("2026-08-14") parse as Jan 8 and trip the past-event flag.
+// Exported for unit testing.
+const MONTH_INDEX: Record<string, number> = {
+  january: 0, jan: 0, february: 1, feb: 1, march: 2, mar: 2, april: 3, apr: 3,
+  may: 4, june: 5, jun: 5, july: 6, jul: 6, august: 7, aug: 7,
+  september: 8, sept: 8, sep: 8, october: 9, oct: 9, november: 10, nov: 10, december: 11, dec: 11,
+};
+// Full names before abbreviations so "september" matches whole; \b...\b so a
+// month token is never matched inside an ordinary word ("May" but not
+// "Mayflower", "Mar" but not "marketing").
+const MONTH_RE =
+  /\b(january|february|march|april|june|july|august|september|october|november|december|jan|feb|mar|apr|may|jun|jul|aug|sept|sep|oct|nov|dec)\b/;
+
+export function parseEventStart(s: string): Date | null {
+  // Numeric dates first. Collect ALL ISO (2026-08-14, allowing a trailing time)
+  // and US (8/14/2026) matches and take the LATEST plausible one, so a leading
+  // "Setup 2026-01-05, event 2026-08-14" resolves to the event, not the setup.
+  const utc: number[] = [];
+  for (const m of s.matchAll(/\b(20[2-9]\d)[-/](\d{1,2})[-/](\d{1,2})(?!\d)/g)) {
+    const mi = Number(m[2]) - 1;
+    const day = Number(m[3]);
+    if (mi >= 0 && mi <= 11 && day >= 1 && day <= 31) utc.push(Date.UTC(Number(m[1]), mi, day));
+  }
+  for (const m of s.matchAll(/\b(\d{1,2})[-/](\d{1,2})[-/](20[2-9]\d)\b/g)) {
+    const mi = Number(m[1]) - 1;
+    const day = Number(m[2]);
+    if (mi >= 0 && mi <= 11 && day >= 1 && day <= 31) utc.push(Date.UTC(Number(m[3]), mi, day));
+  }
+  if (utc.length) return new Date(Math.max(...utc));
+
+  // Free-text month-name form. First month token in TEXT order (not calendar
+  // order), whole-word, so "June 2026 marketing expo" is June, not March.
   const years = [...s.matchAll(/\b(20[2-9]\d)\b/g)].map((m) => Number(m[1]));
   if (!years.length) return null;
-  const year = Math.max(...years);
-  const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
   const lower = s.toLowerCase();
-  let monthIdx = 0;
-  for (let i = 0; i < 12; i++) {
-    if (lower.includes(months[i])) { monthIdx = i; break; }
-  }
+  const mMatch = lower.match(MONTH_RE);
+  if (!mMatch) return null; // no month token -> unparseable (soft flag), not January
+  const monthIdx = MONTH_INDEX[mMatch[1]];
+  const year = Math.max(...years);
   let day = 1;
   const dm = lower.replace(/20[2-9]\d/g, " ").match(/\b([0-3]?\d)\b/);
   if (dm) { const d = Number(dm[1]); if (d >= 1 && d <= 31) day = d; }

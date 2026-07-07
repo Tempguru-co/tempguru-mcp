@@ -626,6 +626,11 @@ export function buildOpenApiSpec() {
               description: "Contact email address for the quote response.",
               example: "jordan@acmeevents.com",
             },
+            contact_phone: {
+              type: "string",
+              description: "Optional phone number for the coordinator to reach the buyer (event ops is phone-first).",
+              example: "+1-904-206-8953",
+            },
             company: {
               type: "string",
               minLength: 1,

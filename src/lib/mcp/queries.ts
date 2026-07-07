@@ -17,6 +17,8 @@ import {
   findCity,
   findRole,
   findState,
+  suggestCity,
+  suggestRole,
   type Role,
   type CityTier,
   type PriceBand,
@@ -48,6 +50,19 @@ export type QueryResult<T> =
 
 const ok = <T>(data: T): QueryResult<T> => ({ ok: true, data });
 const fail = (error: QueryError): QueryResult<never> => ({ ok: false, error });
+
+// A did-you-mean handed back on a miss so the agent can auto-retry with the
+// resolved slug instead of relaying "not covered". Populated from the same
+// fuzzy layer findCity/findRole use, at a looser threshold.
+export type EntitySuggestion = { kind: "city" | "role"; slug: string; name: string };
+const citySuggestion = (q: string): EntitySuggestion | undefined => {
+  const c = suggestCity(q);
+  return c ? { kind: "city", slug: c.slug, name: c.name } : undefined;
+};
+const roleSuggestion = (q: string): EntitySuggestion | undefined => {
+  const r = suggestRole(q);
+  return r ? { kind: "role", slug: r.slug, name: r.name } : undefined;
+};
 
 // ─── Shared availability heuristics ──────────────────────────────────────
 
@@ -150,6 +165,7 @@ export type AvailabilityQuery = {
 export type AvailabilityCityNotFound = {
   city_found: false;
   requested: string;
+  suggestion?: EntitySuggestion;
   message: string;
 };
 
@@ -197,10 +213,14 @@ export function queryAvailability(
 
   const cityMatch = findCity(input.city);
   if (!cityMatch) {
+    const suggestion = citySuggestion(input.city);
     return ok({
       city_found: false,
       requested: input.city,
-      message: `TempGuru does not have a dedicated city page for "${input.city}". We serve 345 markets, contact us at https://tempguru.co/get-staffing for coverage confirmation.`,
+      suggestion,
+      message: suggestion
+        ? `No exact match for "${input.city}" among TempGuru's 345 US/CA markets. The closest covered market is ${suggestion.name}, confirm with the user before using it (do not assume). Coverage: https://tempguru.co/get-staffing.`
+        : `No match for "${input.city}" among TempGuru's 345 US/CA markets. Confirm coverage at https://tempguru.co/get-staffing.`,
     });
   }
 
@@ -259,12 +279,14 @@ export type RolePricingQuery = { role: string; city: string };
 export type RolePricingRoleNotFound = {
   role_found: false;
   requested: string;
+  suggestion?: EntitySuggestion;
   available_roles: Array<{ slug: string; name: string }>;
 };
 
 export type RolePricingCityNotFound = {
   city_found: false;
   requested: string;
+  suggestion?: EntitySuggestion;
   role: string;
   fallback_pricing: RolePricing;
   note: string;
@@ -304,6 +326,7 @@ export function queryRolePricing(
     return ok({
       role_found: false,
       requested: input.role,
+      suggestion: roleSuggestion(input.role),
       available_roles: ROLES.map((r) => ({ slug: r.slug, name: r.name })),
     });
   }
@@ -312,9 +335,10 @@ export function queryRolePricing(
     return ok({
       city_found: false,
       requested: input.city,
+      suggestion: citySuggestion(input.city),
       role: roleMatch.name,
       fallback_pricing: PRICING[roleMatch.slug],
-      note: "City not in TempGuru's 345-page footprint. Showing pricing across all tiers as fallback.",
+      note: "City not in TempGuru's 345-market footprint. Showing pricing across all tiers as fallback.",
     });
   }
   // Published per-role rate card (role-pricing.json): a distinct rate per role,

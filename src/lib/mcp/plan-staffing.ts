@@ -7,8 +7,9 @@
 // plan is always consistent with what get_role_pricing / check_availability /
 // get_compliance_by_state would return one call at a time.
 //
-// Read-only. Returns variant shapes (plan | needs_roles | city_not_found), so the
-// tool registration deliberately omits outputSchema and returns text content.
+// Read-only. Returns variant shapes discriminated by `status`
+// (plan | needs_roles | roles_not_found | city_not_found); the tool declares
+// PLAN_STAFFING_OUTPUT so clients still get structuredContent.
 
 import {
   queryRoles,
@@ -18,7 +19,9 @@ import {
   isAvailabilityCityNotFound,
   isAvailabilityDateInvalid,
   type RolePricingData,
+  type EntitySuggestion,
 } from "./queries";
+import { findCity, suggestCity, suggestRole } from "./data";
 
 export type PlanRoleInput = {
   role: string;
@@ -36,9 +39,11 @@ export type PlanStaffingInput = {
   description?: string;
 };
 
+// Neutral, factual fallback. Deliberately no cross-platform (ChatGPT GPT)
+// steering in tool output; platform-specific fallbacks live in the docs/skills.
 const FALLBACK_LADDER = [
   "If the user confirms this plan, call request_quote with their contact details (name, email, company) plus the event and roles below.",
-  "If request_quote is unavailable or fails: ChatGPT users can use the TempGuru Event Staffing Planner GPT at https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner; otherwise send the user to https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=mcp-planner, or megan@tempguru.co / (904) 206-8953.",
+  "If request_quote is unavailable or fails, direct the user to https://tempguru.co/get-staffing, megan@tempguru.co, or (904) 206-8953.",
 ];
 
 function isPricing(d: unknown): d is RolePricingData {
@@ -61,23 +66,52 @@ export function buildStaffingPlan(input: PlanStaffingInput) {
     };
   }
 
-  // Price each role line; the pricing query also resolves the city for us.
+  // Resolve the city up front and independently of the roles. This is the fix
+  // for the flagship bug: previously cityMeta was only ever set from a
+  // successful priced role line, so a valid city with unmatched role phrasing
+  // (e.g. "brand ambassador" singular in Chicago) reported status:city_not_found
+  // and told the agent the city wasn't covered. City resolution and role
+  // resolution are now separate, with distinct statuses.
+  const city = findCity(input.city);
+  if (!city) {
+    const sug = suggestCity(input.city);
+    return {
+      status: "city_not_found" as const,
+      requested_city: input.city,
+      suggestion: sug
+        ? ({ kind: "city", slug: sug.slug, name: sug.name } as EntitySuggestion)
+        : undefined,
+      message: sug
+        ? `TempGuru has no exact match for "${input.city}" among its 345 US/CA markets. The closest covered market is ${sug.name}, confirm with the user that they mean ${sug.name} before planning it (do not assume), or check get_cities.`
+        : `TempGuru has no match for "${input.city}" among its 345 US/CA markets (US and Canada only). Check spelling, ask the user for the nearest major city, or confirm coverage with get_cities.`,
+      next_steps: FALLBACK_LADDER,
+    };
+  }
+  const cityMeta = {
+    city: city.name,
+    state: city.state,
+    tier: city.tier as string,
+    currency: city.country === "CA" ? ("CAD" as const) : ("USD" as const),
+  };
+
+  // Price each resolved role line; collect unresolved role phrasings with a
+  // did-you-mean so the agent can retry without re-listing the whole catalog.
   const lines = [];
-  let cityMeta: { city: string; state: string; tier: string; currency: string } | null = null;
-  const unresolved: string[] = [];
+  const unresolved: Array<{ role: string; suggestion?: EntitySuggestion }> = [];
 
   for (const r of input.roles) {
     const hours = r.hours_per_shift && r.hours_per_shift > 0 ? r.hours_per_shift : 8;
     const days = r.days && r.days > 0 ? r.days : 1;
     const priced = queryRolePricing({ role: r.role, city: input.city });
     if (!priced.ok || !isPricing(priced.data)) {
-      unresolved.push(r.role);
+      const sr = suggestRole(r.role);
+      unresolved.push({
+        role: r.role,
+        suggestion: sr ? { kind: "role", slug: sr.slug, name: sr.name } : undefined,
+      });
       continue;
     }
     const d = priced.data;
-    if (!cityMeta) {
-      cityMeta = { city: d.city, state: d.state, tier: d.city_tier, currency: d.currency };
-    }
     const workerHours = r.headcount * hours * days;
     lines.push({
       role: d.role,
@@ -93,13 +127,17 @@ export function buildStaffingPlan(input: PlanStaffingInput) {
     });
   }
 
-  if (!cityMeta) {
+  // City is valid but NOT ONE role resolved. Distinct from city_not_found:
+  // report coverage + the catalog + per-role suggestions so the agent recovers.
+  if (lines.length === 0) {
+    const roles = queryRoles();
     return {
-      status: "city_not_found" as const,
-      requested_city: input.city,
+      status: "roles_not_found" as const,
+      event: { city: cityMeta.city, state: cityMeta.state, market_tier: cityMeta.tier },
+      requested_roles: input.roles.map((r) => r.role),
       unresolved_roles: unresolved,
-      message:
-        "Could not resolve this city (or any requested role) against TempGuru's 345-market catalog. Check spelling, try the nearest major city, or confirm coverage with get_cities. TempGuru serves the US and Canada only.",
+      available_roles: roles.ok ? roles.data : null,
+      message: `${cityMeta.city} is covered, but none of the requested roles matched TempGuru's catalog. Pick roles from the list below (or use each unresolved role's suggestion) and call plan_staffing again.`,
       next_steps: FALLBACK_LADDER,
     };
   }
@@ -122,8 +160,11 @@ export function buildStaffingPlan(input: PlanStaffingInput) {
     );
   }
   if (unresolved.length > 0) {
+    const parts = unresolved.map((u) =>
+      u.suggestion ? `${u.role} (did you mean ${u.suggestion.name}?)` : u.role,
+    );
     staffingNotes.push(
-      `Roles not matched to the catalog (check get_roles for exact names): ${unresolved.join(", ")}.`,
+      `Roles not matched to the catalog (check get_roles for exact names): ${parts.join(", ")}.`,
     );
   }
 
@@ -143,6 +184,12 @@ export function buildStaffingPlan(input: PlanStaffingInput) {
 
   // The compliance flags that actually change an event plan.
   let compliance = null;
+  let overtime: {
+    low: number;
+    high: number;
+    currency: "USD" | "CAD";
+    note: string;
+  } | null = null;
   const comp = queryStateCompliance({ state: cityMeta.state });
   if (comp.ok && "state_abbr" in comp.data) {
     compliance = {
@@ -153,11 +200,56 @@ export function buildStaffingPlan(input: PlanStaffingInput) {
       unique_rules: comp.data.unique_rules,
       note: "All TempGuru placements are W-2 with workers comp and general liability included. General information, not legal advice.",
     };
-    const perDay = Math.max(...lines.map((l) => l.hours_per_shift));
-    if (comp.data.overtime_threshold_daily_hours && perDay > comp.data.overtime_threshold_daily_hours) {
-      staffingNotes.push(
-        `${comp.data.state} has daily overtime at ${comp.data.overtime_threshold_daily_hours}h, shifts of ${perDay}h will accrue OT. Budget accordingly or split shifts.`,
-      );
+    const dailyThreshold = comp.data.overtime_threshold_daily_hours; // null in most states
+    const weeklyThreshold = comp.data.overtime_threshold_weekly_hours; // usually 40
+
+    // Compute an overtime-ADJUSTED total. Straight-time (estimated_total_range)
+    // understates the eventual quote wherever daily or weekly OT applies, which
+    // is exactly the states plan_staffing flags. Per worker, take the GREATER of
+    // daily and weekly OT hours (CA-style, so the two don't double-count), bill
+    // OT hours at 1.5x. If no line triggers OT, overtime stays null.
+    let otLow = 0;
+    let otHigh = 0;
+    let triggered = false;
+    for (const l of lines) {
+      const perWorkerHours = l.hours_per_shift * l.days;
+      const dailyOtPerWorker = dailyThreshold
+        ? l.days * Math.max(0, l.hours_per_shift - dailyThreshold)
+        : 0;
+      // Weekly OT applies PER WORKWEEK, not across the whole engagement, so a
+      // 14-day run is two 40h weeks, not one 112h week. Assume consecutive days
+      // (the model has no calendar): full 7-day weeks plus a remainder.
+      const fullWeeks = Math.floor(l.days / 7);
+      const remDays = l.days % 7;
+      const weeklyOtPerWorker =
+        fullWeeks * Math.max(0, 7 * l.hours_per_shift - weeklyThreshold) +
+        Math.max(0, remDays * l.hours_per_shift - weeklyThreshold);
+      const otHoursPerWorker = Math.max(dailyOtPerWorker, weeklyOtPerWorker);
+      if (otHoursPerWorker > 0) triggered = true;
+      const regularHoursPerWorker = perWorkerHours - otHoursPerWorker;
+      const regWorker = l.headcount * regularHoursPerWorker;
+      const otWorker = l.headcount * otHoursPerWorker;
+      otLow += regWorker * l.hourly_range.low + otWorker * l.hourly_range.low * 1.5;
+      otHigh += regWorker * l.hourly_range.high + otWorker * l.hourly_range.high * 1.5;
+    }
+    if (triggered) {
+      overtime = {
+        low: Math.round(otLow),
+        high: Math.round(otHigh),
+        currency: cityMeta.currency,
+        note: `${comp.data.state} overtime applies to this schedule (daily > ${dailyThreshold ?? "n/a"}h or weekly > ${weeklyThreshold}h). This range bills the overtime hours at 1.5x; the straight-time range above does not.`,
+      };
+      const daily = comp.data.overtime_threshold_daily_hours;
+      const perDay = Math.max(...lines.map((l) => l.hours_per_shift));
+      if (daily && perDay > daily) {
+        staffingNotes.push(
+          `${comp.data.state} has daily overtime at ${daily}h, shifts of ${perDay}h will accrue OT. See overtime_adjusted_total_range or split shifts.`,
+        );
+      } else {
+        staffingNotes.push(
+          `This multi-day schedule crosses ${comp.data.state}'s ${weeklyThreshold}h weekly overtime threshold per worker. See overtime_adjusted_total_range or add staff to shorten shifts.`,
+        );
+      }
     }
   }
 
@@ -176,8 +268,9 @@ export function buildStaffingPlan(input: PlanStaffingInput) {
     estimated_total_range: {
       ...totals,
       currency: cityMeta.currency,
-      basis: "All-inclusive W-2 bill rates: worker pay, payroll taxes, workers comp, general liability, coordinator support. Planning estimate, not a binding quote.",
+      basis: "All-inclusive W-2 bill rates: worker pay, payroll taxes, workers comp, general liability, coordinator support. Straight-time planning estimate, not a binding quote.",
     },
+    overtime_adjusted_total_range: overtime,
     lead_time: leadTime,
     compliance,
     staffing_notes: staffingNotes,

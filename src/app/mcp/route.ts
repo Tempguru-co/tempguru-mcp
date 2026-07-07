@@ -21,7 +21,7 @@ import { createMcpHandler } from "mcp-handler";
 import pkg from "../../../package.json";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { registerTools } from "@/lib/mcp/register-tools";
+import { registerTools, SERVER_INSTRUCTIONS } from "@/lib/mcp/register-tools";
 import { runWithContext, currentContext } from "@/lib/telemetry/context";
 import { track } from "@/lib/telemetry/track";
 
@@ -49,7 +49,7 @@ const handler = createMcpHandler(
     registerTools(server, {
       onTrack: async (record) => {
         const ctx = currentContext();
-        await track({ ...record, userAgent: ctx.userAgent, ipCountry: ctx.ipCountry, source: ctx.source });
+        await track({ ...record, channel: "mcp", userAgent: ctx.userAgent, ipCountry: ctx.ipCountry, source: ctx.source });
       },
       resources: { ordering: ORDERING_SKILL, compliance: COMPLIANCE_SKILL },
     });
@@ -81,6 +81,10 @@ const handler = createMcpHandler(
         },
       ],
     } as { name: string; version: string },
+    // Returned in the initialize result; clients (Claude) inject it into the
+    // system prompt, so the golden order + estimates-not-quotes rule reach the
+    // agent before it reads any tool description. Shared with the stdio binary.
+    instructions: SERVER_INSTRUCTIONS,
   },
   {
     // Endpoint at /mcp (default streamableHttpEndpoint with empty basePath)
