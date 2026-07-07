@@ -27,7 +27,9 @@ const SERVER_CARD = {
     type: "streamable-http",
     url: "https://mcp.tempguru.co/mcp",
   },
-  protocolVersion: "2025-03-26",
+  // Matches the version the live server actually negotiates on initialize.
+  // Keep in sync with /.well-known/mcp.json (check:submissions gates this).
+  protocolVersion: "2025-06-18",
   capabilities: {
     tools: {},
     resources: {},

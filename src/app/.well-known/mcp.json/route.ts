@@ -20,7 +20,9 @@ const MCP_DISCOVERY = {
         "MCP server for TempGuru event staffing data: city coverage (345 US/Canada markets), staffing roles, lead-time guidance, all-inclusive W-2 rate ranges, and state-by-state compliance rules, plus a plan_staffing planner, a get_rate_benchmark Rate Index, and an opt-in request_quote submission tool. Ships tools, skill resources, and guided prompts.",
       endpoint: "https://mcp.tempguru.co/mcp",
       transport: "streamable-http",
-      protocolVersion: "2025-03-26",
+      // Matches the version the live server actually negotiates on initialize.
+      // Keep in sync with the server card (check:submissions gates this).
+      protocolVersion: "2025-06-18",
       authentication: { type: "none" },
       documentation: "https://tempguru.co/ai",
       serverCard: "https://mcp.tempguru.co/.well-known/mcp/server-card.json",

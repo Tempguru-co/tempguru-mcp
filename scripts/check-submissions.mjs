@@ -202,6 +202,23 @@ if (existsSync(join(root, "public/.well-known/agent-skills/index.json"))) {
   errors.push("public/.well-known/agent-skills/index.json is a stale shadow of the route; delete it (the App Router route is canonical)");
 }
 
+// ── MCP discovery-doc protocol consistency ────────────────────────────────
+// The mcp.json server-discovery doc and the SEP-1649 server card must advertise
+// the same protocolVersion, and never the stale 2025-03-26 the live server
+// stopped negotiating (a client that pre-negotiates the advertised version off a
+// doc would otherwise handshake an old protocol). Both routes are embedded
+// verbatim into the apex worker, so they must agree.
+const protoOf = (p) => (read(p).match(/protocolVersion:\s*"([^"]+)"/) || [])[1];
+const mcpJsonProto = protoOf("src/app/.well-known/mcp.json/route.ts");
+const serverCardProto = protoOf("src/app/.well-known/mcp/server-card.json/route.ts");
+if (!mcpJsonProto || !serverCardProto) {
+  errors.push("could not read protocolVersion from mcp.json and/or server-card route");
+} else if (mcpJsonProto !== serverCardProto) {
+  errors.push(`mcp.json protocolVersion "${mcpJsonProto}" != server-card "${serverCardProto}"`);
+} else if (mcpJsonProto === "2025-03-26") {
+  errors.push(`discovery docs still advertise the stale protocolVersion 2025-03-26 (live server negotiates a newer revision)`);
+}
+
 console.log(`Canonical: ${MARKET_COUNT} markets, ${ROLE_COUNT} roles, ${TOOLS.length} MCP tools, v${PKG_VERSION}.`);
 if (errors.length) {
   console.error(`\nSubmission drift detected (${errors.length}):`);
