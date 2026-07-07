@@ -238,6 +238,35 @@ for (const [p, re] of nameChecks) {
   }
 }
 
+// ── generated knowledge-file / HF-dataset role-coverage drift ──────────────
+// distribution/assistants/knowledge/*.md (uploaded to the GPT/Poe/Coze) and the
+// HF dataset are generated from content/mcp-data but had no self-check, so they
+// silently served an 11-role catalog for weeks after roles.json grew to 19.
+// Assert every canonical role name appears in both, forcing a regenerate
+// (node distribution/assistants/build-knowledge.mjs && node distribution/toolbox/build-hf-dataset.mjs).
+{
+  const roleNames = JSON.parse(read("content/mcp-data/roles.json")).roles.map((r) => r.name);
+  const targets = [
+    "distribution/assistants/knowledge/tempguru-roles-and-rates.md",
+    "distribution/toolbox/huggingface/data/roles_and_rates.jsonl",
+  ];
+  for (const p of targets) {
+    let body;
+    try {
+      body = read(p);
+    } catch {
+      errors.push(`generated role file missing: ${p}`);
+      continue;
+    }
+    const missing = roleNames.filter((n) => !body.includes(n));
+    if (missing.length) {
+      errors.push(
+        `${p}: missing ${missing.length} role(s) from roles.json (${missing.slice(0, 3).join(", ")}${missing.length > 3 ? ", ..." : ""}); regenerate build-knowledge.mjs / build-hf-dataset.mjs`,
+      );
+    }
+  }
+}
+
 // ── state-compliance data freshness ───────────────────────────────────────
 // Minimum wages change every January (plus mid-year in AK/DC/OR/FL). Stale
 // compliance data presented as current is a liability for a compliance-brand
