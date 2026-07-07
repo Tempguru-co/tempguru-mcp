@@ -240,8 +240,12 @@ function stripTrailingState(raw: string): { city: string; abbr: string | null } 
   return null;
 }
 
-/** Resolve a city from slug, nickname, name, "City ST", or a close typo.
- *  Returns null only when nothing plausibly matches. */
+// A close typo of a covered city ("Chcago") is a real, DIFFERENT city just as
+// often as it is a misspelling ("Dover" is edit-distance 2 from "Denver",
+// "Gary" is 1 from "Cary"). So resolution here is DETERMINISTIC only, exact
+// slug / nickname / name / "City, ST". Typos never auto-resolve, they fall to
+// null and the caller surfaces suggestCity() as a did-you-mean for the user to
+// confirm, so the tool can never silently price/plan the wrong market.
 export function findCity(query: string): City | null {
   if (!query) return null;
   const raw = query.trim().toLowerCase().replace(/\s+/g, " ");
@@ -253,38 +257,50 @@ export function findCity(query: string): City | null {
   // 2. nickname / borough
   const alias = CITY_ALIAS.get(nq);
   if (alias) return alias;
-  // 3. exact normalized name
+  // 3. exact normalized name (bare collision names resolve to the first-in-data
+  //    entry, but note the -event-staffing slug in step 1 wins for some names).
   const byName = CITY_BY_NORM.get(nq);
   if (byName && byName.length) return byName[0];
-  // 4. "City ST" / "City, State" — state disambiguates collisions
+  // 4. "City ST" / "City, State".
   const parsed = stripTrailingState(raw);
   if (parsed) {
     const cityN = normCity(parsed.city);
     if (parsed.abbr) {
+      // An explicit state was given. Only accept a covered city of that name in
+      // THAT state (or a nickname whose city sits in that state). Do NOT fall
+      // through to a same-named city in a different state, that would silently
+      // discard the state the user typed ("Springfield, IL" -> Springfield, MA).
       const byNS = CITY_BY_NORM_STATE.get(`${cityN}|${parsed.abbr}`);
       if (byNS) return byNS;
+      const aliasS = CITY_ALIAS.get(cityN);
+      if (aliasS && aliasS.state_abbr.toUpperCase() === parsed.abbr) return aliasS;
+      return null;
     }
     const aliasC = CITY_ALIAS.get(cityN);
     if (aliasC) return aliasC;
     const arr = CITY_BY_NORM.get(cityN);
     if (arr && arr.length) return arr[0];
   }
-  // 5. bounded typo correction (unique, within edit distance 2)
-  const near = nearestKey([...CITY_BY_NORM.keys()], nq, 2);
-  if (near && near.unique) {
-    const arr = CITY_BY_NORM.get(near.key);
-    if (arr && arr.length) return arr[0];
-  }
   return null;
 }
 
-/** A best-effort did-you-mean city for a miss (looser than findCity's auto-match). */
+// Did-you-mean for a genuine miss. Gated on a LENGTH-RELATIVE distance so a
+// short query can't match a far, unrelated market (flat caps let "Bozeman"
+// suggest "Norman"); the caller presents it for confirmation, never auto-uses it.
+function suggestKey(keys: string[], nq: string): string | null {
+  if (nq.length < 4) return null; // too short to suggest safely
+  const near = nearestKey(keys, nq, 4);
+  if (!near) return null;
+  const maxDist = Math.max(1, Math.floor(nq.length / 4));
+  return near.dist <= maxDist ? near.key : null;
+}
+
 export function suggestCity(query: string): City | null {
   const nq = normCity(query);
   if (!nq) return null;
-  const near = nearestKey([...CITY_BY_NORM.keys()], nq, 5);
-  if (!near) return null;
-  const arr = CITY_BY_NORM.get(near.key);
+  const key = suggestKey([...CITY_BY_NORM.keys()], nq);
+  if (!key) return null;
+  const arr = CITY_BY_NORM.get(key);
   return arr && arr.length ? arr[0] : null;
 }
 
@@ -369,7 +385,9 @@ for (const [k, slug] of Object.entries(RAW_ROLE_SYNONYMS)) {
   if (r) ROLE_SYNONYM.set(normRole(k), r);
 }
 
-/** Resolve a role from slug, name, synonym, singular/plural, or a close typo. */
+// Deterministic (exact / synonym / singular-plural) only, same principle as
+// findCity: a typo never silently resolves to a possibly-wrong role. Misses
+// fall to null and the caller offers suggestRole() plus the full catalog.
 export function findRole(query: string): Role | null {
   if (!query) return null;
   const nq = normRole(query);
@@ -380,18 +398,15 @@ export function findRole(query: string): Role | null {
   const alt = nq.endsWith("s") ? nq.slice(0, -1) : `${nq}s`;
   const byAlt = ROLE_BY_NORM.get(alt) ?? ROLE_SYNONYM.get(alt);
   if (byAlt) return byAlt;
-  // bounded typo correction (unique, within edit distance 2)
-  const near = nearestKey([...ROLE_BY_NORM.keys()], nq, 2);
-  if (near && near.unique) return ROLE_BY_NORM.get(near.key) ?? null;
   return null;
 }
 
-/** A best-effort did-you-mean role for a miss (looser than findRole's auto-match). */
+/** Did-you-mean role for a genuine miss, length-relative gate (see suggestKey). */
 export function suggestRole(query: string): Role | null {
   const nq = normRole(query);
   if (!nq) return null;
-  const near = nearestKey([...ROLE_BY_NORM.keys()], nq, 6);
-  return near ? ROLE_BY_NORM.get(near.key) ?? null : null;
+  const key = suggestKey([...ROLE_BY_NORM.keys()], nq);
+  return key ? ROLE_BY_NORM.get(key) ?? null : null;
 }
 
 /** Look up state compliance by 2-letter abbreviation OR full state name. */

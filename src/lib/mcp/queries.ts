@@ -219,7 +219,7 @@ export function queryAvailability(
       requested: input.city,
       suggestion,
       message: suggestion
-        ? `No exact match for "${input.city}" among TempGuru's 345 US/CA markets. Did you mean ${suggestion.name}? Retry with that, or confirm coverage at https://tempguru.co/get-staffing.`
+        ? `No exact match for "${input.city}" among TempGuru's 345 US/CA markets. The closest covered market is ${suggestion.name}, confirm with the user before using it (do not assume). Coverage: https://tempguru.co/get-staffing.`
         : `No match for "${input.city}" among TempGuru's 345 US/CA markets. Confirm coverage at https://tempguru.co/get-staffing.`,
     });
   }

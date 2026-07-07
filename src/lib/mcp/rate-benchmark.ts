@@ -11,7 +11,7 @@
 // tier's measured cities, NOT a midpoint. Agents are pointed at get_role_pricing
 // for an exact per-city rate.
 
-import { ROLES } from "./data";
+import { findRole } from "./data";
 import {
   TIER_SPANS,
   TYPICAL,
@@ -26,8 +26,6 @@ export type RateBenchmarkInput = {
   role?: string;
   tier?: "hub" | "mid" | "small";
 };
-
-const norm = (s: string) => s.trim().toLowerCase().replace(/[\s_]+/g, "-");
 
 // The roles the Index publishes, each tied to its vetted card key. Display
 // roles that share a key (registration, hospitality, gate, etc. all ride event
@@ -45,10 +43,12 @@ const INDEX_ROLES: Array<{ label: string; key: CardKey }> = [
 export function buildRateBenchmark(input: RateBenchmarkInput = {}) {
   let rows = INDEX_ROLES;
   if (input.role) {
-    const want = norm(input.role);
-    const known = ROLES.find((r) => r.slug === want || norm(r.name) === want);
-    const key = roleKeyFor(known ?? input.role);
-    rows = INDEX_ROLES.filter((r) => r.key === key);
+    // Resolve against the real role catalog. roleKeyFor() maps ANY string to a
+    // card key (unknown -> event_staff), so a raw roleKeyFor would silently
+    // return Event Staff rates for "wizard". Require a genuine role match first.
+    const known = findRole(input.role);
+    const key = known ? roleKeyFor(known) : null;
+    rows = key ? INDEX_ROLES.filter((r) => r.key === key) : [];
     if (rows.length === 0) {
       return {
         role_found: false as const,

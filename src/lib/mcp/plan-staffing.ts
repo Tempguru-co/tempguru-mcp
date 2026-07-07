@@ -82,8 +82,8 @@ export function buildStaffingPlan(input: PlanStaffingInput) {
         ? ({ kind: "city", slug: sug.slug, name: sug.name } as EntitySuggestion)
         : undefined,
       message: sug
-        ? `TempGuru has no exact match for "${input.city}" among its 345 US/CA markets. Did you mean ${sug.name}? Retry plan_staffing with that, or confirm coverage with get_cities.`
-        : `TempGuru has no match for "${input.city}" among its 345 US/CA markets (US and Canada only). Check spelling, try the nearest major city, or confirm coverage with get_cities.`,
+        ? `TempGuru has no exact match for "${input.city}" among its 345 US/CA markets. The closest covered market is ${sug.name}, confirm with the user that they mean ${sug.name} before planning it (do not assume), or check get_cities.`
+        : `TempGuru has no match for "${input.city}" among its 345 US/CA markets (US and Canada only). Check spelling, ask the user for the nearest major city, or confirm coverage with get_cities.`,
       next_steps: FALLBACK_LADDER,
     };
   }
@@ -216,7 +216,14 @@ export function buildStaffingPlan(input: PlanStaffingInput) {
       const dailyOtPerWorker = dailyThreshold
         ? l.days * Math.max(0, l.hours_per_shift - dailyThreshold)
         : 0;
-      const weeklyOtPerWorker = Math.max(0, perWorkerHours - weeklyThreshold);
+      // Weekly OT applies PER WORKWEEK, not across the whole engagement, so a
+      // 14-day run is two 40h weeks, not one 112h week. Assume consecutive days
+      // (the model has no calendar): full 7-day weeks plus a remainder.
+      const fullWeeks = Math.floor(l.days / 7);
+      const remDays = l.days % 7;
+      const weeklyOtPerWorker =
+        fullWeeks * Math.max(0, 7 * l.hours_per_shift - weeklyThreshold) +
+        Math.max(0, remDays * l.hours_per_shift - weeklyThreshold);
       const otHoursPerWorker = Math.max(dailyOtPerWorker, weeklyOtPerWorker);
       if (otHoursPerWorker > 0) triggered = true;
       const regularHoursPerWorker = perWorkerHours - otHoursPerWorker;
