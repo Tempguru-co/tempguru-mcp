@@ -71,7 +71,8 @@
     },
     "expect": [
       "daily overtime",
-      "OT"
+      "OT",
+      "overtime_adjusted_total_range"
     ]
   },
   {
