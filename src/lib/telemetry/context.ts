@@ -11,6 +11,10 @@ import { AsyncLocalStorage } from "node:async_hooks";
 export interface RequestContext {
   userAgent: string;
   ipCountry: string;
+  // Client IP (x-forwarded-for first hop), used ONLY for the request_quote
+  // rate limiter, which stores a truncated hash, never the raw IP. Empty under
+  // stdio, where the limiter fails open.
+  ip: string;
   // Optional attribution tag from a surface we control (the Custom GPT, the
   // website widget, a test script, a team demo). Set via the `X-TempGuru-Source`
   // header or a `?source=` query param. Empty for organic/unattributed traffic.
@@ -24,5 +28,5 @@ export function runWithContext<T>(ctx: RequestContext, fn: () => T): T {
 }
 
 export function currentContext(): RequestContext {
-  return storage.getStore() ?? { userAgent: "", ipCountry: "", source: "" };
+  return storage.getStore() ?? { userAgent: "", ipCountry: "", ip: "", source: "" };
 }

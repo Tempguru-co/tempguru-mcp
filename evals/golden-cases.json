@@ -276,5 +276,97 @@
       "tier_usd",
       "Rate Index"
     ]
+  },
+  {
+    "name": "plan_staffing: 'London, UK' is rejected, never resolved to London, Ontario",
+    "tool": "plan_staffing",
+    "arguments": {
+      "city": "London, UK",
+      "roles": [
+        {
+          "role": "brand-ambassadors",
+          "headcount": 2
+        }
+      ]
+    },
+    "expect": [
+      "city_not_found"
+    ]
+  },
+  {
+    "name": "plan_staffing: Toronto prices Ontario weekly OT with provincial compliance",
+    "tool": "plan_staffing",
+    "arguments": {
+      "city": "Toronto",
+      "roles": [
+        {
+          "role": "brand-ambassadors",
+          "headcount": 1,
+          "hours_per_shift": 10,
+          "days": 5
+        }
+      ]
+    },
+    "expect": [
+      "Ontario",
+      "CAD",
+      "overtime_adjusted_total_range",
+      "coordinator"
+    ]
+  },
+  {
+    "name": "plan_staffing: partial plan is labeled incomplete and blocks quoting",
+    "tool": "plan_staffing",
+    "arguments": {
+      "city": "Chicago",
+      "roles": [
+        {
+          "role": "registration-staff",
+          "headcount": 2
+        },
+        {
+          "role": "sword swallowers",
+          "headcount": 3
+        }
+      ]
+    },
+    "expect": [
+      "plan_complete",
+      "unpriced_roles",
+      "Do NOT submit"
+    ]
+  },
+  {
+    "name": "get_role_pricing: 'security' resolves to Crowd Control WITH the unarmed warning",
+    "tool": "get_role_pricing",
+    "arguments": {
+      "role": "security",
+      "city": "Boston"
+    },
+    "expect": [
+      "Crowd Control",
+      "NOT licensed"
+    ]
+  },
+  {
+    "name": "get_cities: unknown country is an explicit error, not a US dump",
+    "tool": "get_cities",
+    "arguments": {
+      "country": "USSR"
+    },
+    "expect": [
+      "must be US or CA"
+    ]
+  },
+  {
+    "name": "check_availability: impossible calendar date is rejected, not rolled over",
+    "tool": "check_availability",
+    "arguments": {
+      "city": "Dallas",
+      "date": "2027-02-30"
+    },
+    "expect": [
+      "Impossible"
+    ]
   }
 ]

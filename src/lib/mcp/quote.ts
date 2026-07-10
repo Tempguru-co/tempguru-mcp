@@ -20,26 +20,29 @@ import { z } from "zod";
 // plan needs at least one role, a lead with blank contact/event fields or
 // no roles is garbage by the time it reaches the CRM (createLead writes
 // fields verbatim to Notion).
+// Field caps are realistic business maxima, not just DoS guards: they keep a
+// megabyte "event name" from eating the Notion Call Notes budget and keep
+// headcounts inside anything a real event could want.
 export const REQUEST_QUOTE_INPUT = {
-  contact_name: z.string().trim().min(1).describe("Full name of the contact person"),
-  contact_email: z.string().trim().email().describe("Contact email address for the quote response"),
-  contact_phone: z.string().trim().optional().describe("Optional phone number for the coordinator to reach the buyer (event ops is phone-first; include when known)"),
-  company: z.string().trim().min(1).describe("Company or organization name"),
-  event_name: z.string().trim().min(1).describe("Name of the event (e.g. 'HIMSS 2026', 'Brand Fest Austin')"),
-  event_type: z.string().trim().min(1).describe("Event type: trade-show, conference, festival, concert, sporting-event, corporate, brand-activation, or other"),
-  city: z.string().trim().min(1).describe("City where the event is held"),
-  event_dates: z.string().trim().min(1).describe("Event dates as a human-readable string, e.g. 'June 15–17, 2026'"),
+  contact_name: z.string().trim().min(1).max(120).describe("Full name of the contact person"),
+  contact_email: z.string().trim().email().max(254).describe("Contact email address for the quote response"),
+  contact_phone: z.string().trim().max(40).optional().describe("Optional phone number for the coordinator to reach the buyer (event ops is phone-first; include when known)"),
+  company: z.string().trim().min(1).max(160).describe("Company or organization name"),
+  event_name: z.string().trim().min(1).max(200).describe("Name of the event (e.g. 'HIMSS 2026', 'Brand Fest Austin')"),
+  event_type: z.string().trim().min(1).max(80).describe("Event type: trade-show, conference, festival, concert, sporting-event, corporate, brand-activation, or other"),
+  city: z.string().trim().min(1).max(120).describe("City where the event is held"),
+  event_dates: z.string().trim().min(1).max(160).describe("Event dates as a human-readable string, e.g. 'June 15–17, 2026'"),
   roles: z.array(
     z.object({
-      role: z.string().trim().min(1).describe("Staffing role name, e.g. brand-ambassadors, registration-staff"),
-      headcount: z.number().int().positive().describe("Number of staff needed"),
-      shifts: z.string().optional().describe("Shift description, e.g. '2 days × 8h'"),
+      role: z.string().trim().min(1).max(80).describe("Staffing role name, e.g. brand-ambassadors, registration-staff"),
+      headcount: z.number().int().positive().max(10_000).describe("Number of staff needed"),
+      shifts: z.string().max(160).optional().describe("Shift description, e.g. '2 days × 8h'"),
     })
-  ).min(1).describe("Roles and headcount needed for the event"),
-  budget_range: z.string().optional().describe("Estimated total budget range if calculated, e.g. '$8,400–$12,600'"),
-  attire: z.string().optional().describe("Staff attire requirements"),
-  special_requirements: z.string().optional().describe("Any special requirements: language skills, certifications, overnight shifts, etc."),
-  compliance_notes: z.string().optional().describe("Any compliance flags surfaced by get_compliance_by_state"),
+  ).min(1).max(50).describe("Roles and headcount needed for the event"),
+  budget_range: z.string().max(120).optional().describe("Estimated total budget range if calculated, e.g. '$8,400–$12,600'"),
+  attire: z.string().max(500).optional().describe("Staff attire requirements"),
+  special_requirements: z.string().max(2000).optional().describe("Any special requirements: language skills, certifications, overnight shifts, etc."),
+  compliance_notes: z.string().max(2000).optional().describe("Any compliance flags surfaced by get_compliance_by_state"),
 };
 
 /** Whole-body schema for surfaces that validate a JSON document (REST). */
@@ -78,11 +81,13 @@ export function quoteSubmittedPayload(
   };
 }
 
-export function quoteFailedPayload(error: string) {
+export function quoteFailedPayload(error: string, reference?: string) {
   return {
     submitted: false as const,
     error,
+    ...(reference ? { reference } : {}),
     message:
-      "Submission failed. Please have the user contact TempGuru directly at megan@tempguru.co or (904) 206-8953.",
+      `Submission failed${reference ? ` (reference ${reference})` : ""}. Please have the user contact TempGuru directly at megan@tempguru.co or (904) 206-8953` +
+      `${reference ? ` and mention reference ${reference}` : ""}.`,
   };
 }

@@ -12,6 +12,7 @@ import citiesData from "../../../content/mcp-data/cities.json";
 import rolesData from "../../../content/mcp-data/roles.json";
 import pricingData from "../../../content/mcp-data/role-pricing.json";
 import stateData from "../../../content/mcp-data/state-compliance.json";
+import provinceData from "../../../content/mcp-data/province-compliance.json";
 
 // ─── Types ────────────────────────────────────────────────────────────────
 
@@ -45,6 +46,21 @@ export type StateCompliance = {
   unique_rules: string[];
   min_wage_as_of?: string;
   min_wage_source?: string;
+  // Premium OT bands beyond the standard 1.5x threshold. Today only California
+  // sets these (double time after 12h/day; seventh-consecutive-day premium).
+  overtime_daily_double?: number | null;
+  seventh_day_overtime?: boolean;
+};
+
+// Canadian provincial employment standards for the markets TempGuru serves.
+// Overtime thresholds only (statutory, stable); provincial minimum wages are
+// deliberately NOT stored — the coordinator confirms them on every CA quote.
+export type ProvinceCompliance = {
+  name: string;
+  overtime_weekly: number;
+  overtime_daily: number | null;
+  overtime_daily_double: number | null;
+  unique_rules: string[];
 };
 
 // ─── Loaders (validated, exported) ────────────────────────────────────────
@@ -77,6 +93,16 @@ export const STATE_META = stateData._meta as {
   notes: string;
   citation_note: string;
 };
+
+export const PROVINCES: Record<string, ProvinceCompliance> = provinceData.provinces as Record<
+  string,
+  ProvinceCompliance
+>;
+
+/** Provincial employment standards by 2-letter province code (ON, BC, ...). */
+export function findProvince(abbr: string): ProvinceCompliance | null {
+  return PROVINCES[abbr.trim().toUpperCase()] ?? null;
+}
 
 // ─── Fuzzy + normalization helpers ──────────────────────────────────────────
 //
@@ -221,22 +247,35 @@ function resolveStateToken(tok: string): string | null {
   return STATE_NAME_TO_ABBR.get(t.toLowerCase()) ?? null;
 }
 
+/** "USA"/"Canada"-style trailer → country code, or null. Lets "Toronto, Canada"
+ *  scope by country while "London, UK" is rejected outright. */
+function countryToken(tok: string): "US" | "CA" | null {
+  const t = tok.trim().toLowerCase().replace(/\./g, "");
+  if (["us", "usa", "united states", "united states of america", "america"].includes(t)) return "US";
+  if (["can", "canada"].includes(t)) return "CA";
+  return null;
+}
+
 /** Peel a trailing state off "City, ST" / "City, State" / "City ST" / "City State".
  *  Returns null when no state-like trailer is present. */
-function stripTrailingState(raw: string): { city: string; abbr: string | null } | null {
+function stripTrailingState(
+  raw: string,
+): { city: string; abbr: string | null; hadComma: boolean; trailer: string } | null {
   if (raw.includes(",")) {
     const idx = raw.indexOf(",");
-    return { city: raw.slice(0, idx).trim(), abbr: resolveStateToken(raw.slice(idx + 1)) };
+    const trailer = raw.slice(idx + 1).trim();
+    return { city: raw.slice(0, idx).trim(), abbr: resolveStateToken(trailer), hadComma: true, trailer };
   }
   const toks = raw.split(" ");
   if (toks.length >= 2) {
     const last = toks[toks.length - 1].replace(/\./g, "");
     if (last.length === 2 && KNOWN_STATE_ABBRS.has(last.toUpperCase())) {
-      return { city: toks.slice(0, -1).join(" "), abbr: last.toUpperCase() };
+      return { city: toks.slice(0, -1).join(" "), abbr: last.toUpperCase(), hadComma: false, trailer: last };
     }
     for (let take = Math.min(3, toks.length - 1); take >= 1; take--) {
-      const abbr = STATE_NAME_TO_ABBR.get(toks.slice(toks.length - take).join(" "));
-      if (abbr) return { city: toks.slice(0, toks.length - take).join(" "), abbr };
+      const trailer = toks.slice(toks.length - take).join(" ");
+      const abbr = STATE_NAME_TO_ABBR.get(trailer);
+      if (abbr) return { city: toks.slice(0, toks.length - take).join(" "), abbr, hadComma: false, trailer };
     }
   }
   return null;
@@ -277,6 +316,18 @@ export function findCity(query: string): City | null {
       const aliasS = CITY_ALIAS.get(cityN);
       if (aliasS && aliasS.state_abbr.toUpperCase() === parsed.abbr) return aliasS;
       return null;
+    }
+    if (parsed.hadComma) {
+      // Explicit comma qualifier that is NOT a known US state / CA province.
+      // A country name still scopes ("Toronto, Canada"); anything else
+      // ("London, UK", "Vancouver, Australia") is an explicit out-of-coverage
+      // qualifier — reject rather than silently pricing a US/CA namesake.
+      const country = countryToken(parsed.trailer);
+      if (!country) return null;
+      const aliasK = CITY_ALIAS.get(cityN);
+      if (aliasK && aliasK.country === country) return aliasK;
+      const inCountry = (CITY_BY_NORM.get(cityN) ?? []).filter((c) => c.country === country);
+      return inCountry.length ? inCountry[0] : null;
     }
     const aliasC = CITY_ALIAS.get(cityN);
     if (aliasC) return aliasC;
@@ -386,6 +437,19 @@ for (const [k, slug] of Object.entries(RAW_ROLE_SYNONYMS)) {
   const r = ROLE_BY_NORM.get(normRole(slug));
   if (r) ROLE_SYNONYM.set(normRole(k), r);
 }
+
+// "Security" resolves to Crowd Control so the ask isn't dead-ended, but the two
+// are not the same thing and the difference is a licensing/liability issue.
+// Callers surface SECURITY_ROLE_NOTE on every response where the input matched
+// a security phrasing, so the substitution is never silent.
+const SECURITY_PHRASES = new Set(
+  ["security", "security staff", "security guard", "security guards", "guard", "guards", "bouncer", "bouncers"],
+);
+export function isSecurityPhrase(input: string): boolean {
+  return SECURITY_PHRASES.has(normRole(input));
+}
+export const SECURITY_ROLE_NOTE =
+  "Requested 'security' maps to Crowd Control: unarmed event staff for crowd flow, access points, and queue management — NOT licensed security guards. If the venue or event requires licensed (or armed) security, TempGuru does not provide it; tell the user plainly.";
 
 // Deterministic (exact / synonym / singular-plural) only, same principle as
 // findCity: a typo never silently resolves to a possibly-wrong role. Misses

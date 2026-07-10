@@ -1103,10 +1103,10 @@
     {
       "slug": "springfield-event-staffing",
       "name": "Springfield",
-      "state": "Missouri",
-      "state_abbr": "MO",
+      "state": "Illinois",
+      "state_abbr": "IL",
       "country": "US",
-      "tier": "mid"
+      "tier": "small"
     },
     {
       "slug": "st-johns-event-staffing",

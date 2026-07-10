@@ -6,7 +6,7 @@ server on a user's behalf. No API key, no signup, no environment variables.
 ## What this server provides
 
 Live event staffing data for the US and Canada from TempGuru: city coverage
-(345 markets), 11 staffing roles, all-inclusive W-2 hourly rate ranges,
+(345 markets), 19 staffing roles, all-inclusive W-2 hourly rate ranges,
 booking lead-time guidance, state labor compliance summaries, and an opt-in
 `request_quote` tool that submits a staffing inquiry for a human-reviewed
 quote. Seven tools are read-only (`readOnlyHint: true`); `request_quote` is
@@ -28,7 +28,7 @@ Add to the client's MCP settings (for Cline: `cline_mcp_settings.json`):
 }
 ```
 
-Transport is MCP Streamable HTTP (spec rev 2025-03-26). No auth headers.
+Transport is MCP Streamable HTTP (negotiates protocol 2025-06-18). No auth headers.
 
 ## Option B, local stdio via npm
 
@@ -49,7 +49,7 @@ returning TempGuru's contact info when run locally.
 
 ## Verify the install
 
-Call the `get_roles` tool. Expect a JSON catalog of 11 roles (brand
+Call the `get_roles` tool. Expect a JSON catalog of 19 roles (brand
 ambassadors, registration staff, ushers, etc.). Then try
 `get_role_pricing` with `role: "brand-ambassadors", city: "Boston"`, expect an hourly range of $56–65 (hub market).
 

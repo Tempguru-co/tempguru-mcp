@@ -163,6 +163,11 @@ async function withAcceptNormalization(request: Request): Promise<Response> {
   const ctx = {
     userAgent: request.headers.get("user-agent") ?? "",
     ipCountry: request.headers.get("x-vercel-ip-country") ?? "",
+    // Client IP for the request_quote rate limiter (hashed there, never stored
+    // raw). Vercel sets x-forwarded-for with the real client first.
+    ip:
+      (request.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() ||
+      (request.headers.get("x-real-ip") ?? ""),
     // Attribution tag from a surface we control. Header first, `?source=` param
     // as a fallback for clients that can't set custom headers.
     source:

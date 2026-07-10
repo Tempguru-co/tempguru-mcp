@@ -14,7 +14,7 @@ monitors, crowd control, guest services, setup/breakdown crews, assistant leads,
 for conventions, conferences, trade shows, festivals, concerts, sporting and
 stadium events, corporate events, and brand activations.
 
-Coverage: 345 markets (307 US, 38 Canada) across three tiers: 25 hub markets, 129 mid markets, 191 small markets.
+Coverage: 345 markets (307 US, 38 Canada) across three tiers: 25 hub markets, 128 mid markets, 192 small markets.
 
 Hub markets: Atlanta, Austin, Boston, Calgary, Charlotte, Chicago, Dallas, Denver, Detroit, Houston, Las Vegas, Los Angeles, Miami, Minneapolis, Nashville, New York City, Orlando, Philadelphia, Phoenix, San Diego, San Francisco, Seattle, Toronto, Vancouver, Washington D.C..
 

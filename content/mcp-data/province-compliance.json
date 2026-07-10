@@ -1,0 +1,103 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "updated": "2026-07-10",
+    "notes": "Provincial overtime thresholds for the Canadian markets TempGuru serves. Overtime thresholds are statutory employment-standards values (stable law). Provincial minimum wages change frequently and are intentionally NOT stored: the coordinator confirms wage floors on every Canadian quote. Operational guidance, not legal advice.",
+    "source": "Provincial employment standards legislation (Ontario ESA, BC ESA, Alberta ESC, Quebec LSA, and equivalents), cross-checked July 2026."
+  },
+  "provinces": {
+    "ON": {
+      "name": "Ontario",
+      "overtime_weekly": 44,
+      "overtime_daily": null,
+      "overtime_daily_double": null,
+      "unique_rules": [
+        "Overtime after 44 hours/week (1.5x)",
+        "Most event roles are covered by ESA hours-of-work and eating-period rules"
+      ]
+    },
+    "BC": {
+      "name": "British Columbia",
+      "overtime_weekly": 40,
+      "overtime_daily": 8,
+      "overtime_daily_double": 12,
+      "unique_rules": [
+        "Daily overtime after 8 hours (1.5x); double time after 12 hours/day",
+        "Weekly overtime after 40 hours"
+      ]
+    },
+    "AB": {
+      "name": "Alberta",
+      "overtime_weekly": 44,
+      "overtime_daily": 8,
+      "overtime_daily_double": null,
+      "unique_rules": [
+        "Overtime after 8 hours/day or 44 hours/week, whichever is greater"
+      ]
+    },
+    "QC": {
+      "name": "Quebec",
+      "overtime_weekly": 40,
+      "overtime_daily": null,
+      "overtime_daily_double": null,
+      "unique_rules": [
+        "Overtime after 40 hours/week (1.5x)",
+        "French-language requirements (Bill 96) can apply to postings, contracts, and signage"
+      ]
+    },
+    "MB": {
+      "name": "Manitoba",
+      "overtime_weekly": 40,
+      "overtime_daily": 8,
+      "overtime_daily_double": null,
+      "unique_rules": [
+        "Overtime after 8 hours/day or 40 hours/week"
+      ]
+    },
+    "SK": {
+      "name": "Saskatchewan",
+      "overtime_weekly": 40,
+      "overtime_daily": 8,
+      "overtime_daily_double": null,
+      "unique_rules": [
+        "Overtime after 8 hours/day (10 in a modified work arrangement) or 40 hours/week"
+      ]
+    },
+    "NS": {
+      "name": "Nova Scotia",
+      "overtime_weekly": 48,
+      "overtime_daily": null,
+      "overtime_daily_double": null,
+      "unique_rules": [
+        "Overtime after 48 hours/week"
+      ]
+    },
+    "NB": {
+      "name": "New Brunswick",
+      "overtime_weekly": 44,
+      "overtime_daily": null,
+      "overtime_daily_double": null,
+      "unique_rules": [
+        "Overtime after 44 hours/week (overtime floor is 1.5x the minimum wage)"
+      ]
+    },
+    "NL": {
+      "name": "Newfoundland and Labrador",
+      "overtime_weekly": 40,
+      "overtime_daily": null,
+      "overtime_daily_double": null,
+      "unique_rules": [
+        "Overtime after 40 hours/week (overtime floor is 1.5x the minimum wage)"
+      ]
+    },
+    "PE": {
+      "name": "Prince Edward Island",
+      "overtime_weekly": 48,
+      "overtime_daily": null,
+      "overtime_daily_double": null,
+      "unique_rules": [
+        "Overtime after 48 hours/week"
+      ]
+    }
+  }
+}

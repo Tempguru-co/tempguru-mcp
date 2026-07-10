@@ -120,7 +120,8 @@ export async function POST(request: Request) {
   if (!result.success) {
     // Upstream CRM failure (Notion down / unconfigured), same payload the
     // MCP tool returns, surfaced as 502 so agents know to use the fallback.
-    return jsonWrite(quoteFailedPayload(result.error), 502);
+    // The reference survives the failure so a follow-up email can cite it.
+    return jsonWrite(quoteFailedPayload(result.error, result.reference), 502);
   }
 
   return jsonWrite(

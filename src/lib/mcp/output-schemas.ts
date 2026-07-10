@@ -32,8 +32,8 @@ const CITY_TIER = z
   .enum(["hub", "mid", "small"])
   .describe("Market tier: hub = 25 major metros, mid = 129 secondary markets, small = 191 tertiary markets.");
 
-// Did-you-mean handed back on a city/role miss so the agent can auto-retry with
-// the resolved slug rather than relaying "not covered".
+// Did-you-mean handed back on a city/role miss. CONFIRM with the user before
+// using it — never auto-retry a suggestion as if the user had typed it.
 const SUGGESTION = z
   .object({
     kind: z.enum(["city", "role"]),
@@ -41,7 +41,7 @@ const SUGGESTION = z
     name: z.string(),
   })
   .optional()
-  .describe("Closest known city/role for a miss; retry with this slug.");
+  .describe("Closest known city/role for a miss. Confirm with the user before using it; do not auto-apply.");
 
 // ─── get_cities ──────────────────────────────────────────────────────────
 
@@ -108,11 +108,21 @@ export const CHECK_AVAILABILITY_OUTPUT = {
   city_tier: CITY_TIER.optional(),
   event_date: z.string().optional().describe("Normalized ISO date (YYYY-MM-DD)."),
   days_until_event: z.number().int().optional(),
+  in_past: z
+    .boolean()
+    .optional()
+    .describe("True when the requested date is already in the past — confirm the date before planning."),
   typical_lead_time_hours: z.number().int().optional(),
   recommendation: z
     .enum(["yes", "tight", "rush", "very-rush"])
     .optional()
     .describe("Lead-time guidance, NOT a reservation. Even rush is worth submitting."),
+  role_found: z
+    .boolean()
+    .nullable()
+    .optional()
+    .describe("null = no role requested; false = the requested role didn't match the catalog (see notes)."),
+  role_suggestion: SUGGESTION,
   role: z
     .object({
       name: z.string(),
@@ -156,6 +166,10 @@ export const GET_ROLE_PRICING_OUTPUT = {
   tier_definition: z.string().optional(),
   all_tiers_for_context: ALL_TIERS.optional(),
   pricing_notes: z.string().optional(),
+  role_note: z
+    .string()
+    .optional()
+    .describe("Caveat about the resolved role (e.g. 'security' maps to unarmed Crowd Control, not licensed security)."),
 };
 
 // ─── get_compliance_by_state (2 variants: found / state miss) ────────────
@@ -180,6 +194,16 @@ export const GET_COMPLIANCE_OUTPUT = {
     .nullable()
     .optional()
     .describe("Daily overtime threshold where the state has one (CA, AK, NV, CO); null otherwise."),
+  overtime_daily_double_hours: z
+    .number()
+    .int()
+    .nullable()
+    .optional()
+    .describe("Start of the double-time band (hours/day) where the state has one (CA: 12); null otherwise."),
+  seventh_day_overtime: z
+    .boolean()
+    .optional()
+    .describe("True where a seventh-consecutive-day premium applies (CA)."),
   unique_rules: z.array(z.string()).optional(),
   liability_coverage_included: z.boolean().optional(),
   workers_comp_included: z.boolean().optional(),
@@ -221,10 +245,24 @@ const PLAN_LINE = z.object({
   estimated_total_range: z.object({ low: z.number(), high: z.number() }),
 });
 
+const UNPRICED_ROLE = z.object({
+  role: z.string(),
+  headcount: z.number().int().optional(),
+  hours_per_shift: z.number().optional(),
+  days: z.number().optional(),
+  suggestion: SUGGESTION,
+});
+
 export const PLAN_STAFFING_OUTPUT = {
   status: z
     .enum(["plan", "needs_roles", "roles_not_found", "city_not_found"])
     .describe("Discriminator. Branch on this before reading the rest."),
+  plan_complete: z
+    .boolean()
+    .optional()
+    .describe(
+      "status:plan only. false = one or more requested roles could not be priced and are EXCLUDED from all totals (see unpriced_roles) — resolve them and re-plan before presenting a budget or quoting.",
+    ),
   message: z.string().optional(),
   tip: z.string().optional(),
   available_roles: ROLES_CATALOG,
@@ -232,11 +270,13 @@ export const PLAN_STAFFING_OUTPUT = {
   requested_city: z.string().optional(),
   suggestion: SUGGESTION,
   next_steps: z.array(z.string()).optional(),
-  // roles_not_found
+  // roles_not_found / partial plan
   requested_roles: z.array(z.string()).optional(),
-  unresolved_roles: z
-    .array(z.object({ role: z.string(), suggestion: SUGGESTION }))
-    .optional(),
+  unresolved_roles: z.array(UNPRICED_ROLE).optional(),
+  unpriced_roles: z
+    .array(UNPRICED_ROLE)
+    .optional()
+    .describe("status:plan with plan_complete:false — the requested lines missing from every total."),
   // plan / roles_not_found event block
   event: z
     .object({
@@ -264,11 +304,15 @@ export const PLAN_STAFFING_OUTPUT = {
       low: z.number(),
       high: z.number(),
       currency: z.enum(["USD", "CAD"]),
+      includes_double_time: z
+        .boolean()
+        .optional()
+        .describe("True when a 2x band (CA/BC >12h/day, CA 7th consecutive day) is included."),
       note: z.string(),
     })
     .nullable()
     .optional()
-    .describe("Present (non-null) only when daily/weekly OT applies to the schedule."),
+    .describe("Present (non-null) only when daily/weekly OT (or a double-time band) applies to the schedule."),
   lead_time: z
     .object({
       event_date: z.string(),
@@ -280,9 +324,12 @@ export const PLAN_STAFFING_OUTPUT = {
     .optional(),
   compliance: z
     .object({
-      state: z.string(),
-      min_wage_usd: z.number(),
-      overtime_weekly_hours: z.number().int(),
+      jurisdiction: z.string().describe("US state or Canadian province the rules below belong to."),
+      min_wage_usd: z
+        .number()
+        .nullable()
+        .describe("US states only; null for Canadian provinces (coordinator confirms provincial wage floors)."),
+      overtime_weekly_hours: z.number().int().nullable(),
       overtime_daily_hours: z.number().int().nullable(),
       unique_rules: z.array(z.string()),
       note: z.string(),

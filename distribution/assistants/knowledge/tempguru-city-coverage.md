@@ -6,7 +6,7 @@
 # TempGuru: City Coverage (345 markets)
 
 TempGuru staffs events in 345 published markets: 307 in the United
-States and 38 in Canada. Tiers: 25 hub, 129 mid, 191 small. Cities marked
+States and 38 in Canada. Tiers: 25 hub, 128 mid, 192 small. Cities marked
 "(hub)" are primary markets with the shortest lead times and the highest rate
 band; "(mid)" are secondary markets; unmarked cities are small markets.
 
@@ -45,7 +45,7 @@ Each city has a detail page at https://tempguru.co/insights/{city-slug}
 
 **Idaho** (2): Boise (mid), Idaho Falls
 
-**Illinois** (7): Bloomington, Champaign, Chicago (hub), Joliet, Naperville (mid), Peoria, Rockford
+**Illinois** (8): Bloomington, Champaign, Chicago (hub), Joliet, Naperville (mid), Peoria, Rockford, Springfield
 
 **Indiana** (5): Evansville, Fort Wayne, Indianapolis (mid), South Bend (mid), Terre Haute
 
@@ -69,7 +69,7 @@ Each city has a detail page at https://tempguru.co/insights/{city-slug}
 
 **Mississippi** (1): Jackson
 
-**Missouri** (5): Joplin, Kansas City (mid), Springfield (mid), Springfield, St. Louis (mid)
+**Missouri** (4): Joplin, Kansas City (mid), Springfield, St. Louis (mid)
 
 **Montana** (1): Missoula
 

@@ -37,3 +37,8 @@ jobs:
       - run: npm run build:stdio
       - run: npm run test:unit
       - run: npm run evals
+      # Generated artifacts (OKF bundle, llms.txt, openapi.json, skill digests)
+      # must be committed in sync with their sources: regenerate and require a
+      # clean tree, so "forgot to run build:okf" can't merge as silent drift.
+      - run: npm run build:okf
+      - run: git diff --exit-code -- public content

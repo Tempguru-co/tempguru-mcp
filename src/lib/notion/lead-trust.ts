@@ -61,6 +61,9 @@ const FIXTURE_DOMAINS = new Set([
   "example.com", "example.org", "example.net", "test.com", "acme.com", "email.com", "domain.com",
 ]);
 const FIXTURE_TOKENS = ["test", "example", "acme", "foobar", "john doe", "jane doe", "jdoe", "asdf", "qwerty", "sample", "lorem"];
+// Token-boundary matchers: "test" must be a standalone token, so a real company
+// like "Contest Labs" or "Sampler Co" is never flagged as fixture data.
+const FIXTURE_RES = FIXTURE_TOKENS.map((t) => new RegExp(`(?:^|[^a-z0-9])${t}(?:[^a-z0-9]|$)`));
 
 // UA classes that represent a real interactive agent (a plausible buyer path).
 const REAL_AGENT_UA = new Set([
@@ -116,16 +119,22 @@ export function parseEventStart(s: string): Date | null {
   // Numeric dates first. Collect ALL ISO (2026-08-14, allowing a trailing time)
   // and US (8/14/2026) matches and take the LATEST plausible one, so a leading
   // "Setup 2026-01-05, event 2026-08-14" resolves to the event, not the setup.
+  // Round-trip each candidate so an impossible date ("2026-02-31") is skipped
+  // instead of rolling over to March and silently mis-scoring the lead.
+  const validUtc = (y: number, mi: number, day: number): number | null => {
+    if (mi < 0 || mi > 11 || day < 1 || day > 31) return null;
+    const t = Date.UTC(y, mi, day);
+    const d = new Date(t);
+    return d.getUTCMonth() === mi && d.getUTCDate() === day ? t : null;
+  };
   const utc: number[] = [];
   for (const m of s.matchAll(/\b(20[2-9]\d)[-/](\d{1,2})[-/](\d{1,2})(?!\d)/g)) {
-    const mi = Number(m[2]) - 1;
-    const day = Number(m[3]);
-    if (mi >= 0 && mi <= 11 && day >= 1 && day <= 31) utc.push(Date.UTC(Number(m[1]), mi, day));
+    const t = validUtc(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+    if (t !== null) utc.push(t);
   }
   for (const m of s.matchAll(/\b(\d{1,2})[-/](\d{1,2})[-/](20[2-9]\d)\b/g)) {
-    const mi = Number(m[1]) - 1;
-    const day = Number(m[2]);
-    if (mi >= 0 && mi <= 11 && day >= 1 && day <= 31) utc.push(Date.UTC(Number(m[3]), mi, day));
+    const t = validUtc(Number(m[3]), Number(m[1]) - 1, Number(m[2]));
+    if (t !== null) utc.push(t);
   }
   if (utc.length) return new Date(Math.max(...utc));
 
@@ -138,10 +147,16 @@ export function parseEventStart(s: string): Date | null {
   if (!mMatch) return null; // no month token -> unparseable (soft flag), not January
   const monthIdx = MONTH_INDEX[mMatch[1]];
   const year = Math.max(...years);
+  // Take the day from AFTER the month token, so "2 shifts July 20-21, 2026"
+  // reads July 20, not July 2 (the leading "2" is a count, not a date).
   let day = 1;
-  const dm = lower.replace(/20[2-9]\d/g, " ").match(/\b([0-3]?\d)\b/);
+  const afterMonth = lower.slice((mMatch.index ?? 0) + mMatch[1].length).replace(/20[2-9]\d/g, " ");
+  const dm = afterMonth.match(/\b([0-3]?\d)\b/);
   if (dm) { const d = Number(dm[1]); if (d >= 1 && d <= 31) day = d; }
-  return new Date(Date.UTC(year, monthIdx, day));
+  const t = new Date(Date.UTC(year, monthIdx, day));
+  // Impossible month/day combo ("Feb 31"): keep the month, drop the day.
+  if (t.getUTCMonth() !== monthIdx || t.getUTCDate() !== day) return new Date(Date.UTC(year, monthIdx, 1));
+  return t;
 }
 
 export async function scoreLeadTrust(input: LeadTrustInput, source: LeadTrustSource = {}): Promise<LeadTrust> {
@@ -212,7 +227,7 @@ export async function scoreLeadTrust(input: LeadTrustInput, source: LeadTrustSou
       weak++;
     }
   }
-  if (FIXTURE_TOKENS.some((t) => name.includes(t) || company.includes(t))) {
+  if (FIXTURE_RES.some((re) => re.test(name) || re.test(company))) {
     flags.push("fixture-identity");
     notes.push(`Contact/company looks like placeholder data ("${input.contact_name}" / "${input.company}").`);
     strong++;
