@@ -21,12 +21,15 @@ on:
 
 jobs:
   publish:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     # MCP_PRIVATE_KEY is stored as a "Production" environment secret; the job must
     # declare the environment to read it. (Production has no protection rules.)
     environment: Production
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
 
       - name: Compare local vs published version
         id: ver
@@ -34,9 +37,24 @@ jobs:
           LOCAL=$(jq -r .version server.json)
           PUBLISHED=$(curl -s "https://registry.modelcontextprotocol.io/v0/servers?search=co.tempguru/event-staffing&version=latest" | jq -r '.servers[0].server.version // "none"')
           echo "local=$LOCAL  published=$PUBLISHED"
+          PACKAGE=$(jq -r '.packages[]? | select(.registryType == "npm") | .identifier' server.json)
+          PACKAGE_READY=false
+          if [ -n "$PACKAGE" ]; then
+            for ATTEMPT in 1 2 3 4 5 6; do
+              if [ "$(npm view "$PACKAGE@$LOCAL" version 2>/dev/null || true)" = "$LOCAL" ]; then
+                PACKAGE_READY=true
+                break
+              fi
+              echo "Waiting for $PACKAGE@$LOCAL to become visible on npm ($ATTEMPT/6)..."
+              sleep 10
+            done
+          fi
           if [ "$LOCAL" = "$PUBLISHED" ]; then
             echo "Already published v$LOCAL; nothing to do."
             echo "skip=true" >> "$GITHUB_OUTPUT"
+          elif [ -n "$PACKAGE" ] && [ "$PACKAGE_READY" != "true" ]; then
+            echo "::error::$PACKAGE@$LOCAL is not visible on npm after six checks. Run publish-npm.yml; it dispatches this workflow again after a successful publish."
+            exit 1
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
@@ -44,7 +62,12 @@ jobs:
       - name: Install mcp-publisher
         if: steps.ver.outputs.skip == 'false'
         run: |
-          curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+          VERSION=v1.7.9
+          ARCHIVE=mcp-publisher_linux_amd64.tar.gz
+          SHA256=ab128162b0616090b47cf245afe0a23f3ef08936fdce19074f5ba0a4469281ac
+          curl --fail --location --retry 3 --output "$ARCHIVE" "https://github.com/modelcontextprotocol/registry/releases/download/$VERSION/$ARCHIVE"
+          echo "$SHA256  $ARCHIVE" | sha256sum --check --strict
+          tar -xzf "$ARCHIVE" mcp-publisher
 
       - name: Publish to MCP Registry (DNS auth)
         if: steps.ver.outputs.skip == 'false'

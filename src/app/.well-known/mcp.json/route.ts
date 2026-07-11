@@ -19,7 +19,7 @@ const MCP_DISCOVERY = {
       name: "tempguru-mcp",
       title: "TempGuru Event Staffing",
       description:
-        "MCP server for TempGuru event staffing data: city coverage (345 US/Canada markets), staffing roles, lead-time guidance, all-inclusive W-2 rate ranges, and state-by-state compliance rules, plus a plan_staffing planner, a get_rate_benchmark Rate Index, and an opt-in request_quote submission tool. Ships tools, skill resources, and guided prompts.",
+        "TempGuru event staffing MCP with 11 tools: plan staffing, restore saved plans, city/role/rate/availability/compliance lookups, published booking policies, the Rate Index, quote submission, and quote status across 345 US/Canada markets. Ten read-only tools plus one opt-in write tool; also ships skill resources and guided prompts.",
       endpoint: "https://mcp.tempguru.co/mcp",
       transport: "streamable-http",
       // Matches the version the live server actually negotiates on initialize.

@@ -34,12 +34,15 @@ then append:
 
 ```
 TOOLS ON THIS PLATFORM
-You have the TempGuru plugin (five read-only API operations plus the
-submitQuoteRequest write operation) and four knowledge documents. Prefer
+You have the TempGuru plugin (eight read-only API operations plus the
+submitQuoteRequest write operation) and five knowledge documents. Prefer
 the plugin for rates, coverage, lead times, and compliance; knowledge for
-background and fallback. To submit a staffing request: confirm the full
-plan with the user (city, dates, roles + headcount, contact name, email,
-company), show what will be sent, then call submitQuoteRequest once after
+background and fallback. Use getPolicies for booking terms, getPlan only
+when the user supplies a saved plan ID, and getQuoteStatus only when the user
+supplies a TG reference; never guess either ID. To submit a staffing request:
+confirm the full plan with the user (city, dates, roles + headcount, contact
+name, email, company), show what will be sent, set source_platform to "coze",
+include plan_id when available, then call submitQuoteRequest once after
 they explicitly confirm. It creates no reservation and requires no payment.
 If it errors or the user prefers the website, send them to
 https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=coze-bot
@@ -56,7 +59,7 @@ Coze imports OpenAPI directly (Plugins → Create plugin → Import from URL):
 
 - **Spec URL:** `https://mcp.tempguru.co/openapi.json`
 - **Auth:** None
-- Enable the five GET operations **plus** `submitQuoteRequest`
+- Enable the eight GET operations **plus** `submitQuoteRequest`
   (`POST /api/v1/quote-requests`, the one write operation); skip
   `/api/v1/health`.
 
@@ -68,7 +71,7 @@ your own email) and delete the row afterward.
 
 ## Knowledge
 
-Upload the four files from `knowledge/` as a Text knowledge base, default
+Upload the five files from `knowledge/` as a Text knowledge base, default
 chunking. Set the bot's knowledge recall to Auto.
 
 ## Opening dialog + suggested questions
@@ -97,7 +100,7 @@ chunking. Set the bot's knowledge recall to Auto.
 
 ## Test script
 
-The standard five (see [chatgpt-custom-gpt.md](./chatgpt-custom-gpt.md))
+The standard nine (see [chatgpt-custom-gpt.md](./chatgpt-custom-gpt.md))
 run in Coze's preview pane before each publish target goes live.
 
 ## Live-tools bridge (add to the suffix)

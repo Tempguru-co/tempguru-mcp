@@ -42,7 +42,7 @@ node openapi-to-okf.mjs openapi.json out/ --base https://api.example.com
 ## Example bundle
 
 `example/` is a real bundle produced from a public production API (TempGuru's
-event-staffing API: 7 operations, 13 schemas, 24 files). Regenerate with:
+event-staffing API: 10 operations, 19 schemas, 33 files). Regenerate with:
 
 ```
 node openapi-to-okf.mjs path/to/openapi.json example/ --base https://mcp.tempguru.co

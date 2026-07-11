@@ -16,11 +16,11 @@ packaging and store listings, not engineering.
 
 | File | What it is |
 |---|---|
-| [system-prompt.md](./system-prompt.md) | **Canonical instructions** (4.7k chars, fits every platform). Single source of truth. |
+| [system-prompt.md](./system-prompt.md) | **Canonical instructions** (6.1k chars, fits every platform). Single source of truth. |
 | [system-prompt.zh-CN.md](./system-prompt.zh-CN.md) | Chinese canonical, framed for 赴美参展 exhibitors |
 | [build-knowledge.mjs](./build-knowledge.mjs) | Generates `knowledge/` from `content/mcp-data/`, never hand-edit knowledge files |
 | [build-manifests.mjs](./build-manifests.mjs) | Generates the Copilot manifests from the canonical prompt |
-| `knowledge/` (4 files, generated) | Company overview/FAQ, roles + full rate matrix, 345-city coverage, 50-state compliance |
+| `knowledge/` (5 files, generated) | Company overview/FAQ, roles + full rate matrix, 345-city coverage, 50-state compliance, booking/procurement policies |
 | [chatgpt-custom-gpt.md](./chatgpt-custom-gpt.md) | GPT Store package + ranking playbook |
 | [chatgpt-app.md](./chatgpt-app.md) | ChatGPT app directory submission (MCP, the bigger prize) |
 | [gemini-gem.md](./gemini-gem.md) | Public Gem (free-tier reach: India, Europe) |

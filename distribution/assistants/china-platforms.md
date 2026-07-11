@@ -55,8 +55,8 @@ entity or 公众号. Don't let that block the whole column:
 - 简介: `为赴美参展和在美办活动的企业规划临时工作人员：345个美加城市实时时薪、提前期建议、各州用工合规。全员W-2正式雇佣，主办方零用工风险。`
 - 设定 (prompt): zh-CN instruction block
 - 插件: 元器支持 API 导入, spec `https://mcp.tempguru.co/openapi.json`,
-  无鉴权, 启用五个查询接口
-- 知识库: upload the four `knowledge/` files (English is fine for Hunyuan;
+  无鉴权, 启用八个只读查询接口和一个报价提交接口
+- 知识库: upload the five `knowledge/` files (English is fine for Hunyuan;
   answers come back in Chinese)
 - 发布渠道: 元器广场 → 元宝 → QQ。微信客服渠道留到 entity tier。
 
@@ -68,7 +68,7 @@ entity or 公众号. Don't let that block the whole column:
 - 人设与回复逻辑: zh-CN instruction block
 - 能力扩展: import the OpenAPI spec as a 数据类插件 if review allows
   third-party APIs; otherwise run knowledge-only like the Gemini Gem
-  (the four knowledge files + form fallback).
+  (the five knowledge files + form fallback).
 - 商业设置: turn OFF Baidu's lead-gen components; route conversion to the
   TempGuru form with `utm_medium=baidu-agent`.
 

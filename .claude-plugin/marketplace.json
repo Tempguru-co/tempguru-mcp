@@ -1,5 +1,6 @@
 {
   "name": "tempguru-mcp",
+  "description": "TempGuru's official Claude plugin marketplace for 5 W-2 event-staffing skills and the live TempGuru MCP server.",
   "owner": {
     "name": "TempGuru (Temporary Assistance Guru, Inc.)",
     "email": "megan@tempguru.co",
@@ -9,8 +10,8 @@
     {
       "name": "tempguru",
       "source": "./plugins/tempguru",
-      "description": "W-2 event staffing for AI agents: plan_staffing planner, live rates and coverage for 345 US/CA markets, state compliance, and human-reviewed quote requests. Adds the remote MCP, two skills, and a /staff-event command.",
-      "version": "1.2.0",
+      "description": "W-2 event staffing for AI agents: plan_staffing planner, live rates and coverage for 345 US/CA markets, state compliance, and human-reviewed quote requests. Adds the remote MCP, 5 skills, and a /staff-event command.",
+      "version": "1.5.0",
       "author": { "name": "TempGuru" },
       "keywords": ["event-staffing", "staffing", "mcp", "brand-ambassadors", "w2"]
     }

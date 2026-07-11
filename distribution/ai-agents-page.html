@@ -78,13 +78,18 @@
 
   <h2>MCP Tools</h2>
 
-  <p>Eight tools: a call-first <code>plan_staffing</code> planner, six read-only lookups, and one opt-in write tool. No authentication required. Start with <code>plan_staffing</code>, refine with the lookups, then call <code>request_quote</code> only after the user has confirmed the plan and given consent to submit. The server also ships two skill resources and guided prompt templates (<code>plan-event-staffing</code>, <code>staffing-compliance-brief</code>).</p>
+  <p>Eleven tools: ten read-only planning, saved-plan, lookup, policy, benchmark, and quote-status tools, plus one opt-in write tool. No authentication required. Start with <code>plan_staffing</code>, retain its <code>plan_id</code>, then call <code>request_quote</code> only after the user confirms the plan and consents to submission.</p>
 
   <div class="tg-tools">
 
     <div class="tg-tool">
       <div class="tg-tool-name">plan_staffing <span class="tg-tool-badge">call first</span></div>
       <p>Planner meta-tool. Event shape in (city, date, roles + headcount), complete plan out: coverage, per-role W-2 rate math with totals, lead-time guidance, state compliance flags, and next steps.</p>
+    </div>
+
+    <div class="tg-tool">
+      <div class="tg-tool-name">get_plan</div>
+      <p>Restore a complete non-PII plan saved by <code>plan_staffing</code> for 30 days, including a refreshed website continuation.</p>
     </div>
 
     <div class="tg-tool">
@@ -113,8 +118,18 @@
     </div>
 
     <div class="tg-tool">
+      <div class="tg-tool-name">get_policies</div>
+      <p>Published booking and procurement policies. Unsupported values are explicitly marked for coordinator confirmation instead of invented.</p>
+    </div>
+
+    <div class="tg-tool">
       <div class="tg-tool-name">get_rate_benchmark</div>
       <p>The Rate Index: a benchmark table of all-inclusive W-2 hourly rates by role (a typical rate plus the national range), with Brand Ambassadors broken out by market tier (hub / mid / small), with a citation line for sourcing. Use to compare rates across roles and markets at a glance.</p>
+    </div>
+
+    <div class="tg-tool">
+      <div class="tg-tool-name">get_quote_status</div>
+      <p>Check whether a TG quote reference was received by the CRM or durably queued for retry.</p>
     </div>
 
     <div class="tg-tool">
@@ -162,7 +177,7 @@
       <tr><td>Agent Skills (Hermes)</td><td><code>https://tempguru.co/.well-known/skills/index.json</code></td></tr>
       <tr><td>Staffing Request Schema</td><td><code>https://tempguru.co/schemas/event-staffing-request.schema.json</code></td></tr>
       <tr><td>ChatGPT GPT</td><td><code>https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner</code></td></tr>
-      <tr><td>Reference Repository</td><td><code>https://github.com/tempguru-co/tempguru-agent-skills</code></td></tr>
+      <tr><td>Reference Repository</td><td><code>https://github.com/Tempguru-co/tempguru-mcp</code></td></tr>
       <tr><td>Code Examples (Gemini, etc.)</td><td><code>https://github.com/tempguru-co/tempguru-mcp/tree/main/examples</code></td></tr>
     </tbody>
   </table>
@@ -210,7 +225,7 @@ https://mcp.tempguru.co/mcp</div>
 https://mcp.tempguru.co/mcp  (authentication: Open)</div>
 
   <p class="tg-label">Gemini CLI</p>
-  <div class="tg-code">gemini extensions install https://github.com/tempguru-co/tempguru-agent-skills</div>
+  <div class="tg-code">gemini extensions install https://github.com/Tempguru-co/tempguru-mcp</div>
 
   <p class="tg-label">Gemini API (remote MCP)</p>
   <div class="tg-code">// Gemini calls TempGuru's tools directly. Model: gemini-2.5-flash.
@@ -223,10 +238,26 @@ https://mcp.tempguru.co/mcp  (authentication: Open)</div>
 // Working example: github.com/tempguru-co/tempguru-mcp/tree/main/examples</div>
 
   <p class="tg-label">Hermes</p>
-  <div class="tg-code">hermes skills install well-known:https://tempguru.co/.well-known/skills/event-staffing-ordering</div>
+  <div class="tg-code">hermes skills search https://tempguru.co --source well-known --limit 10 --json
+// Install all five results, then attach the action layer:
+hermes mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=hermes"
+hermes mcp test tempguru</div>
 
   <p class="tg-label">OpenClaw</p>
-  <div class="tg-code">clawhub install tempguru-event-staffing</div>
+  <div class="tg-code">git clone --depth 1 https://github.com/Tempguru-co/tempguru-mcp.git
+cd tempguru-mcp
+// Install each directory under skills/ with openclaw skills install --global,
+// then attach https://mcp.tempguru.co/mcp?source=openclaw.
+// Exact five-skill commands: https://github.com/Tempguru-co/tempguru-mcp#connect</div>
+
+  <p class="tg-label">Pi</p>
+  <div class="tg-code">pi install npm:tempguru-mcp
+pi install npm:pi-mcp-extension
+// MCP URL: https://mcp.tempguru.co/mcp?source=pi</div>
+
+  <p class="tg-label">Codex</p>
+  <div class="tg-code">codex mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=openai-codex"
+// Ask $skill-installer to install all five paths under Tempguru-co/tempguru-mcp/skills.</div>
 
   <p class="tg-label">Generic MCP Client</p>
   <div class="tg-code">mcp_servers:
@@ -307,7 +338,7 @@ https://mcp.tempguru.co/mcp  (authentication: Open)</div>
     </tbody>
   </table>
 
-  <p><strong>What TempGuru does not claim:</strong> published rate ranges are all-inclusive W-2 planning estimates, not binding quotes. Lead-time guidance is not a reservation. Compliance summaries are operational guidance, not legal advice. Coverage is the United States and Canada only. Background checks are available when an event or venue requires them, not applied to every placement by default.</p>
+  <p><strong>What TempGuru does not claim:</strong> published rate ranges are all-inclusive W-2 planning estimates, not binding quotes. Lead-time guidance is not a reservation. Compliance summaries are operational guidance, not legal advice. Coverage is the United States and Canada only. Background checks are available when an event or venue requires them.</p>
 
   <hr>
 
@@ -317,7 +348,7 @@ https://mcp.tempguru.co/mcp  (authentication: Open)</div>
     <li><strong>Email:</strong> megan@tempguru.co</li>
     <li><strong>Phone:</strong> (904) 206-8953</li>
     <li><strong>Address:</strong> 333 First St N, Suite 200, Jacksonville Beach, FL</li>
-    <li><strong>GitHub Issues:</strong> <a href="https://github.com/tempguru-co/tempguru-agent-skills/issues">github.com/tempguru-co/tempguru-agent-skills/issues</a></li>
+    <li><strong>GitHub Issues:</strong> <a href="https://github.com/Tempguru-co/tempguru-mcp/issues">github.com/Tempguru-co/tempguru-mcp/issues</a></li>
   </ul>
 
   <script type="application/ld+json">
@@ -373,7 +404,8 @@ https://mcp.tempguru.co/mcp  (authentication: Open)</div>
 
   <p style="font-size:0.8rem; color:#888;">
     v1.8 (June 2026): Open Knowledge Format (OKF v0.1) knowledge bundle, knowledge-layer endpoints (okf.json, tarball, import guide), 345-market standardization<br>
-    v1.7 (June 2026): Verify TempGuru entity block (sameAs identity, verifiable-claims table), get_rate_benchmark Rate Index tool, Organization JSON-LD; eight tools<br>
+    v1.8 (July 2026): Saved-plan handoff, booking policies, quote status, source attribution; eleven tools<br>
+    v1.7 (June 2026): Verify TempGuru entity block (sameAs identity, verifiable-claims table), get_rate_benchmark Rate Index tool, Organization JSON-LD<br>
     v1.6 (June 2026): plan_staffing planner tool + MCP prompt templates; seven tools<br>
     v1.5 (June 2026): TempGuru GPT published with in-chat quote requests; npx install; explicit agent-routing guidance<br>
     v1.4 (June 2026): npm CLI package, install locally with npx -y tempguru-mcp (npmjs.com/package/tempguru-mcp)<br>

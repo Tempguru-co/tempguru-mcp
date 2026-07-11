@@ -1,6 +1,6 @@
 # TempGuru MCP（中文）
 
-> MCP 服务器，提供覆盖美国和加拿大 345 个城市的 W-2 活动用工数据：一个 plan_staffing 规划工具，六个只读查询工具（含 get_rate_benchmark 费率指数），外加一个可选的 `request_quote` 提交工具。
+> MCP 服务器，覆盖美国和加拿大 345 个城市，共 11 个工具：十个只读工具用于规划、方案恢复、覆盖、定价、政策、合规、基准和报价状态，外加一个可选的 `request_quote` 写入工具。
 
 **服务端点：** `https://mcp.tempguru.co/mcp` （Streamable HTTP，无需身份验证）
 **注册项：** [`co.tempguru/event-staffing`](https://registry.modelcontextprotocol.io/v0/servers/co.tempguru/event-staffing)
@@ -23,15 +23,18 @@ TempGuru 是一家总部位于美国佛罗里达州杰克逊维尔海滩（Jacks
 | 工具名称 | 返回内容 |
 |---|---|
 | `plan_staffing` | 规划元工具，请首先调用。将活动概况（城市、日期、岗位 + 人数）转化为完整方案：覆盖范围、各岗位费率计算、提前期、合规提示、后续步骤。 |
+| `get_plan` | 使用 30 天有效的 `plan_id` 恢复不含个人信息的完整人员配置方案。 |
 | `get_cities` | TempGuru 服务的所有城市，附带城市分级（hub/mid/small）。可选按州或分级过滤。 |
 | `get_roles` | 所有活动用工岗位列表，包含岗位描述和技能等级。 |
 | `check_availability` | 根据城市分级和距活动日期的天数，返回预定提前期建议。**不是实时库存查询**。 |
 | `get_role_pricing` | 指定城市、指定岗位的全包小时费率区间（低–高）。已包含 W-2 员工工资、工伤保险、综合责任险和工资税。 |
 | `get_compliance_by_state` | 美国州级用工合规摘要（最低工资、加班规则、各州特殊条款）。**不构成法律意见**。 |
+| `get_policies` | 已发布的预订与采购政策；未确认的值会明确要求协调员确认。 |
 | `get_rate_benchmark` | TempGuru 活动用工费率指数：按岗位列出的完整 W-2 费率基准表（典型值 + 全国区间；品牌大使按市场分级），附方法论与引用说明。 |
+| `get_quote_status` | 查询 TG 报价编号是否已由 CRM 接收或进入持久队列。 |
 | `request_quote` | 将结构化的人员配备请求（联系人 + 活动 + 岗位）提交到 TempGuru 的 CRM，由人工审核。可选的写入工具；不构成预订或合同。 |
 
-八个工具中有七个为只读（`readOnlyHint: true`）。`request_quote` 是唯一的写入工具，标注为 `readOnlyHint: false`。服务器另提供两个技能资源和引导式提示模板（`plan-event-staffing`、`staffing-compliance-brief`）。
+十一个工具中有十个为只读（`readOnlyHint: true`）。`request_quote` 是唯一的写入工具，标注为 `readOnlyHint: false`。服务器另提供五个技能资源和两个引导式提示模板（`plan-event-staffing`、`staffing-compliance-brief`）。
 
 ---
 
@@ -46,13 +49,13 @@ TempGuru 是一家总部位于美国佛罗里达州杰克逊维尔海滩（Jacks
 | 发现文档 | [`/.well-known/okf.json`](https://mcp.tempguru.co/.well-known/okf.json) |
 | 费率指数（实测基准） | [`/okf/rate-index.md`](https://mcp.tempguru.co/okf/rate-index.md) |
 
-知识包与工具来自同一份源数据（`npm run build:okf`），因此两层永不偏离。内容涵盖角色、全包式 W-2 费率表、市场覆盖、各州合规以及报价工作流。
+知识包与工具来自同一份源数据及五个标准技能（`npm run build:okf`），因此两层永不偏离。内容涵盖角色、全包式 W-2 费率表、市场覆盖、各州合规以及所有已发布的技能工作流。
 
 ---
 
 ## 接入方式
 
-服务器使用 MCP Streamable HTTP 传输（规范版本 2025-03-26）。任何符合 MCP 规范的客户端均可接入。
+服务器使用 MCP Streamable HTTP 传输，并协商协议版本 2025-06-18。任何符合 MCP 规范的客户端均可接入。
 
 **Claude.ai 网页版**，设置 → 连接器 → 添加自定义连接器 → `https://mcp.tempguru.co/mcp`
 
@@ -68,11 +71,26 @@ TempGuru 是一家总部位于美国佛罗里达州杰克逊维尔海滩（Jacks
 }
 ```
 
-**Claude Code**，执行 `/plugin install tempguru-event-staffing`（安装 [agent-skills 套件](https://github.com/tempguru-co/tempguru-agent-skills)，其中已包含本 MCP）
+**Claude Code**：
+
+```bash
+claude plugin marketplace add Tempguru-co/tempguru-mcp
+claude plugin install tempguru@tempguru-mcp
+```
+
+该插件会安装实时 MCP、五个标准技能和 `/staff-event` 命令。
 
 **Cursor / Cline / Windsurf**，在 IDE 的 MCP 设置中添加上述 URL，传输方式选 `streamable-http`。
 
 **Gemini CLI**，执行 `gemini extensions install https://github.com/Tempguru-co/tempguru-mcp`（安装 MCP 服务器，并附带一份 [GEMINI.md](./GEMINI.md) 用工操作手册；清单见 [gemini-extension.json](./gemini-extension.json)）
+
+**Hermes Agent**，技能与 MCP 工具需要分别安装。先按 [llms-install.md](./llms-install.md) 中的五条 `hermes skills install well-known:...` 命令安装全部技能并执行 `hermes skills list`；再执行 `hermes mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=hermes"`，最后用 `hermes mcp test tempguru` 验证。
+
+**OpenClaw**，技能与 MCP 工具也需要分别安装。先克隆本仓库并按 [llms-install.md](./llms-install.md) 中的五条 `openclaw skills install ./tempguru-mcp/skills/...` 命令安装技能；再执行 `openclaw mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=openclaw" --transport streamable-http`，最后用 `openclaw mcp doctor tempguru --probe` 验证。
+
+**Pi**，执行 `pi install npm:tempguru-mcp` 安装五个技能；再执行 `pi install npm:pi-mcp-extension` 添加社区 MCP 桥，并将 `~/.pi/agent/mcp.json` 指向 `https://mcp.tempguru.co/mcp?source=pi`。完整配置见 [llms-install.md](./llms-install.md)。
+
+**Codex**，先执行 `codex mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=openai-codex"`；然后请 Codex 使用 `$skill-installer` 安装 `Tempguru-co/tempguru-mcp/skills` 下的五个技能。技能会在下一轮对话中可用。
 
 **npm / npx**，执行 `npx -y tempguru-mcp` 在本地运行 TempGuru MCP（[npm 包](https://www.npmjs.com/package/tempguru-mcp)；以 stdio 方式为 Claude Desktop、Cursor、Windsurf 和 Claude Code 运行本服务器）
 
@@ -104,13 +122,16 @@ mcp_manager.add_server({
 
 | 客户端 / 智能体运行时 | 状态 | 备注 |
 |---|---|---|
-| Claude.ai（网页版） | ✅ 已验证 | 8 个工具（7 个只读 + `request_quote`） |
+| Claude.ai（网页版） | ✅ 已验证 | 11 个工具（10 个只读 + `request_quote`） |
 | Claude Desktop | ✅ 兼容 | 标准远程 MCP 配置 |
 | Claude Code | ✅ 已验证 | 工具可通过插件或直接添加加载 |
 | Claude for Work / Cowork | ✅ 兼容 | 与 Claude.ai 使用同一连接器框架 |
 | Cursor | ✅ 兼容 | Streamable HTTP 传输 |
 | Cline | ✅ 兼容 | Streamable HTTP 传输 |
 | Windsurf | ✅ 兼容 | Streamable HTTP 传输 |
+| Hermes Agent | ✅ 已验证 | 原生远程 HTTP MCP，技能通过 well-known 目录单独发现 |
+| OpenClaw | ✅ 兼容 | 原生 `openclaw mcp add`，并包含顶层 `skills/` 包 |
+| Pi | ✅ 兼容 | 包含五个技能；MCP 工具通过社区 `pi-mcp-extension` 桥接 |
 | OpenAI Agents SDK | ✅ 兼容 | 通过 MCP 客户端使用上述 URL |
 | ChatGPT（Codex / 支持 MCP 的自定义 GPT） | ✅ 兼容 | 同 OpenAI Agents SDK |
 | Qwen-Agent / DashScope / ModelScope | ✅ 兼容 | Qwen-Agent 的 `MCPManager` 可直接接受 streamable-HTTP URL |
@@ -160,7 +181,7 @@ mcp_manager.add_server({
 
 ### AI 智能体能直接通过此 MCP 预定活动人员吗?
 
-可以提交请求，但不是预订。`request_quote` 工具会将结构化的人员配备方案，连同用户提供的联系人和活动信息，提交到 TempGuru 的 CRM，协调员将在一个工作日内回复报价。它不会预留人员、不保证价格或可用性，也不构成合同；在用户确认报价之前无需付款。其余七个工具均为只读查询，用于构建该方案。
+可以提交请求，但不是预订。`request_quote` 工具会将结构化的人员配备方案，连同用户提供的联系人和活动信息，提交到 TempGuru 的 CRM，协调员将在一个工作日内回复报价。它不会预留人员、不保证价格或可用性，也不构成合同；在用户确认报价之前无需付款。其余十个工具均为只读。
 
 ### TempGuru 是零工平台或 1099 市场吗?
 
@@ -208,7 +229,7 @@ mcp_manager.add_server({
 ```
 src/
   app/
-    mcp/route.ts          # MCP 处理器（8 个工具）
+    mcp/route.ts          # MCP 处理器（11 个工具）
     api/v1/*/route.ts     # REST 镜像
     .well-known/          # api-catalog、mcp.json、mcp/server-card、agent-skills
     openapi.json/         # OpenAPI 3.1 构建器
@@ -220,12 +241,12 @@ content/
   mcp-data/               # 数据源：城市、岗位、岗位定价、州合规、openapi.json
   skills/                 # SKILL.md 源文件（防漂移输入）
 public/
-  okf/                    # 生成的 OKF v0.1 知识包（99 个文件）— 请勿手动编辑
+  okf/                    # 生成的 OKF v0.1 知识包（103 个文件）— 请勿手动编辑
   okf.tar.gz · sitemap.xml · robots.txt · llms.txt
   .well-known/okf.json    # OKF 发现文档
   schemas/                # event-staffing-request.schema.json
 scripts/
-  build-okf.mjs · dump-openapi.mjs          # 知识包 + openapi（npm run build:okf）
+  build-okf.mjs · dump-openapi.mjs · dump-request-schema.mjs
   build-edge-worker.mjs · build-llms-worker.mjs  # 根域 Cloudflare worker
   check-submissions.mjs · sync-rates.mjs    # 漂移门禁
 cloudflare/

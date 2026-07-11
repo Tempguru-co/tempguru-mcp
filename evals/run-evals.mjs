@@ -20,6 +20,11 @@ const cases = JSON.parse(readFileSync(join(here, "golden-cases.json"), "utf-8"))
 
 const server = spawn("node", [join(here, "..", "dist", "mcp-stdio.mjs")], {
   stdio: ["pipe", "pipe", "inherit"],
+  env: {
+    ...process.env,
+    NODE_ENV: "test",
+    TEMPGURU_EVAL_MEMORY_REDIS: "1",
+  },
 });
 
 let buf = "";
@@ -89,12 +94,15 @@ try {
   const tools = await rpc("tools/list", {});
   const toolNames = (tools.result?.tools ?? []).map((t) => t.name).sort();
   check(
-    "tools/list advertises all 8 tools",
+    "tools/list advertises all 11 tools",
     JSON.stringify(toolNames) ===
       JSON.stringify([
         "check_availability",
         "get_cities",
         "get_compliance_by_state",
+        "get_plan",
+        "get_policies",
+        "get_quote_status",
         "get_rate_benchmark",
         "get_role_pricing",
         "get_roles",
@@ -114,6 +122,37 @@ try {
 
   // Golden tool-call cases.
   for (const c of cases) {
+    if (c.workflow === "plan_quote_roundtrip") {
+      const planned = await rpc("tools/call", {
+        name: "plan_staffing",
+        arguments: c.arguments.plan,
+      });
+      const plan = planned.result?.structuredContent;
+      const planId = plan?.plan_id;
+      const restored = planId
+        ? await rpc("tools/call", { name: "get_plan", arguments: { plan_id: planId } })
+        : null;
+      const quoted = planId
+        ? await rpc("tools/call", {
+            name: "request_quote",
+            arguments: { ...c.arguments.quote, plan_id: planId },
+          })
+        : null;
+      const reference = quoted?.result?.structuredContent?.reference;
+      const status = reference
+        ? await rpc("tools/call", {
+            name: "get_quote_status",
+            arguments: { reference },
+          })
+        : null;
+      const text = JSON.stringify({ plan, restored, quoted, status });
+      const missing = c.expect.filter((marker) => !text.includes(marker));
+      if (quoted?.result?.structuredContent?.plan_linked !== true) {
+        missing.push("plan_linked:true");
+      }
+      check(c.name, missing.length === 0, missing.length ? `missing: ${missing.join(" | ")}` : "");
+      continue;
+    }
     const res = await rpc("tools/call", { name: c.tool, arguments: c.arguments });
     const text = JSON.stringify(res.result ?? res.error ?? {});
     const missing = c.expect.filter((marker) => !text.includes(marker));

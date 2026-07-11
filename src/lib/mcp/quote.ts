@@ -12,6 +12,22 @@
 // src/lib/api/openapi.ts mirrors it by hand and must be kept in sync.
 
 import { z } from "zod";
+import { PLAN_ID_PATTERN } from "./plan-store";
+
+/**
+ * Canonical skill identifiers accepted on quote submissions. Keep this list
+ * deliberately closed: it is copied into CRM attribution and aggregate
+ * telemetry, so arbitrary public strings must never become a new dimension.
+ */
+export const QUOTE_SKILL_IDS = [
+  "event-staffing-ordering",
+  "event-staffing-compliance",
+  "staffing-plan-from-event-brief",
+  "urgent-event-backfill",
+  "staffing-agency-partner-growth",
+] as const;
+
+export type QuoteSkillId = (typeof QUOTE_SKILL_IDS)[number];
 
 // Raw shape (not z.object) because McpServer.registerTool takes a ZodRawShape.
 // The REST route validates with RequestQuoteSchema below, same shape object.
@@ -43,6 +59,32 @@ export const REQUEST_QUOTE_INPUT = {
   attire: z.string().max(500).optional().describe("Staff attire requirements"),
   special_requirements: z.string().max(2000).optional().describe("Any special requirements: language skills, certifications, overnight shifts, etc."),
   compliance_notes: z.string().max(2000).optional().describe("Any compliance flags surfaced by get_compliance_by_state"),
+  source_platform: z
+    .string()
+    .trim()
+    .min(1)
+    .max(80)
+    .optional()
+    .describe("Optional agent/platform attribution, e.g. chatgpt-gpt, claude-desktop, coze"),
+  skill_version: z
+    .string()
+    .trim()
+    .min(1)
+    .max(40)
+    .optional()
+    .describe("Optional version of the TempGuru staffing skill used to assemble this request"),
+  skill_id: z
+    .enum(QUOTE_SKILL_IDS)
+    .optional()
+    .describe("Optional canonical TempGuru skill slug that assembled this request"),
+  plan_id: z
+    .string()
+    .trim()
+    .toUpperCase()
+    .max(12)
+    .regex(PLAN_ID_PATTERN, "plan_id must be a 12-character TempGuru plan reference")
+    .optional()
+    .describe("Optional plan_id returned by plan_staffing; links the submitted quote to its saved non-PII plan"),
 };
 
 /** Whole-body schema for surfaces that validate a JSON document (REST). */
@@ -60,6 +102,7 @@ export function quoteSubmittedPayload(
   dealName: string,
   reference: string,
   captured: "notion" | "queued" = "notion",
+  planLinked = false,
 ) {
   const receiptNote =
     captured === "queued"
@@ -67,6 +110,7 @@ export function quoteSubmittedPayload(
       : "A coordinator will review the details and respond with a quote within one business day.";
   return {
     submitted: true as const,
+    plan_linked: planLinked,
     deal_name: dealName,
     reference,
     message:

@@ -4,12 +4,15 @@
 //
 //   tools:{date}                 HASH  tool_name → invocation count
 //   uas:{date}                   HASH  ua_class → invocation count
-//   ua:unclassified:{date}       HASH  raw UA string → count (only "other" bucket)
+//   ua:unclassified:{date}       HASH  fixed "unclassified" bucket → count
 //   countries:{date}             HASH  iso2_country → invocation count
 //   status:{date}                HASH  "success"|"error" → count
 //   sources:{date}               HASH  attribution tag → count (our controlled surfaces)
+//   funnel:{date}                HASH  "channel:event" → lifecycle count
+//   source-platforms:{date}       HASH  canonical agent platform → successful new quote leads
+//   source-skills:{date}          HASH  canonical TempGuru skill → successful new quote leads
 //   queries:cities:{date}        ZSET  canonical city slug → invocation count (sorted)
-//   queries:cities:unmatched:{date}  HASH  unrecognized city input → count (diagnostic)
+//   queries:cities:unmatched:{date}  HASH  fixed "unmatched" bucket → count
 //   queries:roles:{date}         ZSET  role slug → invocation count (sorted)
 //   queries:states:{date}        ZSET  state code → invocation count (sorted)
 //   recent:invocations           LIST  last 200 events as JSON strings
@@ -20,7 +23,9 @@
 
 import { exec } from "./redis";
 import { classifyUserAgent, type UaClass } from "./classify-ua";
-import { findCity } from "../mcp/data";
+import { findCity, findRole, findState } from "../mcp/data";
+import { normalizeControlledSource, normalizeSourcePlatform } from "./source-tags";
+import { QUOTE_SKILL_IDS, type QuoteSkillId } from "../mcp/quote";
 
 const TTL_SECONDS = 60 * 60 * 24 * 90; // 90 days
 const RECENT_LIMIT = 200;
@@ -44,27 +49,56 @@ export interface TrackInput {
   // Attribution tag set by a surface we control (X-TempGuru-Source header or
   // ?source= param). Empty/undefined for organic/unattributed traffic.
   source?: string;
+  // Coarse, non-PII lifecycle events. These are counts only; no plan/reference
+  // identifiers enter telemetry.
+  funnelEvents?: FunnelEvent[];
+  // Agent-supplied platform attribution. Canonical allowlist only; unknown
+  // values collapse to `other` before Redis.
+  sourcePlatform?: string;
+  // Canonical TempGuru skill that produced a successful quote lead. Closed
+  // enum only; arbitrary public strings never become telemetry dimensions.
+  sourceSkill?: QuoteSkillId;
+}
+
+export type FunnelEvent =
+  | "plans_created"
+  | "plans_resumed"
+  | "quotes_submitted"
+  | "quotes_linked";
+
+const QUOTE_SKILL_ID_SET = new Set<string>(QUOTE_SKILL_IDS);
+
+export function normalizeSourceSkill(value: string | undefined): QuoteSkillId | null {
+  return value && QUOTE_SKILL_ID_SET.has(value) ? (value as QuoteSkillId) : null;
 }
 
 const utcDate = (): string => new Date().toISOString().slice(0, 10);
-// Bug fix: also replace underscores so "registration_staff" normalises to "registration-staff"
-const slug = (s: string): string => s.trim().toLowerCase().replace(/[\s_]+/g, "-").slice(0, 80);
-// The diagnostic buckets (unclassified UAs, unmatched city inputs) retain raw
-// caller strings; redact anything email-shaped first so PII can never persist
-// in telemetry even when a caller stuffs an address into those fields.
-const redactEmails = (s: string): string => s.replace(/[^\s@"'<>()]+@[^\s@"'<>()]+/g, "[email]");
+export function canonicalTelemetryRole(value: string | undefined): string | null {
+  return value ? findRole(value)?.slug ?? null : null;
+}
+
+export function canonicalTelemetryCity(value: string | undefined): string | null {
+  const city = value ? findCity(value) : null;
+  return city ? city.slug.replace(/-event-staffing$/, "") : null;
+}
+
+export function canonicalTelemetryState(value: string | undefined): string | null {
+  return value ? findState(value)?.abbr ?? null : null;
+}
+
+export function canonicalTelemetryCountry(value: string | undefined): string | null {
+  const country = value?.trim().toUpperCase() ?? "";
+  return /^[A-Z]{2}$/.test(country) ? country : null;
+}
 
 export async function track(input: TrackInput): Promise<void> {
   const date = utcDate();
   const ua: UaClass = classifyUserAgent(input.userAgent);
 
-  // Diagnostic: when a UA still falls into "other", retain the raw string
-  // (truncated) so the dashboard can show exactly what's unclassified and we
-  // can add a pattern next time. Without this, "other" is a black hole.
-  const rawUnclassified =
-    ua === "other" && input.userAgent
-      ? redactEmails(input.userAgent.trim()).slice(0, 200)
-      : null;
+  // Never persist the public user-agent string. The existing UA class plus a
+  // fixed diagnostic bucket preserve aggregate visibility without retaining a
+  // name, email, phone, token, or other caller-controlled substring.
+  const unclassifiedBucket = ua === "other" ? "unclassified" : null;
 
   // Sanitize the city demand signal so only real, recognized markets feed the
   // "Top cities queried" chart. findCity() resolves against our 345-market
@@ -72,23 +106,22 @@ export async function track(input: TrackInput): Promise<void> {
   // emoji) and unrecognized place names never pollute the aggregate. The
   // canonical slug (suffix stripped) also dedupes "Atlanta" vs
   // "atlanta-event-staffing" into one member. A present-but-unrecognized input
-  // is bucketed separately (mirrors the ua:unclassified capture) so it stays
-  // visible for review instead of vanishing silently.
-  const cityMatch = input.city ? findCity(input.city) : null;
-  const canonicalCity = cityMatch ? cityMatch.slug.replace(/-event-staffing$/, "") : null;
-  const unmatchedCity = input.city && !cityMatch ? slug(redactEmails(input.city)) : null;
+  // increments a fixed diagnostic bucket (mirroring ua:unclassified), so its
+  // aggregate volume stays visible without retaining the public input.
+  const canonicalCity = canonicalTelemetryCity(input.city);
+  const unmatchedCityBucket = input.city && !canonicalCity ? "unmatched" : null;
+  const canonicalRole = canonicalTelemetryRole(input.role);
+  const canonicalState = canonicalTelemetryState(input.state);
+  const canonicalCountry = canonicalTelemetryCountry(input.ipCountry);
 
   // Attribution tag from a controlled surface (custom_gpt / website_widget /
   // manual_test / team_demo / ...). Sanitized to [a-z0-9_-], capped. Only our
   // own surfaces set it; organic traffic has none, which is the whole point:
   // subtract the tagged-known to see the untagged candidate-real pool.
-  const sourceTag =
-    (input.source ?? "")
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9_-]+/g, "-")
-      .replace(/^-+|-+$/g, "")
-      .slice(0, 40) || null;
+  const sourceTag = normalizeControlledSource(input.source);
+  const sourcePlatformTag = normalizeSourcePlatform(input.sourcePlatform);
+  const sourceSkillTag = normalizeSourceSkill(input.sourceSkill);
+  const funnelEvents = [...new Set(input.funnelEvents ?? [])];
 
   // Build the ring-buffer payload before entering the async context so it is
   // already serialised when the Promise.allSettled batch fires.
@@ -99,14 +132,14 @@ export async function track(input: TrackInput): Promise<void> {
     tool: input.tool,
     ua,
     channel,
-    country: input.ipCountry || null,
+    country: canonicalCountry,
     status: input.status,
-    // Recent feed shows reality: canonical slug when matched, slugified raw
-    // when not, so an unrecognized lookup is still visible in the forensic feed.
-    city: canonicalCity ?? unmatchedCity,
-    role: input.role ? slug(input.role) : null,
-    state: input.state ? input.state.toUpperCase().slice(0, 2) : null,
+    city: canonicalCity,
+    role: canonicalRole,
+    state: canonicalState,
     source: sourceTag,
+    source_platform: sourcePlatformTag,
+    source_skill: sourceSkillTag,
   });
 
   // Issue all writes in ONE Promise.allSettled so they race to completion in
@@ -115,40 +148,83 @@ export async function track(input: TrackInput): Promise<void> {
   // Vercel function shutdown before reaching Upstash, awaiting in-handler is
   // the only durable path on serverless.
   const write = exec(async (r) => {
+    // Funnel counts and successful-lead attribution form one logical event.
+    // MULTI keeps their increments and TTLs atomic, so a partial Redis response
+    // can never record a quote without its channel (or vice versa).
+    const funnelWrite = funnelEvents.length
+      ? (() => {
+          const transaction = r.multi();
+          for (const funnelEvent of funnelEvents) {
+            transaction.hincrby(`funnel:${date}`, `${channel}:${funnelEvent}`, 1);
+          }
+          const tracksQuoteSource =
+            Boolean(sourcePlatformTag) && funnelEvents.includes("quotes_submitted");
+          if (tracksQuoteSource) {
+            transaction.hincrby(
+              `source-platforms:${date}`,
+              sourcePlatformTag as string,
+              1,
+            );
+          }
+          const tracksQuoteSkill =
+            Boolean(sourceSkillTag) && funnelEvents.includes("quotes_submitted");
+          if (tracksQuoteSkill) {
+            transaction.hincrby(
+              `source-skills:${date}`,
+              sourceSkillTag as string,
+              1,
+            );
+          }
+          transaction.expire(`funnel:${date}`, TTL_SECONDS);
+          if (tracksQuoteSource) {
+            transaction.expire(`source-platforms:${date}`, TTL_SECONDS);
+          }
+          if (tracksQuoteSkill) {
+            transaction.expire(`source-skills:${date}`, TTL_SECONDS);
+          }
+          return transaction.exec();
+        })()
+      : Promise.resolve();
+
     await Promise.allSettled([
       // Counters
       r.hincrby(`tools:${date}`, input.tool, 1),
       r.hincrby(`uas:${date}`, ua, 1),
-      // Raw unclassified UA capture (only when bucket === "other")
-      rawUnclassified
-        ? r.hincrby(`ua:unclassified:${date}`, rawUnclassified, 1)
+      // Fixed unclassified bucket only; the raw public UA is never stored.
+      unclassifiedBucket
+        ? r.hincrby(`ua:unclassified:${date}`, unclassifiedBucket, 1)
         : Promise.resolve(),
       r.hincrby(`status:${date}`, input.status, 1),
       r.hincrby(`channels:${date}`, channel, 1),
-      input.ipCountry
-        ? r.hincrby(`countries:${date}`, input.ipCountry.toUpperCase(), 1)
+      canonicalCountry
+        ? r.hincrby(`countries:${date}`, canonicalCountry, 1)
         : Promise.resolve(),
       sourceTag ? r.hincrby(`sources:${date}`, sourceTag, 1) : Promise.resolve(),
+      funnelWrite,
       // Real markets feed the sorted demand chart; unrecognized inputs land in
       // a separate diagnostic HASH so junk never pollutes "Top cities queried".
       canonicalCity ? r.zincrby(`queries:cities:${date}`, 1, canonicalCity) : Promise.resolve(),
-      unmatchedCity
-        ? r.hincrby(`queries:cities:unmatched:${date}`, unmatchedCity, 1)
+      unmatchedCityBucket
+        ? r.hincrby(`queries:cities:unmatched:${date}`, unmatchedCityBucket, 1)
         : Promise.resolve(),
-      input.role ? r.zincrby(`queries:roles:${date}`, 1, slug(input.role)) : Promise.resolve(),
-      input.state
-        ? r.zincrby(`queries:states:${date}`, 1, input.state.toUpperCase().slice(0, 2))
+      canonicalRole ? r.zincrby(`queries:roles:${date}`, 1, canonicalRole) : Promise.resolve(),
+      canonicalState
+        ? r.zincrby(`queries:states:${date}`, 1, canonicalState)
         : Promise.resolve(),
       // TTLs (idempotent, re-setting is safe)
       r.expire(`tools:${date}`, TTL_SECONDS),
       r.expire(`uas:${date}`, TTL_SECONDS),
-      rawUnclassified ? r.expire(`ua:unclassified:${date}`, TTL_SECONDS) : Promise.resolve(),
+      unclassifiedBucket
+        ? r.expire(`ua:unclassified:${date}`, TTL_SECONDS)
+        : Promise.resolve(),
       r.expire(`status:${date}`, TTL_SECONDS),
       r.expire(`channels:${date}`, TTL_SECONDS),
       r.expire(`countries:${date}`, TTL_SECONDS),
       sourceTag ? r.expire(`sources:${date}`, TTL_SECONDS) : Promise.resolve(),
       r.expire(`queries:cities:${date}`, TTL_SECONDS),
-      unmatchedCity ? r.expire(`queries:cities:unmatched:${date}`, TTL_SECONDS) : Promise.resolve(),
+      unmatchedCityBucket
+        ? r.expire(`queries:cities:unmatched:${date}`, TTL_SECONDS)
+        : Promise.resolve(),
       r.expire(`queries:roles:${date}`, TTL_SECONDS),
       r.expire(`queries:states:${date}`, TTL_SECONDS),
       // dates:active ZSET, used by the time-series widget

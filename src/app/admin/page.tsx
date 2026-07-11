@@ -101,6 +101,17 @@ function Dashboard({ m }: { m: DashboardMetrics }) {
   const errorRate = m.totalRequests
     ? ((m.totalErrors / m.totalRequests) * 100).toFixed(1)
     : "0.0";
+  const funnelTotal = (event: string) =>
+    Object.entries(m.funnelByChannel)
+      .filter(([key]) => key.endsWith(`:${event}`))
+      .reduce((sum, [, count]) => sum + count, 0);
+  const plansCreated = funnelTotal("plans_created");
+  const plansResumed = funnelTotal("plans_resumed");
+  const quotesSubmitted = funnelTotal("quotes_submitted");
+  const quotesLinked = funnelTotal("quotes_linked");
+  const linkedRate = quotesSubmitted
+    ? `${((quotesLinked / quotesSubmitted) * 100).toFixed(1)}%`
+    : "0.0%";
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -117,6 +128,31 @@ function Dashboard({ m }: { m: DashboardMetrics }) {
         <Stat label="Unique tools used" value={String(Object.keys(m.byTool).length)} />
         <Stat label="UA classes seen" value={String(Object.keys(m.byUa).length)} />
       </div>
+
+      <Card title="Plan-to-quote funnel">
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+            gap: 12,
+          }}
+        >
+          <Stat label="Complete plans" value={plansCreated.toLocaleString()} />
+          <Stat label="Plans resumed" value={plansResumed.toLocaleString()} />
+          <Stat label="New quote leads" value={quotesSubmitted.toLocaleString()} />
+          <Stat label="Quotes linked" value={quotesLinked.toLocaleString()} sub={linkedRate} />
+        </div>
+        <p style={{ color: "#94a8c4", fontSize: 12, margin: "12px 0 0" }}>
+          Linked rate is resolved-plan quotes ÷ successful new quote leads. Plans and quotes are
+          window totals, not a cohort conversion rate.
+        </p>
+        <div style={{ marginTop: 12 }}>
+          <KeyValueTable
+            rows={toRows(m.funnelByChannel)}
+            emptyMessage="No plan/quote lifecycle events yet."
+          />
+        </div>
+      </Card>
 
       {/* Daily totals */}
       {m.dailyTotals.length > 0 && (
@@ -146,8 +182,22 @@ function Dashboard({ m }: { m: DashboardMetrics }) {
         />
       </Card>
 
-      {/* Unclassified raw UAs, the menu for the next classifier pass */}
-      <Card title="Unclassified user-agents (raw)">
+      <Card title="Quote leads by source platform">
+        <KeyValueTable
+          rows={toRows(m.bySourcePlatform)}
+          emptyMessage="No successful quote leads have supplied source_platform yet."
+        />
+      </Card>
+
+      <Card title="Quote leads by canonical skill">
+        <KeyValueTable
+          rows={toRows(m.bySourceSkill)}
+          emptyMessage="No successful quote leads have supplied a canonical skill_id yet."
+        />
+      </Card>
+
+      {/* Aggregate only: raw public user-agent strings are never retained. */}
+      <Card title="Unclassified user-agent calls">
         <KeyValueTable
           rows={m.unclassifiedUas.map((u) => [u.member, u.count])}
           emptyMessage="No unclassified user-agents, every UA matched a known pattern."
@@ -182,12 +232,11 @@ function Dashboard({ m }: { m: DashboardMetrics }) {
         </Card>
       </div>
 
-      {/* Unrecognized city inputs, kept out of the demand chart above. The menu
-          for spotting uncovered demand, typos worth aliasing, or junk to ignore. */}
-      <Card title="Unrecognized city inputs (raw)">
+      {/* Aggregate only: raw unmatched public city strings are never retained. */}
+      <Card title="Unrecognized city calls">
         <KeyValueTable
           rows={m.unmatchedCities.map((c) => [c.member, c.count])}
-          emptyMessage="No unrecognized city inputs, every city query matched a known market."
+          emptyMessage="No unrecognized city calls, every city query matched a known market."
         />
       </Card>
 
@@ -373,6 +422,7 @@ function RecentTable({ rows }: { rows: DashboardMetrics["recent"] }) {
             <th style={{ padding: "6px 8px" }}>Country</th>
             <th style={{ padding: "6px 8px" }}>Status</th>
             <th style={{ padding: "6px 8px" }}>Params</th>
+            <th style={{ padding: "6px 8px" }}>Attribution</th>
           </tr>
         </thead>
         <tbody>
@@ -394,6 +444,11 @@ function RecentTable({ rows }: { rows: DashboardMetrics["recent"] }) {
               </td>
               <td style={{ padding: "6px 8px", color: "#94a8c4" }}>
                 {[r.city, r.role, r.state].filter(Boolean).join(" · ") || "-"}
+              </td>
+              <td style={{ padding: "6px 8px", color: "#94a8c4" }}>
+                {[r.source_platform, r.source_skill, r.source]
+                  .filter(Boolean)
+                  .join(" · ") || "-"}
               </td>
             </tr>
           ))}

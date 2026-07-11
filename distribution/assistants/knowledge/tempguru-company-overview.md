@@ -38,7 +38,7 @@ all-inclusive bill rate covers:
 
 Background checks are available when the event or venue requires them.
 Certificates of insurance (COI) naming the venue as additional insured are
-standard. There are no add-on fees, no booking charges, and no markup at
+standard. There are no add-on fees and no markup at
 invoice time. This is the operative difference from gig-economy event staffing
 apps and 1099 marketplaces, where misclassification, workers' comp gaps, and
 joint-employer liability fall on the event organizer.

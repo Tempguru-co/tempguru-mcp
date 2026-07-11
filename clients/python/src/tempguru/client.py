@@ -1,9 +1,8 @@
 """Zero-dependency client for the TempGuru public event staffing API.
 
-The API is read-only and unauthenticated. It returns the same data that
-powers tempguru.co and the TempGuru MCP server: city coverage, staffing
-roles, all-inclusive W-2 hourly rate ranges, booking lead-time guidance,
-and state-level employment compliance summaries for the US and Canada.
+The API is unauthenticated. Eight read operations return the same data that
+powers tempguru.co and the TempGuru MCP server; one opt-in write operation
+submits a confirmed quote request for human review.
 
 Method docstrings are written so they can be reused verbatim as LLM tool
 descriptions (LangChain, OpenAI function calling, etc.).
@@ -14,12 +13,12 @@ from __future__ import annotations
 import json
 from typing import Any, Dict, Optional
 from urllib.error import HTTPError, URLError
-from urllib.parse import urlencode
+from urllib.parse import quote, urlencode
 from urllib.request import Request, urlopen
 
 __all__ = ["TempGuru", "TempGuruError"]
 
-_VERSION = "0.2.0"
+_VERSION = "0.3.0"
 DEFAULT_BASE_URL = "https://mcp.tempguru.co"
 QUOTE_FORM_URL = "https://tempguru.co/get-staffing"
 
@@ -102,17 +101,15 @@ class TempGuru:
         Use this to confirm coverage before quoting anything. ``state``
         accepts a two-letter code ("CA") or full name ("California"); US
         states and Canadian provinces both work. ``tier`` filters by market
-        tier: "hub" (25 major metros), "mid" (129 secondary markets), or
-        "small" (191 tertiary markets).
+        tier: "hub" (25 major metros), "mid" (128 secondary markets), or
+        "small" (192 tertiary markets).
         """
         return self._get("/api/v1/cities", state=state, tier=tier)
 
     def roles(self) -> Dict[str, Any]:
         """List all event staffing roles with descriptions and skill tiers.
 
-        Returns the 10-role catalog (brand ambassadors, registration,
-        ushers, hospitality, gate staff, booth monitors, crowd control,
-        guest services, setup/breakdown, team leads). The returned ``slug``
+        Returns the current 19-role catalog. The returned ``slug``
         values are the keys for :meth:`pricing` and :meth:`availability`.
         """
         return self._get("/api/v1/roles")
@@ -154,6 +151,32 @@ class TempGuru:
         """
         return self._get("/api/v1/compliance", state=state)
 
+    def policies(self, topic: Optional[str] = None) -> Dict[str, Any]:
+        """Get published booking and procurement policies.
+
+        Optionally filter to one topic such as ``payment-terms`` or
+        ``cancellation-rescheduling``. Values TempGuru has not published are
+        explicitly marked for coordinator confirmation; never infer them.
+        """
+        return self._get("/api/v1/policies", topic=topic)
+
+    def plan(self, plan_id: str) -> Dict[str, Any]:
+        """Restore a non-PII staffing plan saved within the last 30 days.
+
+        Use only a ``plan_id`` returned by ``plan_staffing``; never guess or
+        enumerate plan IDs. A clean ``plan_found: false`` response means the
+        plan is absent or expired.
+        """
+        return self._get(f"/api/v1/plans/{quote(plan_id, safe='')}")
+
+    def quote_status(self, reference: str) -> Dict[str, Any]:
+        """Check whether a TG quote reference was received or queued.
+
+        Version 1 reports only ``received`` and ``queued``. A clean
+        ``quote_found: false`` response does not prove the CRM lead is absent.
+        """
+        return self._get(f"/api/v1/quote-requests/{quote(reference, safe='')}")
+
     def request_quote(
         self,
         *,
@@ -165,10 +188,14 @@ class TempGuru:
         city: str,
         event_dates: str,
         roles: list,
+        contact_phone: Optional[str] = None,
         budget_range: Optional[str] = None,
         attire: Optional[str] = None,
         special_requirements: Optional[str] = None,
         compliance_notes: Optional[str] = None,
+        source_platform: Optional[str] = None,
+        skill_version: Optional[str] = None,
+        plan_id: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Submit a staffing request to TempGuru for a human-reviewed quote.
 
@@ -184,7 +211,9 @@ class TempGuru:
         "shifts": "3 days x 8h"}`` (``shifts`` optional). ``event_dates`` is
         human-readable, e.g. ``"June 15-17, 2026"``.
 
-        Returns ``{"submitted": true, "deal_name": ..., "next_steps": [...]}``
+        Pass ``plan_id`` when resuming a saved plan, plus ``source_platform``
+        and ``skill_version`` for attribution. Returns ``{"submitted": true,
+        "deal_name": ..., "reference": ..., "next_steps": [...]}``
         on success. Raises :class:`TempGuruError` on validation failure or
         rate limiting (the endpoint allows 20 submissions/hour per IP).
         """
@@ -199,10 +228,14 @@ class TempGuru:
             "roles": roles,
         }
         for key, value in {
+            "contact_phone": contact_phone,
             "budget_range": budget_range,
             "attire": attire,
             "special_requirements": special_requirements,
             "compliance_notes": compliance_notes,
+            "source_platform": source_platform,
+            "skill_version": skill_version,
+            "plan_id": plan_id,
         }.items():
             if value is not None:
                 body[key] = value

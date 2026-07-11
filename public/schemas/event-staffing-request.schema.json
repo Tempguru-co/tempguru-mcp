@@ -1,107 +1,150 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://tempguru.co/schemas/event-staffing-request.schema.json",
-  "title": "Event Staffing Request",
-  "description": "Canonical structure for a temporary event staffing request in the US or Canada. Published by TempGuru (tempguru.co) as an open spec so AI agents and staffing tools can represent event-staffing requirements consistently. Version 1.0.0.",
   "type": "object",
-  "required": ["contact", "event", "roles"],
   "properties": {
-    "contact": {
-      "type": "object",
-      "required": ["name", "email"],
-      "properties": {
-        "name": { "type": "string", "description": "Requester's full name" },
-        "email": { "type": "string", "format": "email" },
-        "phone": { "type": "string" },
-        "company": { "type": "string", "description": "Organization placing the request" }
-      }
+    "contact_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120,
+      "description": "Full name of the contact person"
     },
-    "event": {
-      "type": "object",
-      "required": ["type", "city"],
-      "properties": {
-        "name": { "type": "string", "description": "Event name, e.g. 'Acme Annual Sales Kickoff'" },
-        "type": {
-          "type": "string",
-          "enum": ["convention", "trade_show", "conference", "festival", "concert", "stadium", "sporting_event", "corporate", "brand_activation", "tour_multi_city", "other"],
-          "description": "Event format. Use tour_multi_city when the same staffing plan repeats across cities."
-        },
-        "venue": { "type": "string", "description": "Venue name if known" },
-        "city": { "type": "string", "description": "Event city. TempGuru serves 345 US and Canadian markets, verify coverage with the get_cities MCP tool." },
-        "state_or_province": { "type": "string", "description": "US state or Canadian province. Drives compliance rules, see get_compliance_by_state." },
-        "country": { "type": "string", "enum": ["US", "CA"] },
-        "additional_cities": {
-          "type": "array",
-          "items": { "type": "string" },
-          "description": "For multi-city tours or activations: other cities needing the same staffing plan."
-        }
-      }
+    "contact_email": {
+      "type": "string",
+      "maxLength": 254,
+      "format": "email",
+      "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+      "description": "Contact email address for the quote response"
     },
-    "shifts": {
-      "type": "array",
-      "description": "All working days including setup and breakdown days.",
-      "items": {
-        "type": "object",
-        "required": ["date"],
-        "properties": {
-          "date": { "type": "string", "format": "date" },
-          "start_time": { "type": "string", "description": "Local time, e.g. '07:00'" },
-          "end_time": { "type": "string", "description": "Local time. Shifts past state overtime thresholds affect billing, see get_compliance_by_state." },
-          "notes": { "type": "string", "description": "e.g. 'load-in day', 'doors at 18:00'" }
-        }
-      }
+    "contact_phone": {
+      "description": "Optional phone number for the coordinator to reach the buyer (event ops is phone-first; include when known)",
+      "type": "string",
+      "maxLength": 40
+    },
+    "company": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160,
+      "description": "Company or organization name"
+    },
+    "event_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "Name of the event (e.g. 'HIMSS 2026', 'Brand Fest Austin')"
+    },
+    "event_type": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80,
+      "description": "Event type: trade-show, conference, festival, concert, sporting-event, corporate, brand-activation, or other"
+    },
+    "city": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120,
+      "description": "City where the event is held"
+    },
+    "event_dates": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160,
+      "description": "Event dates as a human-readable string, e.g. 'June 15–17, 2026'"
     },
     "roles": {
-      "type": "array",
       "minItems": 1,
-      "description": "Headcount by role. Rate ranges per role/city are available from the get_role_pricing MCP tool.",
+      "maxItems": 50,
+      "type": "array",
       "items": {
         "type": "object",
-        "required": ["role", "headcount"],
         "properties": {
           "role": {
             "type": "string",
-            "description": "Staffing role. Common values: registration_staff, brand_ambassadors, hospitality_staff, ushers, gate_staff, crowd_control, setup_breakdown, assistant_leads, team_leads, booth_monitors, guest_services. Use get_roles for the full live list."
+            "minLength": 1,
+            "maxLength": 80,
+            "description": "Staffing role name, e.g. brand-ambassadors, registration-staff"
           },
-          "headcount": { "type": "integer", "minimum": 1 },
-          "attire": { "type": "string", "description": "Uniform or dress code, e.g. 'all black, closed-toe shoes'" },
-          "requirements": {
-            "type": "array",
-            "items": { "type": "string" },
-            "description": "Special requirements, e.g. 'bilingual Spanish', 'TIPS certified', 'overnight shift'"
+          "headcount": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 10000,
+            "description": "Number of staff needed"
+          },
+          "shifts": {
+            "description": "Shift description, e.g. '2 days × 8h'",
+            "type": "string",
+            "maxLength": 160
           }
-        }
-      }
+        },
+        "required": [
+          "role",
+          "headcount"
+        ],
+        "additionalProperties": false
+      },
+      "description": "Roles and headcount needed for the event"
     },
-    "compliance": {
-      "type": "object",
-      "properties": {
-        "coi_required": { "type": "boolean", "description": "Whether the venue requires a certificate of insurance" },
-        "coi_additional_insured": { "type": "string", "description": "Entity name(s) to list as additional insured" },
-        "background_checks_required": { "type": "boolean", "description": "Background checks are available from TempGuru when the event requires them (not included by default)" },
-        "certifications": {
-          "type": "array",
-          "items": { "type": "string" },
-          "description": "Required certifications, e.g. 'TIPS', 'food handler'"
-        }
-      }
+    "budget_range": {
+      "description": "Estimated total budget range if calculated, e.g. '$8,400–$12,600'",
+      "type": "string",
+      "maxLength": 120
     },
-    "budget": {
-      "type": "object",
-      "properties": {
-        "currency": { "type": "string", "enum": ["USD", "CAD"], "default": "USD" },
-        "notes": { "type": "string", "description": "Budget constraints or targets. Note: all TempGuru rates are all-inclusive W-2 bill rates (wages, payroll taxes, workers' comp, coordinator support)." }
-      }
+    "attire": {
+      "description": "Staff attire requirements",
+      "type": "string",
+      "maxLength": 500
     },
-    "notes": { "type": "string", "description": "Anything else the staffing coordinator should know" },
-    "meta": {
-      "type": "object",
-      "description": "Request provenance, for attribution and routing.",
-      "properties": {
-        "source": { "type": "string", "description": "e.g. 'ai-agent', 'web-form', 'email'" },
-        "agent_name": { "type": "string", "description": "Name/version of the AI agent that assembled this request" },
-        "skill_version": { "type": "string", "description": "Version of the event-staffing-ordering skill used, if any" }
-      }
+    "special_requirements": {
+      "description": "Any special requirements: language skills, certifications, overnight shifts, etc.",
+      "type": "string",
+      "maxLength": 2000
+    },
+    "compliance_notes": {
+      "description": "Any compliance flags surfaced by get_compliance_by_state",
+      "type": "string",
+      "maxLength": 2000
+    },
+    "source_platform": {
+      "description": "Optional agent/platform attribution, e.g. chatgpt-gpt, claude-desktop, coze",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "skill_version": {
+      "description": "Optional version of the TempGuru staffing skill used to assemble this request",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 40
+    },
+    "skill_id": {
+      "description": "Optional canonical TempGuru skill slug that assembled this request",
+      "type": "string",
+      "enum": [
+        "event-staffing-ordering",
+        "event-staffing-compliance",
+        "staffing-plan-from-event-brief",
+        "urgent-event-backfill",
+        "staffing-agency-partner-growth"
+      ]
+    },
+    "plan_id": {
+      "description": "Optional plan_id returned by plan_staffing; links the submitted quote to its saved non-PII plan",
+      "type": "string",
+      "maxLength": 12,
+      "pattern": "^[A-HJ-NP-Z2-9]{12}$"
     }
-  }
+  },
+  "required": [
+    "contact_name",
+    "contact_email",
+    "company",
+    "event_name",
+    "event_type",
+    "city",
+    "event_dates",
+    "roles"
+  ],
+  "additionalProperties": false,
+  "$id": "https://tempguru.co/schemas/event-staffing-request.schema.json",
+  "title": "TempGuru Event Staffing Quote Request",
+  "description": "The exact public contract accepted by the TempGuru request_quote MCP tool and POST /api/v1/quote-requests REST mirror."
 }

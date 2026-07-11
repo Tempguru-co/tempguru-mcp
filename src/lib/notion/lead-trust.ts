@@ -28,6 +28,9 @@
 
 import { promises as dns } from "node:dns";
 import { classifyUserAgent } from "../telemetry/classify-ua";
+import { parseEventStart } from "../dates/parse-event-start";
+
+export { parseEventStart } from "../dates/parse-event-start";
 
 export type TrustLevel = "high" | "medium" | "low";
 
@@ -95,68 +98,6 @@ function resolveMxSafe(domain: string): Promise<boolean | null> {
       ),
     new Promise<null>((resolve) => setTimeout(() => resolve(null), 1500)),
   ]);
-}
-
-// Pull a best-effort START date out of an event-dates string. Handles the ISO
-// and US-numeric forms FIRST (plan_staffing's own schema recommends ISO
-// YYYY-MM-DD), then the free-text month-name form ("January 6-9, 2026" /
-// "Aug 14-15, 2026" / "June 15-17 2026"). Returns null when no month can be
-// identified, rather than silently defaulting to January, which previously made
-// every ISO date ("2026-08-14") parse as Jan 8 and trip the past-event flag.
-// Exported for unit testing.
-const MONTH_INDEX: Record<string, number> = {
-  january: 0, jan: 0, february: 1, feb: 1, march: 2, mar: 2, april: 3, apr: 3,
-  may: 4, june: 5, jun: 5, july: 6, jul: 6, august: 7, aug: 7,
-  september: 8, sept: 8, sep: 8, october: 9, oct: 9, november: 10, nov: 10, december: 11, dec: 11,
-};
-// Full names before abbreviations so "september" matches whole; \b...\b so a
-// month token is never matched inside an ordinary word ("May" but not
-// "Mayflower", "Mar" but not "marketing").
-const MONTH_RE =
-  /\b(january|february|march|april|june|july|august|september|october|november|december|jan|feb|mar|apr|may|jun|jul|aug|sept|sep|oct|nov|dec)\b/;
-
-export function parseEventStart(s: string): Date | null {
-  // Numeric dates first. Collect ALL ISO (2026-08-14, allowing a trailing time)
-  // and US (8/14/2026) matches and take the LATEST plausible one, so a leading
-  // "Setup 2026-01-05, event 2026-08-14" resolves to the event, not the setup.
-  // Round-trip each candidate so an impossible date ("2026-02-31") is skipped
-  // instead of rolling over to March and silently mis-scoring the lead.
-  const validUtc = (y: number, mi: number, day: number): number | null => {
-    if (mi < 0 || mi > 11 || day < 1 || day > 31) return null;
-    const t = Date.UTC(y, mi, day);
-    const d = new Date(t);
-    return d.getUTCMonth() === mi && d.getUTCDate() === day ? t : null;
-  };
-  const utc: number[] = [];
-  for (const m of s.matchAll(/\b(20[2-9]\d)[-/](\d{1,2})[-/](\d{1,2})(?!\d)/g)) {
-    const t = validUtc(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
-    if (t !== null) utc.push(t);
-  }
-  for (const m of s.matchAll(/\b(\d{1,2})[-/](\d{1,2})[-/](20[2-9]\d)\b/g)) {
-    const t = validUtc(Number(m[3]), Number(m[1]) - 1, Number(m[2]));
-    if (t !== null) utc.push(t);
-  }
-  if (utc.length) return new Date(Math.max(...utc));
-
-  // Free-text month-name form. First month token in TEXT order (not calendar
-  // order), whole-word, so "June 2026 marketing expo" is June, not March.
-  const years = [...s.matchAll(/\b(20[2-9]\d)\b/g)].map((m) => Number(m[1]));
-  if (!years.length) return null;
-  const lower = s.toLowerCase();
-  const mMatch = lower.match(MONTH_RE);
-  if (!mMatch) return null; // no month token -> unparseable (soft flag), not January
-  const monthIdx = MONTH_INDEX[mMatch[1]];
-  const year = Math.max(...years);
-  // Take the day from AFTER the month token, so "2 shifts July 20-21, 2026"
-  // reads July 20, not July 2 (the leading "2" is a count, not a date).
-  let day = 1;
-  const afterMonth = lower.slice((mMatch.index ?? 0) + mMatch[1].length).replace(/20[2-9]\d/g, " ");
-  const dm = afterMonth.match(/\b([0-3]?\d)\b/);
-  if (dm) { const d = Number(dm[1]); if (d >= 1 && d <= 31) day = d; }
-  const t = new Date(Date.UTC(year, monthIdx, day));
-  // Impossible month/day combo ("Feb 31"): keep the month, drop the day.
-  if (t.getUTCMonth() !== monthIdx || t.getUTCDate() !== day) return new Date(Date.UTC(year, monthIdx, 1));
-  return t;
 }
 
 export async function scoreLeadTrust(input: LeadTrustInput, source: LeadTrustSource = {}): Promise<LeadTrust> {

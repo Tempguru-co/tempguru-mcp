@@ -3,10 +3,11 @@
 Adds integration docs for [TempGuru](https://tempguru.co), a W-2 event staffing platform
 covering 345 US and Canadian cities. The [`tempguru`](https://pypi.org/project/tempguru/)
 package ([source](https://github.com/Tempguru-co/tempguru-mcp/tree/main/clients/python))
-ships a `langchain` extra providing six tools over TempGuru's free, no-auth public API:
+ships a `langchain` extra providing nine tools over TempGuru's free, no-auth public API:
 
-- Five read-only lookups: city coverage, staffing roles, booking lead times, all-inclusive
-  hourly rates, and per-state labor compliance.
+- Eight read operations: city coverage, staffing roles, booking lead times,
+  all-inclusive hourly rates, per-state labor compliance, booking policies,
+  saved-plan resume, and quote-receipt status.
 - One opt-in write tool that submits a confirmed staffing plan for a human-reviewed quote
   (excludable via `get_tools(include_quote_submission=False)`).
 

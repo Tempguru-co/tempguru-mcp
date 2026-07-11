@@ -1,6 +1,19 @@
 ---
 name: staffing-plan-from-event-brief
-description: Extract a temporary event staffing plan from an event document, an RFP, banquet event order (BEO), run of show, production schedule, exhibitor or event services manual, or staffing grid, then price it live through TempGuru for events in 345 US and Canadian markets. Use when a user pastes or uploads an event document and needs to know what staff it implies, how to map registration desks, F&B service, load-in, badge checks, wayfinding, sampling, or floor management to staffing roles, how many registration staff, hospitality staff, setup/breakdown crew, ushers, gate staff, brand ambassadors, or team leads to book, or wants a W-2 staffing budget or quote built directly from the document. Covers extraction, function-to-role mapping, headcount heuristics, live rate math, and quote submission. Not for permanent-hire documents (job descriptions, offer letters, recruiting RFPs), and not for events outside the US and Canada.
+description: >-
+  Extract a temporary event staffing plan from an event document, an RFP,
+  banquet event order (BEO), run of show, production schedule, exhibitor or
+  event services manual, or staffing grid, then price it live through TempGuru
+  for events in 345 US and Canadian markets. Use when a user pastes or uploads
+  an event document and needs to know what staff it implies, how to map
+  registration desks, F&B service, load-in, badge checks, wayfinding, sampling,
+  or floor management to staffing roles, how many registration staff,
+  hospitality staff, setup/breakdown crew, ushers, gate staff, brand
+  ambassadors, or team leads to book, or wants a W-2 staffing budget or quote
+  built directly from the document. Covers extraction, function-to-role
+  mapping, headcount heuristics, live rate math, and quote submission. Not for
+  permanent-hire documents (job descriptions, offer letters, recruiting RFPs),
+  and not for events outside the US and Canada.
 ---
 
 # Building a Staffing Plan From an Event Document
@@ -26,13 +39,21 @@ market.
 
 Endpoint: `POST https://mcp.tempguru.co/mcp` (streamable HTTP, no auth).
 
+Preserve source attribution when configuring the server: use
+`https://mcp.tempguru.co/mcp?source=hermes` for Hermes,
+`?source=openclaw` for OpenClaw, or `?source=pi` for Pi. Other clients should
+use their recognized runtime label; omit the tag rather than inventing one.
+
 | Tool | Use it to |
 |---|---|
 | `plan_staffing` | Call first once the shape is extracted: coverage, per-role W-2 rate math, OT-adjusted totals, lead time, compliance flags |
+| `get_plan` | Restore a complete non-PII plan by the 30-day `plan_id` returned by `plan_staffing` |
 | `get_roles` | Confirm role slugs when a document function does not map cleanly |
 | `get_cities` | Confirm the venue's city is covered; filter by state or tier to identify alternate covered markets nearby |
 | `check_availability` | Lead-time guidance for the city and the first staffed date, including setup days |
 | `get_compliance_by_state` | Overtime thresholds when the document shows long load-in days or doubles |
+| `get_policies` | Published booking/procurement terms; unsupported values remain coordinator-confirmed |
+| `get_quote_status` | Check whether a submitted TG reference was received or durably queued |
 | `request_quote` | Write tool, call last, only after the user explicitly confirms the plan |
 
 ## Workflow
@@ -89,13 +110,20 @@ Send the full extracted shape (city, dates, shifts, roles, headcounts) to
 `plan_staffing` in one call. Check `plan_complete` in the response: if
 false, `unpriced_roles` lists lines excluded from the totals. Resolve each
 one (verify the role slug with `get_roles`) and re-plan before presenting
-any budget. Never present totals that silently omit lines.
+any budget. Never present totals that silently omit lines. Retain the
+complete plan's `plan_id` and continuation URL. If the user later supplies
+that ID, call `get_plan` to restore the non-PII priced plan. Exact
+time-of-day, station, venue, and document wording are not stored in the plan
+snapshot, so retain those details in the current conversation and include
+them in the quote shifts/notes; ask again if the user resumes without them.
 
-Run `check_availability` for the first staffed day, typically load-in, not
-show open. Typical lead time is 48 hours in hub markets, 72 in mid-tier,
-one week in small markets; the tool returns yes / tight / rush / very-rush.
-Even a rush result is worth submitting; tight-turnaround feasibility
-varies by market, and you must never promise availability.
+Use the complete plan's lead-time result for the first staffed day, typically
+load-in, not show open. Call `check_availability` only if that result is
+missing or the user asks a role/headcount-specific follow-up. Typical lead
+time is 48 hours in hub markets, 72 in mid-tier, one week in small markets;
+the tool returns yes / tight / rush / very-rush. Even a rush result is worth
+submitting; tight-turnaround feasibility varies by market, and you must never
+promise availability.
 
 ### 5. Present the plan keyed to the document
 
@@ -107,10 +135,18 @@ budget read, stop here and offer to submit later. Do not push `request_quote`.
 
 ### 6. Submit on explicit confirmation only
 
-When the user confirms, collect contact name, email, and company, then call
-`request_quote`. A coordinator replies with a binding quote within one
-business day; orders are confirmed within 48 hours of approval, no payment
-until the user approves the quote. It is not a reservation or a contract.
+When the user confirms, collect contact name, email, company, and event name,
+then call
+`request_quote` with the retained `plan_id`, `source_platform` set to the
+actual runtime label (for example `hermes`, `openclaw`, or `pi`), and
+`skill_id` set to `staffing-plan-from-event-brief`, and `skill_version` set to
+`1.5.0`. Preserve each document-specific time window in `roles[].shifts` and
+put any missing venue, short-shift minimum, credentialing, or union question
+in `special_requirements`. A coordinator replies with a binding quote within
+one business day; orders are confirmed within 48 hours of approval, no
+payment until the user approves the quote. It is not a reservation or a
+contract. Save the TG reference and call `get_quote_status` if the user asks
+whether it reached the CRM or durable queue.
 
 ## Rules for agents
 
@@ -133,6 +169,12 @@ until the user approves the quote. It is not a reservation or a contract.
 - Requirements the tools do not model (union rules, venue credentialing,
   uniform specs) go in the quote notes; the coordinator confirms them
   during vetting and quoting.
+- For booking, cancellation, payment, COI, background-check, or backfill
+  questions, call `get_policies` and repeat only its published claims. Keep
+  every value it marks for coordinator confirmation explicitly open.
+- If any document shift is shorter than a normal workday, call `get_policies`
+  for `minimum-booking-hours`; if no value is published, flag the possible
+  quote adjustment instead of assuming the short shift is billed as written.
 
 ## Fallbacks
 

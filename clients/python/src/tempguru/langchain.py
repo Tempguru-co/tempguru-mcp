@@ -34,7 +34,7 @@ def get_tools(
 ) -> List:
     """Build the TempGuru tool list for a LangChain or LangGraph agent.
 
-    Five read-only lookup tools, plus (by default) the opt-in quote
+    Eight read-only tools, plus (by default) the opt-in quote
     submission tool. Set ``include_quote_submission=False`` for a strictly
     read-only toolset.
     """
@@ -45,16 +45,14 @@ def get_tools(
         """List the 345 US and Canadian cities where TempGuru provides W-2
         event staffing. Use this to confirm coverage before quoting anything.
         Optional filters: state (two-letter code like 'CA' or full name),
-        tier ('hub' = 25 major metros, 'mid' = 129 secondary markets,
-        'small' = 191 tertiary markets)."""
+        tier ('hub' = 25 major metros, 'mid' = 128 secondary markets,
+        'small' = 192 tertiary markets)."""
         return tg.cities(state=state or None, tier=tier or None)
 
     @_tool
     def event_staffing_roles() -> dict:
-        """List all 11 event staffing roles TempGuru offers (brand
-        ambassadors, registration staff, ushers, hospitality, gate staff,
-        booth monitors, crowd control, guest services, setup/breakdown
-        crews, team leads) with descriptions and skill tiers. The returned
+        """List the current 19-role event staffing catalog with descriptions
+        and skill tiers. The returned
         slugs are the keys for the pricing and availability tools."""
         return tg.roles()
 
@@ -87,12 +85,37 @@ def get_tools(
         and meal breaks). Operational guidance, not legal advice."""
         return tg.compliance(state=state)
 
+    @_tool
+    def event_staffing_policies(topic: str = "") -> dict:
+        """Get published TempGuru booking and procurement policies. Pass an
+        optional topic such as payment-terms or cancellation-rescheduling.
+        Preserve every confirm_with_coordinator flag; never invent a missing
+        minimum, cancellation window, fee, deposit term, or response time."""
+        return tg.policies(topic=topic or None)
+
+    @_tool
+    def restore_event_staffing_plan(plan_id: str) -> dict:
+        """Restore a non-PII staffing plan saved for 30 days. Use only a
+        plan_id supplied by the user or returned by TempGuru; never guess or
+        enumerate IDs. Review the restored plan before quote submission."""
+        return tg.plan(plan_id=plan_id)
+
+    @_tool
+    def event_staffing_quote_status(reference: str) -> dict:
+        """Check whether a TempGuru TG quote reference was received by the
+        CRM or durably queued. Version 1 does not expose quote_sent or won;
+        a not-found response does not prove the CRM lead is absent."""
+        return tg.quote_status(reference=reference)
+
     tools = [
         event_staffing_cities,
         event_staffing_roles,
         event_staffing_availability,
         event_staffing_pricing,
         event_staffing_state_compliance,
+        event_staffing_policies,
+        restore_event_staffing_plan,
+        event_staffing_quote_status,
     ]
 
     if include_quote_submission:
@@ -107,10 +130,13 @@ def get_tools(
             city: str,
             event_dates: str,
             roles: list,
+            contact_phone: str = "",
             budget_range: str = "",
             attire: str = "",
             special_requirements: str = "",
             compliance_notes: str = "",
+            plan_id: str = "",
+            skill_version: str = "",
         ) -> dict:
             """Submit a confirmed event staffing plan to TempGuru for a
             human-reviewed quote (response within one business day). OPT-IN
@@ -129,10 +155,14 @@ def get_tools(
                 city=city,
                 event_dates=event_dates,
                 roles=roles,
+                contact_phone=contact_phone or None,
                 budget_range=budget_range or None,
                 attire=attire or None,
                 special_requirements=special_requirements or None,
                 compliance_notes=compliance_notes or None,
+                source_platform="langchain",
+                skill_version=skill_version or None,
+                plan_id=plan_id or None,
             )
 
         tools.append(submit_event_staffing_quote_request)

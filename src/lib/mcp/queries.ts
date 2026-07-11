@@ -14,9 +14,13 @@ import {
   PRICING_META,
   STATES,
   STATE_META,
+  POLICIES,
+  POLICIES_META,
   findCity,
   findRole,
   findState,
+  cityDetailUrl,
+  roleDetailUrl,
   suggestCity,
   suggestRole,
   isSecurityPhrase,
@@ -25,11 +29,13 @@ import {
   type CityTier,
   type PriceBand,
   type RolePricing,
+  type Policy,
 } from "./data";
+import { parseEventStart } from "../dates/parse-event-start";
 
 // Re-export shared types so REST/MCP route files can import everything
 // query-related from one place.
-export type { CityTier, Role, PriceBand, RolePricing } from "./data";
+export type { CityTier, Role, PriceBand, RolePricing, Policy } from "./data";
 
 // ─── Result type ─────────────────────────────────────────────────────────
 
@@ -110,7 +116,7 @@ const cityRow = (c: (typeof CITIES)[number]): CityRow => ({
   state_abbr: c.state_abbr,
   country: c.country,
   tier: c.tier,
-  url: `https://tempguru.co/insights/${c.slug}`,
+  url: cityDetailUrl(c),
 });
 
 export type CitiesData = {
@@ -231,8 +237,12 @@ export function queryRoles(): QueryResult<RolesData> {
   return ok({
     total: ROLES.length,
     roles: ROLES.map((r) => ({
-      ...r,
-      url: `https://tempguru.co/insights/${r.slug}-in-new-york-city`,
+      slug: r.slug,
+      name: r.name,
+      description: r.description,
+      skill_tier: r.skill_tier,
+      typical_shift_length_hours: r.typical_shift_length_hours,
+      url: roleDetailUrl(r),
     })),
   });
 }
@@ -315,7 +325,9 @@ export function queryAvailability(
 
   // Strict ISO validation first: JS Date rolls impossible dates over
   // (2027-02-30 → Mar 2), which silently plans against a date the user never
-  // gave. Round-trip the components; non-ISO strings still get Date parsing.
+  // gave. Recognized human dates use the same deterministic parser as lead
+  // trust and saved plans; native Date parsing misreads ranges such as
+  // "Aug 14-15, 2026" as a date in 2015.
   const iso = input.date.trim().match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
   let eventDate: Date;
   if (iso) {
@@ -330,14 +342,15 @@ export function queryAvailability(
     }
     eventDate = dt;
   } else {
-    eventDate = new Date(input.date);
-    if (isNaN(eventDate.getTime())) {
+    const parsed = parseEventStart(input.date);
+    if (!parsed) {
       return ok({
         city_found: true,
         city: cityMatch.name,
         error: `Invalid date: "${input.date}". Expected ISO format (YYYY-MM-DD) or recognizable date string.`,
       });
     }
+    eventDate = parsed;
   }
 
   const now = new Date();
@@ -565,6 +578,66 @@ export function queryStateCompliance(
     currency_note:
       "Minimum wages change every January (and mid-year in some states); local ordinances may set higher floors. Verify against the state DOL (min_wage_source) before relying on it.",
     citation_note: STATE_META.citation_note,
+  });
+}
+
+// ─── Booking / procurement policies ─────────────────────────────────────
+
+export type PoliciesQuery = { topic?: string };
+
+export type PoliciesData = {
+  status: "policies";
+  policy_found: true;
+  data_version: string;
+  updated: string;
+  scope: string;
+  policies: Policy[];
+  todo_for_megan: string[];
+  disclaimer: string;
+};
+
+export type PolicyNotFound = {
+  status: "policy_not_found";
+  policy_found: false;
+  requested: string;
+  available_topics: string[];
+  message: string;
+};
+
+const normalizePolicyTopic = (value: string) =>
+  value.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+
+export function queryPolicies(input: PoliciesQuery = {}): QueryResult<PoliciesData | PolicyNotFound> {
+  let selected = POLICIES;
+  if (input.topic?.trim()) {
+    const requested = normalizePolicyTopic(input.topic);
+    selected = POLICIES.filter(
+      (policy) =>
+        normalizePolicyTopic(policy.topic) === requested ||
+        normalizePolicyTopic(policy.title) === requested,
+    );
+    if (selected.length === 0) {
+      return ok({
+        status: "policy_not_found",
+        policy_found: false,
+        requested: input.topic,
+        available_topics: POLICIES.map((policy) => policy.topic),
+        message:
+          `No published TempGuru policy topic matched "${input.topic}". ` +
+          "Choose an available topic or ask a coordinator at megan@tempguru.co for event-specific terms.",
+      });
+    }
+  }
+
+  return ok({
+    status: "policies",
+    policy_found: true,
+    data_version: POLICIES_META.version,
+    updated: POLICIES_META.updated,
+    scope: POLICIES_META.scope,
+    policies: selected,
+    todo_for_megan: [...new Set(selected.flatMap((policy) => policy.todo_for_megan))],
+    disclaimer: POLICIES_META.disclaimer,
   });
 }
 

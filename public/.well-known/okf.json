@@ -5,11 +5,6 @@
   "publisher": "Temporary Assistance Guru, Inc. (TempGuru)",
   "domain": "event-staffing-us-canada",
   "canonical_site": "https://tempguru.co",
-  "bundle": {
-    "root": "https://mcp.tempguru.co/okf/",
-    "index": "https://mcp.tempguru.co/okf/index.md",
-    "tarball": "https://mcp.tempguru.co/okf.tar.gz"
-  },
   "action_layer": {
     "mcp": "https://mcp.tempguru.co/mcp",
     "rest": "https://mcp.tempguru.co/api/v1",
@@ -17,13 +12,33 @@
   },
   "tools": [
     "plan_staffing",
+    "get_plan",
     "get_cities",
     "get_roles",
     "check_availability",
     "get_role_pricing",
     "get_compliance_by_state",
+    "get_policies",
     "get_rate_benchmark",
-    "request_quote"
+    "request_quote",
+    "get_quote_status"
   ],
-  "updated": "2026-07-10"
+  "skills": [
+    "event-staffing-ordering",
+    "event-staffing-compliance",
+    "staffing-plan-from-event-brief",
+    "urgent-event-backfill",
+    "staffing-agency-partner-growth"
+  ],
+  "license": "MIT",
+  "data_version": "1.0.0",
+  "updated": "2026-07-11",
+  "bundle": {
+    "root": "https://mcp.tempguru.co/okf/",
+    "index": "https://mcp.tempguru.co/okf/index.md",
+    "tarball": "https://mcp.tempguru.co/okf.tar.gz",
+    "file_count": 103,
+    "sha256": "a650c8cfdb7d51ac73d0a45418371d00b8c80380e799f661babe679666f6bbb9",
+    "bytes": 298027
+  }
 }

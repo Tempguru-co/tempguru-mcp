@@ -144,14 +144,14 @@ lead_time_days:
     urgent: null         # TODO: TJ — e.g., 1–2?
 
   mid:
-    # mid = regional hubs, mid-size metros (~129 cities)
+    # mid = regional hubs, mid-size metros (~128 cities)
     comfortable: null    # TODO: TJ
     standard: null       # TODO: TJ
     rush: null           # TODO: TJ
     urgent: null         # TODO: TJ
 
   small:
-    # small = tertiary markets, secondary towns (~191 cities)
+    # small = tertiary markets, secondary towns (~192 cities)
     comfortable: null    # TODO: TJ — likely 14+?
     standard: null       # TODO: TJ
     rush: null           # TODO: TJ — small market rush may not be reliably serviceable

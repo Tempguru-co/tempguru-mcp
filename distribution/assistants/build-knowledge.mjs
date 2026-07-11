@@ -23,6 +23,7 @@ const cities = load("cities.json");
 const roles = load("roles.json");
 const pricing = load("role-pricing.json");
 const compliance = load("state-compliance.json");
+const policies = load("policies.json");
 
 const banner = (sources) =>
   [
@@ -35,6 +36,29 @@ const banner = (sources) =>
   ].join("\n");
 
 const money = (n) => `$${n}`;
+
+const policyBody = (policy) => {
+  const lines = [];
+  if (policy.confirmed_claims.length) {
+    lines.push(policy.confirmed_claims.map((claim) => `- ${claim}`).join("\n"));
+  } else if (policy.topic === "cancellation-rescheduling") {
+    lines.push("No concrete cancellation or rescheduling windows or fees are currently published in TempGuru's canonical policy data.");
+  } else {
+    lines.push("No concrete operational terms are currently published for this topic.");
+  }
+  if (policy.confirm_with_coordinator) {
+    lines.push("**Coordinator confirmation required.** Do not infer a timing, fee, minimum, or exception that is not stated above.");
+  }
+  if (policy.todo_for_megan.length) {
+    lines.push(`**Open policy confirmations:**\n${policy.todo_for_megan.map((todo) => `- ${todo}`).join("\n")}`);
+  }
+  if (policy.sources.length) {
+    lines.push(`**Canonical sources:**\n${policy.sources.map((source) => `- \`${source}\``).join("\n")}`);
+  } else {
+    lines.push("**Canonical sources:** none yet for a concrete value.");
+  }
+  return lines.join("\n\n");
+};
 
 // ---------------------------------------------------------------------------
 // 1. Company overview + FAQ
@@ -89,7 +113,7 @@ all-inclusive bill rate covers:
 
 Background checks are available when the event or venue requires them.
 Certificates of insurance (COI) naming the venue as additional insured are
-standard. There are no add-on fees, no booking charges, and no markup at
+standard. There are no add-on fees and no markup at
 invoice time. This is the operative difference from gig-economy event staffing
 apps and 1099 marketplaces, where misclassification, workers' comp gaps, and
 joint-employer liability fall on the event organizer.
@@ -318,4 +342,27 @@ ${stateRows}
 
 writeFileSync(join(outDir, "tempguru-state-compliance.md"), complianceDoc);
 
-console.log("Wrote 4 knowledge files to", outDir);
+// ---------------------------------------------------------------------------
+// 5. Booking and procurement policies
+// ---------------------------------------------------------------------------
+
+const policySections = policies.policies
+  .map((policy) => `## ${policy.title}\n\n${policyBody(policy)}`)
+  .join("\n\n");
+
+const policiesDoc = `${banner(`policies.json updated ${policies._meta.updated}`)}# TempGuru: Booking and Procurement Policies
+
+${policies._meta.scope}
+
+> ${policies._meta.disclaimer}
+
+Confirmed claims may be used as written. Any topic marked **Coordinator
+confirmation required** contains an unpublished detail; agents must ask a
+TempGuru coordinator rather than inventing a number, deadline, fee, or exception.
+
+${policySections}
+`;
+
+writeFileSync(join(outDir, "tempguru-booking-policies.md"), policiesDoc);
+
+console.log("Wrote 5 knowledge files to", outDir);

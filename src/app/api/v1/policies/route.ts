@@ -1,0 +1,34 @@
+// GET /api/v1/policies, REST mirror of MCP get_policies.
+
+import { queryPolicies } from "@/lib/mcp/queries";
+import {
+  jsonBadRequest,
+  jsonError,
+  jsonOk,
+  optionalParam,
+  optionsPreflight,
+} from "@/lib/api/responses";
+import { trackRest } from "@/lib/api/track-rest";
+
+export async function GET(request: Request) {
+  const url = new URL(request.url);
+  const topic = optionalParam(url, "topic");
+  if (topic && topic.length > 80) {
+    await trackRest(request, { tool: "get_policies", status: "error" });
+    return jsonBadRequest("topic must be at most 80 characters.", "topic");
+  }
+  const result = queryPolicies({ topic });
+  if (!result.ok) {
+    await trackRest(request, { tool: "get_policies", status: "error" });
+    return jsonError(result.error);
+  }
+  await trackRest(request, {
+    tool: "get_policies",
+    status: result.data.policy_found ? "success" : "error",
+  });
+  return jsonOk({ topic: topic ?? null }, result.data);
+}
+
+export async function OPTIONS() {
+  return optionsPreflight();
+}

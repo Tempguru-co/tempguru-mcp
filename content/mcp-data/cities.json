@@ -6,8 +6,8 @@
     "total_cities": 345,
     "tier_counts": {
       "hub": 25,
-      "mid": 129,
-      "small": 191,
+      "mid": 128,
+      "small": 192,
       "unknown": 0
     }
   },
@@ -250,7 +250,8 @@
       "state": "California",
       "state_abbr": "CA",
       "country": "US",
-      "tier": "mid"
+      "tier": "mid",
+      "detail_url": "https://tempguru.co/california-event-staffing"
     },
     {
       "slug": "anchorage-event-staffing",

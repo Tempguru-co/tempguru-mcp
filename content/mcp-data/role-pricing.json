@@ -5,8 +5,8 @@
     "notes": "All rates USD/hr, all-inclusive (worker pay + workers comp + general liability + payroll taxes). Canadian markets bill in CAD at parity; client invoicing converts. Floors enforced, Brand Ambassadors never below $40 anywhere. Assistant Leads priced at the per-tier midpoint between Event Staff and Team Leads. General event-labor roles (parking, load-crew, concessions, cleanup-crew, merchandise, line-management, general-labor) bill at the event-staff base rate; Operations Support bills at the Team Lead rate.",
     "currency_default": "USD",
     "tier_definitions": {
-      "small": "Tertiary markets (~191 cities), smaller metros, secondary towns",
-      "mid": "Secondary markets (~129 cities), regional hubs, mid-size metros",
+      "small": "Tertiary markets (~192 cities), smaller metros, secondary towns",
+      "mid": "Secondary markets (~128 cities), regional hubs, mid-size metros",
       "hub": "Primary markets (~25 cities), NYC, LA, SF, Chicago, Boston, Miami, DC, Houston, Dallas, Atlanta, Seattle, Denver, etc."
     }
   },

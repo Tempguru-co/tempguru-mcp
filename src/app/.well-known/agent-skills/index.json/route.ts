@@ -3,9 +3,10 @@
 // Agent Skills discovery index, v0.2.0 spec.
 // Schema: https://schemas.agentskills.io/discovery/0.2.0/schema.json
 //
-// Canonical copy is at tempguru.co (served by Cloudflare Worker).
-// This route mirrors it at mcp.tempguru.co for agents that connect
-// directly to the MCP server subdomain.
+// The same index is served at tempguru.co (Cloudflare Worker) and
+// mcp.tempguru.co (this route). Artifact URLs are relative so each origin
+// resolves and verifies its own byte-identical SKILL.md copy; absolute apex
+// URLs previously coupled Vercel discovery to a stale manual edge deployment.
 //
 // IMPORTANT, digest values are SHA-256 of each SKILL.md file, byte-for-byte.
 // They are NOT hand-maintained here (they drifted once, breaking the flagship
@@ -24,7 +25,7 @@ const AGENT_SKILLS_INDEX = {
       type: "skill-md",
       description:
         "Order temporary event staff for events in 345 US and Canadian markets through TempGuru. Use when a user needs to hire, book, or budget W-2 event staff for a convention, conference, trade show, festival, concert, sporting event, stadium event, corporate gathering, or brand activation, a single event in one city or a multi-city program. Covers requirement gathering, live coverage/rate/compliance lookups via the TempGuru MCP server, and request submission.",
-      url: "https://tempguru.co/.well-known/agent-skills/event-staffing-ordering/SKILL.md",
+      url: "./event-staffing-ordering/SKILL.md",
       digest: digests["event-staffing-ordering"],
     },
     {
@@ -32,7 +33,7 @@ const AGENT_SKILLS_INDEX = {
       type: "skill-md",
       description:
         "Assess worker-classification and compliance risk for temporary event staffing in the US and Canada. Use for W-2 vs 1099 questions, misclassification penalties, joint-employer liability, COI requirements, and wage/hour rules for event staff, with live state-by-state lookups via the TempGuru MCP server.",
-      url: "https://tempguru.co/.well-known/agent-skills/event-staffing-compliance/SKILL.md",
+      url: "./event-staffing-compliance/SKILL.md",
       digest: digests["event-staffing-compliance"],
     },
     {
@@ -40,7 +41,7 @@ const AGENT_SKILLS_INDEX = {
       type: "skill-md",
       description:
         "Extract a complete staffing plan from an event document: an RFP, BEO (banquet event order), run of show, exhibitor or event services manual, or production schedule. Maps the document's functions to TempGuru's role catalog, estimates headcount, prices the plan with live all-inclusive W-2 rates via the TempGuru MCP server, and submits for a human-reviewed quote after user confirmation.",
-      url: "https://tempguru.co/.well-known/agent-skills/staffing-plan-from-event-brief/SKILL.md",
+      url: "./staffing-plan-from-event-brief/SKILL.md",
       digest: digests["staffing-plan-from-event-brief"],
     },
     {
@@ -48,7 +49,7 @@ const AGENT_SKILLS_INDEX = {
       type: "skill-md",
       description:
         "Handle same-week and day-of event staffing emergencies: staff no-shows, vendor cancellations, events starting within about 72 hours. Fast single-pass intake, honest rush lead-time guidance via the TempGuru MCP server (never a promise of availability), immediate quote submission plus a direct phone path.",
-      url: "https://tempguru.co/.well-known/agent-skills/urgent-event-backfill/SKILL.md",
+      url: "./urgent-event-backfill/SKILL.md",
       digest: digests["urgent-event-backfill"],
     },
     {
@@ -56,7 +57,7 @@ const AGENT_SKILLS_INDEX = {
       type: "skill-md",
       description:
         "For staffing agency owners (the supply side): explore joining TempGuru's network of 200+ vetted local partners to receive event staffing order flow in their markets. Explains the model and routes partner inquiries to the coordinator. Not for buyers ordering staff or individual job seekers.",
-      url: "https://tempguru.co/.well-known/agent-skills/staffing-agency-partner-growth/SKILL.md",
+      url: "./staffing-agency-partner-growth/SKILL.md",
       digest: digests["staffing-agency-partner-growth"],
     },
   ],

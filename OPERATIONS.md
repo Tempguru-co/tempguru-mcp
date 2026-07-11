@@ -1,6 +1,8 @@
 # Operations, Deploy, Telemetry & Admin Dashboard
 
-Internal documentation for the telemetry layer added 2026-06-04. The MCP server itself is stateless; this doc covers the *measurement* layer that sits alongside it.
+Internal documentation for the telemetry and non-PII lifecycle layer. Most
+business data is static, while complete staffing plans and quote-receipt stubs
+use short-lived Redis records so an agent can resume work across conversations.
 
 ---
 
@@ -36,7 +38,7 @@ withAcceptNormalization (CORS + Accept-header shim)               │
   ▼                                                                │
 mcp-handler → tool callback                                        │
   │                                                                │
-  │  reads ctx, calls queryX(), records track() (fire-and-forget) │
+  │  reads ctx, calls queryX(), records track() (awaited + capped) │
   ▼                                                                ▼
 queryX (pure function, no I/O)                              Upstash Redis
   │                                                                ▲
@@ -49,26 +51,44 @@ GET /admin (server component) ─────────► getMetrics() ──
                        Dashboard HTML
 ```
 
-Telemetry writes never block MCP responses. If Upstash is down, `ff()` swallows the error silently and the tool call still returns normally to the client.
+Telemetry and lifecycle writes are awaited only up to a short cap and fail open.
+If Upstash is absent or slow, lookup tools still work; a complete plan simply
+has no resumable `plan_id`, and quote capture retains its existing CRM/fallback
+behavior.
 
 ---
 
 ## Storage schema
 
-All keys are namespaced by UTC date (`YYYY-MM-DD`). Every daily key carries a **90-day TTL**.
+Telemetry keys are namespaced by UTC date (`YYYY-MM-DD`) and every daily key
+carries a **90-day TTL**. Non-daily operational keys list their retention below.
 
 | Key | Type | Contents |
 |---|---|---|
 | `tools:{date}` | HASH | `tool_name → count` |
 | `uas:{date}` | HASH | `ua_class → count` |
+| `ua:unclassified:{date}` | HASH | fixed `unclassified` bucket only; raw user-agent discarded |
 | `countries:{date}` | HASH | `iso2 → count` |
 | `status:{date}` | HASH | `success`/`error` → count |
+| `channels:{date}` | HASH | `mcp`/`rest` invocation count |
+| `sources:{date}` | HASH | allowlisted controlled-source tag → count |
+| `funnel:{date}` | HASH | `channel:event` → plan/quote lifecycle count |
+| `source-platforms:{date}` | HASH | allowlisted source platform → successful new quote leads |
+| `source-skills:{date}` | HASH | canonical TempGuru skill slug → successful new quote leads |
 | `queries:cities:{date}` | ZSET | city slug, score = invocation count |
+| `queries:cities:unmatched:{date}` | HASH | fixed `unmatched` bucket only; raw city input discarded |
 | `queries:roles:{date}` | ZSET | role slug, score = invocation count |
 | `queries:states:{date}` | ZSET | state code, score = invocation count |
 | `recent:invocations` | LIST | last 200 events, each a JSON string |
 | `dates:active` | ZSET | `YYYY-MM-DD` → unix timestamp (for time-series widget) |
 | `ratelimit:quote:{hash}` | STRING | fixed-window counter for `POST /api/v1/quote-requests` (20/IP/hour) |
+| `plan:{id}` | JSON STRING | explicitly allowlisted, non-PII complete plan snapshot (30-day TTL) |
+| `leads:ref:{TG-REF}` | JSON STRING | non-PII `received`/`queued` quote status stub (90-day TTL) |
+| `lead:dedup:{hash}` | STRING | 30-second processing lease promoted to a 24-hour captured quote result; fingerprint includes role/headcount/shift |
+| `leads:pending` | LIST | opaque retry-record IDs waiting for replay (90-day housekeeping TTL; no PII) |
+| `leads:pending:inflight` | LIST | opaque IDs atomically claimed for replay and recoverable after interruption (90-day housekeeping TTL; no PII) |
+| `leads:pending:record:{id}` | JSON STRING | full PII CRM retry record, one key per lead with its own immutable 90-day TTL (operational queue, not telemetry) |
+| `leads:pending:drain-lock` | STRING | random queue-drain lease token (90-second TTL; no PII) |
 
 `recent:invocations` is trimmed on every write via `LTRIM 0 199`.
 
@@ -102,7 +122,7 @@ route many users through shared egress IPs.
 
 ### Adding a new UA class
 
-`other` is now **self-diagnosing**: when a UA falls into `other`, the raw string is captured to the Redis hash `ua:unclassified:{date}` (truncated 200 chars, 90-day TTL) and surfaced on the admin dashboard as the **"Unclassified user-agents (raw)"** card (top 25). To add a class: read that card, add a new regex branch in `classify-ua.ts`, bump the `UaClass` union type. The classifier runs at MCP-call time, so changes apply to new traffic only, historical events keep their old classification.
+When a UA falls into `other`, telemetry increments only the fixed `unclassified` bucket in `ua:unclassified:{date}`. The raw public user-agent is deliberately discarded so it cannot carry a name, email, phone, token, or other PII into Redis. To add a class, inspect request logs outside telemetry under the applicable retention/access policy, add a regex branch in `classify-ua.ts`, and bump the `UaClass` union type. The classifier runs at MCP-call time, so changes apply to new traffic only; historical events keep their old classification.
 
 ---
 
@@ -120,14 +140,15 @@ Top right: 1d / 7d / 30d / 90d. URL is `?days=N`. Maximum window is 90 days (mat
 - **Daily volume chart**, bar per day in window
 - **By tool**, invocation count per tool, sorted desc with %-bars
 - **By UA class**, same breakdown for clients (most strategically useful, Claude vs Cursor vs Qwen vs probes vs crawlers)
+- **Quote leads by platform and canonical skill**, which runtime and workflow produced each successful new lead
 - **Top cities / roles / states**, top 20 each, demand signal from queries
 - **By country**, Vercel edge geolocation
-- **Recent invocations**, last 50 events with timestamps, tool, UA class, country, status, params
+- **Recent invocations**, last 50 events with timestamps, tool, UA class, country, status, and canonical catalog dimensions
 
-### What's NOT captured
+### What's NOT captured in telemetry
 - No raw IPs
 - No request bodies or response bodies
-- No user content (queries are just slug-form parameters, `boston`, `brand-ambassadors`)
+- No request/response content or lifecycle identifiers
 - No PII
 - No cookies, no analytics pixels, no cross-site identifiers
 
@@ -144,10 +165,24 @@ Set via Vercel project settings (Production + Preview).
 | `KV_REST_API_READ_ONLY_TOKEN` | Upstash integration (auto-set) | Read-only token (unused but populated) |
 | `KV_URL` | Upstash integration (auto-set) | Redis protocol URL (unused by current code) |
 | `ADMIN_PASSWORD` | Manual | Dashboard login password |
+| `NOTION_API_KEY` | Manual | CRM write integration for `request_quote` (legacy `Notion_API_Key` casing is also read) |
+| `PLAN_LINK_SECRET` | Manual, optional | HMAC-SHA256 key for signed 30-day plan handoff links; `sig`/`exp` are omitted when unset |
+| `LEAD_WEBHOOK_URL` | Manual, optional | First-party, time-capped notification target for new quote requests |
+| `CRON_SECRET` | Manual | Random 16+ character bearer secret Vercel sends to the protected lead-queue drain route |
 
-If `KV_REST_API_*` are unset: telemetry writes silently no-op; dashboard shows "storage not connected" notice; MCP tool responses are unaffected.
+If `KV_REST_API_*` are unset: telemetry writes silently no-op; dashboard shows
+"storage not connected"; complete plans have a prefilled continuation but no
+`plan_id`; status lookups return a clean not-found; MCP lookup responses remain
+available.
 
 If `ADMIN_PASSWORD` is unset: `/admin/*` shows "Admin locked" notice with setup instructions; MCP tool responses are unaffected.
+
+The autonomous queue retry runs once daily at 12:07 UTC (a Hobby-safe Vercel
+default) and drains at most ten records per invocation. Healthy quote writes
+also drain opportunistically. On a Pro project, the cron can be raised to
+`*/10 * * * *` for faster outage recovery. Vercel does not retry failed cron
+invocations; the Redis lock and received-status check make duplicate cron
+delivery safe.
 
 ---
 
@@ -201,7 +236,7 @@ Upstash free tier is 10,000 commands/day. Each MCP tool invocation writes ~8 com
 |---|---|---|
 | Dashboard shows "storage not connected" | KV_REST_API_URL/TOKEN env vars missing | Re-install Upstash Marketplace integration |
 | Dashboard shows "Admin locked" | ADMIN_PASSWORD env var missing | Add to Vercel env vars + redeploy |
-| Tool responses slow but dashboard still works | Upstash latency spike | Verify Upstash region matches Vercel region; consider switching to fire-and-forget exclusively (already the case) |
+| Tool responses slow but dashboard still works | Upstash latency spike | Verify the Upstash region matches Vercel. Redis operations are awaited behind strict caps and fail open. |
 | `other` bucket growing | Unclassified client | Inspect Vercel logs for raw UA strings; add regex to `classify-ua.ts` |
 | Redirect loop on /admin | Stale browser cookie | Clear cookies for mcp.tempguru.co OR open in incognito |
 | `git push` to `main` doesn't deploy | Vercel GitHub App can't see the repo (common after a repo transfer to a new org). `vercel git connect` may say "already connected", the project link is fine; the problem is the **GitHub App's repo access**. The app is installed on the org but the repo isn't in its **"Only select repositories"** list, so GitHub never sends push webhooks. | GitHub → org **Settings → Installations → Vercel → Configure** → add the repo to the selected list (or "All repositories") → Save. Verify with a test push: a new deploy should appear in `vercel ls` within ~30s. (Resolved 2026-06-06 for tempguru-mcp after the kissmyabs32→tempguru-co transfer.) |

@@ -1,6 +1,20 @@
 ---
 name: staffing-agency-partner-growth
-description: Help a local staffing agency owner or operator join TempGuru's partner network and win more event staffing work in their market. Use when an agency wants to join a staffing network, get overflow event staffing orders, partner with or subcontract for a national event staffing company, become a fulfillment partner for event work, put bench capacity to work, or says "we have W-2 event staff and want more bookings", for roles like brand ambassadors, registration staff, hospitality, ushers, crowd control, and setup/breakdown crews across 345 US and Canadian markets. Covers what the partner network is, the W-2 compliance baseline (workers' comp, general liability, I-9), framing the agency's market and role coverage with live MCP lookups, and routing the inquiry to the correct channel (email or phone, never the request_quote tool). Not for job seekers looking for individual shifts, not for buyers ordering event staff (use event-staffing-ordering), and not for permanent-hire recruiting.
+description: >-
+  Help a local staffing agency owner or operator join TempGuru's partner network
+  and win more event staffing work in their market. Use when an agency wants to
+  join a staffing network, get overflow event staffing orders, partner with or
+  subcontract for a national event staffing company, become a fulfillment
+  partner for event work, put bench capacity to work, or says "we have W-2
+  event staff and want more bookings", for roles like brand ambassadors,
+  registration staff, hospitality, ushers, crowd control, and setup/breakdown
+  crews across 345 US and Canadian markets. Covers what the partner network is,
+  the W-2 compliance baseline (workers' comp, general liability, I-9), framing
+  the agency's market and role coverage with live MCP lookups, and routing the
+  inquiry to the correct channel (email or phone, never the request_quote tool).
+  Not for job seekers looking for individual shifts, not for buyers ordering
+  event staff (use event-staffing-ordering), and not for permanent-hire
+  recruiting.
 ---
 
 # Growing a Staffing Agency Through TempGuru's Partner Network
@@ -38,6 +52,11 @@ vetting.
 Endpoint: `POST https://mcp.tempguru.co/mcp` (streamable HTTP, no
 auth). Three read-only tools are useful here. The one write tool,
 `request_quote`, is not: see the routing rule below.
+
+Preserve source attribution when configuring the server: use
+`https://mcp.tempguru.co/mcp?source=hermes` for Hermes,
+`?source=openclaw` for OpenClaw, or `?source=pi` for Pi. Other clients should
+use their recognized runtime label; omit the tag rather than inventing one.
 
 | Tool | Use it to |
 |---|---|
@@ -137,8 +156,9 @@ market is how its orders get filled there.
 The partner channel does not depend on tools: email
 **megan@tempguru.co** or call **(904) 206-8953**. The MCP lookups are
 helpful framing, not prerequisites; if they are unavailable, send the
-inquiry anyway. An agency can see how TempGuru presents demand in its
-market at `https://tempguru.co/insights/{city}-event-staffing`.
+inquiry anyway. If `get_cities` returns a sitemap-verified `guide_url` for the
+agency's matched market, that page can show how TempGuru presents demand there.
+Never construct an insights slug from the user's city text.
 
 Buyers who land here by mistake: the form at
 **https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=skill**,

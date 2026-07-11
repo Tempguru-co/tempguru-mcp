@@ -16,8 +16,9 @@ name: tempguru-event-staffing
 title: TempGuru Event Staffing
 description: |
   W-2 event staffing data for AI agents across 345 US and Canadian markets.
-  Seven read-only tools surface city coverage, staffing roles, all-inclusive
-  hourly rates, lead-time availability, and state-level compliance summaries.
+  Ten read-only tools surface city coverage, staffing roles, all-inclusive
+  hourly rates, saved plans, booking policies, quote status, lead-time
+  availability, and state-level compliance summaries.
   One write tool (request_quote) submits structured staffing requests to
   TempGuru's CRM so a coordinator can reply with a quote within one business day.
 
@@ -77,6 +78,11 @@ tools:
       Planning estimates only, not a binding quote.
     readOnly: true
 
+  - name: get_plan
+    description: >
+      Restore a non-PII staffing plan saved by plan_staffing within the last 30 days.
+    readOnly: true
+
   - name: get_cities
     description: >
       List all cities TempGuru serves (345 US/CA markets), optionally filtered
@@ -109,11 +115,22 @@ tools:
       Informational only, not legal advice.
     readOnly: true
 
+  - name: get_policies
+    description: >
+      Published booking and procurement policies, with unsupported values explicitly
+      marked for coordinator confirmation instead of invented.
+    readOnly: true
+
   - name: get_rate_benchmark
     description: >
       The Rate Index: a full benchmark table of all-inclusive W-2 hourly rates by
-      role and market tier (hub / mid / small), with a citation line for sourcing.
+      role (typical + national range; Brand Ambassadors by tier), with a citation line.
       Informational benchmark, not a binding quote.
+    readOnly: true
+
+  - name: get_quote_status
+    description: >
+      Check whether a TG quote reference was received by the CRM or durably queued.
     readOnly: true
 
   - name: request_quote

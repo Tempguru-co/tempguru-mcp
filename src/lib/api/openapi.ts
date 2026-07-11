@@ -8,6 +8,7 @@
 // is always in sync with the running deployment.
 
 import pkg from "../../../package.json";
+import { RequestQuoteSchema } from "../mcp/quote";
 
 export function buildOpenApiSpec() {
   return {
@@ -16,13 +17,13 @@ export function buildOpenApiSpec() {
       title: "TempGuru Public Data API",
       version: pkg.version,
       summary:
-        "Public event-staffing data for the US and Canada: five read-only lookups plus one opt-in quote-request submission.",
+        "Public event-staffing data for the US and Canada: eight read-only operations plus one opt-in quote-request submission.",
       description: [
-        "Public event-staffing data for the US and Canada, served by TempGuru (Temporary Assistance Guru, Inc.). Five read-only lookup operations plus a single opt-in write operation (`submitQuoteRequest`).",
+        "Public event-staffing data for the US and Canada, served by TempGuru (Temporary Assistance Guru, Inc.). Eight read-only operations plus a single opt-in write operation (`submitQuoteRequest`).",
         "",
         "**No authentication required.** The read endpoints return public data equivalent to what is published on tempguru.co, city footprint, staffing roles, hourly rate ranges, lead-time guidance, and state-level employment compliance summaries.",
         "",
-        "**About the rates.** All hourly figures are *all-inclusive W-2 bill rates*: they cover the worker's pay, employer-side payroll taxes (FICA/FUTA/SUTA), workers' compensation insurance, general liability insurance, and dedicated coordinator support. No additional per-shift fees, no hidden booking charges, no markup at invoice time. Rate ranges are *planning estimates*, a real quote requires event specifics and is provided after a quote request is reviewed by a coordinator.",
+        "**About the rates.** All hourly figures are *all-inclusive W-2 bill rates*: they cover the worker's pay, employer-side payroll taxes (FICA/FUTA/SUTA), workers' compensation insurance, general liability insurance, and dedicated coordinator support. Published hourly bill rates have no add-on fees or invoice-time markup. Rate ranges are *planning estimates*, a real quote requires event specifics and is provided after a quote request is reviewed by a coordinator.",
         "",
         "**About availability.** The `availability` endpoint returns *lead-time guidance based on city tier*, not a real-time reservation or hold on staff. TempGuru staffs to demand from a 100,000+ W-2 worker network across 345 markets; bookings are confirmed through the standard quote-and-confirmation flow, not via this API.",
         "",
@@ -66,7 +67,7 @@ export function buildOpenApiSpec() {
       },
       {
         name: "Compliance",
-        description: "State-level employment compliance summaries for event staffing decisions.",
+        description: "State compliance plus published booking and procurement policies.",
       },
       {
         name: "Quote Submission",
@@ -101,7 +102,7 @@ export function buildOpenApiSpec() {
               required: false,
               schema: { type: "string", enum: ["hub", "mid", "small"] },
               description:
-                "Filter by market tier. 'hub' = 25 major metros (NYC, LA, Boston, etc.); 'mid' = 129 secondary markets; 'small' = 191 tertiary markets.",
+                "Filter by market tier. 'hub' = 25 major metros (NYC, LA, Boston, etc.); 'mid' = 128 secondary markets; 'small' = 192 tertiary markets.",
             },
           ],
           responses: {
@@ -130,7 +131,7 @@ export function buildOpenApiSpec() {
           tags: ["Discovery"],
           summary: "List event staffing roles",
           description:
-            "Use this when an agent needs the canonical list of roles TempGuru staffs (brand ambassadors, registration, hospitality, setup, ushers, gate, crowd control, guest services, booth monitors, assistant leads, team leads). The returned `slug` values are the keys to use in the pricing and availability endpoints.",
+            "Use this when an agent needs TempGuru's complete canonical staffing-role catalog, including Assistant Leads. The returned `slug` values are the keys to use in the pricing and availability endpoints.",
           responses: {
             "200": {
               description: "All TempGuru staffing roles.",
@@ -309,6 +310,78 @@ export function buildOpenApiSpec() {
           },
         },
       },
+      "/api/v1/policies": {
+        get: {
+          operationId: "getPolicies",
+          tags: ["Compliance"],
+          summary: "Published booking and procurement policies",
+          description:
+            "Returns TempGuru's published minimum-hours, cancellation/rescheduling, no-show backfill, COI/additional-insured, payment, background-check, order-confirmation, and quote-response policies. Unsupported values are explicitly marked `confirm_with_coordinator` and never fabricated. Pass an optional topic for one policy; an unknown topic returns a clean expected-miss variant with the available topics.",
+          parameters: [
+            {
+              name: "topic",
+              in: "query",
+              required: false,
+              schema: { type: "string", maxLength: 80 },
+              description: "Optional policy topic, e.g. payment-terms or coi-additional-insured.",
+            },
+          ],
+          responses: {
+            "200": {
+              description: "All policies, one matched policy, or a clean topic-not-found variant.",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/PoliciesResponse" },
+                },
+              },
+            },
+            "400": {
+              description: "Policy topic exceeds the 80-character input cap.",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/Error" },
+                },
+              },
+            },
+          },
+        },
+      },
+      "/api/v1/plans/{id}": {
+        get: {
+          operationId: "getPlan",
+          tags: ["Planning"],
+          summary: "Restore a saved staffing plan",
+          description:
+            "Restores a complete, non-PII staffing-plan snapshot created within the last 30 days. Use the plan ID returned by `plan_staffing`; never guess or enumerate IDs. The response is never cached and returns a clean not-found variant when the snapshot is absent or expired.",
+          parameters: [
+            {
+              name: "id",
+              in: "path",
+              required: true,
+              schema: { type: "string", pattern: "^[A-HJ-NP-Z2-9]{12}$", maxLength: 12 },
+              description: "12-character plan ID returned by plan_staffing.",
+            },
+          ],
+          responses: {
+            "200": {
+              description: "Saved plan or clean not-found/expired guidance.",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/SavedPlanResponse" },
+                },
+              },
+            },
+            "400": {
+              description: "Malformed plan reference.",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/Error" },
+                },
+              },
+            },
+          },
+        },
+      },
       "/api/v1/quote-requests": {
         post: {
           operationId: "submitQuoteRequest",
@@ -372,6 +445,42 @@ export function buildOpenApiSpec() {
               content: {
                 "application/json": {
                   schema: { $ref: "#/components/schemas/QuoteRequestFailure" },
+                },
+              },
+            },
+          },
+        },
+      },
+      "/api/v1/quote-requests/{reference}": {
+        get: {
+          operationId: "getQuoteStatus",
+          tags: ["Quote Submission"],
+          summary: "Check quote-request receipt status",
+          description:
+            "Returns the 90-day non-PII status stub for a TG quote reference. Version 1 reports `received` or `queued`; later CRM states such as quote_sent and won are not exposed yet. A not-found result does not prove the CRM lead is absent.",
+          parameters: [
+            {
+              name: "reference",
+              in: "path",
+              required: true,
+              schema: { type: "string", pattern: "^TG-[A-HJ-NP-Z2-9]{6}$", maxLength: 9 },
+              description: "TG reference returned by submitQuoteRequest.",
+            },
+          ],
+          responses: {
+            "200": {
+              description: "Received/queued status or clean not-found guidance.",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/QuoteStatusResponse" },
+                },
+              },
+            },
+            "400": {
+              description: "Malformed TG quote reference.",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/Error" },
                 },
               },
             },
@@ -599,127 +708,173 @@ export function buildOpenApiSpec() {
             citation_note: { type: "string" },
           },
         },
-        QuoteRequestInput: {
+        Policy: {
           type: "object",
-          description:
-            "A confirmed staffing plan plus the contact details a coordinator needs to reply. Mirrors the MCP `request_quote` tool's input schema exactly.",
           required: [
-            "contact_name",
-            "contact_email",
-            "company",
-            "event_name",
-            "event_type",
-            "city",
-            "event_dates",
-            "roles",
+            "topic",
+            "title",
+            "confirmed_claims",
+            "confirm_with_coordinator",
+            "todo_for_megan",
+            "sources",
           ],
           properties: {
-            contact_name: {
-              type: "string",
-              minLength: 1,
-              description: "Full name of the contact person.",
-              example: "Jordan Reyes",
-            },
-            contact_email: {
-              type: "string",
-              format: "email",
-              description: "Contact email address for the quote response.",
-              example: "jordan@acmeevents.com",
-            },
-            contact_phone: {
-              type: "string",
-              description: "Optional phone number for the coordinator to reach the buyer (event ops is phone-first).",
-              example: "+1-904-206-8953",
-            },
-            company: {
-              type: "string",
-              minLength: 1,
-              description: "Company or organization name.",
-              example: "Acme Events",
-            },
-            event_name: {
-              type: "string",
-              minLength: 1,
-              description: "Name of the event.",
-              example: "HIMSS 2026",
-            },
-            event_type: {
-              type: "string",
-              minLength: 1,
-              description:
-                "Event type: trade-show, conference, festival, concert, sporting-event, corporate, brand-activation, or other.",
-              example: "trade-show",
-            },
+            topic: { type: "string" },
+            title: { type: "string" },
+            confirmed_claims: { type: "array", items: { type: "string" } },
+            confirm_with_coordinator: { type: "boolean" },
+            todo_for_megan: { type: "array", items: { type: "string" } },
+            sources: { type: "array", items: { type: "string" } },
+          },
+          additionalProperties: false,
+        },
+        PoliciesResponse: {
+          type: "object",
+          required: ["input", "status", "policy_found"],
+          properties: {
+            input: { type: "object" },
+            status: { type: "string", enum: ["policies", "policy_not_found"] },
+            policy_found: { type: "boolean" },
+            data_version: { type: "string" },
+            updated: { type: "string", format: "date" },
+            scope: { type: "string" },
+            policies: { type: "array", items: { $ref: "#/components/schemas/Policy" } },
+            todo_for_megan: { type: "array", items: { type: "string" } },
+            disclaimer: { type: "string" },
+            requested: { type: "string" },
+            available_topics: { type: "array", items: { type: "string" } },
+            message: { type: "string" },
+          },
+        },
+        PlanLine: {
+          type: "object",
+          required: [
+            "role",
+            "role_slug",
+            "headcount",
+            "hours_per_shift",
+            "days",
+            "hourly_range",
+            "estimated_total_range",
+          ],
+          properties: {
+            role: { type: "string" },
+            role_slug: { type: "string" },
+            headcount: { type: "integer" },
+            hours_per_shift: { type: "number" },
+            days: { type: "integer" },
+            hourly_range: { $ref: "#/components/schemas/PriceBand" },
+            estimated_total_range: { $ref: "#/components/schemas/PriceBand" },
+          },
+        },
+        PlanSnapshot: {
+          type: "object",
+          required: [
+            "city",
+            "event",
+            "plan_lines",
+            "estimated_total_range",
+            "overtime_adjusted_total_range",
+            "compliance_jurisdiction",
+            "created_at",
+            "channel",
+            "source",
+          ],
+          properties: {
             city: {
-              type: "string",
-              minLength: 1,
-              description: "City where the event is held.",
-              example: "Boston",
-            },
-            event_dates: {
-              type: "string",
-              minLength: 1,
-              description: "Event dates as a human-readable string.",
-              example: "June 15–17, 2026",
-            },
-            roles: {
-              type: "array",
-              minItems: 1,
-              description: "Roles and headcount needed for the event.",
-              items: {
-                type: "object",
-                required: ["role", "headcount"],
-                properties: {
-                  role: {
-                    type: "string",
-                    minLength: 1,
-                    description: "Staffing role name, e.g. brand-ambassadors, registration-staff.",
-                    example: "brand-ambassadors",
-                  },
-                  headcount: {
-                    type: "integer",
-                    minimum: 1,
-                    description: "Number of staff needed.",
-                    example: 10,
-                  },
-                  shifts: {
-                    type: "string",
-                    description: "Shift description, e.g. '2 days × 8h'.",
-                    example: "3 days × 8h",
-                  },
-                },
+              type: "object",
+              required: ["slug", "name", "state"],
+              properties: {
+                slug: { type: "string" },
+                name: { type: "string" },
+                state: { type: "string" },
               },
             },
-            budget_range: {
-              type: "string",
-              description: "Estimated total budget range if calculated.",
-              example: "$13,400–$15,600",
+            event: {
+              type: "object",
+              required: ["event_date", "event_type", "attendees"],
+              properties: {
+                event_date: { type: ["string", "null"] },
+                event_type: { type: ["string", "null"] },
+                attendees: { type: ["integer", "null"] },
+              },
             },
-            attire: {
-              type: "string",
-              description: "Staff attire requirements.",
-              example: "Black polo, khakis",
+            plan_lines: { type: "array", items: { $ref: "#/components/schemas/PlanLine" } },
+            estimated_total_range: {
+              type: "object",
+              required: ["low", "high", "currency", "basis"],
+              properties: {
+                low: { type: "number" },
+                high: { type: "number" },
+                currency: { type: "string", enum: ["USD", "CAD"] },
+                basis: { type: "string" },
+              },
             },
-            special_requirements: {
-              type: "string",
-              description:
-                "Any special requirements: language skills, certifications, overnight shifts, etc.",
+            overtime_adjusted_total_range: {
+              anyOf: [
+                { type: "null" },
+                {
+                  type: "object",
+                  required: ["low", "high", "currency", "note"],
+                  properties: {
+                    low: { type: "number" },
+                    high: { type: "number" },
+                    currency: { type: "string", enum: ["USD", "CAD"] },
+                    includes_double_time: { type: "boolean" },
+                    note: { type: "string" },
+                  },
+                },
+              ],
             },
-            compliance_notes: {
-              type: "string",
-              description: "Any compliance flags surfaced by the compliance endpoint.",
-            },
+            compliance_jurisdiction: { type: ["string", "null"] },
+            created_at: { type: "string", format: "date-time" },
+            channel: { type: "string", enum: ["mcp", "rest"] },
+            source: { type: ["string", "null"] },
           },
+        },
+        SavedPlanResponse: {
+          type: "object",
+          required: ["input", "plan_found", "plan_id", "message", "next_steps"],
+          properties: {
+            input: { type: "object" },
+            plan_found: { type: "boolean" },
+            plan_id: { type: "string" },
+            snapshot: { $ref: "#/components/schemas/PlanSnapshot" },
+            continuation: {
+              type: "object",
+              required: ["form_url", "note"],
+              properties: {
+                form_url: { type: "string", format: "uri" },
+                note: { type: "string" },
+              },
+            },
+            message: { type: "string" },
+            next_steps: { type: "array", items: { type: "string" } },
+          },
+        },
+        QuoteRequestInput: {
+          description:
+            "A confirmed staffing plan plus the contact details a coordinator needs to reply. Mirrors the MCP `request_quote` tool's input schema exactly.",
+          ...RequestQuoteSchema.toJSONSchema({ target: "draft-2020-12" }),
         },
         QuoteRequestConfirmation: {
           type: "object",
-          required: ["submitted", "deal_name", "message", "next_steps"],
+          required: ["submitted", "plan_linked", "deal_name", "reference", "message", "next_steps"],
           properties: {
             submitted: { type: "boolean", enum: [true] },
+            plan_linked: {
+              type: "boolean",
+              description: "True when the submitted plan_id resolved and its snapshot was attached.",
+            },
             deal_name: {
               type: "string",
               description: "Internal name assigned to the lead in TempGuru's CRM.",
               example: "Agent Quote, trade-show · Boston · June 15–17, 2026",
+            },
+            reference: {
+              type: "string",
+              pattern: "^TG-[A-HJ-NP-Z2-9]{6}$",
+              description: "Quote reference to save and cite when following up.",
             },
             message: {
               type: "string",
@@ -738,11 +893,27 @@ export function buildOpenApiSpec() {
           properties: {
             submitted: { type: "boolean", enum: [false] },
             error: { type: "string", description: "What failed upstream." },
+            reference: { type: "string", description: "Reference to cite when following up, when available." },
             message: {
               type: "string",
               description:
                 "Fallback instructions with direct TempGuru contact details, relay to the user.",
             },
+          },
+        },
+        QuoteStatusResponse: {
+          type: "object",
+          required: ["input", "quote_found", "reference", "message", "follow_up"],
+          properties: {
+            input: { type: "object" },
+            quote_found: { type: "boolean" },
+            reference: { type: "string" },
+            status: { type: "string", enum: ["received", "queued"] },
+            created_at: { type: "string", format: "date-time" },
+            deal_name: { type: "string" },
+            channel: { type: "string", enum: ["mcp", "rest"] },
+            message: { type: "string" },
+            follow_up: { type: "string" },
           },
         },
         HealthResponse: {

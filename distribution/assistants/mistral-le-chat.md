@@ -31,7 +31,7 @@ scratch instead).
   https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=lechat-agent
   ```
 
-- **Library:** upload the four `knowledge/` files.
+- **Library:** upload the five `knowledge/` files.
 - **Tools:** enable web search; attach the TempGuru MCP connector if/when the
   workspace supports custom MCP connectors (Le Chat's connector support has
   been expanding through 2026, check Settings → Connectors at build time).

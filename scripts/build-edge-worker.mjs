@@ -9,7 +9,7 @@
 //     so the bytes equal exactly what mcp.tempguru.co returns.
 //   - SKILL.md files: content/skills/*.md verbatim (the index.json sha256
 //     digests come from the route, which hashes these same files).
-//   - okf.json: public/.well-known/okf.json (built by build-okf).
+//   - okf.json + security.txt: public/.well-known/ (built/maintained in-repo).
 //   - schema: public/schemas/event-staffing-request.schema.json.
 //   - robots.txt: cloudflare/robots.txt.
 //   - agent-card: built here (no Next route exists), version from package.json.
@@ -21,6 +21,7 @@ import { readFileSync, writeFileSync, mkdtempSync, mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { SKILLS as SKILL_SLUGS } from "./gen-skill-digests.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(here, "..");
@@ -53,20 +54,14 @@ const serverCard = await routeText("src/app/.well-known/mcp/server-card.json/rou
 const apiCatalog = await routeText("src/app/.well-known/api-catalog/route.ts");
 const agentSkillsIndex = await routeText("src/app/.well-known/agent-skills/index.json/route.ts");
 
-// One list drives both /.well-known/agent-skills/* and /.well-known/skills/*
-// SKILL.md bodies. Keep in sync with the agent-skills index route and
-// gen-skill-digests.mjs.
-const SKILL_SLUGS = [
-  "event-staffing-ordering",
-  "event-staffing-compliance",
-  "staffing-plan-from-event-brief",
-  "urgent-event-backfill",
-  "staffing-agency-partner-growth",
-];
+// The digest generator's canonical list drives both discovery trees here. The
+// submission gate separately proves the route and MCP resources expose the same
+// exact set.
 const skillBodies = Object.fromEntries(
   SKILL_SLUGS.map((s) => [s, readFileSync(r(`content/skills/${s}.md`), "utf8")]),
 );
 const okfJson = readFileSync(r("public/.well-known/okf.json"), "utf8");
+const securityTxt = readFileSync(r("public/.well-known/security.txt"), "utf8");
 const schemaJson = readFileSync(r("public/schemas/event-staffing-request.schema.json"), "utf8");
 const robots = readFileSync(r("cloudflare/robots.txt"), "utf8");
 
@@ -166,6 +161,7 @@ const files = [
   ["/.well-known/skills/index.json", JSON.stringify(skillsIndex, null, 2) + "\n", JSON_T],
   ...SKILL_SLUGS.map((s) => [`/.well-known/skills/${s}/SKILL.md`, skillBodies[s], MD_T]),
   ["/.well-known/api-catalog", apiCatalog, "application/linkset+json"],
+  ["/.well-known/security.txt", securityTxt, "text/plain; charset=utf-8"],
   ["/schemas/event-staffing-request.schema.json", schemaJson, JSON_T],
   ["/.well-known/okf.json", okfJson, JSON_T],
 ];

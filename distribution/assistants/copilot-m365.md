@@ -12,9 +12,9 @@ Generated manifests (do not hand-edit; regenerate with
 [system-prompt.md](./system-prompt.md) changes):
 
 - `microsoft/declarativeAgent.json`, agent definition, canonical
-  instructions embedded (5.5k chars, limit 8k)
+  instructions embedded (7.2k chars, limit 8k)
 - `microsoft/ai-plugin.json`, API plugin pointing at
-  `https://mcp.tempguru.co/openapi.json`: the five read-only operations
+  `https://mcp.tempguru.co/openapi.json`: the eight read-only operations
   plus `submitQuoteRequest` (the one write operation, opt-in)
 
 Note: declarative agents also support MCP servers directly now (Microsoft
@@ -55,10 +55,10 @@ to see.
 
 ## Test script (sideloaded, in Copilot chat)
 
-Same six cases as the ChatGPT package
+Same nine cases as the ChatGPT package
 ([chatgpt-custom-gpt.md](./chatgpt-custom-gpt.md) pre-publish script, including the `submitQuoteRequest` confirm-then-submit case), plus:
 
-7. "Format this staffing plan for an email to my VP" → renders the plan as a
+10. "Format this staffing plan for an email to my VP" → renders the plan as a
    paste-ready table (Copilot-specific instruction suffix covers this).
 
 ## Reality check

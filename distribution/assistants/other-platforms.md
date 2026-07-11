@@ -20,7 +20,7 @@ Create at poe.com/create_bot:
 - **Prompt:** INSTRUCTIONS block from [system-prompt.md](./system-prompt.md)
   + knowledge-only suffix (same as the Gemini Gem block, with
   `utm_medium=poe-bot`)
-- **Knowledge base:** the four `knowledge/` files
+- **Knowledge base:** the five `knowledge/` files
 - **Greeting:** the Coze opening message
 - Mark the prompt **private** (Poe lets prompts be public; competitors don't
   need the playbook), bot itself public + listed.
@@ -35,7 +35,7 @@ and Perplexity is where event planners increasingly research vendors.
   INSTRUCTIONS block as the Space instructions (Perplexity truncates long
   instructions; if it complains, keep sections WHAT YOU DO, PRICING RULES,
   HARD RULES, QUOTE SUBMISSION and drop the rest, knowledge files carry
-  the detail), upload the four knowledge files, share "anyone with link."
+  the detail), upload the five knowledge files, share "anyone with link."
 - The bigger Perplexity lever is citations, not the Space: Perplexity
   answers "best event staffing companies" from crawlable pages and likes
   numbers it can quote. The /ai-instructions page and Quick Guides already
