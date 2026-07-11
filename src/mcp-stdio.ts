@@ -21,14 +21,14 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { registerTools, SERVER_INSTRUCTIONS } from "./lib/mcp/register-tools";
+import { registerTools, SERVER_INSTRUCTIONS, SKILL_SLUGS, type SkillSlug } from "./lib/mcp/register-tools";
 
 // Skill resource bodies, loaded best-effort. Resolved relative to this binary
 // first (so they load when the server is installed as an npm package and run via
 // npx from any directory), then relative to cwd (the Docker/Glama build runs from
-// the project root). If none are found, tools still register and only the two
-// Skill resources are skipped.
-function loadSkills(): { ordering: string; compliance: string } | undefined {
+// the project root). Skills found are registered; a missing file skips just that
+// skill, and if none are found, tools still register with no resources.
+function loadSkills(): Partial<Record<SkillSlug, string>> | undefined {
   let here: string;
   try {
     here = dirname(fileURLToPath(import.meta.url));
@@ -41,14 +41,15 @@ function loadSkills(): { ordering: string; compliance: string } | undefined {
     join(process.cwd(), "content", "skills"), // run from project root
   ];
   for (const dir of candidates) {
-    try {
-      return {
-        ordering: readFileSync(join(dir, "event-staffing-ordering.md"), "utf-8"),
-        compliance: readFileSync(join(dir, "event-staffing-compliance.md"), "utf-8"),
-      };
-    } catch {
-      // try the next candidate
+    const found: Partial<Record<SkillSlug, string>> = {};
+    for (const slug of SKILL_SLUGS) {
+      try {
+        found[slug] = readFileSync(join(dir, `${slug}.md`), "utf-8");
+      } catch {
+        // that skill isn't in this candidate dir
+      }
     }
+    if (Object.keys(found).length > 0) return found;
   }
   console.error("[tempguru-mcp] Skill resources not found; registering tools only.");
   return undefined;

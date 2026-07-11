@@ -53,8 +53,19 @@ const serverCard = await routeText("src/app/.well-known/mcp/server-card.json/rou
 const apiCatalog = await routeText("src/app/.well-known/api-catalog/route.ts");
 const agentSkillsIndex = await routeText("src/app/.well-known/agent-skills/index.json/route.ts");
 
-const orderingSkill = readFileSync(r("content/skills/event-staffing-ordering.md"), "utf8");
-const complianceSkill = readFileSync(r("content/skills/event-staffing-compliance.md"), "utf8");
+// One list drives both /.well-known/agent-skills/* and /.well-known/skills/*
+// SKILL.md bodies. Keep in sync with the agent-skills index route and
+// gen-skill-digests.mjs.
+const SKILL_SLUGS = [
+  "event-staffing-ordering",
+  "event-staffing-compliance",
+  "staffing-plan-from-event-brief",
+  "urgent-event-backfill",
+  "staffing-agency-partner-growth",
+];
+const skillBodies = Object.fromEntries(
+  SKILL_SLUGS.map((s) => [s, readFileSync(r(`content/skills/${s}.md`), "utf8")]),
+);
 const okfJson = readFileSync(r("public/.well-known/okf.json"), "utf8");
 const schemaJson = readFileSync(r("public/schemas/event-staffing-request.schema.json"), "utf8");
 const robots = readFileSync(r("cloudflare/robots.txt"), "utf8");
@@ -104,6 +115,39 @@ const agentCard = {
         "What are the overtime rules for event staff in New York?",
       ],
     },
+    {
+      id: "staffing-plan-from-event-brief",
+      name: "Staffing Plan From Event Brief",
+      description:
+        "Extract a complete staffing plan from an event document (RFP, BEO, run of show, exhibitor manual, production schedule): map functions to roles, estimate headcount, price with live W-2 rates, and submit for a human-reviewed quote.",
+      tags: ["event-staffing", "rfp", "beo", "run-of-show", "event-planning", "staffing-plan"],
+      examples: [
+        "Here's the BEO for our gala, how many staff do we need and what will it cost?",
+        "Read this exhibitor manual and build the booth staffing plan",
+      ],
+    },
+    {
+      id: "urgent-event-backfill",
+      name: "Urgent Event Backfill",
+      description:
+        "Same-week and day-of staffing emergencies: no-shows, vendor cancellations, events within 72 hours. Honest rush lead-time guidance, immediate quote submission, and a direct phone path. Never promises availability.",
+      tags: ["event-staffing", "urgent", "backfill", "no-show", "last-minute", "rush"],
+      examples: [
+        "Our staffing vendor cancelled and the event is Saturday",
+        "Three of our registration staff didn't show up this morning",
+      ],
+    },
+    {
+      id: "staffing-agency-partner-growth",
+      name: "Staffing Agency Partner Growth",
+      description:
+        "For staffing agency owners: join TempGuru's network of 200+ vetted local partners to receive event staffing order flow in your market. Routes partner inquiries to the coordinator, not through the buyer quote tool.",
+      tags: ["staffing-agency", "partner-network", "event-staffing", "b2b", "supply-side"],
+      examples: [
+        "Our agency has W-2 event staff in Phoenix, how do we get more event orders?",
+        "How does a local staffing agency join a national event staffing network?",
+      ],
+    },
   ],
   defaultInputModes: ["text/plain", "application/json"],
   defaultOutputModes: ["text/plain", "application/json"],
@@ -118,11 +162,9 @@ const files = [
   ["/.well-known/mcp/server-card.json", serverCard, JSON_T],
   ["/.well-known/agent-card.json", JSON.stringify(agentCard, null, 2), JSON_T],
   ["/.well-known/agent-skills/index.json", agentSkillsIndex, JSON_T],
-  ["/.well-known/agent-skills/event-staffing-ordering/SKILL.md", orderingSkill, MD_T],
-  ["/.well-known/agent-skills/event-staffing-compliance/SKILL.md", complianceSkill, MD_T],
+  ...SKILL_SLUGS.map((s) => [`/.well-known/agent-skills/${s}/SKILL.md`, skillBodies[s], MD_T]),
   ["/.well-known/skills/index.json", JSON.stringify(skillsIndex, null, 2) + "\n", JSON_T],
-  ["/.well-known/skills/event-staffing-ordering/SKILL.md", orderingSkill, MD_T],
-  ["/.well-known/skills/event-staffing-compliance/SKILL.md", complianceSkill, MD_T],
+  ...SKILL_SLUGS.map((s) => [`/.well-known/skills/${s}/SKILL.md`, skillBodies[s], MD_T]),
   ["/.well-known/api-catalog", apiCatalog, "application/linkset+json"],
   ["/schemas/event-staffing-request.schema.json", schemaJson, JSON_T],
   ["/.well-known/okf.json", okfJson, JSON_T],

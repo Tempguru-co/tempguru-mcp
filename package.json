@@ -7,7 +7,7 @@
     "dev": "next dev",
     "build": "npm run build:okf && next build",
     "build:stdio": "node scripts/sync-rates.mjs --check && esbuild src/mcp-stdio.ts --bundle --platform=node --format=esm --outfile=dist/mcp-stdio.mjs --packages=external",
-    "build:cli": "rm -rf cli/skills cli/index.mjs cli/LICENSE && esbuild src/mcp-stdio.ts --bundle --platform=node --format=esm --outfile=cli/index.mjs --banner:js='#!/usr/bin/env node' && mkdir -p cli/skills && cp content/skills/event-staffing-ordering.md content/skills/event-staffing-compliance.md cli/skills/ && cp LICENSE cli/LICENSE",
+    "build:cli": "rm -rf cli/skills cli/index.mjs cli/LICENSE && esbuild src/mcp-stdio.ts --bundle --platform=node --format=esm --outfile=cli/index.mjs --banner:js='#!/usr/bin/env node' && mkdir -p cli/skills && cp content/skills/*.md cli/skills/ && cp LICENSE cli/LICENSE",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
