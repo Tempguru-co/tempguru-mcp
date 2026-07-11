@@ -22,6 +22,7 @@ import {
   type CityTier,
 } from "./queries";
 import { createLead } from "../notion/create-lead";
+import { checkQuoteRateLimit } from "../api/rate-limit";
 import { currentContext } from "../telemetry/context";
 import { buildStaffingPlan } from "./plan-staffing";
 import { buildRateBenchmark } from "./rate-benchmark";
@@ -135,25 +136,27 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
         "<examples>plan_staffing(city='Chicago', event_date='2026-08-14', event_type='trade-show', roles=[{role:'registration-staff', headcount:6, hours_per_shift:8, days:2}, {role:'team-leads', headcount:1}]) ; plan_staffing(city='Austin', attendees=300)</examples> " +
         "<hints>Roles accept names or slugs (brand-ambassadors, registration-staff, team-leads). Omit roles to get the catalog plus a suggested mix. Totals are planning estimates, never binding quotes. Branch on the `status` field: plan | needs_roles | roles_not_found | city_not_found (the last two carry a did-you-mean suggestion to confirm with the user, not auto-apply).</hints>",
       inputSchema: {
-        city: z.string().describe("Event city, name or slug (e.g., 'Chicago')."),
-        event_date: z.string().optional().describe("Event date, ISO YYYY-MM-DD preferred."),
+        city: z.string().max(120).describe("Event city, name or slug (e.g., 'Chicago')."),
+        event_date: z.string().max(40).optional().describe("Event date, ISO YYYY-MM-DD preferred."),
         event_type: z
           .string()
+          .max(80)
           .optional()
           .describe("trade-show, conference, festival, concert, sporting-event, corporate, brand-activation, or other."),
-        attendees: z.number().int().positive().optional().describe("Expected attendee count."),
+        attendees: z.number().int().positive().max(5_000_000).optional().describe("Expected attendee count."),
         roles: z
           .array(
             z.object({
-              role: z.string().describe("Role name or slug."),
-              headcount: z.number().int().positive().describe("Staff needed for this role."),
-              hours_per_shift: z.number().positive().optional().describe("Hours per shift (default 8)."),
-              days: z.number().int().positive().optional().describe("Number of event days (default 1)."),
+              role: z.string().max(80).describe("Role name or slug."),
+              headcount: z.number().int().positive().max(10_000).describe("Staff needed for this role."),
+              hours_per_shift: z.number().positive().max(24).optional().describe("Hours per shift (default 8, max 24)."),
+              days: z.number().int().positive().max(365).optional().describe("Number of event days (default 1)."),
             }),
           )
+          .max(50)
           .optional()
           .describe("Roles and headcount. Omit to receive the role catalog and a suggested mix."),
-        description: z.string().optional().describe("Optional free-text event description, echoed into the plan."),
+        description: z.string().max(2000).optional().describe("Optional free-text event description, echoed into the plan."),
       },
       outputSchema: PLAN_STAFFING_OUTPUT,
       annotations: {
@@ -423,6 +426,20 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
       // country). currentContext() returns empty defaults under stdio, which
       // the scorer treats as an unrecognized source (medium, not blocked).
       const ctx = currentContext();
+
+      // Same per-IP limiter the REST mirror uses (fails open with no IP, e.g.
+      // stdio). Without this, the MCP transport was the unthrottled way to
+      // spam the one public write tool.
+      const verdict = await checkQuoteRateLimit(ctx.ip);
+      if (!verdict.allowed) {
+        await track({ tool: "request_quote", status: "error", city: input.city });
+        return structuredResult(
+          quoteFailedPayload(
+            `Rate limited: too many quote submissions from this source. Retry after ${verdict.retryAfterSeconds}s, or use the form at https://tempguru.co/get-staffing.`,
+          ),
+        );
+      }
+
       const result = await createLead({
         ...input,
         channel: "mcp",
@@ -431,7 +448,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
       await track({ tool: "request_quote", status: result.success ? "success" : "error", city: input.city });
 
       if (!result.success) {
-        return structuredResult(quoteFailedPayload(result.error));
+        return structuredResult(quoteFailedPayload(result.error, result.reference));
       }
 
       return structuredResult(

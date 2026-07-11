@@ -49,6 +49,10 @@ export interface TrackInput {
 const utcDate = (): string => new Date().toISOString().slice(0, 10);
 // Bug fix: also replace underscores so "registration_staff" normalises to "registration-staff"
 const slug = (s: string): string => s.trim().toLowerCase().replace(/[\s_]+/g, "-").slice(0, 80);
+// The diagnostic buckets (unclassified UAs, unmatched city inputs) retain raw
+// caller strings; redact anything email-shaped first so PII can never persist
+// in telemetry even when a caller stuffs an address into those fields.
+const redactEmails = (s: string): string => s.replace(/[^\s@"'<>()]+@[^\s@"'<>()]+/g, "[email]");
 
 export async function track(input: TrackInput): Promise<void> {
   const date = utcDate();
@@ -59,7 +63,7 @@ export async function track(input: TrackInput): Promise<void> {
   // can add a pattern next time. Without this, "other" is a black hole.
   const rawUnclassified =
     ua === "other" && input.userAgent
-      ? input.userAgent.trim().slice(0, 200)
+      ? redactEmails(input.userAgent.trim()).slice(0, 200)
       : null;
 
   // Sanitize the city demand signal so only real, recognized markets feed the
@@ -72,7 +76,7 @@ export async function track(input: TrackInput): Promise<void> {
   // visible for review instead of vanishing silently.
   const cityMatch = input.city ? findCity(input.city) : null;
   const canonicalCity = cityMatch ? cityMatch.slug.replace(/-event-staffing$/, "") : null;
-  const unmatchedCity = input.city && !cityMatch ? slug(input.city) : null;
+  const unmatchedCity = input.city && !cityMatch ? slug(redactEmails(input.city)) : null;
 
   // Attribution tag from a controlled surface (custom_gpt / website_widget /
   // manual_test / team_demo / ...). Sanitized to [a-z0-9_-], capped. Only our

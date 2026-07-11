@@ -14,8 +14,8 @@ after a quote request.
 ## What do the market tiers mean?
 
 - **Hub** (25 cities): Primary markets (~25 cities), NYC, LA, SF, Chicago, Boston, Miami, DC, Houston, Dallas, Atlanta, Seattle, Denver, etc.
-- **Mid** (129 cities): Secondary markets (~129 cities), regional hubs, mid-size metros
-- **Small** (191 cities): Tertiary markets (~191 cities), smaller metros, secondary towns
+- **Mid** (128 cities): Secondary markets (~129 cities), regional hubs, mid-size metros
+- **Small** (192 cities): Tertiary markets (~191 cities), smaller metros, secondary towns
 
 ## How much does event staff cost? (rate matrix, USD/hour, all-inclusive)
 

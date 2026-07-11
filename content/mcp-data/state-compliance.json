@@ -1,8 +1,8 @@
 {
   "_meta": {
-    "version": "1.1.0",
-    "updated": "2026-07-07",
-    "notes": "Min wage values are the GENERAL statewide rate in effect as of July 2026, verified per-state against state DOL / DOL.gov sources (min_wage_source, min_wage_as_of per state). NY and OR store the metro floor (NYC $17.00, Portland $16.80) with a regional note in unique_rules. W-2 classification is TempGuru's standard for ALL workers in ALL states (the model, not a state requirement). Local ordinances (many cities/counties) may set higher floors. NOT legal advice, consult employment counsel.",
+    "version": "1.2.0",
+    "updated": "2026-07-10",
+    "notes": "Min wage values are the GENERAL statewide rate in effect as of July 2026, verified per-state against state DOL / DOL.gov sources (min_wage_source, min_wage_as_of per state). NY and OR store the metro floor (NYC $17.00, Portland $16.80) with a regional note in unique_rules. W-2 classification is TempGuru's standard for ALL workers in ALL states (the model, not a state requirement). Local ordinances (many cities/counties) may set higher floors. NOT legal advice, consult employment counsel. v1.2.0: removed stale 2025 sub-notes (NY, OR), removed MA Sunday premium (eliminated 2023), MN stored as the operational FLSA 40h threshold, Seattle updated to $21.30 (2026), Denver $19.29 note added, CA double-time (>12h/day) and seventh-day premium now structured fields.",
     "citation_note": "Compliance summary; consult employment counsel for binding rules. Source: TempGuru W-2 vs 1099 Event Workers risk brief and per-state DOL guidance."
   },
   "states": {
@@ -24,7 +24,7 @@
         "Daily overtime after 8 hours"
       ],
       "min_wage_as_of": "2026-07-01",
-      "min_wage_source": "https://labor.alaska.gov/news/2026/news26-11.htm"
+      "min_wage_source": "https://labor.alaska.gov/lss/whact.htm"
     },
     "AZ": {
       "name": "Arizona",
@@ -57,7 +57,9 @@
         "Seventh-day overtime"
       ],
       "min_wage_as_of": "2026-01-01",
-      "min_wage_source": "https://www.dir.ca.gov/DIRNews/2025/2025-118.html"
+      "min_wage_source": "https://www.dir.ca.gov/DIRNews/2025/2025-118.html",
+      "overtime_daily_double": 12,
+      "seventh_day_overtime": true
     },
     "CO": {
       "name": "Colorado",
@@ -65,7 +67,8 @@
       "overtime_weekly": 40,
       "overtime_daily": 12,
       "unique_rules": [
-        "Daily overtime after 12 hours"
+        "Daily overtime after 12 hours",
+        "Denver: $19.29 local citywide minimum (2026), well above the state floor"
       ],
       "min_wage_as_of": "2026-01-01",
       "min_wage_source": "https://cdle.colorado.gov/sites/cdle/files/info_%231_2026_comps_&_paycalc_orders_12.18.25.pdf"
@@ -212,9 +215,7 @@
       "min_wage": 15,
       "overtime_weekly": 40,
       "overtime_daily": null,
-      "unique_rules": [
-        "Sunday and holiday premium pay for retail-adjacent work"
-      ],
+      "unique_rules": [],
       "min_wage_as_of": "2023-01-01",
       "min_wage_source": "https://www.mass.gov/info-details/massachusetts-law-about-minimum-wage"
     },
@@ -230,10 +231,10 @@
     "MN": {
       "name": "Minnesota",
       "min_wage": 11.41,
-      "overtime_weekly": 48,
+      "overtime_weekly": 40,
       "overtime_daily": null,
       "unique_rules": [
-        "Overtime threshold 48 hours/week for small employers"
+        "Minnesota state law sets overtime after 48h/week, but most event employers are FLSA-covered and owe federal overtime after 40h/week (the stricter rule applies)"
       ],
       "min_wage_as_of": "2026-01-01",
       "min_wage_source": "https://www.dli.mn.gov/minwage"
@@ -319,7 +320,6 @@
       "overtime_daily": null,
       "unique_rules": [
         "Regional: NYC/Nassau/Suffolk/Westchester $17.00; rest of state $16.00 (2026).",
-        "NYC, Long Island, Westchester: $16.50/hr min; rest of state $15.50",
         "Spread-of-hours premium for shifts >10 hours"
       ],
       "min_wage_as_of": "2026-01-01",
@@ -367,8 +367,7 @@
       "overtime_weekly": 40,
       "overtime_daily": null,
       "unique_rules": [
-        "Regional: Portland Metro $16.80; standard statewide $15.55; non-urban $14.55 (eff Jul 1, 2026).",
-        "Portland Metro: $15.95, non-urban: $13.70"
+        "Regional: Portland Metro $16.80; standard statewide $15.55; non-urban $14.55 (eff Jul 1, 2026)."
       ],
       "min_wage_as_of": "2026-07-01",
       "min_wage_source": "https://www.oregon.gov/boli/workers/pages/minimum-wage.aspx"
@@ -460,7 +459,7 @@
       "overtime_weekly": 40,
       "overtime_daily": null,
       "unique_rules": [
-        "Seattle: $20.76 (large employers)",
+        "Seattle: $21.30 local minimum (2026, all large/small employers per Seattle OLS)",
         "Paid sick leave required"
       ],
       "min_wage_as_of": "2026-01-01",

@@ -16,8 +16,10 @@
 // endpoint exists for. 20/hour stops runaway agent loops and hand-rolled
 // spam scripts, which is what a no-auth public write can realistically gate.
 
+// Relative import (not the "@/" alias) so this module can be bundled into the
+// stdio build by esbuild, which doesn't resolve tsconfig path aliases.
 import { createHash } from "node:crypto";
-import { exec } from "@/lib/telemetry/redis";
+import { exec } from "../telemetry/redis";
 
 const LIMIT = 20; // max submissions per IP per window
 const WINDOW_SECONDS = 3600; // 1-hour fixed window

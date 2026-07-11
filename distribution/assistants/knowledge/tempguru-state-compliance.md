@@ -1,11 +1,11 @@
 <!--
   GENERATED FILE. Do not hand-edit.
-  Source: content/mcp-data/ (state-compliance.json updated 2026-07-07)
+  Source: content/mcp-data/ (state-compliance.json updated 2026-07-10)
   Regenerate: node distribution/assistants/build-knowledge.mjs
 -->
 # TempGuru: State-by-State Employment Compliance for Event Staffing
 
-Min wage values are the GENERAL statewide rate in effect as of July 2026, verified per-state against state DOL / DOL.gov sources (min_wage_source, min_wage_as_of per state). NY and OR store the metro floor (NYC $17.00, Portland $16.80) with a regional note in unique_rules. W-2 classification is TempGuru's standard for ALL workers in ALL states (the model, not a state requirement). Local ordinances (many cities/counties) may set higher floors. NOT legal advice, consult employment counsel.
+Min wage values are the GENERAL statewide rate in effect as of July 2026, verified per-state against state DOL / DOL.gov sources (min_wage_source, min_wage_as_of per state). NY and OR store the metro floor (NYC $17.00, Portland $16.80) with a regional note in unique_rules. W-2 classification is TempGuru's standard for ALL workers in ALL states (the model, not a state requirement). Local ordinances (many cities/counties) may set higher floors. NOT legal advice, consult employment counsel. v1.2.0: removed stale 2025 sub-notes (NY, OR), removed MA Sunday premium (eliminated 2023), MN stored as the operational FLSA 40h threshold, Seattle updated to $21.30 (2026), Denver $19.29 note added, CA double-time (>12h/day) and seventh-day premium now structured fields.
 
 W-2 classification is TempGuru's standard for ALL workers in ALL states. It is
 not a state mandate; it is the model that removes misclassification, workers'
@@ -40,7 +40,7 @@ comp, and joint-employer risk for the event organizer by design.
 | Arizona (AZ) | $15.15 | 40h/week | none | - |
 | Arkansas (AR) | $11.00 | 40h/week | none | - |
 | California (CA) | $16.90 | 40h/week | 8h/day | Daily overtime after 8 hours; Double-time after 12 hours/day; Mandatory meal break by 5th hour; 10-min paid rest break per 4 hours; Seventh-day overtime |
-| Colorado (CO) | $15.16 | 40h/week | 12h/day | Daily overtime after 12 hours |
+| Colorado (CO) | $15.16 | 40h/week | 12h/day | Daily overtime after 12 hours; Denver: $19.29 local citywide minimum (2026), well above the state floor |
 | Connecticut (CT) | $16.94 | 40h/week | none | - |
 | Delaware (DE) | $15.00 | 40h/week | none | - |
 | District of Columbia (DC) | $18.40 | 40h/week | none | - |
@@ -56,9 +56,9 @@ comp, and joint-employer risk for the event organizer by design.
 | Louisiana (LA) | $7.25 | 40h/week | none | - |
 | Maine (ME) | $15.10 | 40h/week | none | - |
 | Maryland (MD) | $15.00 | 40h/week | none | - |
-| Massachusetts (MA) | $15.00 | 40h/week | none | Sunday and holiday premium pay for retail-adjacent work |
+| Massachusetts (MA) | $15.00 | 40h/week | none | - |
 | Michigan (MI) | $13.73 | 40h/week | none | - |
-| Minnesota (MN) | $11.41 | 48h/week | none | Overtime threshold 48 hours/week for small employers |
+| Minnesota (MN) | $11.41 | 40h/week | none | Minnesota state law sets overtime after 48h/week, but most event employers are FLSA-covered and owe federal overtime after 40h/week (the stricter rule applies) |
 | Mississippi (MS) | $7.25 | 40h/week | none | - |
 | Missouri (MO) | $15.00 | 40h/week | none | - |
 | Montana (MT) | $10.85 | 40h/week | none | - |
@@ -67,12 +67,12 @@ comp, and joint-employer risk for the event organizer by design.
 | New Hampshire (NH) | $7.25 | 40h/week | none | - |
 | New Jersey (NJ) | $15.92 | 40h/week | none | - |
 | New Mexico (NM) | $12.00 | 40h/week | none | - |
-| New York (NY) | $17.00 | 40h/week | none | Regional: NYC/Nassau/Suffolk/Westchester $17.00; rest of state $16.00 (2026).; NYC, Long Island, Westchester: $16.50/hr min; rest of state $15.50; Spread-of-hours premium for shifts >10 hours |
+| New York (NY) | $17.00 | 40h/week | none | Regional: NYC/Nassau/Suffolk/Westchester $17.00; rest of state $16.00 (2026).; Spread-of-hours premium for shifts >10 hours |
 | North Carolina (NC) | $7.25 | 40h/week | none | - |
 | North Dakota (ND) | $7.25 | 40h/week | none | - |
 | Ohio (OH) | $11.00 | 40h/week | none | - |
 | Oklahoma (OK) | $7.25 | 40h/week | none | - |
-| Oregon (OR) | $16.80 | 40h/week | none | Regional: Portland Metro $16.80; standard statewide $15.55; non-urban $14.55 (eff Jul 1, 2026).; Portland Metro: $15.95, non-urban: $13.70 |
+| Oregon (OR) | $16.80 | 40h/week | none | Regional: Portland Metro $16.80; standard statewide $15.55; non-urban $14.55 (eff Jul 1, 2026). |
 | Pennsylvania (PA) | $7.25 | 40h/week | none | - |
 | Rhode Island (RI) | $16.00 | 40h/week | none | - |
 | South Carolina (SC) | $7.25 | 40h/week | none | - |
@@ -82,7 +82,7 @@ comp, and joint-employer risk for the event organizer by design.
 | Utah (UT) | $7.25 | 40h/week | none | - |
 | Vermont (VT) | $14.42 | 40h/week | none | - |
 | Virginia (VA) | $12.77 | 40h/week | none | - |
-| Washington (WA) | $17.13 | 40h/week | none | Seattle: $20.76 (large employers); Paid sick leave required |
+| Washington (WA) | $17.13 | 40h/week | none | Seattle: $21.30 local minimum (2026, all large/small employers per Seattle OLS); Paid sick leave required |
 | West Virginia (WV) | $8.75 | 40h/week | none | - |
 | Wisconsin (WI) | $7.25 | 40h/week | none | - |
 | Wyoming (WY) | $7.25 | 40h/week | none | - |

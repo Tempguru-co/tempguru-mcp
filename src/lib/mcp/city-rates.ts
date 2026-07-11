@@ -37,13 +37,16 @@ const CARDS = Object.fromEntries(
 ) as unknown as Record<string, Card>;
 
 export const CITY_RATES_META = {
-  version: "1.0.0",
-  updated: "2026-05-21",
+  version: "1.1.0",
+  updated: "2026-07-10",
   source: "TempGuru Rate Report 2026, per-city actual-paid weighted averages (7,900+ shifts)",
   card_floor: 30,
   card_ceiling: 85,
   basis:
     "All-inclusive W-2 bill rates per hour: worker pay, payroll taxes, workers' comp, general liability, coordinator support.",
+  // v1.1.0: deduplicated 38 duplicate rows (space-key twins, case/name typos, tier conflicts) (446 -> 408
+  // distinct measured markets) and reconciled the Kansas City tier conflict,
+  // so modes/extrema no longer double-weight duplicated cities.
 };
 
 // ─── role -> card key (rates-model.md ladder) ───────────────────────────────

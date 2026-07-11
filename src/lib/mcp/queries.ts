@@ -19,6 +19,8 @@ import {
   findState,
   suggestCity,
   suggestRole,
+  isSecurityPhrase,
+  SECURITY_ROLE_NOTE,
   type Role,
   type CityTier,
   type PriceBand,
@@ -175,9 +177,21 @@ export function queryCities(input: CitiesQuery): QueryResult<CitiesData | CityCo
     );
   }
   if (input.country) {
-    const cc = input.country.trim().toUpperCase();
-    // Accept "US"/"USA"/"United States" and "CA"/"CAN"/"Canada".
-    const want = cc.startsWith("US") || cc.startsWith("UNITED") ? "US" : cc.startsWith("CA") || cc.startsWith("CAN") ? "CA" : cc;
+    // Exact alias sets only. Prefix matching made "USSR" → US and
+    // "United Kingdom" → US; an unrecognized country is an explicit error.
+    const cc = input.country.trim().toUpperCase().replace(/\./g, "");
+    const want = ["US", "USA", "UNITED STATES", "UNITED STATES OF AMERICA", "AMERICA"].includes(cc)
+      ? "US"
+      : ["CA", "CAN", "CANADA"].includes(cc)
+        ? "CA"
+        : null;
+    if (!want) {
+      return fail({
+        code: "invalid_param",
+        message: `country must be US or CA (accepted: US, USA, United States, CA, CAN, Canada). Got: "${input.country}". TempGuru serves the United States and Canada only.`,
+        field: "country",
+      });
+    }
     result = result.filter((c) => c.country.toUpperCase() === want);
   }
 
@@ -188,8 +202,10 @@ export function queryCities(input: CitiesQuery): QueryResult<CitiesData | CityCo
     small: result.filter((c) => c.tier === "small").length,
   };
   // Cap the returned array so an unfiltered call doesn't dump ~35KB (345 rows)
-  // into the model's context. The full counts are always in total/tier_breakdown.
-  const limit = input.limit && input.limit > 0 ? Math.min(input.limit, 1000) : total;
+  // into the model's context. The full counts are always in total/tier_breakdown;
+  // an explicit limit overrides the default cap (up to 1000 = everything).
+  const DEFAULT_LIMIT = 100;
+  const limit = input.limit && input.limit > 0 ? Math.min(input.limit, 1000) : Math.min(DEFAULT_LIMIT, total);
   const capped = result.slice(0, limit);
   return ok({
     total,
@@ -250,8 +266,13 @@ export type AvailabilityData = {
   city_tier: CityTier;
   event_date: string;
   days_until_event: number;
+  /** True when the requested date is already in the past — confirm the date, don't plan against it. */
+  in_past: boolean;
   typical_lead_time_hours: number;
   recommendation: ReturnType<typeof recommendationLabel>;
+  /** null when no role param; false when a role was given but didn't resolve. */
+  role_found: boolean | null;
+  role_suggestion?: EntitySuggestion;
   role: null | {
     name: string;
     rate_range_usd: PriceBand;
@@ -292,24 +313,64 @@ export function queryAvailability(
     });
   }
 
-  const eventDate = new Date(input.date);
-  if (isNaN(eventDate.getTime())) {
-    return ok({
-      city_found: true,
-      city: cityMatch.name,
-      error: `Invalid date: "${input.date}". Expected ISO format (YYYY-MM-DD) or recognizable date string.`,
-    });
+  // Strict ISO validation first: JS Date rolls impossible dates over
+  // (2027-02-30 → Mar 2), which silently plans against a date the user never
+  // gave. Round-trip the components; non-ISO strings still get Date parsing.
+  const iso = input.date.trim().match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  let eventDate: Date;
+  if (iso) {
+    const [y, mo, d] = [Number(iso[1]), Number(iso[2]), Number(iso[3])];
+    const dt = new Date(Date.UTC(y, mo - 1, d));
+    if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== mo - 1 || dt.getUTCDate() !== d) {
+      return ok({
+        city_found: true,
+        city: cityMatch.name,
+        error: `Impossible calendar date: "${input.date}" (that month has no such day). Confirm the intended date.`,
+      });
+    }
+    eventDate = dt;
+  } else {
+    eventDate = new Date(input.date);
+    if (isNaN(eventDate.getTime())) {
+      return ok({
+        city_found: true,
+        city: cityMatch.name,
+        error: `Invalid date: "${input.date}". Expected ISO format (YYYY-MM-DD) or recognizable date string.`,
+      });
+    }
   }
 
   const now = new Date();
   const daysUntilEvent = Math.ceil(
     (eventDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
   );
+  const inPast = daysUntilEvent < 0;
   const leadHours = LEAD_TIME_HOURS[cityMatch.tier];
   const recommendation = recommendationLabel(daysUntilEvent, leadHours);
 
   const roleMatch = input.role ? findRole(input.role) : null;
+  const roleMissed = !!input.role && !roleMatch;
   const pricing = roleMatch ? PRICING[roleMatch.slug]?.[cityMatch.tier] ?? null : null;
+
+  const notes = [
+    `${cityMatch.name} is a ${cityMatch.tier}-tier market.`,
+    `Typical lead time for ${cityMatch.tier} cities: ${leadHours} hours.`,
+    inPast
+      ? `The requested date is in the past — confirm the intended date with the user before planning or quoting.`
+      : `Event is ${daysUntilEvent} days out, ${recommendation} window.`,
+  ];
+  if (roleMissed) {
+    const rs = roleSuggestion(input.role!);
+    notes.push(
+      rs
+        ? `Role "${input.role}" didn't match the catalog. Did you mean ${rs.name}? Confirm, or check get_roles.`
+        : `Role "${input.role}" didn't match the catalog — check get_roles for exact names. Guidance below is city-level only.`,
+    );
+  }
+  if (input.role && roleMatch && isSecurityPhrase(input.role)) {
+    notes.push(SECURITY_ROLE_NOTE);
+  }
+  notes.push("To book, visit https://tempguru.co/get-staffing or request a quote via the dashboard.");
 
   return ok({
     city_found: true,
@@ -318,8 +379,11 @@ export function queryAvailability(
     city_tier: cityMatch.tier,
     event_date: eventDate.toISOString().slice(0, 10),
     days_until_event: daysUntilEvent,
+    in_past: inPast,
     typical_lead_time_hours: leadHours,
     recommendation,
+    role_found: input.role ? !!roleMatch : null,
+    ...(roleMissed && roleSuggestion(input.role!) ? { role_suggestion: roleSuggestion(input.role!) } : {}),
     role:
       roleMatch && pricing
         ? {
@@ -329,14 +393,7 @@ export function queryAvailability(
           }
         : null,
     count: input.headcount ?? null,
-    notes: [
-      `${cityMatch.name} is a ${cityMatch.tier}-tier market.`,
-      `Typical lead time for ${cityMatch.tier} cities: ${leadHours} hours.`,
-      daysUntilEvent < 0
-        ? "Event date is in the past."
-        : `Event is ${daysUntilEvent} days out, ${recommendation} window.`,
-      "To book, visit https://tempguru.co/get-staffing or request a quote via the dashboard.",
-    ],
+    notes,
   });
 }
 
@@ -377,6 +434,8 @@ export type RolePricingData = {
   tier_definition: string;
   all_tiers_for_context: RolePricing;
   pricing_notes: string;
+  /** Present when the input phrasing needs a caveat (e.g. "security" → unarmed Crowd Control). */
+  role_note?: string;
 };
 
 export function queryRolePricing(
@@ -434,6 +493,7 @@ export function queryRolePricing(
     all_tiers_for_context: PRICING[roleMatch.slug],
     pricing_notes:
       "Published per-role rate card (all-inclusive W-2), by market tier. all_tiers_for_context shows this role's bands across small, mid, and hub. For the measured market benchmark across cities, call get_rate_benchmark (the Rate Index).",
+    ...(isSecurityPhrase(input.role) ? { role_note: SECURITY_ROLE_NOTE } : {}),
   });
 }
 
@@ -455,6 +515,10 @@ export type StateComplianceData = {
   w2_note: string;
   overtime_threshold_weekly_hours: number;
   overtime_threshold_daily_hours: number | null;
+  /** Double-time band start (hours/day), where the state has one (CA: 12). */
+  overtime_daily_double_hours: number | null;
+  /** True where a seventh-consecutive-day premium applies (CA). */
+  seventh_day_overtime: boolean;
   unique_rules: string[];
   liability_coverage_included: boolean;
   workers_comp_included: boolean;
@@ -490,6 +554,8 @@ export function queryStateCompliance(
     w2_note: "TempGuru classifies ALL workers as W-2 employees regardless of state.",
     overtime_threshold_weekly_hours: match.data.overtime_weekly,
     overtime_threshold_daily_hours: match.data.overtime_daily,
+    overtime_daily_double_hours: match.data.overtime_daily_double ?? null,
+    seventh_day_overtime: match.data.seventh_day_overtime ?? false,
     unique_rules: match.data.unique_rules,
     liability_coverage_included: true,
     workers_comp_included: true,

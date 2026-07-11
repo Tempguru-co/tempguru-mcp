@@ -271,6 +271,7 @@ for (const [p, re] of nameChecks) {
 // Minimum wages change every January (plus mid-year in AK/DC/OR/FL). Stale
 // compliance data presented as current is a liability for a compliance-brand
 // company, so fail if the dataset hasn't been re-verified in over 6 months.
+// A FUTURE date also fails: it would silently disarm this gate for years.
 // Reset by re-checking values against state DOL sources and bumping _meta.updated.
 try {
   const sc = JSON.parse(read("content/mcp-data/state-compliance.json"));
@@ -283,10 +284,78 @@ try {
       errors.push(
         `state-compliance.json is ${ageMonths.toFixed(1)} months stale (updated ${sc._meta.updated}); minimum wages change every January, re-verify against state DOL sources and bump _meta.updated.`,
       );
+    } else if (ageMonths < -0.1) {
+      errors.push(
+        `state-compliance.json _meta.updated "${sc._meta.updated}" is in the future; use the actual verification date.`,
+      );
     }
   }
 } catch (e) {
   errors.push(`could not read state-compliance.json for freshness check: ${e.message}`);
+}
+
+// ── city-data integrity ─────────────────────────────────────────────────────
+// (a) cities.json: (name, state, country) must be unique — a duplicate row
+//     (Springfield MO twice, once as the bare slug) shipped and split the
+//     market's identity across two tiers.
+// (b) city-rates.json: .name must be unique — 36 space-key/typo-key duplicate
+//     rows (446 "measured markets" that were really 410) double-weighted modes
+//     and let Kansas City carry two different tiers.
+// (c) where a rate row's "City, ST" matches a served city, tiers must agree.
+// (d) Brand Ambassador rates floor at $40 in EVERY market and every tier.
+{
+  const cities = JSON.parse(read("content/mcp-data/cities.json")).cities;
+  const seen = new Map();
+  for (const c of cities) {
+    const k = `${c.name}|${c.state_abbr}|${c.country}`;
+    if (seen.has(k)) errors.push(`cities.json: duplicate market ${k} (slugs ${seen.get(k)} and ${c.slug})`);
+    seen.set(k, c.slug);
+  }
+
+  const rates = JSON.parse(read("content/mcp-data/city-rates.json"));
+  const rateEntries = Object.entries(rates).filter(([k]) => k !== "_meta");
+  const namesSeen = new Map();
+  const tierByCity = new Map(cities.map((c) => [`${c.name}, ${c.state_abbr}`, c.tier]));
+  for (const [key, row] of rateEntries) {
+    // Case-insensitive: "College station, TX" vs "College Station, TX" was a
+    // real duplicate that exact-match comparison missed.
+    const nameKey = row.name.toLowerCase();
+    if (namesSeen.has(nameKey)) {
+      errors.push(`city-rates.json: duplicate market "${row.name}" (keys "${namesSeen.get(nameKey)}" and "${key}")`);
+    }
+    namesSeen.set(nameKey, key);
+    if (key.includes(" ")) {
+      errors.push(`city-rates.json: key "${key}" contains a space (keys are hyphenated slugs)`);
+    }
+    const servedTier = tierByCity.get(row.name);
+    if (servedTier && row.tier !== servedTier) {
+      errors.push(`city-rates.json: "${row.name}" is tier "${row.tier}" but cities.json says "${servedTier}"`);
+    }
+    if (Array.isArray(row.brand_amb) && row.brand_amb[0] < 40) {
+      errors.push(`city-rates.json: "${row.name}" Brand Ambassador low $${row.brand_amb[0]} breaks the $40 floor`);
+    }
+  }
+
+  const rolePricing = JSON.parse(read("content/mcp-data/role-pricing.json")).pricing;
+  const ba = rolePricing["brand-ambassadors"];
+  for (const tier of ["small", "mid", "hub"]) {
+    if (ba?.[tier]?.low < 40) {
+      errors.push(`role-pricing.json: brand-ambassadors ${tier} low $${ba[tier].low} breaks the $40 floor`);
+    }
+  }
+}
+
+// ── llms-install.md freshness ───────────────────────────────────────────────
+// The agent-facing install doc served an 11-role catalog and a stale protocol
+// revision long after both changed; hold it to the canonical values.
+{
+  const body = read("llms-install.md");
+  if (!body.includes(`${ROLE_COUNT} staffing roles`) || !body.includes(`${ROLE_COUNT} roles`)) {
+    errors.push(`llms-install.md: role count drifted from the canonical ${ROLE_COUNT} (roles.json)`);
+  }
+  if (mcpJsonProto && !body.includes(mcpJsonProto)) {
+    errors.push(`llms-install.md: does not mention the advertised protocolVersion ${mcpJsonProto}`);
+  }
 }
 
 console.log(`Canonical: ${MARKET_COUNT} markets, ${ROLE_COUNT} roles, ${TOOLS.length} MCP tools, v${PKG_VERSION}.`);

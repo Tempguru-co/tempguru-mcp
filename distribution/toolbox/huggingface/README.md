@@ -31,7 +31,7 @@ served live by the TempGuru API (`https://mcp.tempguru.co/api/v1`, OpenAPI
 at `/openapi.json`) and MCP server (`https://mcp.tempguru.co/mcp`).
 
 - **cities** (345 rows): every published market with state, country, and
-  market tier (25 hub / 129 mid / 191 small).
+  market tier (25 hub / 128 mid / 192 small).
 - **roles_and_rates** (57 rows): 11 event staffing roles x 3 market tiers
   with all-inclusive W-2 hourly rate bands in USD (worker pay, employer
   payroll taxes, workers' compensation, general liability, coordinator
