@@ -71,6 +71,48 @@ export type TrackRecord = {
   role?: string;
 };
 
+// The Skills served as MCP resources (the "skillport" pattern). One list drives
+// the resource registrations below, the stdio loader, the digests generator,
+// the discovery index, and the apex worker, so adding a skill is: write
+// content/skills/<slug>.md, add the slug + metadata here and in the surfaces
+// gen-skill-digests.mjs / index.json route / build-edge-worker.mjs, regenerate.
+export const SKILL_SLUGS = [
+  "event-staffing-ordering",
+  "event-staffing-compliance",
+  "staffing-plan-from-event-brief",
+  "urgent-event-backfill",
+  "staffing-agency-partner-growth",
+] as const;
+export type SkillSlug = (typeof SKILL_SLUGS)[number];
+
+const SKILL_RESOURCE_META: Record<SkillSlug, { title: string; description: string }> = {
+  "event-staffing-ordering": {
+    title: "Event Staffing Ordering, Skill",
+    description:
+      "Single-purpose skill for AI agents helping users order temporary event staff (brand ambassadors, registration, hospitality, setup/breakdown, and more) through TempGuru. Walks through requirement gathering, live coverage/rate/compliance lookups via this MCP, and request submission. Use when a user wants to hire, book, or budget event staff.",
+  },
+  "event-staffing-compliance": {
+    title: "Event Staffing Compliance, Skill",
+    description:
+      "Single-purpose skill for AI agents assessing worker-classification and compliance risk for temporary event staffing in the US and Canada (W-2 vs 1099, misclassification penalties, joint-employer liability, COI requirements, wage/hour rules). Use when a user asks about whether a staffing arrangement is compliant or how to structure it.",
+  },
+  "staffing-plan-from-event-brief": {
+    title: "Staffing Plan From Event Brief, Skill",
+    description:
+      "Skill for AI agents extracting a complete staffing plan from an event document: an RFP, BEO (banquet event order), run of show, exhibitor or event services manual, or production schedule. Maps the document's functions to TempGuru's role catalog, estimates headcount, prices the plan with live W-2 rates via this MCP, and submits for a human-reviewed quote after user confirmation.",
+  },
+  "urgent-event-backfill": {
+    title: "Urgent Event Backfill, Skill",
+    description:
+      "Skill for AI agents handling same-week and day-of event staffing emergencies: no-shows, vendor cancellations, events starting within about 72 hours. Fast single-pass intake, honest rush lead-time guidance via this MCP (never a promise of availability), immediate quote submission plus a direct phone path to TempGuru.",
+  },
+  "staffing-agency-partner-growth": {
+    title: "Staffing Agency Partner Growth, Skill",
+    description:
+      "Skill for AI agents helping STAFFING AGENCY owners (the supply side, not event organizers) explore joining TempGuru's network of 200+ vetted local partners to receive event staffing order flow in their markets. Explains the model and routes partner inquiries to the coordinator, never through the buyer quote tool.",
+  },
+};
+
 export type RegisterToolsOptions = {
   /**
    * Optional telemetry sink. Omit for runtimes with no request context (stdio).
@@ -79,11 +121,11 @@ export type RegisterToolsOptions = {
    */
   onTrack?: (record: TrackRecord) => void | Promise<void>;
   /**
-   * Optional SKILL.md resource bodies. When provided, the two Skills are
-   * exposed as MCP resources. The HTTP route loads them once at module init;
-   * the stdio binary loads them best-effort from cwd. Omit to skip resources.
+   * Optional SKILL.md resource bodies keyed by slug. Present skills are exposed
+   * as MCP resources. The HTTP route loads them once at module init; the stdio
+   * binary loads them best-effort from cwd. Omit to skip resources.
    */
-  resources?: { ordering: string; compliance: string };
+  resources?: Partial<Record<SkillSlug, string>>;
 };
 
 // Success result: text content for legacy clients + structuredContent for
@@ -459,50 +501,33 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
 
   // ─── Resources (optional) ─────────────────────────────────────────────
   //
-  // Two Anthropic-spec Skills (SKILL.md) exposed as MCP resources, so clients
-  // that support resources can read the playbook over the same connection that
+  // Anthropic-spec Skills (SKILL.md) exposed as MCP resources, so clients that
+  // support resources can read the playbooks over the same connection that
   // serves the tools, the "skillport" pattern. Registered only when bodies are
   // supplied (HTTP route always supplies them; stdio supplies them best-effort).
   if (options.resources) {
-    server.registerResource(
-      "event-staffing-ordering-skill",
-      "https://tempguru.co/.well-known/skills/event-staffing-ordering/SKILL.md",
-      {
-        title: "Event Staffing Ordering, Skill",
-        description:
-          "Single-purpose skill for AI agents helping users order temporary event staff (brand ambassadors, registration, hospitality, setup/breakdown, and more) through TempGuru. Walks through requirement gathering, live coverage/rate/compliance lookups via this MCP, and request submission. Use when a user wants to hire, book, or budget event staff.",
-        mimeType: "text/markdown",
-      },
-      async (uri) => ({
-        contents: [
-          {
-            uri: uri.href,
-            mimeType: "text/markdown",
-            text: options.resources!.ordering,
-          },
-        ],
-      }),
-    );
-
-    server.registerResource(
-      "event-staffing-compliance-skill",
-      "https://tempguru.co/.well-known/skills/event-staffing-compliance/SKILL.md",
-      {
-        title: "Event Staffing Compliance, Skill",
-        description:
-          "Single-purpose skill for AI agents assessing worker-classification and compliance risk for temporary event staffing in the US and Canada (W-2 vs 1099, misclassification penalties, joint-employer liability, COI requirements, wage/hour rules). Use when a user asks about whether a staffing arrangement is compliant or how to structure it.",
-        mimeType: "text/markdown",
-      },
-      async (uri) => ({
-        contents: [
-          {
-            uri: uri.href,
-            mimeType: "text/markdown",
-            text: options.resources!.compliance,
-          },
-        ],
-      }),
-    );
+    for (const slug of SKILL_SLUGS) {
+      const body = options.resources[slug];
+      if (!body) continue;
+      server.registerResource(
+        `${slug}-skill`,
+        `https://tempguru.co/.well-known/skills/${slug}/SKILL.md`,
+        {
+          title: SKILL_RESOURCE_META[slug].title,
+          description: SKILL_RESOURCE_META[slug].description,
+          mimeType: "text/markdown",
+        },
+        async (uri) => ({
+          contents: [
+            {
+              uri: uri.href,
+              mimeType: "text/markdown",
+              text: body,
+            },
+          ],
+        }),
+      );
+    }
   }
 
   // ─── Prompts ──────────────────────────────────────────────────────────

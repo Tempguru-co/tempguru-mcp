@@ -1,4 +1,7 @@
 {
-  "event-staffing-ordering": "sha256:5da463f2d0d233974ccef7019d14bd3aa5f876a8ef3bdbd7acf74d92f8fd3b3a",
-  "event-staffing-compliance": "sha256:c36c45115c141ffa0cbb3c5778be67ece6161695830fa7f987d55086fc6fe94e"
+  "event-staffing-ordering": "sha256:77acebd3fc96904a7ed2433d34f69425b4b1ab90f09c0b09c2acd8dc96a00665",
+  "event-staffing-compliance": "sha256:c36c45115c141ffa0cbb3c5778be67ece6161695830fa7f987d55086fc6fe94e",
+  "staffing-plan-from-event-brief": "sha256:4232427019d3d576a96be0873d0ae3ea54af4643cb464a864844fc39ce0768f0",
+  "urgent-event-backfill": "sha256:9b7eaf30f9f190334d9044c44ffa931785140325d567ee122df86a4f44e63e05",
+  "staffing-agency-partner-growth": "sha256:51e5ae9e4e2381b65ed9bac6d6bf0da5017d37d149ef163790bc3329e88848e7"
 }

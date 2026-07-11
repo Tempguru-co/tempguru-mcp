@@ -21,13 +21,13 @@ import { createMcpHandler } from "mcp-handler";
 import pkg from "../../../package.json";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { registerTools, SERVER_INSTRUCTIONS } from "@/lib/mcp/register-tools";
+import { registerTools, SERVER_INSTRUCTIONS, SKILL_SLUGS, type SkillSlug } from "@/lib/mcp/register-tools";
 import { runWithContext, currentContext } from "@/lib/telemetry/context";
 import { track } from "@/lib/telemetry/track";
 
 // ─── Skill resource content ───────────────────────────────────────────────
 //
-// Both SKILL.md files are loaded once at module-init time and served as MCP
+// SKILL.md files are loaded once at module-init time and served as MCP
 // resources. Source-of-truth is /content/skills/*.md in this repo, kept in
 // sync with the canonical files at tempguru.co/.well-known/skills/<name>/SKILL.md.
 //
@@ -35,8 +35,9 @@ import { track } from "@/lib/telemetry/track";
 // resources/read call. Vercel's Fluid Compute reuses module state across
 // requests, so the read happens once per cold start.
 const SKILLS_DIR = join(process.cwd(), "content", "skills");
-const ORDERING_SKILL = readFileSync(join(SKILLS_DIR, "event-staffing-ordering.md"), "utf-8");
-const COMPLIANCE_SKILL = readFileSync(join(SKILLS_DIR, "event-staffing-compliance.md"), "utf-8");
+const SKILL_BODIES = Object.fromEntries(
+  SKILL_SLUGS.map((slug) => [slug, readFileSync(join(SKILLS_DIR, `${slug}.md`), "utf-8")]),
+) as Record<SkillSlug, string>;
 
 // ─── Handler ──────────────────────────────────────────────────────────────
 
@@ -51,7 +52,7 @@ const handler = createMcpHandler(
         const ctx = currentContext();
         await track({ ...record, channel: "mcp", userAgent: ctx.userAgent, ipCountry: ctx.ipCountry, source: ctx.source });
       },
-      resources: { ordering: ORDERING_SKILL, compliance: COMPLIANCE_SKILL },
+      resources: SKILL_BODIES,
     });
   },
   {

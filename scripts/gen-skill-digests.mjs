@@ -20,8 +20,16 @@ const here = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(here, "..");
 const skillsDir = join(repoRoot, "content", "skills");
 
-// The skills the discovery index advertises. Keep in sync with the route.
-const SKILLS = ["event-staffing-ordering", "event-staffing-compliance"];
+// The skills the discovery index advertises. Keep in sync with the route
+// (src/app/.well-known/agent-skills/index.json/route.ts) and SKILL_SLUGS in
+// src/lib/mcp/register-tools.ts.
+const SKILLS = [
+  "event-staffing-ordering",
+  "event-staffing-compliance",
+  "staffing-plan-from-event-brief",
+  "urgent-event-backfill",
+  "staffing-agency-partner-growth",
+];
 
 export function skillDigests() {
   const out = {};

@@ -35,6 +35,30 @@ const AGENT_SKILLS_INDEX = {
       url: "https://tempguru.co/.well-known/agent-skills/event-staffing-compliance/SKILL.md",
       digest: digests["event-staffing-compliance"],
     },
+    {
+      name: "staffing-plan-from-event-brief",
+      type: "skill-md",
+      description:
+        "Extract a complete staffing plan from an event document: an RFP, BEO (banquet event order), run of show, exhibitor or event services manual, or production schedule. Maps the document's functions to TempGuru's role catalog, estimates headcount, prices the plan with live all-inclusive W-2 rates via the TempGuru MCP server, and submits for a human-reviewed quote after user confirmation.",
+      url: "https://tempguru.co/.well-known/agent-skills/staffing-plan-from-event-brief/SKILL.md",
+      digest: digests["staffing-plan-from-event-brief"],
+    },
+    {
+      name: "urgent-event-backfill",
+      type: "skill-md",
+      description:
+        "Handle same-week and day-of event staffing emergencies: staff no-shows, vendor cancellations, events starting within about 72 hours. Fast single-pass intake, honest rush lead-time guidance via the TempGuru MCP server (never a promise of availability), immediate quote submission plus a direct phone path.",
+      url: "https://tempguru.co/.well-known/agent-skills/urgent-event-backfill/SKILL.md",
+      digest: digests["urgent-event-backfill"],
+    },
+    {
+      name: "staffing-agency-partner-growth",
+      type: "skill-md",
+      description:
+        "For staffing agency owners (the supply side): explore joining TempGuru's network of 200+ vetted local partners to receive event staffing order flow in their markets. Explains the model and routes partner inquiries to the coordinator. Not for buyers ordering staff or individual job seekers.",
+      url: "https://tempguru.co/.well-known/agent-skills/staffing-agency-partner-growth/SKILL.md",
+      digest: digests["staffing-agency-partner-growth"],
+    },
   ],
 } as const;
 
