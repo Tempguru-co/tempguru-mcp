@@ -90,6 +90,16 @@ export function parseEventStart(value: string): Date | null {
   if (dayMatch) {
     const candidate = Number(dayMatch[1]);
     if (candidate >= 1 && candidate <= 31) day = candidate;
+  } else {
+    // Day-before-month form ("14 August 2026"): take the number immediately
+    // preceding the month token, so UK-style dates don't collapse to the 1st.
+    const beforeMonth = lower.slice(0, monthMatch.index ?? 0).replace(/20[2-9]\d/g, " ");
+    const beforeMatches = [...beforeMonth.matchAll(/\b([0-3]?\d)\b/g)];
+    const last = beforeMatches.at(-1);
+    if (last) {
+      const candidate = Number(last[1]);
+      if (candidate >= 1 && candidate <= 31) day = candidate;
+    }
   }
 
   const timestamp = validUtc(year, month, day);

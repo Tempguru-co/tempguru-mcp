@@ -980,6 +980,10 @@ delete process.env.TEMPGURU_EVAL_MEMORY_REDIS;
 if (priorNodeEnv === undefined) delete process.env.NODE_ENV;
 else process.env.NODE_ENV = priorNodeEnv;
 
+const ukDate = parseEventStart("14 August 2026");
+check("parseEventStart: '14 August 2026' (day-before-month) is August 14, not August 1",
+  ukDate?.getUTCMonth() === 7 && ukDate?.getUTCDate() === 14, `got ${ukDate?.toISOString()?.slice(0, 10)}`);
+
 console.log(`\n${pass} passed, ${fail} failed`);
 if (failures.length) {
   console.log("failures:\n - " + failures.join("\n - "));

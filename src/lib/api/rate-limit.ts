@@ -68,3 +68,32 @@ export async function checkQuoteRateLimit(ip: string): Promise<RateLimitVerdict>
     if (timer) clearTimeout(timer);
   }
 }
+
+// Generic per-IP fixed-window limiter for cheap read-side abuse vectors
+// (plan-snapshot persistence, quote-status lookups). Same fail-open posture
+// and hashed-IP privacy as the quote limiter, higher ceiling.
+const READ_LIMIT = 60; // per IP per hour, per kind
+export async function checkReadRateLimit(ip: string, kind: string): Promise<RateLimitVerdict> {
+  if (!ip) return { allowed: true };
+  const hash = createHash("sha256").update(ip).digest("hex").slice(0, 32);
+  const key = `ratelimit:${kind}:${hash}`;
+  const check: Promise<RateLimitVerdict | null> = exec(async (r) => {
+    const count = await r.incr(key);
+    await r.expire(key, WINDOW_SECONDS, "nx");
+    if (count <= READ_LIMIT) return { allowed: true };
+    const ttl = await r.ttl(key);
+    return { allowed: false, retryAfterSeconds: ttl > 0 ? ttl : WINDOW_SECONDS };
+  });
+  let timer;
+  try {
+    const verdict = await Promise.race([
+      check,
+      new Promise((resolve) => { timer = setTimeout(() => resolve(null), CHECK_CAP_MS); }),
+    ]);
+    return (verdict as RateLimitVerdict | null) ?? { allowed: true };
+  } catch {
+    return { allowed: true };
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}

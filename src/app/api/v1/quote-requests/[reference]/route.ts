@@ -1,7 +1,8 @@
 // GET /api/v1/quote-requests/{reference}, REST mirror of MCP get_quote_status.
 
 import { queryQuoteStatus, QUOTE_REFERENCE_PATTERN } from "@/lib/mcp/quote-status";
-import { jsonBadRequest, jsonOk, optionsPreflight } from "@/lib/api/responses";
+import { jsonBadRequest, jsonOk, jsonRateLimited, optionsPreflight } from "@/lib/api/responses";
+import { checkReadRateLimit } from "@/lib/api/rate-limit";
 import { trackRest } from "@/lib/api/track-rest";
 
 export async function GET(
@@ -16,6 +17,14 @@ export async function GET(
       "reference must match the TG-ABC234 quote-reference format.",
       "reference",
     );
+  }
+  const ip =
+    (request.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() ||
+    (request.headers.get("x-real-ip") ?? "");
+  const verdict = await checkReadRateLimit(ip, "status");
+  if (!verdict.allowed) {
+    await trackRest(request, { tool: "get_quote_status", status: "error" });
+    return jsonRateLimited(verdict.retryAfterSeconds);
   }
   const result = await queryQuoteStatus(normalized);
   await trackRest(request, {

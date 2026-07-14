@@ -23,7 +23,7 @@ import {
   type CityTier,
 } from "./queries";
 import { createLead } from "../notion/create-lead";
-import { checkQuoteRateLimit } from "../api/rate-limit";
+import { checkQuoteRateLimit, checkReadRateLimit } from "../api/rate-limit";
 import { currentContext } from "../telemetry/context";
 import { buildStaffingPlan } from "./plan-staffing";
 import { persistCompletePlan, querySavedPlan, PLAN_ID_PATTERN } from "./plan-store";
@@ -226,7 +226,12 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     async (input) => {
       const plan = buildStaffingPlan(input);
       const complete = plan.status === "plan" && plan.plan_complete === true;
-      const decoration = complete
+      // Persistence is rate-limited per IP: a no-auth caller looping valid
+      // plans must not mint unbounded Redis keys in the instance that also
+      // holds the lead queue. Fails open into "no plan_id", never a worse plan.
+      const persistAllowed =
+        complete && (await checkReadRateLimit(currentContext().ip, "plan")).allowed;
+      const decoration = persistAllowed
         ? await persistCompletePlan(
             plan,
             input.city,
@@ -651,6 +656,16 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
       },
     },
     async ({ reference }) => {
+      // Reference space is ~30 bits: throttle lookups so live TG codes can't
+      // be enumerated from the no-auth endpoint.
+      const verdict = await checkReadRateLimit(currentContext().ip, "status");
+      if (!verdict.allowed) {
+        await track({ tool: "get_quote_status", status: "error" });
+        return errorResult({
+          error: "rate_limited",
+          message: `Too many status lookups from this source. Retry after ${verdict.retryAfterSeconds}s.`,
+        });
+      }
       const result = await queryQuoteStatus(reference);
       await track({
         tool: "get_quote_status",
