@@ -1,17 +1,22 @@
 // TempGuru MCP server, streamable-HTTP transport (production, on Vercel).
 //
-// The 8 tools and 2 Skill resources are registered by the shared registerTools()
+// The 11 tools and 5 Skill resources are registered by the shared registerTools()
 // in @/lib/mcp/register-tools, so this hosted endpoint and the stdio binary
 // (src/mcp-stdio.ts) expose byte-identical tools, no behavior drift between the
 // remote server and a local/Docker build. This file owns only what is
 // HTTP-specific: per-request telemetry context, Accept-header normalization,
 // CORS, and the streamable-HTTP handler wiring.
 //
+//   - plan_staffing              build a complete plan from city/date/roles
+//   - get_plan                    restore a non-PII saved staffing plan
 //   - get_cities                 list all cities TempGuru serves (with tier)
 //   - get_roles                  list all staffing roles with descriptions
 //   - check_availability         deterministic lead-time guidance for a city/date
 //   - get_role_pricing           rate range for a role in a specific city
 //   - get_compliance_by_state    state-level employment compliance summary
+//   - get_policies                published booking/procurement terms
+//   - get_rate_benchmark          citable W-2 Rate Index benchmark
+//   - get_quote_status            received/queued quote status by TG reference
 //   - request_quote              submit a staffing plan → Notion Inbound Deal Pipeline
 //
 // Transport: streamable HTTP (MCP spec rev 2025-03-26). SSE disabled.
@@ -69,7 +74,7 @@ const handler = createMcpHandler(
       version: pkg.version,
       title: "TempGuru Event Staffing",
       description:
-        "W-2 event staffing data for AI agents: 345 US/CA markets. Eight tools: the call-first plan_staffing planner, six read-only lookups including the get_rate_benchmark Rate Index, and an opt-in request_quote submission. Ships skill resources and guided prompts. No authentication required. ChatGPT users without MCP: the TempGuru Event Staffing Planner GPT covers the same workflow.",
+        "W-2 event staffing data for AI agents across 345 US/CA markets. Eleven tools: ten read-only planning, saved-plan, lookup, policy, benchmark, and quote-status tools plus one opt-in request_quote submission. Ships skill resources and guided prompts. No authentication required.",
       icons: [
         {
           src: "https://mcp.tempguru.co/logo.svg",
@@ -135,7 +140,7 @@ const CORS_HEADERS: Record<string, string> = {
   "access-control-allow-origin": "*",
   "access-control-allow-methods": "GET, POST, DELETE, OPTIONS",
   "access-control-allow-headers":
-    "Content-Type, Accept, Mcp-Session-Id, Last-Event-ID, Authorization",
+    "Content-Type, Accept, Mcp-Session-Id, Last-Event-ID, Authorization, X-TempGuru-Source",
   "access-control-expose-headers": "Mcp-Session-Id, WWW-Authenticate",
   "access-control-max-age": "86400",
 };

@@ -24,11 +24,15 @@ const copilotSuffix = `
 
 TOOLS ON THIS PLATFORM
 You have live actions against TempGuru's public API (listCities, listRoles,
-checkAvailability, getRolePricing, getComplianceByState, and
-submitQuoteRequest). Use them for anything current. submitQuoteRequest is
-the one write action: confirm the full plan with the user (city, dates,
+checkAvailability, getRolePricing, getComplianceByState, getPolicies,
+getPlan, getQuoteStatus, and submitQuoteRequest). Use getPlan when the user
+provides a saved plan ID, getPolicies for booking/procurement questions, and
+getQuoteStatus when they provide a TG reference. Never guess either ID.
+submitQuoteRequest is the one write action: confirm the full plan with the
+user (city, dates,
 roles + headcount, contact name, email, company), show what will be sent,
-and call it once after they explicitly confirm. It creates no reservation
+set source_platform to "copilot-agent", include plan_id when available, and
+call it once after they explicitly confirm. It creates no reservation
 and requires no payment; a coordinator replies within one business day. If
 it errors or the user prefers the website, send them to
 https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=copilot-agent
@@ -86,7 +90,7 @@ const aiPlugin = {
   description_for_human:
     "Event staffing coverage, hourly rates, lead times, and state labor compliance for 345 US and Canadian markets.",
   description_for_model:
-    "Public data and quote submission for event staffing in the US and Canada from TempGuru. Use listCities for coverage, listRoles for the role catalog, checkAvailability for lead-time guidance on a city + date, getRolePricing for all-inclusive hourly rate ranges, and getComplianceByState for state wage and overtime rules. submitQuoteRequest is the single write operation: it submits a confirmed staffing plan to TempGuru's CRM for human review, call it only after the user explicitly confirms; it creates no reservation and requires no payment. No authentication.",
+    "Public data and quote submission for event staffing in the US and Canada from TempGuru. Use listCities for coverage, listRoles for the role catalog, checkAvailability for lead-time guidance, getRolePricing for hourly rates, getComplianceByState for wage/overtime rules, getPolicies for published booking terms, getPlan to restore a supplied plan ID, and getQuoteStatus to check a supplied TG reference. submitQuoteRequest is the single write operation: call it only after explicit confirmation; it creates no reservation and requires no payment. No authentication.",
   contact_email: "megan@tempguru.co",
   namespace: "tempguru",
   legal_info_url: "https://tempguru.co/privacy-policy",
@@ -102,6 +106,9 @@ const aiPlugin = {
         "checkAvailability",
         "getRolePricing",
         "getComplianceByState",
+        "getPolicies",
+        "getPlan",
+        "getQuoteStatus",
         "submitQuoteRequest",
       ],
     },

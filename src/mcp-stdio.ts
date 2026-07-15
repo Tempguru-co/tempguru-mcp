@@ -1,14 +1,14 @@
 // TempGuru MCP server, stdio transport (local / Docker / embedded).
 //
 // A self-contained build of the same MCP server that runs at
-// https://mcp.tempguru.co/mcp. It registers the identical 8 tools + 2 Skill
+// https://mcp.tempguru.co/mcp. It registers the identical 11 tools + 5 Skill
 // resources via the shared registerTools(), but speaks MCP over stdin/stdout
 // instead of streamable HTTP, the form that Claude Desktop, the Docker MCP
 // Catalog, on-device assistants, and Glama's sandboxed checker expect from a
 // locally-run server.
 //
-// Boots with no configuration: the seven read-only tools serve static data that
-// esbuild bundles into the binary, and request_quote registers but returns a
+// Boots with no configuration: the ten read-only tools serve static data or
+// clean not-found variants when Redis is absent. request_quote registers but returns a
 // clean error if NOTION_API_KEY is unset (e.g. a credential-less Docker build),
 // so the server never crashes on startup.
 //
@@ -38,15 +38,19 @@ function loadSkills(): Partial<Record<SkillSlug, string>> | undefined {
   const candidates = [
     join(here, "skills"), // npm CLI layout: <pkg>/skills
     join(here, "..", "content", "skills"), // dist layout: <pkg>/content/skills
+    join(process.cwd(), "skills"), // portable Agent Skills checkout layout
     join(process.cwd(), "content", "skills"), // run from project root
   ];
   for (const dir of candidates) {
     const found: Partial<Record<SkillSlug, string>> = {};
     for (const slug of SKILL_SLUGS) {
-      try {
-        found[slug] = readFileSync(join(dir, `${slug}.md`), "utf-8");
-      } catch {
-        // that skill isn't in this candidate dir
+      for (const path of [join(dir, slug, "SKILL.md"), join(dir, `${slug}.md`)]) {
+        try {
+          found[slug] = readFileSync(path, "utf-8");
+          break;
+        } catch {
+          // Try the portable directory layout, then the canonical flat layout.
+        }
       }
     }
     if (Object.keys(found).length > 0) return found;
@@ -60,7 +64,7 @@ const server = new McpServer({
   version: pkg.version,
   title: "TempGuru Event Staffing",
   description:
-    "W-2 event staffing data for AI agents: 345 US/CA markets. Eight tools: the call-first plan_staffing planner, six read-only lookups including the get_rate_benchmark Rate Index, and an opt-in request_quote submission. Ships skill resources and guided prompts. No authentication required. ChatGPT users without MCP: the TempGuru Event Staffing Planner GPT covers the same workflow.",
+    "W-2 event staffing data for AI agents: 345 US/CA markets. Eleven tools: ten read-only planning, saved-plan, lookup, policy, benchmark, and quote-status tools plus one opt-in request_quote submission. Ships skill resources and guided prompts. No authentication required.",
   icons: [
     {
       src: "https://mcp.tempguru.co/logo.svg",
@@ -75,7 +79,7 @@ registerTools(server, { resources: loadSkills() });
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("[tempguru-mcp] stdio server ready, 8 tools, 2 prompts.");
+  console.error("[tempguru-mcp] stdio server ready, 11 tools, 5 skill resources, 2 prompts.");
 }
 
 main().catch((err) => {

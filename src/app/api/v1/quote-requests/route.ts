@@ -106,7 +106,16 @@ export async function POST(request: Request) {
       ? ((body as Record<string, unknown>).source as string)
       : "";
   const sourceTag = request.headers.get("x-tempguru-source") ?? rawBodySource;
-  const result = await createLead({ ...input, channel: "rest", source: { userAgent, ipCountry } });
+  const result = await createLead({
+    ...input,
+    channel: "rest",
+    source: { userAgent, ipCountry },
+    controlled_source: sourceTag,
+  });
+  const funnelEvents =
+    result.success && !result.deduped
+      ? ["quotes_submitted" as const, ...(result.plan_linked ? (["quotes_linked"] as const) : [])]
+      : [];
   await track({
     tool: "request_quote",
     status: result.success ? "success" : "error",
@@ -115,6 +124,10 @@ export async function POST(request: Request) {
     userAgent,
     ipCountry,
     source: sourceTag,
+    funnelEvents,
+    sourcePlatform:
+      result.success && funnelEvents.length ? result.source_platform : undefined,
+    sourceSkill: result.success && funnelEvents.length ? result.skill_id : undefined,
   });
 
   if (!result.success) {
@@ -125,7 +138,13 @@ export async function POST(request: Request) {
   }
 
   return jsonWrite(
-    quoteSubmittedPayload(input.contact_email, result.deal_name, result.reference, result.captured),
+    quoteSubmittedPayload(
+      input.contact_email,
+      result.deal_name,
+      result.reference,
+      result.captured,
+      result.plan_linked,
+    ),
   );
 }
 

@@ -3,7 +3,8 @@
 // the golden MCP cases can't easily reach. Run: npm run test:unit
 
 import { build } from "esbuild";
-import { mkdtempSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -21,6 +22,72 @@ async function load(rel) {
     logLevel: "silent",
   });
   const tmp = join(mkdtempSync(join(tmpdir(), "unit-")), "mod.mjs");
+  writeFileSync(tmp, result.outputFiles[0].text);
+  return import(pathToFileURL(tmp).href);
+}
+
+// Re-export telemetry and its Redis adapter from one bundle so the eval-memory
+// backend is shared and its aggregate writes can be asserted directly.
+async function loadTelemetryHarness() {
+  const result = await build({
+    stdin: {
+      contents: `
+        export { track } from "./src/lib/telemetry/track.ts";
+        export { exec as redisExec } from "./src/lib/telemetry/redis.ts";
+      `,
+      resolveDir: repoRoot,
+      loader: "ts",
+    },
+    bundle: true,
+    format: "esm",
+    platform: "node",
+    write: false,
+    logLevel: "silent",
+  });
+  const tmp = join(mkdtempSync(join(tmpdir(), "telemetry-unit-")), "mod.mjs");
+  writeFileSync(tmp, result.outputFiles[0].text);
+  return import(pathToFileURL(tmp).href);
+}
+
+// Bundle Route Handlers through their real validation/query code while
+// replacing only external side effects. This keeps HTTP contract checks
+// deterministic even when a developer has Redis credentials in their shell.
+async function loadRestRoute(rel) {
+  const sideEffectStubs = {
+    name: "rest-route-test-stubs",
+    setup(esbuild) {
+      for (const name of ["track-rest", "expiring-json-store"]) {
+        esbuild.onResolve(
+          { filter: new RegExp(`${name}$`) },
+          () => ({ path: name, namespace: "rest-route-test" }),
+        );
+      }
+      esbuild.onLoad(
+        { filter: /.*/, namespace: "rest-route-test" },
+        ({ path }) => ({
+          loader: "js",
+          contents:
+            path === "track-rest"
+              ? "export async function trackRest() {}"
+              : `export const redisJsonStore = {
+                   async get() { return null; },
+                   async put() { return "unavailable"; },
+                 };
+                 export function withCap(promise) { return promise; }`,
+        }),
+      );
+    },
+  };
+  const result = await build({
+    entryPoints: [join(repoRoot, rel)],
+    bundle: true,
+    format: "esm",
+    platform: "node",
+    write: false,
+    logLevel: "silent",
+    plugins: [sideEffectStubs],
+  });
+  const tmp = join(mkdtempSync(join(tmpdir(), "rest-route-unit-")), "mod.mjs");
   writeFileSync(tmp, result.outputFiles[0].text);
   return import(pathToFileURL(tmp).href);
 }
@@ -43,6 +110,24 @@ const { findCity, findRole, suggestCity } = await load("src/lib/mcp/data.ts");
 const { parseEventStart } = await load("src/lib/notion/lead-trust.ts");
 const { buildStaffingPlan } = await load("src/lib/mcp/plan-staffing.ts");
 const { buildRateBenchmark } = await load("src/lib/mcp/rate-benchmark.ts");
+
+function memoryStore() {
+  const rows = new Map();
+  const puts = [];
+  return {
+    rows,
+    puts,
+    async put(key, value, ttlSeconds, options = {}) {
+      puts.push({ key, value, ttlSeconds, options });
+      if (options.ifAbsent && rows.has(key)) return "collision";
+      rows.set(key, value);
+      return "stored";
+    },
+    async get(key) {
+      return rows.get(key) ?? null;
+    },
+  };
+}
 
 // ── City resolution ──
 const cityCases = [
@@ -149,7 +234,7 @@ check("findCity('Toronto, Canada') scopes by country", findCity("Toronto, Canada
 check("findCity('Austin, USA') scopes by country", findCity("Austin, USA")?.name === "Austin");
 
 // ── queries: country filter, default cap, strict dates, role miss ──
-const { queryCities, queryAvailability, queryRolePricing } = await load("src/lib/mcp/queries.ts");
+const { queryCities, queryRoles, queryAvailability, queryRolePricing } = await load("src/lib/mcp/queries.ts");
 const ussr = queryCities({ country: "USSR" });
 check("get_cities country=USSR is invalid_param, not all US markets", !ussr.ok && ussr.error.code === "invalid_param");
 const uk = queryCities({ country: "United Kingdom" });
@@ -157,12 +242,21 @@ check("get_cities country='United Kingdom' is invalid_param", !uk.ok && uk.error
 const allCities = queryCities({});
 check("get_cities unfiltered is capped by default (<=100) with a note",
   allCities.ok && allCities.data.returned <= 100 && !!allCities.data.note, `returned ${allCities.ok ? allCities.data.returned : "?"}`);
+const anaheim = queryCities({ city: "Anaheim" });
+check("get_cities uses the sitemap-verified Anaheim detail URL",
+  anaheim.ok && anaheim.data.city?.url === "https://tempguru.co/california-event-staffing");
+const assistantLead = queryRoles().data.roles.find((role) => role.slug === "assistant-leads");
+check("get_roles avoids the nonexistent Assistant Leads city-guide URL",
+  assistantLead?.url === "https://tempguru.co/roles");
 const impossible = queryAvailability({ city: "Dallas", date: "2027-02-30" });
 check("check_availability 2027-02-30 is an impossible-date error, not March 2",
   impossible.ok && "error" in impossible.data && impossible.data.error.includes("Impossible"));
 const past = queryAvailability({ city: "Dallas", date: "2024-01-01" });
 check("check_availability past date carries in_past:true",
   past.ok && "in_past" in past.data && past.data.in_past === true);
+const humanRange = queryAvailability({ city: "Chicago", date: "Aug 14-15, 2026" });
+check("check_availability canonicalizes human date ranges without native-Date drift",
+  humanRange.ok && "event_date" in humanRange.data && humanRange.data.event_date === "2026-08-14");
 const wiz = queryAvailability({ city: "Boston", date: "2027-03-10", role: "wizard" });
 check("check_availability unknown role flags role_found:false",
   wiz.ok && "role_found" in wiz.data && wiz.data.role_found === false);
@@ -187,6 +281,145 @@ check("partial plan: next_steps blocks quoting first",
   partial.next_steps[0].includes("Do NOT submit"));
 const complete = buildStaffingPlan({ city: "Chicago", roles: [{ role: "registration-staff", headcount: 2 }] });
 check("complete plan: plan_complete is true", complete.status === "plan" && complete.plan_complete === true);
+
+// ── plan persistence / handoff: allowlist, TTL, signature, resume ──
+const {
+  PLAN_TTL_SECONDS,
+  buildPlanContinuation,
+  persistCompletePlan,
+  querySavedPlan,
+  rolesMateriallyDiffer,
+  snapshotFromPlan,
+  verifyPlanLinkSignature,
+} = await load("src/lib/mcp/plan-store.ts");
+const piiPlan = buildStaffingPlan({
+  city: "Chicago",
+  event_date: "2027-03-10",
+  event_type: "trade-show",
+  description: "Ask Alice at alice@example.com",
+  roles: [{ role: "brand-ambassadors", headcount: 5, hours_per_shift: 8, days: 2 }],
+});
+const safeSnapshot = snapshotFromPlan(
+  piiPlan,
+  "Chicago",
+  "mcp",
+  "alice@example.com",
+  "2026-07-11T12:00:00.000Z",
+);
+const snapshotJson = JSON.stringify(safeSnapshot);
+check("plan snapshot excludes free-text description and email-shaped source PII",
+  !snapshotJson.includes("Alice") && !snapshotJson.includes("alice") && safeSnapshot.source === "other",
+  snapshotJson);
+check("plan snapshot contains only the requested planning event fields",
+  Object.keys(safeSnapshot.event).sort().join(",") === "attendees,event_date,event_type");
+const hostilePlan = buildStaffingPlan({
+  city: "Chicago",
+  event_date: "alice@example.com",
+  event_type: "Call Alice Example",
+  roles: [{ role: "ushers", headcount: 2 }],
+});
+const hostileSnapshot = snapshotFromPlan(hostilePlan, "Chicago", "mcp");
+check("plan snapshot canonicalizes free-form date/type before Redis",
+  hostileSnapshot.event.event_date === null
+    && hostileSnapshot.event.event_type === "other"
+    && !JSON.stringify(hostileSnapshot).includes("Alice")
+    && !JSON.stringify(hostileSnapshot).includes("alice@example.com"));
+const humanDatePlan = buildStaffingPlan({
+  city: "Chicago",
+  event_date: "Aug 14-15, 2026",
+  event_type: "trade show",
+  roles: [{ role: "ushers", headcount: 2 }],
+});
+const humanDateSnapshot = snapshotFromPlan(humanDatePlan, "Chicago", "mcp");
+check("recognized human event date persists as safe ISO without losing handoff date",
+  humanDateSnapshot.event.event_date === "2026-08-14"
+    && humanDateSnapshot.event.event_type === "trade-show");
+
+const signed = buildPlanContinuation(safeSnapshot, "ABCDEFGH2345", {
+  secret: "unit-test-secret",
+  nowSeconds: 1_000,
+});
+const signedUrl = new URL(signed.form_url);
+const signedExp = Number(signedUrl.searchParams.get("exp"));
+const signedSig = signedUrl.searchParams.get("sig") ?? "";
+check("plan handoff HMAC verifies before expiry",
+  verifyPlanLinkSignature("ABCDEFGH2345", signedExp, signedSig, "unit-test-secret", 1_001));
+check("plan handoff HMAC rejects at expiry",
+  !verifyPlanLinkSignature("ABCDEFGH2345", signedExp, signedSig, "unit-test-secret", signedExp));
+check("plan handoff HMAC rejects tampered id, expiry, signature, and wrong secret",
+  !verifyPlanLinkSignature("ABCDEFGH2346", signedExp, signedSig, "unit-test-secret", 1_001)
+    && !verifyPlanLinkSignature("ABCDEFGH2345", signedExp + 1, signedSig, "unit-test-secret", 1_001)
+    && !verifyPlanLinkSignature("ABCDEFGH2345", signedExp, "0".repeat(64), "unit-test-secret", 1_001)
+    && !verifyPlanLinkSignature("ABCDEFGH2345", signedExp, signedSig, "wrong-secret", 1_001));
+const unsignedUrl = new URL(buildPlanContinuation(safeSnapshot, "ABCDEFGH2345", {
+  secret: "",
+  nowSeconds: 1_000,
+}).form_url);
+check("plan handoff omits signature fields when PLAN_LINK_SECRET is unset",
+  !unsignedUrl.searchParams.has("sig") && !unsignedUrl.searchParams.has("exp"));
+check("plan handoff carries compact human-prefill params",
+  signedUrl.searchParams.get("city") === "Chicago"
+    && signedUrl.searchParams.get("roles") === "brand-ambassadors:5"
+    && signedUrl.searchParams.get("utm_medium") === "mcp");
+const attributedSnapshot = snapshotFromPlan(
+  piiPlan,
+  "Chicago",
+  "mcp",
+  "openclaw",
+  "2026-07-01T00:00:00.000Z",
+);
+const attributedUrl = new URL(buildPlanContinuation(
+  attributedSnapshot,
+  "ABCDEFGH2345",
+  { secret: "" },
+).form_url);
+check("plan handoff preserves controlled runtime attribution across website continuation",
+  attributedUrl.searchParams.get("utm_medium") === "openclaw"
+    && attributedUrl.searchParams.get("utm_content") === "mcp");
+const snapshotCreated = Math.floor(Date.parse(safeSnapshot.created_at) / 1000);
+const nearExpiryUrl = new URL(buildPlanContinuation(safeSnapshot, "ABCDEFGH2345", {
+  secret: "unit-test-secret",
+  nowSeconds: snapshotCreated + PLAN_TTL_SECONDS - 60,
+}).form_url);
+check("resumed plan handoff cannot outlive the saved snapshot",
+  Number(nearExpiryUrl.searchParams.get("exp")) === snapshotCreated + PLAN_TTL_SECONDS);
+
+const planStore = memoryStore();
+const persisted = await persistCompletePlan(piiPlan, "Chicago", "mcp", "chatgpt-gpt", planStore);
+const restored = await querySavedPlan(persisted.plan_id, planStore);
+check("complete plan persists with 30-day TTL + NX collision guard",
+  planStore.puts[0]?.ttlSeconds === PLAN_TTL_SECONDS
+    && planStore.puts[0]?.options?.ifAbsent === true
+    && /^[A-HJ-NP-Z2-9]{12}$/.test(persisted.plan_id));
+check("saved plan round-trips through querySavedPlan",
+  restored.plan_found === true && restored.snapshot.plan_lines[0].headcount === 5);
+check("plan persistence fails open to a prefilled continuation",
+  !(
+    await persistCompletePlan(piiPlan, "Chicago", "mcp", "chatgpt-gpt", {
+      async put() { throw new Error("offline"); },
+      async get() { return null; },
+    })
+  ).plan_id);
+let unavailableAttempts = 0;
+const unavailablePlan = await persistCompletePlan(piiPlan, "Chicago", "mcp", "chatgpt-gpt", {
+  async put() { unavailableAttempts++; return "unavailable"; },
+  async get() { return null; },
+});
+check("plan persistence does not retry an unavailable/slow store as a collision",
+  unavailableAttempts === 1 && !unavailablePlan.plan_id);
+let collisionAttempts = 0;
+const afterCollisions = await persistCompletePlan(piiPlan, "Chicago", "mcp", "chatgpt-gpt", {
+  async put() {
+    collisionAttempts++;
+    return collisionAttempts < 3 ? "collision" : "stored";
+  },
+  async get() { return null; },
+});
+check("plan persistence retries actual ID collisions only",
+  collisionAttempts === 3 && Boolean(afterCollisions.plan_id));
+check("plan role drift canonicalizes synonyms and sums duplicate rows",
+  rolesMateriallyDiffer([{ role: "promo models", headcount: 2 }, { role: "brand-ambassadors", headcount: 3 }], safeSnapshot) === false
+    && rolesMateriallyDiffer([{ role: "brand-ambassadors", headcount: 7 }], safeSnapshot) === true);
 
 // ── plan_staffing: OT engine (partial weeks, CA premiums, Canada) ──
 // Anchorage (AK: daily 8h, weekly 40h), 8 consecutive 12h days:
@@ -253,6 +486,191 @@ check("quote schema rejects headcount 2147483647",
 check("quote schema rejects 10,000 roles",
   !RequestQuoteSchema.safeParse({ ...base, roles: Array.from({ length: 10_000 }, () => ({ role: "ushers", headcount: 1 })) }).success);
 check("quote schema accepts a normal request", RequestQuoteSchema.safeParse(base).success);
+check("quote schema accepts bounded attribution + plan_id",
+  RequestQuoteSchema.safeParse({
+    ...base,
+    source_platform: "openclaw",
+    skill_id: "urgent-event-backfill",
+    skill_version: "1.5.0",
+    plan_id: "ABCDEFGH2345",
+  }).success);
+check("quote schema rejects arbitrary skill attribution",
+  !RequestQuoteSchema.safeParse({ ...base, skill_id: "made-up-skill" }).success);
+
+const { normalizeControlledSource, normalizeSourcePlatform } = await load(
+  "src/lib/telemetry/source-tags.ts",
+);
+check("source tags canonicalize underscore aliases and retain known agent runtimes",
+  normalizeControlledSource("custom_gpt") === "custom-gpt"
+    && normalizeSourcePlatform("openai-codex") === "openai-codex"
+    && normalizeSourcePlatform("qwen-ecosystem") === "qwen-ecosystem"
+    && normalizeSourcePlatform("alice@example.com") === "other");
+const {
+  canonicalTelemetryCity,
+  canonicalTelemetryCountry,
+  canonicalTelemetryRole,
+  canonicalTelemetryState,
+  normalizeSourceSkill,
+} = await load("src/lib/telemetry/track.ts");
+check("telemetry persists only canonical catalog/geography dimensions",
+  canonicalTelemetryRole("promo models") === "brand-ambassadors"
+    && canonicalTelemetryRole("alice@example.com") === null
+    && canonicalTelemetryCity("Chicago") === "chicago"
+    && canonicalTelemetryCity("Megan Hayward") === null
+    && canonicalTelemetryState("Texas") === "TX"
+    && canonicalTelemetryState("alice@example.com") === null
+    && canonicalTelemetryCountry("us") === "US"
+    && canonicalTelemetryCountry("megan@example.com") === null);
+check("telemetry accepts only closed-enum TempGuru skill attribution",
+  normalizeSourceSkill("urgent-event-backfill") === "urgent-event-backfill"
+    && normalizeSourceSkill("made-up-skill") === null);
+
+const { optionsPreflightPost } = await load("src/lib/api/responses.ts");
+const quotePreflight = optionsPreflightPost();
+const mcpRouteSource = readFileSync(join(repoRoot, "src/app/mcp/route.ts"), "utf8");
+check("REST and MCP CORS both allow the controlled source header",
+  quotePreflight.headers.get("access-control-allow-headers")
+    ?.split(",")
+    .map((value) => value.trim().toLowerCase())
+    .includes("x-tempguru-source") === true
+    && mcpRouteSource.includes("X-TempGuru-Source"));
+
+const publicRequestSchema = JSON.parse(
+  readFileSync(join(repoRoot, "public/schemas/event-staffing-request.schema.json"), "utf8"),
+);
+delete publicRequestSchema.$id;
+delete publicRequestSchema.title;
+delete publicRequestSchema.description;
+const generatedRequestSchema = RequestQuoteSchema.toJSONSchema({ target: "draft-2020-12" });
+check("public staffing-request schema exactly matches RequestQuoteSchema",
+  JSON.stringify(publicRequestSchema) === JSON.stringify(generatedRequestSchema));
+
+// ── same-origin Agent Skills discovery + digest integrity ──
+const skillsIndexRoute = await load("src/app/.well-known/agent-skills/index.json/route.ts");
+const skillArtifactRoute = await load(
+  "src/app/.well-known/agent-skills/[skill]/SKILL.md/route.ts",
+);
+const skillsIndexResponse = await skillsIndexRoute.GET();
+const skillsIndex = await skillsIndexResponse.json();
+const orderingEntry = skillsIndex.skills.find(
+  (skill) => skill.name === "event-staffing-ordering",
+);
+const orderingArtifactResponse = await skillArtifactRoute.GET(
+  new Request("https://mcp.tempguru.co/.well-known/agent-skills/event-staffing-ordering/SKILL.md"),
+  { params: Promise.resolve({ skill: "event-staffing-ordering" }) },
+);
+const orderingArtifact = await orderingArtifactResponse.text();
+const orderingDigest = `sha256:${createHash("sha256").update(orderingArtifact).digest("hex")}`;
+const missingArtifactResponse = await skillArtifactRoute.GET(
+  new Request("https://mcp.tempguru.co/.well-known/agent-skills/not-real/SKILL.md"),
+  { params: Promise.resolve({ skill: "not-real" }) },
+);
+check("same-origin skill artifact resolves relative discovery URL with matching digest",
+  skillsIndexResponse.status === 200
+    && skillsIndex.skills.length === 5
+    && orderingEntry.url === "./event-staffing-ordering/SKILL.md"
+    && orderingArtifactResponse.status === 200
+    && orderingDigest === orderingEntry.digest
+    && missingArtifactResponse.status === 404,
+  JSON.stringify({ orderingEntry, orderingDigest, missingStatus: missingArtifactResponse.status }));
+
+// ── REST validation parity + non-cacheable lifecycle misses ──
+const planRoute = await loadRestRoute("src/app/api/v1/plans/[id]/route.ts");
+const malformedPlanResponse = await planRoute.GET(
+  new Request("https://mcp.tempguru.co/api/v1/plans/not-a-plan"),
+  { params: Promise.resolve({ id: "not-a-plan" }) },
+);
+const malformedPlanBody = await malformedPlanResponse.json();
+check("REST get_plan rejects a malformed plan ID with 400",
+  malformedPlanResponse.status === 400
+    && malformedPlanBody.error?.code === "invalid_param"
+    && malformedPlanBody.error?.field === "id");
+
+const absentPlanResponse = await planRoute.GET(
+  new Request("https://mcp.tempguru.co/api/v1/plans/ABCDEFGH2345"),
+  { params: Promise.resolve({ id: "ABCDEFGH2345" }) },
+);
+const absentPlanBody = await absentPlanResponse.json();
+check("REST get_plan returns a no-store 200 for a valid absent plan",
+  absentPlanResponse.status === 200
+    && absentPlanResponse.headers.get("cache-control") === "no-store"
+    && absentPlanBody.plan_found === false);
+
+const quoteStatusRoute = await loadRestRoute(
+  "src/app/api/v1/quote-requests/[reference]/route.ts",
+);
+const malformedReferenceResponse = await quoteStatusRoute.GET(
+  new Request("https://mcp.tempguru.co/api/v1/quote-requests/TG-123"),
+  { params: Promise.resolve({ reference: "TG-123" }) },
+);
+const malformedReferenceBody = await malformedReferenceResponse.json();
+check("REST get_quote_status rejects a malformed reference with 400",
+  malformedReferenceResponse.status === 400
+    && malformedReferenceBody.error?.code === "invalid_param"
+    && malformedReferenceBody.error?.field === "reference");
+
+const absentStatusResponse = await quoteStatusRoute.GET(
+  new Request("https://mcp.tempguru.co/api/v1/quote-requests/TG-ABC234"),
+  { params: Promise.resolve({ reference: "TG-ABC234" }) },
+);
+const absentStatusBody = await absentStatusResponse.json();
+check("REST get_quote_status returns a no-store 200 for a valid absent reference",
+  absentStatusResponse.status === 200
+    && absentStatusResponse.headers.get("cache-control") === "no-store"
+    && absentStatusBody.quote_found === false);
+
+const policiesRoute = await loadRestRoute("src/app/api/v1/policies/route.ts");
+const overlongTopicResponse = await policiesRoute.GET(
+  new Request(
+    `https://mcp.tempguru.co/api/v1/policies?topic=${encodeURIComponent("x".repeat(81))}`,
+  ),
+);
+const overlongTopicBody = await overlongTopicResponse.json();
+check("REST get_policies rejects an overlong topic with 400",
+  overlongTopicResponse.status === 400
+    && overlongTopicBody.error?.code === "invalid_param"
+    && overlongTopicBody.error?.field === "topic");
+
+// ── quote status stub lifecycle: queued -> received, 90-day TTL ──
+const {
+  buildQuoteStatusDealName,
+  QUOTE_STATUS_TTL_SECONDS,
+  loadQuoteStatus,
+  makeQuoteStatusStub,
+  quoteStatusTtlSeconds,
+  queryQuoteStatus,
+  saveQuoteStatus,
+} = await load("src/lib/mcp/quote-status.ts");
+const safeStatusDeal = buildQuoteStatusDealName("alice@example.com", "Megan Hayward");
+check("quote status display name cannot persist free-form event/city PII",
+  safeStatusDeal === "Agent Quote, other · submitted market"
+    && !safeStatusDeal.includes("alice")
+    && !safeStatusDeal.includes("Megan"));
+const statusStore = memoryStore();
+const statusCreated = new Date(Date.now() - 1_000).toISOString();
+await saveQuoteStatus(
+  "TG-ABC234",
+  makeQuoteStatusStub("queued", "Agent Quote, trade-show · Chicago", "mcp", statusCreated),
+  statusStore,
+);
+const queuedStatus = await loadQuoteStatus("TG-ABC234", statusStore);
+await saveQuoteStatus(
+  "TG-ABC234",
+  makeQuoteStatusStub("received", "Agent Quote, trade-show · Chicago", "mcp", queuedStatus.created_at),
+  statusStore,
+);
+const receivedStatus = await queryQuoteStatus("TG-ABC234", statusStore);
+check("quote status lifecycle updates queued to received and preserves created_at",
+  receivedStatus.quote_found === true
+    && receivedStatus.status === "received"
+    && receivedStatus.created_at === statusCreated);
+check("quote status TTL is bounded by the original 90-day creation window",
+  quoteStatusTtlSeconds("2026-07-11T12:00:00.000Z", Date.parse("2026-07-11T12:00:00.000Z"))
+      === QUOTE_STATUS_TTL_SECONDS
+    && quoteStatusTtlSeconds("2026-07-11T12:00:00.000Z", Date.parse("2026-09-09T12:00:00.000Z"))
+      === 30 * 24 * 60 * 60
+    && statusStore.puts.every((put) => put.ttlSeconds > 0 && put.ttlSeconds <= QUOTE_STATUS_TTL_SECONDS)
+    && statusStore.puts[1].ttlSeconds <= statusStore.puts[0].ttlSeconds);
 
 // ── createLead: no config still yields a stable public error + reference ──
 delete process.env.NOTION_API_KEY;
@@ -269,6 +687,302 @@ check("createLead without config fails with a generic error + TG reference",
     && leadRes.error.includes("not configured")
     && !leadRes.error.includes("Notion API error"),
   JSON.stringify(leadRes));
+
+// ── durable queue: per-record TTL, inflight replay, dedup timeout ownership ──
+const priorNodeEnv = process.env.NODE_ENV;
+process.env.NODE_ENV = "test";
+process.env.TEMPGURU_EVAL_MEMORY_REDIS = "1";
+delete process.env.TEMPGURU_EVAL_DEDUP_SET_DELAY_MS;
+delete process.env.NOTION_API_KEY;
+delete process.env.Notion_API_Key;
+delete process.env.LEAD_WEBHOOK_URL;
+
+const queueModule = await load("src/lib/notion/create-lead.ts");
+const telemetryHarness = await loadTelemetryHarness();
+await telemetryHarness.track({
+  tool: "request_quote",
+  status: "success",
+  channel: "mcp",
+  userAgent: "unit-test",
+  ipCountry: "US",
+  funnelEvents: ["quotes_submitted"],
+  sourcePlatform: "openclaw",
+  sourceSkill: "urgent-event-backfill",
+});
+const telemetryDate = new Date().toISOString().slice(0, 10);
+const [skillAttribution, platformAttribution, funnelAttribution] = await Promise.all([
+  telemetryHarness.redisExec((redis) => redis.get(`source-skills:${telemetryDate}`)),
+  telemetryHarness.redisExec((redis) => redis.get(`source-platforms:${telemetryDate}`)),
+  telemetryHarness.redisExec((redis) => redis.get(`funnel:${telemetryDate}`)),
+]);
+check("successful quote telemetry atomically attributes platform, skill, and funnel",
+  skillAttribution?.["urgent-event-backfill"] === 1
+    && platformAttribution?.openclaw === 1
+    && funnelAttribution?.["mcp:quotes_submitted"] === 1,
+  JSON.stringify({ skillAttribution, platformAttribution, funnelAttribution }));
+const savedPlanSource = { source: "pi" };
+check("lead source precedence is explicit platform, current runtime, then saved plan",
+  queueModule.resolveEffectiveSourcePlatform(
+    { source_platform: "openclaw", controlled_source: "hermes" },
+    savedPlanSource,
+  ) === "openclaw"
+    && queueModule.resolveEffectiveSourcePlatform(
+      { controlled_source: "hermes" },
+      savedPlanSource,
+    ) === "hermes"
+    && queueModule.resolveEffectiveSourcePlatform(
+      { source_platform: "attacker@example.com", controlled_source: "hermes" },
+      savedPlanSource,
+    ) === "hermes"
+    && queueModule.resolveEffectiveSourcePlatform({}, savedPlanSource) === "pi");
+const queuedInput = {
+  contact_name: "Queue Buyer",
+  contact_email: "queue@example.com",
+  company: "Queue Fixture",
+  event_name: "Queue Recovery Expo",
+  event_type: "trade-show",
+  city: "Chicago",
+  event_dates: "Aug 14-15, 2027",
+  roles: [{ role: "registration-staff", headcount: 2 }],
+};
+const queuedLead = await queueModule.createLead(queuedInput);
+check("Notion outage persists a lead in the durable queue",
+  queuedLead.success === true && queuedLead.captured === "queued" && !queuedLead.deduped,
+  JSON.stringify(queuedLead));
+
+const originalFetch = globalThis.fetch;
+const notionBodies = [];
+const webhookBodies = [];
+process.env.NOTION_API_KEY = "ntn_unit_test";
+process.env.LEAD_WEBHOOK_URL = "https://hooks.example.test/lead";
+globalThis.fetch = async (_url, init) => {
+  if (String(_url) === process.env.LEAD_WEBHOOK_URL) {
+    webhookBodies.push(JSON.parse(String(init?.body ?? "{}")));
+    return new Response(null, { status: 204 });
+  }
+  notionBodies.push(JSON.parse(String(init?.body ?? "{}")));
+  return new Response(JSON.stringify({ url: "https://notion.so/unit-test-page" }), {
+    status: 200,
+    headers: { "content-type": "application/json" },
+  });
+};
+try {
+  const firstDrain = await queueModule.drainPendingLeads("ntn_unit_test", 99);
+  const secondDrain = await queueModule.drainPendingLeads("ntn_unit_test", 99);
+  check("bounded queue drain delivers pending leads without waiting for a new quote",
+    queueModule.MAX_DRAIN_BATCH === 10
+      && firstDrain.delivered === 1
+      && secondDrain.delivered === 0
+      && notionBodies.length === 1,
+    JSON.stringify({ firstDrain, secondDrain, notionWrites: notionBodies.length }));
+
+  const healthyLead = await queueModule.createLead({
+    ...queuedInput,
+    contact_email: "healthy@example.com",
+    event_name: "Healthy Current Expo",
+    source_platform: "openclaw",
+    controlled_source: "hermes",
+    skill_id: "urgent-event-backfill",
+    skill_version: "1.5.0",
+  });
+  const replayedDuplicate = await queueModule.createLead(queuedInput);
+  const healthyNotionProperties = notionBodies[1]?.properties ?? {};
+  check("lead attribution reaches result, CRM fields, and notification webhook",
+    healthyLead.source_platform === "openclaw"
+      && healthyLead.skill_id === "urgent-event-backfill"
+      && healthyNotionProperties["UTM Source"]?.rich_text?.[0]?.text?.content === "openclaw"
+      && healthyNotionProperties["UTM Medium"]?.rich_text?.[0]?.text?.content
+        ?.includes("skill=urgent-event-backfill")
+      && healthyNotionProperties["UTM Medium"]?.rich_text?.[0]?.text?.content
+        ?.includes("skill_version=1.5.0")
+      && webhookBodies[0]?.source_platform === "openclaw"
+      && webhookBodies[0]?.skill_id === "urgent-event-backfill"
+      && webhookBodies[0]?.skill_version === "1.5.0",
+    JSON.stringify({ healthyLead, healthyNotionProperties, webhook: webhookBodies[0] }));
+  check("drained lead is idempotent and duplicate status advances to CRM received",
+    healthyLead.success === true
+      && healthyLead.captured === "notion"
+      && notionBodies.length === 2
+      && replayedDuplicate.success === true
+      && replayedDuplicate.deduped === true
+      && replayedDuplicate.reference === queuedLead.reference
+      && replayedDuplicate.captured === "notion",
+    JSON.stringify({ healthyLead, replayedDuplicate, notionWrites: notionBodies.length }));
+
+  const revisedCrew = await queueModule.createLead({
+    ...queuedInput,
+    roles: [{ role: "registration staff", headcount: 3 }],
+  });
+  check("dedup fingerprint treats a role/headcount/shift revision as a new quote",
+    revisedCrew.success === true
+      && revisedCrew.deduped !== true
+      && revisedCrew.reference !== queuedLead.reference
+      && notionBodies.length === 3,
+    JSON.stringify({ queuedLead, revisedCrew, notionWrites: notionBodies.length }));
+
+  const concurrentInput = {
+    ...queuedInput,
+    contact_email: "concurrent@example.com",
+    event_name: "Concurrent Capture Expo",
+  };
+  const trackedFetch = globalThis.fetch;
+  globalThis.fetch = async (...args) => {
+    if (String(args[0]).includes("api.notion.com")) {
+      await new Promise((resolve) => setTimeout(resolve, 150));
+    }
+    return trackedFetch(...args);
+  };
+  const firstConcurrent = queueModule.createLead(concurrentInput);
+  await new Promise((resolve) => setTimeout(resolve, 20));
+  const processingDuplicate = await queueModule.createLead(concurrentInput);
+  const capturedConcurrent = await firstConcurrent;
+  const capturedDuplicate = await queueModule.createLead(concurrentInput);
+  globalThis.fetch = trackedFetch;
+  check("processing dedup never reports phantom success, then returns captured result",
+    capturedConcurrent.success === true
+      && capturedConcurrent.captured === "notion"
+      && processingDuplicate.success === false
+      && processingDuplicate.reference === capturedConcurrent.reference
+      && processingDuplicate.error?.includes("still being captured")
+      && capturedDuplicate.success === true
+      && capturedDuplicate.deduped === true
+      && capturedDuplicate.reference === capturedConcurrent.reference
+      && notionBodies.length === 4,
+    JSON.stringify({ capturedConcurrent, processingDuplicate, capturedDuplicate, notionWrites: notionBodies.length }));
+
+  delete process.env.NOTION_API_KEY;
+  const rotatedLead = await queueModule.createLead({
+    ...queuedInput,
+    contact_email: "rotated@example.com",
+    event_name: "Unreadable Queue Record Expo",
+  });
+  const leadBehindIt = await queueModule.createLead({
+    ...queuedInput,
+    contact_email: "behind@example.com",
+    event_name: "Healthy Lead Behind Poison Record",
+  });
+  process.env.NOTION_API_KEY = "ntn_unit_test";
+  process.env.TEMPGURU_EVAL_QUEUE_RECORD_READ_MISSES = "1";
+  const rotatedDrain = await queueModule.drainPendingLeads("ntn_unit_test", 2);
+  delete process.env.TEMPGURU_EVAL_QUEUE_RECORD_READ_MISSES;
+  const recoveredDrain = await queueModule.drainPendingLeads("ntn_unit_test", 2);
+  check("unreadable queue record rotates behind healthy leads instead of head-of-line blocking",
+    rotatedLead.success === true
+      && leadBehindIt.success === true
+      && rotatedDrain.unreadable_rotated === 1
+      && rotatedDrain.delivered === 1
+      && recoveredDrain.delivered === 1,
+    JSON.stringify({ rotatedDrain, recoveredDrain }));
+
+  delete process.env.NOTION_API_KEY;
+  const deadlineLead = await queueModule.createLead({
+    ...queuedInput,
+    contact_email: "deadline@example.com",
+    event_name: "Deadline Reserve Expo",
+  });
+  process.env.NOTION_API_KEY = "ntn_unit_test";
+  const deadlineDrain = await queueModule.drainPendingLeads(
+    "ntn_unit_test",
+    queueModule.MAX_DRAIN_BATCH,
+    Date.now() + 5_000,
+  );
+  const afterDeadlineDrain = await queueModule.drainPendingLeads("ntn_unit_test", 1);
+  check("scheduled drain keeps a finish reserve before the function deadline",
+    deadlineLead.success === true
+      && deadlineDrain.deadline_reached === true
+      && deadlineDrain.claimed === 0
+      && afterDeadlineDrain.delivered === 1,
+    JSON.stringify({ deadlineDrain, afterDeadlineDrain }));
+} finally {
+  globalThis.fetch = originalFetch;
+  delete process.env.LEAD_WEBHOOK_URL;
+}
+
+process.env.CRON_SECRET = "unit-cron-secret";
+const cronRoute = await load("src/app/api/internal/drain-leads/route.ts");
+const rejectedCronResponse = await cronRoute.GET(
+  new Request("https://mcp.tempguru.co/api/internal/drain-leads"),
+);
+const acceptedCronResponse = await cronRoute.GET(
+  new Request("https://mcp.tempguru.co/api/internal/drain-leads", {
+    headers: { Authorization: "Bearer unit-cron-secret" },
+  }),
+);
+const acceptedCronBody = await acceptedCronResponse.json();
+check("scheduled lead drain requires CRON_SECRET and returns a bounded summary",
+  rejectedCronResponse.status === 401
+    && acceptedCronResponse.status === 200
+    && acceptedCronResponse.headers.get("cache-control") === "no-store"
+    && acceptedCronBody.ok === true
+    && typeof acceptedCronBody.drain?.delivered === "number");
+delete process.env.CRON_SECRET;
+
+delete process.env.NOTION_API_KEY;
+process.env.TEMPGURU_EVAL_DEDUP_SET_DELAY_MS = "1600";
+const delayedDedupModule = await load("src/lib/notion/create-lead.ts");
+const delayedDedupLead = await delayedDedupModule.createLead({
+  ...queuedInput,
+  contact_email: "delayed@example.com",
+  event_name: "Committed Dedup Timeout Expo",
+});
+check("timed-out SET that committed this request's dedup reference still persists the lead",
+  delayedDedupLead.success === true
+    && delayedDedupLead.captured === "queued"
+    && !delayedDedupLead.deduped,
+  JSON.stringify(delayedDedupLead));
+delete process.env.TEMPGURU_EVAL_DEDUP_SET_DELAY_MS;
+
+process.env.TEMPGURU_EVAL_DEDUP_SET_COMMIT_DELAY_MS = "1600";
+process.env.TEMPGURU_EVAL_QUEUE_WRITE_FAIL = "1";
+process.env.NOTION_API_KEY = "ntn_unit_test";
+const lateCommitModule = await load("src/lib/notion/create-lead.ts");
+const lateCommitInput = {
+  ...queuedInput,
+  contact_email: "late-commit@example.com",
+  event_name: "Late Commit Cleanup Expo",
+};
+globalThis.fetch = async () => {
+  await new Promise((resolve) => setTimeout(resolve, 250));
+  return new Response("injected Notion failure", { status: 503 });
+};
+let failedLateCommit;
+try {
+  failedLateCommit = await lateCommitModule.createLead(lateCommitInput);
+} finally {
+  globalThis.fetch = originalFetch;
+  delete process.env.TEMPGURU_EVAL_DEDUP_SET_COMMIT_DELAY_MS;
+  delete process.env.TEMPGURU_EVAL_QUEUE_WRITE_FAIL;
+  delete process.env.NOTION_API_KEY;
+}
+const retryAfterLateCommit = await lateCommitModule.createLead(lateCommitInput);
+check("final failure compare-deletes only this request's late dedup commit",
+  failedLateCommit.success === false
+    && retryAfterLateCommit.success === true
+    && retryAfterLateCommit.captured === "queued"
+    && !retryAfterLateCommit.deduped
+    && retryAfterLateCommit.reference !== failedLateCommit.reference,
+  JSON.stringify({ failedLateCommit, retryAfterLateCommit }));
+
+const evalRedis = await load("src/lib/telemetry/redis.ts");
+const funnelTransaction = await evalRedis.exec((redis) =>
+  redis
+    .multi()
+    .hincrby("funnel:unit", "mcp:quotes_submitted", 1)
+    .hincrby("funnel:unit", "mcp:quotes_submitted", 2)
+    .expire("funnel:unit", 60)
+    .exec(),
+);
+check("eval-memory Redis supports transactional funnel increments",
+  JSON.stringify(funnelTransaction) === JSON.stringify([1, 3, 1]),
+  JSON.stringify(funnelTransaction));
+
+delete process.env.TEMPGURU_EVAL_MEMORY_REDIS;
+if (priorNodeEnv === undefined) delete process.env.NODE_ENV;
+else process.env.NODE_ENV = priorNodeEnv;
+
+const ukDate = parseEventStart("14 August 2026");
+check("parseEventStart: '14 August 2026' (day-before-month) is August 14, not August 1",
+  ukDate?.getUTCMonth() === 7 && ukDate?.getUTCDate() === 14, `got ${ukDate?.toISOString()?.slice(0, 10)}`);
 
 console.log(`\n${pass} passed, ${fail} failed`);
 if (failures.length) {

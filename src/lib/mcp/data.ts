@@ -13,6 +13,7 @@ import rolesData from "../../../content/mcp-data/roles.json";
 import pricingData from "../../../content/mcp-data/role-pricing.json";
 import stateData from "../../../content/mcp-data/state-compliance.json";
 import provinceData from "../../../content/mcp-data/province-compliance.json";
+import policiesData from "../../../content/mcp-data/policies.json";
 
 // ─── Types ────────────────────────────────────────────────────────────────
 
@@ -25,6 +26,8 @@ export type City = {
   state_abbr: string;
   country: string;
   tier: CityTier;
+  /** Sitemap-verified override when the canonical city slug has no detail page. */
+  detail_url?: string;
 };
 
 export type Role = {
@@ -33,6 +36,8 @@ export type Role = {
   description: string;
   skill_tier: number;
   typical_shift_length_hours: number;
+  /** Sitemap-verified override when the standard role-guide URL is unavailable. */
+  detail_url?: string;
 };
 
 export type PriceBand = { low: number; high: number };
@@ -61,6 +66,15 @@ export type ProvinceCompliance = {
   overtime_daily: number | null;
   overtime_daily_double: number | null;
   unique_rules: string[];
+};
+
+export type Policy = {
+  topic: string;
+  title: string;
+  confirmed_claims: string[];
+  confirm_with_coordinator: boolean;
+  todo_for_megan: string[];
+  sources: string[];
 };
 
 // ─── Loaders (validated, exported) ────────────────────────────────────────
@@ -98,6 +112,23 @@ export const PROVINCES: Record<string, ProvinceCompliance> = provinceData.provin
   string,
   ProvinceCompliance
 >;
+
+export const POLICIES: Policy[] = (policiesData.policies as Policy[]).slice();
+
+export const POLICIES_META = policiesData._meta as {
+  version: string;
+  updated: string;
+  scope: string;
+  disclaimer: string;
+};
+
+export function cityDetailUrl(city: Pick<City, "slug" | "detail_url">): string {
+  return city.detail_url ?? `https://tempguru.co/insights/${city.slug}`;
+}
+
+export function roleDetailUrl(role: Pick<Role, "slug" | "detail_url">): string {
+  return role.detail_url ?? `https://tempguru.co/insights/${role.slug}-in-new-york-city`;
+}
 
 /** Provincial employment standards by 2-letter province code (ON, BC, ...). */
 export function findProvince(abbr: string): ProvinceCompliance | null {

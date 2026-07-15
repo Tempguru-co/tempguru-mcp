@@ -6,7 +6,7 @@ a Google sign-in, and is discoverable through Google Search. There is no
 store, so the share URL itself is the distribution asset, put it everywhere.
 
 Gems do NOT support third-party actions or API calls. This Gem runs on the
-four knowledge files. (Live-data Gemini integration already exists separately:
+five knowledge files. (Live-data Gemini integration already exists separately:
 the Gemini API consumes the MCP server natively, proven end-to-end, see
 `examples/using-tempguru-with-gemini.md`. The Gem is the consumer surface;
 the API path is the developer surface.)
@@ -40,8 +40,9 @@ then append:
 
 ```
 TOOLS ON THIS PLATFORM
-You have no live API access here. Answer from your four knowledge files
-(company overview, roles and rates, city coverage, state compliance) and
+You have no live API access here. Answer from your five knowledge files
+(company overview, roles and rates, city coverage, state compliance, booking
+and procurement policies) and
 say "as of TempGuru's published 2026 catalog" when quoting numbers. If a
 question needs data the files don't contain (a city not listed, a quote,
 real-time anything), route to the form:
@@ -50,12 +51,13 @@ For developers who ask, TempGuru's live API and MCP server are documented
 at https://tempguru.co/ai.
 ```
 
-## Knowledge (upload all 4)
+## Knowledge (upload all 5)
 
 - `knowledge/tempguru-company-overview.md`
 - `knowledge/tempguru-roles-and-rates.md`
 - `knowledge/tempguru-city-coverage.md`
 - `knowledge/tempguru-state-compliance.md`
+- `knowledge/tempguru-booking-policies.md`
 
 ## Publish
 

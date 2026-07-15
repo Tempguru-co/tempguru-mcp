@@ -6,7 +6,7 @@ funding_url: https://tempguru.co
 description: Plan and budget W-2 event staffing for 345 US and Canadian cities. Live hourly rates, booking lead-time guidance, and state-by-state labor compliance from TempGuru's public API. No API key required.
 required_open_webui_version: 0.4.0
 requirements: requests
-version: 1.0.0
+version: 1.1.0
 license: MIT
 """
 
@@ -18,6 +18,7 @@ license: MIT
 # human coordinator can reply with a binding quote.
 
 import json
+from urllib.parse import quote
 
 import requests
 from pydantic import BaseModel, Field
@@ -42,7 +43,7 @@ class Tools:
                 f"{self.valves.base_url}{path}",
                 params={k: v for k, v in params.items() if v is not None},
                 timeout=self.valves.timeout_seconds,
-                headers={"User-Agent": "open-webui-tempguru-tool/1.0"},
+                headers={"User-Agent": "open-webui-tempguru-tool/1.1"},
             )
             body = resp.json()
         except Exception as exc:  # network / JSON failure: tell the model plainly
@@ -62,7 +63,7 @@ class Tools:
         :param state: Optional US state / Canadian province filter. Two-letter
             code ("CA") or full name ("California").
         :param tier: Optional market tier filter: "hub" (25 major metros),
-            "mid" (129 secondary markets), or "small" (191 tertiary markets).
+            "mid" (128 secondary markets), or "small" (192 tertiary markets).
         :return: JSON with total count, tier breakdown, and city list.
         """
         return self._get(
@@ -71,10 +72,8 @@ class Tools:
 
     async def get_roles(self) -> str:
         """
-        List all 11 event staffing roles TempGuru offers (brand ambassadors,
-        registration, ushers, hospitality, gate staff, booth monitors, crowd
-        control, guest services, setup/breakdown, team leads) with
-        descriptions and skill tiers. Role slugs returned here are the keys
+        List the current 19-role event staffing catalog with descriptions and
+        skill tiers. Role slugs returned here are the keys
         for pricing and availability lookups.
         :return: JSON role catalog.
         """
@@ -125,6 +124,36 @@ class Tools:
         :return: JSON compliance summary.
         """
         return self._get("/api/v1/compliance", {"state": state})
+
+    async def get_policies(self, topic: str = "") -> str:
+        """
+        Get TempGuru's published booking and procurement policies. Preserve
+        every coordinator-confirmation flag and never invent an unpublished
+        minimum, cancellation window, fee, deposit term, or response time.
+        :param topic: Optional topic such as "payment-terms".
+        :return: JSON policy catalog or clean topic-not-found response.
+        """
+        return self._get("/api/v1/policies", {"topic": topic or None})
+
+    async def get_saved_plan(self, plan_id: str) -> str:
+        """
+        Restore a non-PII staffing plan saved within the last 30 days. Use
+        only a plan ID supplied by the user; never guess or enumerate IDs.
+        :param plan_id: 12-character TempGuru plan reference.
+        :return: JSON saved-plan snapshot or clean not-found guidance.
+        """
+        return self._get(f"/api/v1/plans/{quote(plan_id, safe='')}", {})
+
+    async def get_quote_status(self, reference: str) -> str:
+        """
+        Check whether a TempGuru TG quote reference was received or queued.
+        A not-found response does not prove the CRM lead is absent.
+        :param reference: TG reference returned by quote submission.
+        :return: JSON received/queued status stub or clean not-found guidance.
+        """
+        return self._get(
+            f"/api/v1/quote-requests/{quote(reference, safe='')}", {}
+        )
 
     async def get_quote_link(self) -> str:
         """

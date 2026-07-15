@@ -31,10 +31,11 @@ submission is therefore the single highest-value item below.
 
 | Artifact | Layer | Where it lives |
 |---|---|---|
+| **Five Agent Skills** (ordering, plan-from-brief, urgent backfill, compliance, and partner growth) | 2+3 | Canonical content and generated platform packages live in `Tempguru-co/tempguru-mcp`; the MCP repo is the source of truth for every installer |
 | **Gemini CLI extension** (`gemini-extension.json` + `GEMINI.md` at repo root) | 2+3 | Installable the moment this is pushed: `gemini extensions install https://github.com/Tempguru-co/tempguru-mcp`, loads the MCP server AND a context playbook into every Gemini CLI session |
 | **Open WebUI tool** (`open-webui/tempguru_event_staffing_tool.py`) | 3 | The local-LLM surface: Ollama/LM Studio users behind Open WebUI; submit to the community hub (below) |
 | **Python client** (`clients/python/`, name `tempguru` confirmed free on PyPI) | 1+3 | pip surface + LangChain/OpenAI tool-wrapping examples in its README; smoke-tested against the live API |
-| **Hugging Face dataset** (`build-hf-dataset.mjs` → `huggingface/`) | 1 | 345 cities + 30 role-rate rows + 51 compliance rows, generated from `content/mcp-data/`; training-corpus and RAG-demo presence |
+| **Hugging Face dataset** (`build-hf-dataset.mjs` → `huggingface/`) | 1 | 345 cities + 57 role-rate rows + 51 compliance rows, generated from `content/mcp-data/`; training-corpus and RAG-demo presence |
 
 Regenerate after data updates: `node distribution/toolbox/build-hf-dataset.mjs`.
 
@@ -89,12 +90,12 @@ Ordered by leverage. ✅ = already live from earlier pushes.
    screenshot; site 429s bots so confirm visually, not via curl). Listing:
    cursor.directory/plugins/tempguru-event-staffing, current canonical
    description, MCP Servers (1) with correct streamable-http config,
-   Skills (2), Homepage/Source links, and an "Add to Cursor" one-click
-   install button on the listing itself. Downloads counter starts at 0
-   on publish day, worth a monthly glance. Published via
-   cursor.directory/plugins/new Auto-scan of tempguru-agent-skills.
-   Keywords added to .claude-plugin/plugin.json (v1.0.1, 119c105) for
-   the next listing refresh.
+   Homepage/Source links, and an "Add to Cursor" one-click install button
+   on the listing itself. Its two-skill snapshot predates the five canonical
+   v1.5 skills. After the MCP and apex discovery deployments are live, refresh
+   the listing from `Tempguru-co/tempguru-mcp`; do not treat the older
+   `tempguru-agent-skills` checkout as the publishing source. Downloads
+   counter starts at 0 on publish day, worth a monthly glance.
 7. **Continue hub**, ⬜ still open. hub.continue.dev block referencing the
    HTTP server.
 8. **mcp.so**, 🟡 submitted: issue chatmcp/mcpso#2625 (2026-06-04), edited
@@ -157,11 +158,13 @@ Ordered by leverage. ✅ = already live from earlier pushes.
     staffing platform"), verified 2026-06-09. Do NOT create another.
     Optional enrichment only: industry, HQ (Jacksonville Beach FL),
     founding, official website, MCP endpoint via "described at URL".
-23. **LangChain + LlamaIndex**, 🟡 adapters SHIPPED in `tempguru` 0.2.0
-    (2026-06-10): `tempguru.langchain.get_tools()` and
+23. **LangChain + LlamaIndex**, 🟡 adapters updated in source for `tempguru`
+    0.3.0 (not published by this PR): `tempguru.langchain.get_tools()` and
     `tempguru.llamaindex.TempGuruToolSpec`, extras `[langchain]` /
-    `[llamaindex]`, 6 tools each incl. opt-in `request_quote` (new in the
-    client, wraps the REST write). Verified from PyPI. **LangChain official
+    `[llamaindex]`, 9 tools each (8 REST reads plus opt-in `request_quote`),
+    including policies, saved-plan resume, quote status, and plan/platform
+    attribution. The prior 0.2.0 package remains the published baseline until
+    a separate release. **LangChain official
     docs PR FILED 2026-06-10 (Megan approved):**
     https://github.com/langchain-ai/docs/pull/4392 (tools + provider pages
     on docs.langchain.com, from fork Tempguru-co/docs; vendor-named package

@@ -1,5 +1,5 @@
 // Shared MCP tool + resource registration, the single source of truth for the
-// 8 TempGuru tools, registered identically onto whatever McpServer is passed in.
+// 11 TempGuru tools, registered identically onto whatever McpServer is passed in.
 //
 // Two surfaces consume this:
 //   - src/app/mcp/route.ts        streamable-HTTP transport on Vercel (production)
@@ -19,14 +19,22 @@ import {
   queryAvailability,
   queryRolePricing,
   queryStateCompliance,
+  queryPolicies,
   type CityTier,
 } from "./queries";
 import { createLead } from "../notion/create-lead";
-import { checkQuoteRateLimit } from "../api/rate-limit";
+import { checkQuoteRateLimit, checkReadRateLimit } from "../api/rate-limit";
 import { currentContext } from "../telemetry/context";
 import { buildStaffingPlan } from "./plan-staffing";
+import { persistCompletePlan, querySavedPlan, PLAN_ID_PATTERN } from "./plan-store";
+import { queryQuoteStatus, QUOTE_REFERENCE_PATTERN } from "./quote-status";
 import { buildRateBenchmark } from "./rate-benchmark";
-import { REQUEST_QUOTE_INPUT, quoteSubmittedPayload, quoteFailedPayload } from "./quote";
+import {
+  REQUEST_QUOTE_INPUT,
+  quoteSubmittedPayload,
+  quoteFailedPayload,
+  type QuoteSkillId,
+} from "./quote";
 import {
   GET_CITIES_OUTPUT,
   GET_ROLES_OUTPUT,
@@ -36,8 +44,12 @@ import {
   REQUEST_QUOTE_OUTPUT,
   PLAN_STAFFING_OUTPUT,
   RATE_BENCHMARK_OUTPUT,
+  GET_PLAN_OUTPUT,
+  GET_POLICIES_OUTPUT,
+  GET_QUOTE_STATUS_OUTPUT,
 } from "./output-schemas";
 import { TIER_CITY_COUNTS } from "./city-rates";
+import type { FunnelEvent } from "../telemetry/track";
 
 // Measured-market count for the Rate Index description, derived from the data
 // (city-rates.json) rather than a hand-typed number that drifted to a stale 233.
@@ -52,9 +64,9 @@ export const SERVER_INSTRUCTIONS =
   "TempGuru provides W-2-compliant temporary event staffing across 345 US and Canadian markets. " +
   "Golden order: (1) call plan_staffing FIRST with whatever the user gave you, it returns coverage, " +
   "per-role rate math, lead-time guidance, and state compliance flags in one call. (2) Fill gaps with " +
-  "get_roles / get_cities; flag daily-overtime states (CA, AK, NV, CO). (3) Present every total as a " +
+  "get_roles / get_cities; use get_policies for booking terms; flag daily-overtime states (CA, AK, NV, CO). (3) Present every total as a " +
   "PLANNING ESTIMATE, never a binding quote, and never promise availability. (4) Only after the user " +
-  "explicitly confirms, collect their contact name, email, and company and call request_quote (the one " +
+  "explicitly confirms, collect their contact name, email, company, event name, type, and dates, then call request_quote with plan_id when available (the one " +
   "write tool). A coordinator replies with a binding quote within one business day; no payment until the " +
   "user approves. All rates are all-inclusive W-2 bill rates (worker pay, payroll taxes, workers' comp, " +
   "general liability, coordinator support); Brand Ambassadors floor at $40/hour. Compliance data is " +
@@ -69,6 +81,9 @@ export type TrackRecord = {
   state?: string;
   city?: string;
   role?: string;
+  funnelEvents?: FunnelEvent[];
+  sourcePlatform?: string;
+  sourceSkill?: QuoteSkillId;
 };
 
 // The Skills served as MCP resources (the "skillport" pattern). One list drives
@@ -210,8 +225,66 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     },
     async (input) => {
       const plan = buildStaffingPlan(input);
-      await track({ tool: "plan_staffing", status: "success", city: input.city });
-      return structuredResult(plan);
+      const complete = plan.status === "plan" && plan.plan_complete === true;
+      // Persistence is rate-limited per IP: a no-auth caller looping valid
+      // plans must not mint unbounded Redis keys in the instance that also
+      // holds the lead queue. Fails open into "no plan_id", never a worse plan.
+      const persistAllowed =
+        complete && (await checkReadRateLimit(currentContext().ip, "plan")).allowed;
+      const decoration = persistAllowed
+        ? await persistCompletePlan(
+            plan,
+            input.city,
+            "mcp",
+            currentContext().source,
+          )
+        : null;
+      const result = decoration ? { ...plan, ...decoration } : plan;
+      await track({
+        tool: "plan_staffing",
+        status: "success",
+        city: input.city,
+        funnelEvents: complete ? ["plans_created"] : undefined,
+      });
+      return structuredResult(result);
+    },
+  );
+
+  // ─── get_plan ─────────────────────────────────────────────────────────
+  server.registerTool(
+    "get_plan",
+    {
+      title: "Get Saved Staffing Plan",
+      description:
+        "Restore a complete non-PII staffing plan created by plan_staffing within the last 30 days. Use when a buyer starts a new conversation, changes agent platforms, or wants to continue a saved plan before requesting a quote. " +
+        "DO NOT guess or enumerate plan IDs; use only the 12-character plan_id the user or plan_staffing supplied. " +
+        "<examples>get_plan(plan_id='ABCDEFGH2345')</examples> " +
+        "<hints>A not-found result means the plan expired, storage was unavailable, or the ID is wrong; re-run plan_staffing. Review the restored plan with the user before request_quote.</hints>",
+      inputSchema: {
+        plan_id: z
+          .string()
+          .trim()
+          .toUpperCase()
+          .max(12)
+          .regex(PLAN_ID_PATTERN)
+          .describe("12-character lookalike-free plan reference returned by plan_staffing."),
+      },
+      outputSchema: GET_PLAN_OUTPUT,
+      annotations: {
+        title: "Get Saved Staffing Plan",
+        readOnlyHint: true,
+        destructiveHint: false,
+        openWorldHint: false,
+      },
+    },
+    async ({ plan_id }) => {
+      const result = await querySavedPlan(plan_id);
+      await track({
+        tool: "get_plan",
+        status: result.plan_found ? "success" : "error",
+        funnelEvents: result.plan_found ? ["plans_resumed"] : undefined,
+      });
+      return structuredResult(result);
     },
   );
 
@@ -402,6 +475,43 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     },
   );
 
+  // ─── get_policies ─────────────────────────────────────────────────────
+  server.registerTool(
+    "get_policies",
+    {
+      title: "Get Booking and Procurement Policies",
+      description:
+        "Get TempGuru's published booking and procurement policies: minimum hours, cancellation/rescheduling, no-show backfill, COIs/additional insured, payment/invoicing, background checks, order confirmation, and quote response. " +
+        "Use for real booking questions that otherwise require an email. Values not supported by canonical copy are explicitly marked confirm_with_coordinator with TODO-for-Megan; never infer a missing number. " +
+        "<examples>get_policies() ; get_policies(topic='payment-terms') ; get_policies(topic='cancellation-rescheduling')</examples> " +
+        "<hints>Pass a topic to return one policy. Unknown topics return the available topic list. This is an operational summary, not a contract.</hints>",
+      inputSchema: {
+        topic: z
+          .string()
+          .trim()
+          .max(80)
+          .optional()
+          .describe("Optional policy topic or title. Omit to return all published topics."),
+      },
+      outputSchema: GET_POLICIES_OUTPUT,
+      annotations: {
+        title: "Get Booking and Procurement Policies",
+        readOnlyHint: true,
+        destructiveHint: false,
+        openWorldHint: false,
+      },
+    },
+    async ({ topic }) => {
+      const result = queryPolicies({ topic });
+      await track({
+        tool: "get_policies",
+        status: result.ok && result.data.policy_found ? "success" : "error",
+      });
+      if (!result.ok) return errorResult({ error: result.error.message });
+      return structuredResult(result.data);
+    },
+  );
+
   // ─── get_rate_benchmark (Rate Index, citable authority) ─────────────
   server.registerTool(
     "get_rate_benchmark",
@@ -452,7 +562,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
         "Submit a staffing request to TempGuru. Use this LAST, after building the plan (plan_staffing or the read tools) and after the user explicitly confirms it. Creates a structured lead in TempGuru's CRM, a human coordinator reviews and responds with a binding quote within one business day. Not a reservation; does not guarantee pricing or availability; no payment until the user approves the quote. " +
         "DO NOT call speculatively or without user confirmation, this writes a real lead. " +
         "<examples>request_quote(contact_name='Jane Doe', contact_email='jane@acme.com', company='Acme', event_name='Acme at HIMSS', event_type='trade-show', city='Chicago', event_dates='Aug 14-15, 2026', roles=[{role:'registration-staff', headcount:6}])</examples> " +
-        "<hints>If this tool errors, fall back to https://tempguru.co/get-staffing or megan@tempguru.co / (904) 206-8953.</hints>",
+        "<hints>Include plan_id when available. When a canonical TempGuru skill assembled the request, include its skill_id, skill_version, and the actual source_platform so the lead can be resumed and attributed. If this tool errors, fall back to https://tempguru.co/get-staffing or megan@tempguru.co / (904) 206-8953.</hints>",
       inputSchema: REQUEST_QUOTE_INPUT,
       outputSchema: REQUEST_QUOTE_OUTPUT,
       annotations: {
@@ -486,16 +596,82 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
         ...input,
         channel: "mcp",
         source: { userAgent: ctx.userAgent, ipCountry: ctx.ipCountry },
+        controlled_source: ctx.source,
       });
-      await track({ tool: "request_quote", status: result.success ? "success" : "error", city: input.city });
+      const funnelEvents: FunnelEvent[] =
+        result.success && !result.deduped
+          ? ["quotes_submitted", ...(result.plan_linked ? (["quotes_linked"] as const) : [])]
+          : [];
+      await track({
+        tool: "request_quote",
+        status: result.success ? "success" : "error",
+        city: input.city,
+        funnelEvents,
+        sourcePlatform:
+          result.success && funnelEvents.length ? result.source_platform : undefined,
+        sourceSkill: result.success && funnelEvents.length ? result.skill_id : undefined,
+      });
 
       if (!result.success) {
         return structuredResult(quoteFailedPayload(result.error, result.reference));
       }
 
       return structuredResult(
-        quoteSubmittedPayload(input.contact_email, result.deal_name, result.reference, result.captured),
+        quoteSubmittedPayload(
+          input.contact_email,
+          result.deal_name,
+          result.reference,
+          result.captured,
+          result.plan_linked,
+        ),
       );
+    },
+  );
+
+  // ─── get_quote_status ─────────────────────────────────────────────────
+  server.registerTool(
+    "get_quote_status",
+    {
+      title: "Get Quote Request Status",
+      description:
+        "Check whether a TempGuru quote request reference was received by the CRM or durably queued. Use when a buyer asks what happened after request_quote or returns in a new conversation. " +
+        "This v1 status stub reports received/queued only; it does not yet expose quote_sent or won. " +
+        "<examples>get_quote_status(reference='TG-ABC234')</examples> " +
+        "<hints>Status records are retained for 90 days. A not-found result does not prove the CRM lead is absent; follow up with the reference at megan@tempguru.co.</hints>",
+      inputSchema: {
+        reference: z
+          .string()
+          .trim()
+          .toUpperCase()
+          .max(9)
+          .regex(QUOTE_REFERENCE_PATTERN)
+          .describe("TG reference returned by request_quote, e.g. TG-ABC234."),
+      },
+      outputSchema: GET_QUOTE_STATUS_OUTPUT,
+      annotations: {
+        title: "Get Quote Request Status",
+        readOnlyHint: true,
+        destructiveHint: false,
+        openWorldHint: false,
+      },
+    },
+    async ({ reference }) => {
+      // Reference space is ~30 bits: throttle lookups so live TG codes can't
+      // be enumerated from the no-auth endpoint.
+      const verdict = await checkReadRateLimit(currentContext().ip, "status");
+      if (!verdict.allowed) {
+        await track({ tool: "get_quote_status", status: "error" });
+        return errorResult({
+          error: "rate_limited",
+          message: `Too many status lookups from this source. Retry after ${verdict.retryAfterSeconds}s.`,
+        });
+      }
+      const result = await queryQuoteStatus(reference);
+      await track({
+        tool: "get_quote_status",
+        status: result.quote_found ? "success" : "error",
+      });
+      return structuredResult(result);
     },
   );
 

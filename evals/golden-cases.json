@@ -368,5 +368,98 @@
     "expect": [
       "Impossible"
     ]
+  },
+  {
+    "name": "get_plan: unknown or expired plan returns a clean miss",
+    "tool": "get_plan",
+    "arguments": {
+      "plan_id": "ABCDEFGH2345"
+    },
+    "expect": [
+      "plan_found",
+      "not found or has expired",
+      "plan_staffing"
+    ]
+  },
+  {
+    "name": "get_policies: returns sourced payment policy plus explicit TODOs",
+    "tool": "get_policies",
+    "arguments": {
+      "topic": "payment-terms"
+    },
+    "expect": [
+      "policy_found",
+      "No payment is required",
+      "TODO-for-Megan"
+    ]
+  },
+  {
+    "name": "get_policies: unknown topic returns available topics",
+    "tool": "get_policies",
+    "arguments": {
+      "topic": "free-unicorn-delivery"
+    },
+    "expect": [
+      "policy_not_found",
+      "available_topics",
+      "payment-terms"
+    ]
+  },
+  {
+    "name": "get_quote_status: unknown reference returns a clean miss",
+    "tool": "get_quote_status",
+    "arguments": {
+      "reference": "TG-ABC234"
+    },
+    "expect": [
+      "quote_found",
+      "not found",
+      "one business day"
+    ]
+  },
+  {
+    "name": "plan_id round-trip restores the plan, links request_quote, and exposes queued status",
+    "workflow": "plan_quote_roundtrip",
+    "arguments": {
+      "plan": {
+        "city": "Chicago",
+        "event_date": "2027-03-10",
+        "event_type": "trade-show",
+        "roles": [
+          {
+            "role": "registration-staff",
+            "headcount": 6,
+            "hours_per_shift": 8,
+            "days": 2
+          }
+        ]
+      },
+      "quote": {
+        "contact_name": "Eval Buyer",
+        "contact_email": "buyer@example.com",
+        "company": "Eval Company",
+        "event_name": "Eval Expo",
+        "event_type": "trade-show",
+        "city": "Chicago",
+        "event_dates": "March 10, 2027",
+        "roles": [
+          {
+            "role": "registration-staff",
+            "headcount": 6,
+            "shifts": "2 days x 8h"
+          }
+        ],
+        "source_platform": "openclaw",
+        "skill_version": "1.5.0"
+      }
+    },
+    "expect": [
+      "plan_id",
+      "plan_found",
+      "submitted",
+      "plan_linked",
+      "quote_found",
+      "queued"
+    ]
   }
 ]

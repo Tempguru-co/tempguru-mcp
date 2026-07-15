@@ -17,7 +17,7 @@ Ship both.
 | Requirement | Status |
 |---|---|
 | Remote MCP server over HTTPS | ✅ `https://mcp.tempguru.co/mcp` (streamable HTTP) |
-| Tool annotations (read-only vs write) | ✅ 7 read-only + `request_quote` flagged write |
+| Tool annotations (read-only vs write) | ✅ 10 read-only + `request_quote` flagged write |
 | No-auth or OAuth | ✅ no-auth (simplest review path) |
 | Tool descriptions written for model selection | ✅ "use this when..." style |
 | Privacy policy | ✅ `https://tempguru.co/privacy-policy` |

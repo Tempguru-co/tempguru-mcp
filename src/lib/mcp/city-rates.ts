@@ -10,6 +10,7 @@
 
 import type { CityTier, Role } from "./data";
 import cityRatesData from "../../../content/mcp-data/city-rates.json";
+import rateIndexMeta from "../../../content/mcp-data/rate-index-meta.json";
 
 export type CardKey =
   | "event_staff"
@@ -36,18 +37,9 @@ const CARDS = Object.fromEntries(
   Object.entries(cityRatesData).filter(([k]) => k !== "_meta"),
 ) as unknown as Record<string, Card>;
 
-export const CITY_RATES_META = {
-  version: "1.1.0",
-  updated: "2026-07-10",
-  source: "TempGuru Rate Report 2026, per-city actual-paid weighted averages (7,900+ shifts)",
-  card_floor: 30,
-  card_ceiling: 85,
-  basis:
-    "All-inclusive W-2 bill rates per hour: worker pay, payroll taxes, workers' comp, general liability, coordinator support.",
-  // v1.1.0: deduplicated 38 duplicate rows (space-key twins, case/name typos, tier conflicts) (446 -> 408
-  // distinct measured markets) and reconciled the Kansas City tier conflict,
-  // so modes/extrema no longer double-weight duplicated cities.
-};
+// Keep version/provenance beside the measured cards so the MCP result and OKF
+// Rate Index cannot silently fall back to the unrelated role-pricing version.
+export const CITY_RATES_META = rateIndexMeta;
 
 // ─── role -> card key (rates-model.md ladder) ───────────────────────────────
 export function roleKeyFor(role: Role | string): CardKey {

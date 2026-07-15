@@ -8,10 +8,19 @@
 // on Vercel's serverless runtime; track() itself caps the wait and fails open.
 
 import { track } from "@/lib/telemetry/track";
+import type { FunnelEvent } from "@/lib/telemetry/track";
 
 export function trackRest(
   request: Request,
-  rec: { tool: string; status: "success" | "error"; city?: string; role?: string; state?: string },
+  rec: {
+    tool: string;
+    status: "success" | "error";
+    city?: string;
+    role?: string;
+    state?: string;
+    funnelEvents?: FunnelEvent[];
+    sourcePlatform?: string;
+  },
 ): Promise<void> {
   const url = new URL(request.url);
   return track({

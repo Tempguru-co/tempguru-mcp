@@ -22,7 +22,7 @@ const SERVER_CARD = {
     title: "TempGuru Event Staffing",
     version: pkg.version,
     description:
-      "Model Context Protocol server for TempGuru event staffing data: city coverage (345 US/Canada markets), staffing roles, lead-time guidance, all-inclusive W-2 rate ranges, and state-by-state compliance rules. Includes a plan_staffing planner tool, a get_rate_benchmark Rate Index tool, a request_quote write tool that submits structured staffing requests to TempGuru's pipeline, two skill resources, and guided prompt templates. For ChatGPT users without MCP, the TempGuru Event Staffing Planner GPT covers the same workflow: https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner",
+      "Model Context Protocol server for TempGuru event staffing data across 345 US/Canada markets. Eleven tools: planning and saved-plan resume, city/role/rate/availability/compliance lookups, published booking policies, the Rate Index, opt-in quote submission, and quote status. Ten tools are read-only; request_quote is the one write tool. Also ships five skill resources and two guided prompts.",
     websiteUrl: "https://tempguru.co",
   },
   transport: {
@@ -42,6 +42,11 @@ const SERVER_CARD = {
       name: "plan_staffing",
       description:
         "Planner meta-tool, call first. Turns an event shape (city, date, roles + headcount) into a complete plan: coverage, per-role W-2 rate math, lead-time guidance, and state compliance flags.",
+    },
+    {
+      name: "get_plan",
+      description:
+        "Restore a complete non-PII staffing plan saved within the last 30 days.",
     },
     {
       name: "get_cities",
@@ -69,9 +74,19 @@ const SERVER_CARD = {
         "Minimum wage, overtime rules, and state-specific event-staffing compliance quirks.",
     },
     {
+      name: "get_policies",
+      description:
+        "Published booking and procurement policies, with unsupported values explicitly deferred to a coordinator.",
+    },
+    {
       name: "get_rate_benchmark",
       description:
         "The TempGuru Event Staffing Rate Index: full benchmark table of all-inclusive W-2 hourly rates by role (typical + national range; Brand Ambassadors by tier), with methodology and citation line.",
+    },
+    {
+      name: "get_quote_status",
+      description:
+        "Check whether a TG quote reference was received by the CRM or durably queued.",
     },
     {
       name: "request_quote",

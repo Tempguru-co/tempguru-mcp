@@ -45,15 +45,21 @@ then append this GPT-specific block:
 TOOLS ON THIS PLATFORM
 You have live Actions against TempGuru's public API (mcp.tempguru.co):
 listCities, listRoles, checkAvailability, getRolePricing,
-getComplianceByState, and submitQuoteRequest. Prefer Actions over knowledge
+getComplianceByState, getPolicies, getPlan, getQuoteStatus, and
+submitQuoteRequest. Prefer Actions over knowledge
 files for anything current (rates, coverage, lead times); use knowledge
 files for background (the W-2 model, FAQ, budget math) and as fallback when
 an Action errors.
 
+Use getPolicies for booking and procurement questions. Use getPlan only when
+the user supplies a saved plan ID, and getQuoteStatus only when they supply a
+TG reference; never guess or enumerate either identifier.
+
 submitQuoteRequest is the one write Action. Use it to submit the staffing
 request directly: confirm the full plan with the user first (city, dates,
 roles + headcount, contact name, email, company), show exactly what will be
-sent, and call it once after they explicitly confirm. It creates no
+sent, set source_platform to "chatgpt-gpt", include plan_id when available,
+and call it once after they explicitly confirm. It creates no
 reservation and requires no payment; a coordinator replies within one
 business day. If it errors or the user prefers the website, send them to
 the form with their details summarized for copy-paste:
@@ -73,12 +79,13 @@ What's my risk if I use a 1099 gig app for event staff in California?
 Build a staffing plan and budget for a 500-person conference
 ```
 
-### Knowledge (upload all 4)
+### Knowledge (upload all 5)
 
 - `knowledge/tempguru-company-overview.md`
 - `knowledge/tempguru-roles-and-rates.md`
 - `knowledge/tempguru-city-coverage.md`
 - `knowledge/tempguru-state-compliance.md`
+- `knowledge/tempguru-booking-policies.md`
 
 Re-upload whenever `content/mcp-data/` changes (regenerate first).
 
@@ -108,7 +115,7 @@ imported schema; it is for monitors, not chats.
 
 ## Pre-publish test script
 
-Run these in Preview; all six must pass before publishing:
+Run these in Preview; all nine must pass before publishing:
 
 1. "What do brand ambassadors cost in Boston?" → calls `getRolePricing`,
    answers $56-65/hr all-inclusive, labels it a planning estimate.
@@ -125,6 +132,15 @@ Run these in Preview; all six must pass before publishing:
    consequential). Use an obvious test payload (event name "TEST, please
    ignore", your own email) and delete the row from the Notion Inbound Deal
    Pipeline afterward.
+7. "What are your cancellation and payment policies?" → calls
+   `getPolicies`, relays only published claims, and preserves every
+   coordinator-confirmation flag.
+8. "Resume plan [a real saved plan ID from a test MCP plan]" → calls
+   `getPlan` once and restores the saved non-PII plan; an unknown ID returns
+   clean re-planning guidance rather than guessed details.
+9. "What happened to quote [a real TG test reference]?" → calls
+   `getQuoteStatus`, reports received/queued, and gives the fixed follow-up
+   guidance without implying a quote has been sent.
 
 ---
 

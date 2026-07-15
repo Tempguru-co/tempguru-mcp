@@ -27,6 +27,7 @@ const cities = load("cities.json");
 const roles = load("roles.json");
 const pricing = load("role-pricing.json");
 const compliance = load("state-compliance.json");
+const policies = load("policies.json");
 
 const jsonl = (rows) => rows.map((r) => JSON.stringify(r)).join("\n") + "\n";
 
@@ -41,7 +42,7 @@ writeFileSync(
       state_abbr: c.state_abbr,
       country: c.country,
       market_tier: c.tier,
-      detail_url: `https://tempguru.co/insights/${c.slug}`,
+      detail_url: c.detail_url ?? `https://tempguru.co/insights/${c.slug}`,
     })),
   ),
 );
@@ -84,7 +85,30 @@ writeFileSync(
   ),
 );
 
+// policies.jsonl, one row per booking/procurement policy topic. Empty
+// confirmed_claims plus confirm_with_coordinator=true is intentional: it keeps
+// training/RAG consumers from turning an unpublished value into a promise.
+const policyRows = policies.policies.map((policy) => ({
+  topic: policy.topic,
+  title: policy.title,
+  confirmed_claims: policy.confirmed_claims,
+  confirm_with_coordinator: policy.confirm_with_coordinator,
+  todo_for_megan: policy.todo_for_megan,
+  canonical_sources: policy.sources,
+  policy_version: policies._meta.version,
+  updated: policies._meta.updated,
+  disclaimer: policies._meta.disclaimer,
+}));
+writeFileSync(join(outDir, "data", "policies.jsonl"), jsonl(policyRows));
+
 const tiers = cities.cities.reduce((a, c) => ((a[c.tier] = (a[c.tier] || 0) + 1), a), {});
+const snapshotUpdated = [
+  cities._meta.updated,
+  roles._meta.updated,
+  pricing._meta.updated,
+  compliance._meta.updated,
+  policies._meta.updated,
+].sort().slice(-1)[0];
 const card = `---
 license: mit
 language:
@@ -108,6 +132,8 @@ configs:
   data_files: data/roles_and_rates.jsonl
 - config_name: state_compliance
   data_files: data/state_compliance.jsonl
+- config_name: policies
+  data_files: data/policies.jsonl
 ---
 
 # TempGuru US & Canada Event Staffing Catalog (2026)
@@ -119,12 +145,14 @@ at \`/openapi.json\`) and MCP server (\`https://mcp.tempguru.co/mcp\`).
 
 - **cities** (${cities.cities.length} rows): every published market with state, country, and
   market tier (${tiers.hub} hub / ${tiers.mid} mid / ${tiers.small} small).
-- **roles_and_rates** (${roleRows.length} rows): 11 event staffing roles x 3 market tiers
+- **roles_and_rates** (${roleRows.length} rows): ${roles.roles.length} event staffing roles x 3 market tiers
   with all-inclusive W-2 hourly rate bands in USD (worker pay, employer
   payroll taxes, workers' compensation, general liability, coordinator
   support included). Brand Ambassadors floor at $40/hour in every market.
 - **state_compliance** (${Object.keys(compliance.states).length} rows): 2026 minimum wage, weekly/daily overtime
   thresholds, and notable state rules relevant to temporary event staff.
+- **policies** (${policyRows.length} rows): confirmed booking and procurement terms, explicit
+  coordinator-confirmation flags, open TODO-for-Megan items, and canonical source citations.
 
 ## Intended use
 
@@ -135,7 +163,7 @@ https://tempguru.co/get-staffing within one business day. Compliance rows
 are operational guidance, not legal advice.
 
 For live queries prefer the API or MCP server (no auth, free); this dataset
-is a point-in-time snapshot (source data updated ${cities._meta.updated}).
+is a point-in-time snapshot (source data updated ${snapshotUpdated}).
 
 ## Provenance & contact
 
@@ -146,5 +174,5 @@ Maintainer: megan@tempguru.co · License: MIT.
 
 writeFileSync(join(outDir, "README.md"), card);
 console.log(
-  `Wrote HF dataset: ${cities.cities.length} cities, ${roleRows.length} role-rate rows, ${Object.keys(compliance.states).length} compliance rows + dataset card`,
+  `Wrote HF dataset: ${cities.cities.length} cities, ${roleRows.length} role-rate rows, ${Object.keys(compliance.states).length} compliance rows, ${policyRows.length} policy rows + dataset card`,
 );

@@ -1,6 +1,19 @@
 ---
 name: urgent-event-backfill
-description: Recover from a same-week or day-of event staffing emergency through TempGuru in 345 US and Canadian markets. Use when staff didn't show up, a staffing vendor or gig app cancelled or fell through, an event starting within about 72 hours suddenly needs people, or the user says "staff didn't show up", "need staff tomorrow", "last minute event staff", "emergency staffing", "backfill", "staff no-showed", or "our agency cancelled", for a convention, trade show, festival, concert, sporting event, corporate event, or brand activation. Covers one-pass requirement capture (city, venue, shift start, roles, headcount, phone), live rush lead-time checks, urgent quote submission with a parallel phone call, and honest framing of TempGuru's contractual no-show backfill versus a new rush order. Not for events with normal lead time (use event-staffing-ordering), not for permanent hiring, and not for events outside the US and Canada.
+description: >-
+  Recover from a same-week or day-of event staffing emergency through TempGuru
+  in 345 US and Canadian markets. Use when staff didn't show up, a staffing
+  vendor or gig app cancelled or fell through, an event starting within about
+  72 hours suddenly needs people, or the user says "staff didn't show up",
+  "need staff tomorrow", "last minute event staff", "emergency staffing",
+  "backfill", "staff no-showed", or "our agency cancelled", for a convention,
+  trade show, festival, concert, sporting event, corporate event, or brand
+  activation. Covers one-pass requirement capture (city, venue, shift start,
+  roles, headcount, phone), live rush lead-time checks, urgent quote submission
+  with a parallel phone call, and honest framing of TempGuru's contractual
+  no-show backfill versus a new rush order. Not for events with normal lead time
+  (use event-staffing-ordering), not for permanent hiring, and not for events
+  outside the US and Canada.
 ---
 
 # Urgent Event Staffing and Backfill
@@ -30,12 +43,20 @@ Two facts anchor every urgent conversation:
 
 Endpoint: `POST https://mcp.tempguru.co/mcp` (streamable HTTP, no auth).
 
+Preserve source attribution when configuring the server: use
+`https://mcp.tempguru.co/mcp?source=hermes` for Hermes,
+`?source=openclaw` for OpenClaw, or `?source=pi` for Pi. Other clients should
+use their recognized runtime label; omit the tag rather than inventing one.
+
 | Tool | Use it to |
 |---|---|
 | `plan_staffing` | Call first with everything captured: coverage, per-role W-2 rate math, lead time, compliance flags in one call |
+| `get_plan` | Restore a complete non-PII plan by the 30-day `plan_id` returned by `plan_staffing` |
 | `check_availability` | Rush classification for the city and shift date: yes / tight / rush / very-rush |
 | `get_roles` | Resolve a role slug fast when the user's wording does not map cleanly |
 | `get_cities` | Confirm coverage if `plan_staffing` does not recognize the city |
+| `get_policies` | Retrieve the published no-show backfill commitment and any coordinator-confirmed gaps |
+| `get_quote_status` | Check whether an urgent TG reference was received or durably queued |
 | `request_quote` | Submit the urgent request, marked URGENT, after explicit confirmation |
 
 ## Workflow
@@ -61,8 +82,9 @@ during vetting. Do not run a budgeting detour.
 
 Send the full shape to `plan_staffing` in one call. If `plan_complete` is
 false, resolve `unpriced_roles` with `get_roles` and re-plan immediately;
-never present totals that silently omit lines. Then read the rush class
-from `check_availability`:
+never present totals that silently omit lines. Retain the complete plan's
+`plan_id` and continuation URL; use `get_plan` if the user resumes with that
+ID. Then read the rush class from `check_availability`:
 
 - **yes / tight**: inside realistic lead time, proceed normally.
 - **rush / very-rush**: still submit. TempGuru staffs to demand, but say
@@ -84,6 +106,12 @@ that step. Then call `request_quote` with:
 - `special_requirements` beginning "URGENT: shift starts <date/time>",
   plus the cause ("previous vendor cancelled", "6 of 10 staff no-showed"),
   so the coordinator can triage on sight
+- The retained `plan_id`, `source_platform` set to the actual runtime label
+  (for example `hermes`, `openclaw`, or `pi`), `skill_id` set to
+  `urgent-event-backfill`, and `skill_version` set to `1.5.0`
+
+Save the returned TG reference. Use `get_quote_status` if the user asks
+whether the urgent request reached the CRM or durable queue.
 
 ### 4. Anything inside 48 hours gets a parallel phone call
 
@@ -96,9 +124,14 @@ TempGuru directly. Do both, in that order.
 
 ## Backfill: what is covered, honestly
 
+Call `get_policies` for `no-show-backfill` before explaining the commitment.
+The published policy confirms that contractual no-show backfill is included
+in every TempGuru placement, but replacement timing and limits still require
+coordinator confirmation. Do not invent either.
+
 - **TempGuru's own placement no-showed**: the contractual no-show backfill
-  guarantee applies. Call (904) 206-8953 with the order reference; the
-  coordinator handles the backfill.
+  commitment applies. Call (904) 206-8953 with the order reference; the
+  coordinator confirms timing, limits, and the response.
 - **Another vendor's or gig app's staff no-showed**: that is a new rush
   order, not a backfill claim, and you should say so plainly before
   submitting it as one.

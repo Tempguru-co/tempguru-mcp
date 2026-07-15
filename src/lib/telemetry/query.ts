@@ -62,10 +62,12 @@ export interface DashboardMetrics {
   // manual_test, team_demo). Subtract these from the total to isolate organic
   // candidate-real traffic. Empty for untagged/organic calls.
   bySource: Record<string, number>;
+  funnelByChannel: Record<string, number>;
+  bySourcePlatform: Record<string, number>;
+  bySourceSkill: Record<string, number>;
   topCities: Array<{ member: string; count: number }>;
-  // Present-but-unrecognized city inputs (junk, typos, markets we don't cover).
-  // Kept out of topCities so the demand chart stays clean; surfaced here so the
-  // junk is reviewable, the same way unclassifiedUas surfaces "other" UAs.
+  // Count of present-but-unrecognized city inputs. The public strings are
+  // deliberately discarded; only the fixed `unmatched` bucket is retained.
   unmatchedCities: Array<{ member: string; count: number }>;
   topRoles: Array<{ member: string; count: number }>;
   topStates: Array<{ member: string; count: number }>;
@@ -79,6 +81,8 @@ export interface DashboardMetrics {
     role: string | null;
     state: string | null;
     source: string | null;
+    source_platform?: string | null;
+    source_skill?: string | null;
   }>;
   dailyTotals: Array<{ date: string; count: number }>;
 }
@@ -95,6 +99,9 @@ export async function getMetrics(windowDays = 7): Promise<DashboardMetrics> {
       unclassifiedUas: [],
       byCountry: {},
       bySource: {},
+      funnelByChannel: {},
+      bySourcePlatform: {},
+      bySourceSkill: {},
       topCities: [],
       unmatchedCities: [],
       topRoles: [],
@@ -112,6 +119,9 @@ export async function getMetrics(windowDays = 7): Promise<DashboardMetrics> {
     byStatus,
     byCountry,
     bySource,
+    funnelByChannel,
+    bySourcePlatform,
+    bySourceSkill,
     unclassifiedHash,
     topCities,
     unmatchedCityHash,
@@ -124,6 +134,9 @@ export async function getMetrics(windowDays = 7): Promise<DashboardMetrics> {
     aggregateHash("status", dates),
     aggregateHash("countries", dates),
     aggregateHash("sources", dates),
+    aggregateHash("funnel", dates),
+    aggregateHash("source-platforms", dates),
+    aggregateHash("source-skills", dates),
     aggregateHash("ua:unclassified", dates),
     aggregateZSet("queries:cities", dates, 20),
     aggregateHash("queries:cities:unmatched", dates),
@@ -132,14 +145,13 @@ export async function getMetrics(windowDays = 7): Promise<DashboardMetrics> {
     exec((r) => r.lrange("recent:invocations", 0, 49)),
   ]);
 
-  // Top-N raw unclassified UA strings, the menu for the next classifier pass.
+  // Aggregate unclassified calls; raw public user-agent strings are discarded.
   const unclassifiedUas = Object.entries(unclassifiedHash)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 25)
     .map(([member, count]) => ({ member, count }));
 
-  // Top-N unrecognized city inputs, the menu for spotting uncovered demand,
-  // typos worth aliasing, or junk worth ignoring.
+  // Aggregate unmatched-city calls; raw public city strings are discarded.
   const unmatchedCities = Object.entries(unmatchedCityHash)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 25)
@@ -187,6 +199,9 @@ export async function getMetrics(windowDays = 7): Promise<DashboardMetrics> {
     unclassifiedUas,
     byCountry,
     bySource,
+    funnelByChannel,
+    bySourcePlatform,
+    bySourceSkill,
     topCities,
     unmatchedCities,
     topRoles,

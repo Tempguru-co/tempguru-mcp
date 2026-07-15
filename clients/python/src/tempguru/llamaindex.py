@@ -26,8 +26,8 @@ except ImportError as _exc:  # pragma: no cover
 
 
 class TempGuruToolSpec(BaseToolSpec):
-    """TempGuru event staffing tools: coverage, rates, lead times, state
-    labor compliance, and opt-in quote submission for 345 US/CA markets.
+    """TempGuru event staffing tools: eight read operations plus opt-in quote
+    submission for 345 US/CA markets.
 
     Pass ``include_quote_submission=False`` for a strictly read-only set.
     """
@@ -38,6 +38,9 @@ class TempGuruToolSpec(BaseToolSpec):
         "event_staffing_availability",
         "event_staffing_pricing",
         "event_staffing_state_compliance",
+        "event_staffing_policies",
+        "restore_event_staffing_plan",
+        "event_staffing_quote_status",
         "submit_event_staffing_quote_request",
     ]
 
@@ -61,10 +64,8 @@ class TempGuruToolSpec(BaseToolSpec):
         return self._tg.cities(state=state or None, tier=tier or None)
 
     def event_staffing_roles(self) -> dict:
-        """List all 11 event staffing roles (brand ambassadors, registration,
-        ushers, hospitality, gate staff, booth monitors, crowd control,
-        guest services, setup/breakdown, team leads) with descriptions and
-        skill tiers. Returned slugs key the pricing/availability tools."""
+        """List the current 19-role event staffing catalog with descriptions
+        and skill tiers. Returned slugs key the pricing/availability tools."""
         return self._tg.roles()
 
     def event_staffing_availability(
@@ -89,6 +90,21 @@ class TempGuruToolSpec(BaseToolSpec):
         Operational guidance, not legal advice."""
         return self._tg.compliance(state=state)
 
+    def event_staffing_policies(self, topic: str = "") -> dict:
+        """Published booking/procurement policies. Preserve coordinator-
+        confirmation flags and never infer an unpublished number or term."""
+        return self._tg.policies(topic=topic or None)
+
+    def restore_event_staffing_plan(self, plan_id: str) -> dict:
+        """Restore a non-PII plan saved for 30 days. Use only a supplied
+        TempGuru plan ID; never guess or enumerate plan IDs."""
+        return self._tg.plan(plan_id=plan_id)
+
+    def event_staffing_quote_status(self, reference: str) -> dict:
+        """Check whether a TG quote reference was received or queued. A
+        not-found response does not prove the CRM lead is absent."""
+        return self._tg.quote_status(reference=reference)
+
     def submit_event_staffing_quote_request(
         self,
         contact_name: str,
@@ -99,10 +115,13 @@ class TempGuruToolSpec(BaseToolSpec):
         city: str,
         event_dates: str,
         roles: list,
+        contact_phone: str = "",
         budget_range: str = "",
         attire: str = "",
         special_requirements: str = "",
         compliance_notes: str = "",
+        plan_id: str = "",
+        skill_version: str = "",
     ) -> dict:
         """Submit a confirmed staffing plan to TempGuru for a human-reviewed
         quote (response within one business day). OPT-IN WRITE: confirm the
@@ -119,8 +138,12 @@ class TempGuruToolSpec(BaseToolSpec):
             city=city,
             event_dates=event_dates,
             roles=roles,
+            contact_phone=contact_phone or None,
             budget_range=budget_range or None,
             attire=attire or None,
             special_requirements=special_requirements or None,
             compliance_notes=compliance_notes or None,
+            source_platform="llamaindex",
+            skill_version=skill_version or None,
+            plan_id=plan_id or None,
         )

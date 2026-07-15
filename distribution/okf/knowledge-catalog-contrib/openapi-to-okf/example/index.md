@@ -6,8 +6,8 @@ okf_version: "0.1"
 
 Public event-staffing data for the US and Canada, served by TempGuru (Temporary Assistance Guru, Inc.).
 
-API base: `https://mcp.tempguru.co`. Generated from an OpenAPI 3.1.0 spec.
+API base: `https://tempguru.co/api/v1`. Generated from an OpenAPI 3.1.0 spec.
 
-- [Operations](operations/index.md) (7)
-- [Schemas](schemas/index.md) (13)
+- [Operations](operations/index.md) (10)
+- [Schemas](schemas/index.md) (19)
 - [Change log](log.md)

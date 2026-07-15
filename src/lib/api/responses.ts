@@ -12,7 +12,7 @@ const STANDARD_HEADERS: Record<string, string> = {
   "Content-Type": "application/json",
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Accept",
+  "Access-Control-Allow-Headers": "Content-Type, Accept, X-TempGuru-Source",
   "Access-Control-Max-Age": "86400",
 };
 

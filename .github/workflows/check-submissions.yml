@@ -41,4 +41,7 @@ jobs:
       # must be committed in sync with their sources: regenerate and require a
       # clean tree, so "forgot to run build:okf" can't merge as silent drift.
       - run: npm run build:okf
-      - run: git diff --exit-code -- public content
+      - run: npm run build:worker
+      - run: git diff --exit-code -- public content skills plugins/tempguru/skills cloudflare/worker.js
+      - run: npm run build:cli
+      - run: npm run check:cli-package

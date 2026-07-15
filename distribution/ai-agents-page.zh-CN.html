@@ -78,13 +78,18 @@
 
   <h2>MCP 工具</h2>
 
-  <p>共八个工具：一个须首先调用的 <code>plan_staffing</code> 规划器、六个只读查询工具，以及一个可选的写入工具。无需身份验证。请先调用 <code>plan_staffing</code>，再用查询工具细化，最后仅在用户确认方案并同意提交后才调用 <code>request_quote</code>。服务器另提供两个技能资源和引导式提示模板（<code>plan-event-staffing</code>、<code>staffing-compliance-brief</code>）。</p>
+  <p>共十一个工具：十个只读的规划、方案恢复、查询、政策、基准和报价状态工具，以及一个可选的写入工具。无需身份验证。请先调用 <code>plan_staffing</code> 并保留 <code>plan_id</code>，仅在用户确认方案并同意提交后调用 <code>request_quote</code>。</p>
 
   <div class="tg-tools">
 
     <div class="tg-tool">
       <div class="tg-tool-name">plan_staffing <span class="tg-tool-badge">请首先调用</span></div>
       <p>规划元工具。输入活动概况（城市、日期、岗位 + 人数），输出完整方案：覆盖范围、各岗位 W-2 费率计算与合计、提前期建议、州级合规提示，以及后续步骤。</p>
+    </div>
+
+    <div class="tg-tool">
+      <div class="tg-tool-name">get_plan</div>
+      <p>使用 <code>plan_staffing</code> 返回的编号恢复 30 天内保存且不含个人信息的完整方案。</p>
     </div>
 
     <div class="tg-tool">
@@ -113,8 +118,18 @@
     </div>
 
     <div class="tg-tool">
+      <div class="tg-tool-name">get_policies</div>
+      <p>已发布的预订与采购政策；未确认的值会明确要求协调员确认，不会编造。</p>
+    </div>
+
+    <div class="tg-tool">
       <div class="tg-tool-name">get_rate_benchmark</div>
       <p>费率指数：全包式 W-2 小时费率基准表，按岗位列出（典型费率加全国区间），其中品牌大使按市场分级（hub / mid / small）拆分，并附引用来源说明。可一目了然地横向比较不同岗位与不同市场的费率。</p>
+    </div>
+
+    <div class="tg-tool">
+      <div class="tg-tool-name">get_quote_status</div>
+      <p>查询 TG 报价编号是否已由 CRM 接收或进入持久队列等待重试。</p>
     </div>
 
     <div class="tg-tool">
@@ -162,7 +177,7 @@
       <tr><td>Agent Skills（Hermes）</td><td><code>https://tempguru.co/.well-known/skills/index.json</code></td></tr>
       <tr><td>人员配置请求 Schema</td><td><code>https://tempguru.co/schemas/event-staffing-request.schema.json</code></td></tr>
       <tr><td>ChatGPT GPT</td><td><code>https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner</code></td></tr>
-      <tr><td>参考代码仓库</td><td><code>https://github.com/tempguru-co/tempguru-agent-skills</code></td></tr>
+      <tr><td>参考代码仓库</td><td><code>https://github.com/Tempguru-co/tempguru-mcp</code></td></tr>
       <tr><td>代码示例（Gemini 等）</td><td><code>https://github.com/tempguru-co/tempguru-mcp/tree/main/examples</code></td></tr>
     </tbody>
   </table>
@@ -217,7 +232,7 @@ https://mcp.tempguru.co/mcp</div>
 https://mcp.tempguru.co/mcp</div>
 
   <p class="tg-label">Gemini CLI</p>
-  <div class="tg-code">gemini extensions install https://github.com/tempguru-co/tempguru-agent-skills</div>
+  <div class="tg-code">gemini extensions install https://github.com/Tempguru-co/tempguru-mcp</div>
 
   <p class="tg-label">Gemini API（远程 MCP）</p>
   <div class="tg-code">// Gemini 直接调用 TempGuru 的工具。模型：gemini-2.5-flash。
@@ -228,6 +243,24 @@ https://mcp.tempguru.co/mcp</div>
   "url": "https://mcp.tempguru.co/mcp"
 }]
 // 可运行示例：github.com/tempguru-co/tempguru-mcp/tree/main/examples</div>
+
+  <p class="tg-label">Hermes</p>
+  <div class="tg-code">hermes skills search https://tempguru.co --source well-known --limit 10 --json
+// 安装全部五个技能后，再连接：
+hermes mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=hermes"</div>
+
+  <p class="tg-label">OpenClaw</p>
+  <div class="tg-code">git clone --depth 1 https://github.com/Tempguru-co/tempguru-mcp.git
+// 从 skills/ 分别安装五个目录，再连接 ?source=openclaw 的 MCP。
+// 完整命令：https://github.com/Tempguru-co/tempguru-mcp#connect</div>
+
+  <p class="tg-label">Pi</p>
+  <div class="tg-code">pi install npm:tempguru-mcp
+pi install npm:pi-mcp-extension</div>
+
+  <p class="tg-label">Codex</p>
+  <div class="tg-code">codex mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=openai-codex"
+// 请 $skill-installer 安装 Tempguru-co/tempguru-mcp/skills 下的五个技能。</div>
 
   <p class="tg-label">通用 MCP 客户端</p>
   <div class="tg-code">mcp_servers:
@@ -318,7 +351,7 @@ https://mcp.tempguru.co/mcp</div>
     <li><strong>邮箱：</strong>megan@tempguru.co</li>
     <li><strong>电话：</strong>(904) 206-8953</li>
     <li><strong>地址：</strong>333 First St N, Suite 200, Jacksonville Beach, FL</li>
-    <li><strong>GitHub Issues：</strong><a href="https://github.com/tempguru-co/tempguru-agent-skills/issues">github.com/tempguru-co/tempguru-agent-skills/issues</a></li>
+    <li><strong>GitHub Issues：</strong><a href="https://github.com/Tempguru-co/tempguru-mcp/issues">github.com/Tempguru-co/tempguru-mcp/issues</a></li>
   </ul>
 
   <script type="application/ld+json">
@@ -375,7 +408,8 @@ https://mcp.tempguru.co/mcp</div>
   <p style="font-size:0.8rem; color:#888;">
     本页为 TempGuru /ai 页面的简体中文版，内容与英文版保持同步。<br>
     v1.8（2026 年 6 月）：开放知识格式（OKF v0.1）知识包、知识层端点（okf.json、压缩包、导入指南）、345 市场标准化<br>
-    v1.7（2026 年 6 月）：核实 TempGuru 实体区块（sameAs 身份、可核实声明表）、get_rate_benchmark 费率指数工具、Organization JSON-LD；八个工具<br>
+    v1.8（2026 年 7 月）：方案恢复、预订政策、报价状态与来源归因；十一个工具<br>
+    v1.7（2026 年 6 月）：核实 TempGuru 实体区块（sameAs 身份、可核实声明表）、get_rate_benchmark 费率指数工具、Organization JSON-LD<br>
     v1.6（2026 年 6 月）：plan_staffing 规划工具 + MCP 提示模板；七个工具<br>
     v1.5（2026 年 6 月）：发布 TempGuru GPT，支持对话内报价请求；npx 安装；明确的智能体路由指引<br>
     v1.0（2026 年 6 月）：首次发布

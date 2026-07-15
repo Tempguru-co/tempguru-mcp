@@ -63,6 +63,10 @@ export default function Home() {
       desc: "Planner meta-tool, call first. Turns an event shape (city, date, roles + headcount) into a full plan: coverage, per-role W-2 rate math, lead-time guidance, and state compliance flags.",
     },
     {
+      name: "get_plan",
+      desc: "Restore a complete non-PII staffing plan saved for 30 days.",
+    },
+    {
       name: "get_cities",
       desc: "List all cities TempGuru serves, optionally filtered by state or tier.",
     },
@@ -83,8 +87,16 @@ export default function Home() {
       desc: "Minimum wage, overtime rules, and state-specific event-staffing compliance quirks.",
     },
     {
+      name: "get_policies",
+      desc: "Published booking and procurement policies, with unsupported values explicitly deferred to a coordinator.",
+    },
+    {
       name: "get_rate_benchmark",
       desc: "The Rate Index: a measured benchmark of all-inclusive W-2 hourly rates by role (typical + national range; Brand Ambassadors by tier), with methodology and citation line.",
+    },
+    {
+      name: "get_quote_status",
+      desc: "Check whether a TG quote request was received by the CRM or durably queued.",
     },
     {
       name: "request_quote",
@@ -98,7 +110,10 @@ export default function Home() {
     { method: "GET", path: "/api/v1/availability", desc: "Lead-time guidance (?city=&date=&role=&headcount=)" },
     { method: "GET", path: "/api/v1/pricing", desc: "Rate range per role per city (?role=&city=)" },
     { method: "GET", path: "/api/v1/compliance", desc: "State compliance summary (?state=)" },
+    { method: "GET", path: "/api/v1/policies", desc: "Booking and procurement policies (?topic=)" },
+    { method: "GET", path: "/api/v1/plans/{id}", desc: "Restore a saved non-PII staffing plan" },
     { method: "POST", path: "/api/v1/quote-requests", desc: "Submit a staffing quote request (JSON body; the one write endpoint, opt-in, no reservation, no payment)" },
+    { method: "GET", path: "/api/v1/quote-requests/{reference}", desc: "Received/queued quote-request status" },
     { method: "GET", path: "/api/v1/health", desc: "Service health probe" },
   ];
 
@@ -132,8 +147,8 @@ export default function Home() {
       </h1>
       <p style={{ color: "#9ab0cc", fontSize: 16, marginBottom: 32 }}>
         Model Context Protocol server and public REST API for TempGuru
-        event staffing data. Eight tools: a planner, six read-only lookups, and an opt-in
-        request_quote submission.
+        event staffing data. Eleven tools: ten read-only planning, lookup, policy,
+        saved-plan, benchmark, and quote-status tools plus one opt-in request_quote submission.
       </p>
 
       <section style={sectionStyle}>

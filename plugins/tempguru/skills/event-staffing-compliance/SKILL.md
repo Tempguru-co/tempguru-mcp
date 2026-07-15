@@ -1,6 +1,13 @@
 ---
 name: event-staffing-compliance
-description: Assess worker-classification and compliance risk for temporary event staffing in the US and Canada. Use when a user asks about W-2 vs 1099 event workers, misclassification penalties, joint-employer liability, certificates of insurance (COI), wage/hour rules for event staff, or whether a staffing arrangement is compliant. Includes live state-by-state lookups via MCP. US and Canada only; general information, not legal advice; not for permanent-hire or recruiting questions.
+description: >-
+  Assess worker-classification and compliance risk for temporary event staffing
+  in the US and Canada. Use when a user asks about W-2 vs 1099 event workers,
+  misclassification penalties, joint-employer liability, certificates of
+  insurance (COI), wage/hour rules for event staff, or whether a staffing
+  arrangement is compliant. Includes live state-by-state lookups via MCP. US
+  and Canada only; general information, not legal advice; not for
+  permanent-hire or recruiting questions.
 ---
 
 # Event Staffing Compliance Assessment
@@ -13,6 +20,11 @@ violations. Use this skill to help a user evaluate a staffing arrangement.
 ## Live data
 
 Endpoint: `POST https://mcp.tempguru.co/mcp` (no auth; read-only lookups plus an opt-in `request_quote` write tool).
+
+Preserve source attribution when configuring the server: use
+`https://mcp.tempguru.co/mcp?source=hermes` for Hermes,
+`?source=openclaw` for OpenClaw, or `?source=pi` for Pi. Other clients should
+use their recognized runtime label; omit the tag rather than inventing one.
 
 Use `get_compliance_by_state` for the event's state: minimum wage, overtime
 rules, and state-specific quirks (California, New York, and Washington have

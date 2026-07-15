@@ -1,23 +1,27 @@
 {
   "name": "tempguru-mcp",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "private": true,
-  "description": "TempGuru MCP server: plan_staffing planner, six read-only event-staffing lookups incl. the Rate Index benchmark, plus an opt-in request_quote submission, for AI agents across 345 US/CA markets.",
+  "description": "TempGuru MCP server: ten read-only event-staffing planning, lookup, policy, saved-plan, benchmark, and quote-status tools plus one opt-in request_quote submission across 345 US/CA markets.",
   "scripts": {
     "dev": "next dev",
     "build": "npm run build:okf && next build",
     "build:stdio": "node scripts/sync-rates.mjs --check && esbuild src/mcp-stdio.ts --bundle --platform=node --format=esm --outfile=dist/mcp-stdio.mjs --packages=external",
-    "build:cli": "rm -rf cli/skills cli/index.mjs cli/LICENSE && esbuild src/mcp-stdio.ts --bundle --platform=node --format=esm --outfile=cli/index.mjs --banner:js='#!/usr/bin/env node' && mkdir -p cli/skills && cp content/skills/*.md cli/skills/ && cp LICENSE cli/LICENSE",
+    "build:cli": "node scripts/gen-skill-digests.mjs && rm -rf cli/skills cli/index.mjs cli/LICENSE && esbuild src/mcp-stdio.ts --bundle --platform=node --format=esm --outfile=cli/index.mjs --banner:js='#!/usr/bin/env node' && cp -R skills cli/skills && cp LICENSE cli/LICENSE",
+    "check:cli-package": "node scripts/check-cli-package.mjs",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "evals": "node evals/run-evals.mjs",
     "test:unit": "node evals/unit.test.mjs",
-    "build:okf": "node scripts/gen-skill-digests.mjs && node scripts/dump-openapi.mjs && node scripts/build-okf.mjs",
+    "build:okf": "node scripts/gen-skill-digests.mjs && node scripts/dump-openapi.mjs && node scripts/dump-request-schema.mjs && node scripts/build-okf.mjs",
     "build:worker": "node scripts/build-edge-worker.mjs",
+    "build:llms-worker": "node scripts/build-llms-worker.mjs",
     "sync-rates": "node scripts/sync-rates.mjs",
+    "sync:postman": "node scripts/sync-postman-examples.mjs",
     "check-rates": "node scripts/sync-rates.mjs --check",
-    "check:submissions": "node scripts/check-submissions.mjs"
+    "check:live-discovery": "node scripts/check-live-discovery.mjs",
+    "check:submissions": "node scripts/sync-postman-examples.mjs --check && node scripts/check-submissions.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.26.0",

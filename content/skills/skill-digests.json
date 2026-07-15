@@ -1,7 +1,7 @@
 {
-  "event-staffing-ordering": "sha256:77acebd3fc96904a7ed2433d34f69425b4b1ab90f09c0b09c2acd8dc96a00665",
-  "event-staffing-compliance": "sha256:c36c45115c141ffa0cbb3c5778be67ece6161695830fa7f987d55086fc6fe94e",
-  "staffing-plan-from-event-brief": "sha256:4232427019d3d576a96be0873d0ae3ea54af4643cb464a864844fc39ce0768f0",
-  "urgent-event-backfill": "sha256:9b7eaf30f9f190334d9044c44ffa931785140325d567ee122df86a4f44e63e05",
-  "staffing-agency-partner-growth": "sha256:51e5ae9e4e2381b65ed9bac6d6bf0da5017d37d149ef163790bc3329e88848e7"
+  "event-staffing-ordering": "sha256:95ec3a6f302a8867516341a29406cb658170cbda2fb1201c1f23a0bb644941b5",
+  "event-staffing-compliance": "sha256:43e1fbdd1144c91e577c99f843dfa2edf7ac6badde8343bfcabb566b3fdc673a",
+  "staffing-plan-from-event-brief": "sha256:cd0584cdde1d2c156cec603a8f25f4215ae5af9ed41a8442a764d32150650fc3",
+  "urgent-event-backfill": "sha256:2a1ab42eb49fef8008607ce99f9279c615ffaa40d5ea375ed9f1c4758f9fff44",
+  "staffing-agency-partner-growth": "sha256:b98e8d55504fc43c38ac5191a6f7796215d51de14a5d44d3f518abf897027c72"
 }

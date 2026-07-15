@@ -12,7 +12,7 @@ npm run build:stdio && npm run evals
 
 | Check | Result |
 |---|---|
-| tools/list advertises all 8 tools | PASS |
+| tools/list advertises all 11 tools | PASS |
 | prompts/list advertises both prompts | PASS |
 | plan_staffing builds a full plan (Chicago trade show) | PASS |
 | plan_staffing flags the team-lead rule at 20+ staff | PASS |
@@ -25,7 +25,9 @@ npm run build:stdio && npm run evals
 | get_cities filters by state | PASS |
 | get_rate_benchmark returns the citable Rate Index | PASS |
 
-**12/12 as of 2026-06-12** (commit of record in git history). Cases live in
+**32/32 as of 2026-07-11**. Cases include saved-plan resume, policy
+happy/miss variants, quote-status happy/miss variants, and a plan-to-quote
+round trip. Cases live in
 [golden-cases.json](./golden-cases.json); add a case whenever a tool gains a
 behavior worth locking in.
 

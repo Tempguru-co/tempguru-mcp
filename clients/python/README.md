@@ -18,6 +18,9 @@ tg.cities(state="TX", tier="hub")                  # coverage check
 tg.pricing(role="brand-ambassadors", city="Boston") # $56-65/hr all-inclusive
 tg.availability(city="Dallas", date="2026-09-12", role="registration-staff")
 tg.compliance(state="CA")                           # min wage, daily OT, quirks
+tg.policies(topic="payment-terms")                 # sourced terms + TODO flags
+tg.plan("ABCDEFGH2345")                            # restore a 30-day saved plan
+tg.quote_status("TG-ABC234")                       # received / queued stub
 tg.quote_form_url()                                 # where a human quote happens
 ```
 
@@ -32,8 +35,8 @@ advice.
 
 ## Use as LLM tools
 
-Built-in adapters ship for both major agent frameworks, six tools each
-(five read-only lookups + opt-in quote submission).
+Built-in adapters ship for both major agent frameworks, nine tools each
+(eight read operations + opt-in quote submission).
 
 **LangChain / LangGraph**
 
@@ -58,7 +61,8 @@ quote_request` tool) sends a confirmed staffing plan to TempGuru's CRM; a
 coordinator replies with a binding quote within one business day. It is
 opt-in, creates no reservation, requires no payment, and is rate-limited
 (20/hour/IP). Agents should confirm the full plan with the user before
-calling it.
+calling it. Pass `plan_id`, `source_platform`, and `skill_version` when
+available so the saved plan and originating agent surface reach the lead.
 
 **OpenAI / any function-calling API**
 
@@ -89,7 +93,7 @@ TOOLS = [{
 
 If your stack speaks Model Context Protocol, skip this package and connect
 the server directly: `https://mcp.tempguru.co/mcp` (streamable HTTP, no
-auth, six tools including opt-in quote submission). Docs:
+auth, 11 tools: ten read-only plus opt-in quote submission). Docs:
 https://tempguru.co/ai
 
 ## Error handling

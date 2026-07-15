@@ -1,4 +1,4 @@
-// MCP outputSchema definitions for 6 of the 8 MCP tools (plan_staffing and get_rate_benchmark omit one), structured-output support
+// MCP outputSchema definitions for all 11 MCP tools, structured-output support
 // (spec rev 2025-06-18). Clients like ChatGPT Apps use these to render and
 // ground tool results ("Output schema recommended" flag in the app console).
 //
@@ -30,7 +30,7 @@ const ALL_TIERS = z
 
 const CITY_TIER = z
   .enum(["hub", "mid", "small"])
-  .describe("Market tier: hub = 25 major metros, mid = 129 secondary markets, small = 191 tertiary markets.");
+  .describe("Market tier: hub = 25 major metros, mid = 128 secondary markets, small = 192 tertiary markets.");
 
 // Did-you-mean handed back on a city/role miss. CONFIRM with the user before
 // using it — never auto-retry a suggestion as if the user had typed it.
@@ -337,6 +337,93 @@ export const PLAN_STAFFING_OUTPUT = {
     .nullable()
     .optional(),
   staffing_notes: z.array(z.string()).optional(),
+  plan_id: z
+    .string()
+    .regex(/^[A-HJ-NP-Z2-9]{12}$/)
+    .optional()
+    .describe("Complete plans only. Non-PII plan reference retained for 30 days when Redis persistence succeeds."),
+  continuation: z
+    .object({ form_url: z.string().url(), note: z.string() })
+    .optional()
+    .describe("Complete plans only. Prefilled website handoff; may be present without plan_id when storage fails open."),
+};
+
+// ─── get_plan (found / not found) ───────────────────────────────────────
+
+const PLAN_SNAPSHOT = z.object({
+  city: z.object({ slug: z.string(), name: z.string(), state: z.string() }),
+  event: z.object({
+    event_date: z.string().nullable(),
+    event_type: z.string().nullable(),
+    attendees: z.number().int().nullable(),
+  }),
+  plan_lines: z.array(PLAN_LINE),
+  estimated_total_range: z.object({
+    low: z.number(),
+    high: z.number(),
+    currency: z.enum(["USD", "CAD"]),
+    basis: z.string(),
+  }),
+  overtime_adjusted_total_range: z
+    .object({
+      low: z.number(),
+      high: z.number(),
+      currency: z.enum(["USD", "CAD"]),
+      includes_double_time: z.boolean().optional(),
+      note: z.string(),
+    })
+    .nullable(),
+  compliance_jurisdiction: z.string().nullable(),
+  created_at: z.string(),
+  channel: z.enum(["mcp", "rest"]),
+  source: z.string().nullable(),
+});
+
+export const GET_PLAN_OUTPUT = {
+  plan_found: z.boolean().describe("Discriminator. false means the reference was absent or expired."),
+  plan_id: z.string(),
+  snapshot: PLAN_SNAPSHOT.optional(),
+  continuation: z.object({ form_url: z.string().url(), note: z.string() }).optional(),
+  message: z.string(),
+  next_steps: z.array(z.string()),
+};
+
+// ─── get_policies (all/one topic / topic not found) ─────────────────────
+
+const POLICY = z.object({
+  topic: z.string(),
+  title: z.string(),
+  confirmed_claims: z.array(z.string()),
+  confirm_with_coordinator: z.boolean(),
+  todo_for_megan: z.array(z.string()),
+  sources: z.array(z.string()),
+});
+
+export const GET_POLICIES_OUTPUT = {
+  status: z.enum(["policies", "policy_not_found"]),
+  policy_found: z.boolean().describe("Discriminator. false means the requested topic is not published."),
+  data_version: z.string().optional(),
+  updated: z.string().optional(),
+  scope: z.string().optional(),
+  policies: z.array(POLICY).optional(),
+  todo_for_megan: z.array(z.string()).optional(),
+  disclaimer: z.string().optional(),
+  requested: z.string().optional(),
+  available_topics: z.array(z.string()).optional(),
+  message: z.string().optional(),
+};
+
+// ─── get_quote_status (found / not found) ───────────────────────────────
+
+export const GET_QUOTE_STATUS_OUTPUT = {
+  quote_found: z.boolean().describe("Discriminator. false means the status stub is absent or expired."),
+  reference: z.string(),
+  status: z.enum(["received", "queued"]).optional(),
+  created_at: z.string().optional(),
+  deal_name: z.string().optional(),
+  channel: z.enum(["mcp", "rest"]).optional(),
+  message: z.string(),
+  follow_up: z.string(),
 };
 
 // ─── get_rate_benchmark (full Index / role-not-found) ─────────────────────
@@ -384,6 +471,10 @@ export const REQUEST_QUOTE_OUTPUT = {
   submitted: z
     .boolean()
     .describe("true = lead created in TempGuru's CRM (or durably queued); false = submission failed (see error)."),
+  plan_linked: z
+    .boolean()
+    .optional()
+    .describe("true when the supplied plan_id resolved and its saved snapshot was attached to the lead."),
   deal_name: z.string().optional().describe("CRM deal name, present when submitted."),
   reference: z.string().optional().describe("Short reference code the buyer can quote when following up."),
   message: z.string().describe("Human-readable outcome to relay to the user."),
