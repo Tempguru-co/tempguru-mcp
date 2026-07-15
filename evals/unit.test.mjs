@@ -106,7 +106,22 @@ function check(name, ok, detail = "") {
   }
 }
 
-const { findCity, findRole, suggestCity } = await load("src/lib/mcp/data.ts");
+const { findCity, findRole, suggestCity, cityDetailUrl, roleDetailUrl } = await load("src/lib/mcp/data.ts");
+
+// URL map: tool results must never emit a deep link to an unpublished page.
+// A mapped slug keeps its rich link; an unmapped one degrades to /insights.
+check("cityDetailUrl(mapped) keeps the /insights/{slug} link",
+  cityDetailUrl({ slug: "champaign-event-staffing" }) === "https://tempguru.co/insights/champaign-event-staffing",
+  cityDetailUrl({ slug: "champaign-event-staffing" }));
+check("cityDetailUrl(unmapped Anaheim) falls back to /insights, not a 404",
+  cityDetailUrl({ slug: "anaheim-event-staffing" }) === "https://tempguru.co/insights",
+  cityDetailUrl({ slug: "anaheim-event-staffing" }));
+check("roleDetailUrl(mapped brand-ambassadors) keeps the -in-new-york-city link",
+  roleDetailUrl({ slug: "brand-ambassadors" }) === "https://tempguru.co/insights/brand-ambassadors-in-new-york-city",
+  roleDetailUrl({ slug: "brand-ambassadors" }));
+check("roleDetailUrl(unmapped assistant-leads) falls back to /insights, not a 404",
+  roleDetailUrl({ slug: "assistant-leads" }) === "https://tempguru.co/insights",
+  roleDetailUrl({ slug: "assistant-leads" }));
 const { parseEventStart } = await load("src/lib/notion/lead-trust.ts");
 const { buildStaffingPlan } = await load("src/lib/mcp/plan-staffing.ts");
 const { buildRateBenchmark } = await load("src/lib/mcp/rate-benchmark.ts");

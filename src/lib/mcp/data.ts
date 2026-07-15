@@ -14,6 +14,7 @@ import pricingData from "../../../content/mcp-data/role-pricing.json";
 import stateData from "../../../content/mcp-data/state-compliance.json";
 import provinceData from "../../../content/mcp-data/province-compliance.json";
 import policiesData from "../../../content/mcp-data/policies.json";
+import siteUrlsData from "../../../content/mcp-data/site-urls.json";
 
 // ─── Types ────────────────────────────────────────────────────────────────
 
@@ -122,12 +123,50 @@ export const POLICIES_META = policiesData._meta as {
   disclaimer: string;
 };
 
+// ─── Canonical URL map ───────────────────────────────────────────────────────
+//
+// Deep links in tool results (get_cities, get_roles) used to be CONSTRUCTED
+// from slug patterns. When a pattern had no published page (e.g. Anaheim has no
+// /insights page, assistant-leads has no per-role page) the agent handed the
+// buyer a 404. We now emit a deep link ONLY when its path is in the published
+// sitemap snapshot; anything else degrades to the /insights index, which always
+// exists. The snapshot is content/mcp-data/site-urls.json (regenerate with
+// `npm run build:url-map`); check-submissions asserts this invariant so a new
+// city/role without a page can't silently reintroduce a dead link.
+const SITE_ORIGIN = "https://tempguru.co";
+const SITE_PATHS: ReadonlySet<string> = new Set(siteUrlsData.paths as string[]);
+const INSIGHTS_INDEX = `${SITE_ORIGIN}/insights`;
+
+/** Path of a tempguru URL/path, or null if it points off-domain or is unparseable. */
+function tempguruPath(value: string): string | null {
+  const raw = value.startsWith("http")
+    ? (value.startsWith(SITE_ORIGIN) ? value.slice(SITE_ORIGIN.length) : null)
+    : value;
+  if (raw == null) return null;
+  const path = raw.replace(/\/+$/, "") || "/";
+  return path.startsWith("/") ? path : `/${path}`;
+}
+
+/**
+ * Resolve a detail link to a REAL published page. Prefers an explicit
+ * detail_url, then the slug pattern; if neither resolves to a mapped path it
+ * falls back to the /insights index rather than emit a dead link.
+ */
+function resolveDetailUrl(explicit: string | undefined, patternPath: string): string {
+  for (const candidate of [explicit, patternPath]) {
+    if (!candidate) continue;
+    const path = tempguruPath(candidate);
+    if (path && SITE_PATHS.has(path)) return `${SITE_ORIGIN}${path}`;
+  }
+  return INSIGHTS_INDEX;
+}
+
 export function cityDetailUrl(city: Pick<City, "slug" | "detail_url">): string {
-  return city.detail_url ?? `https://tempguru.co/insights/${city.slug}`;
+  return resolveDetailUrl(city.detail_url, `/insights/${city.slug}`);
 }
 
 export function roleDetailUrl(role: Pick<Role, "slug" | "detail_url">): string {
-  return role.detail_url ?? `https://tempguru.co/insights/${role.slug}-in-new-york-city`;
+  return resolveDetailUrl(role.detail_url, `/insights/${role.slug}-in-new-york-city`);
 }
 
 /** Provincial employment standards by 2-letter province code (ON, BC, ...). */
