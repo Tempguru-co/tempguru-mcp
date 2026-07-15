@@ -47,7 +47,7 @@ included for the full picture.)
 | Anthropic Connectors Directory (claude.ai) | MCP | 🟡 submitted, awaiting review (2026-06-09), do not re-submit |
 | npm CLI (`tempguru-mcp`), GHCR image | dev | ✅ live — npm `1.5.0` (Trusted Publishing / OIDC via `publish-npm.yml`) |
 | Hermes agent catalog (NousResearch) | Agent Skill | 🟡 PR #39150 open — sweeper fixes pushed (`distribution/assistants/hermes/`), awaiting re-review |
-| OpenClaw / ClawHub | Agent Skill | ⬜ 5-skill publish kit ready (`clawhub-kit`, all v1.5.0); publish once logged in as a TempGuru-branded account |
+| OpenClaw / ClawHub | Agent Skill | ✅ live 2026-07-15 — all 5 skills published (owner `kissmyabs32`): `tempguru-event-staffing-ordering`, `tempguru-event-staffing-compliance`, `tempguru-staffing-plan-from-event-brief`, `tempguru-urgent-event-backfill`, `tempguru-staffing-agency-partner-growth`. 2 no-prefix duplicates merged→redirected. Verify: `GET clawhub.ai/api/v1/skills/<slug>` |
 | **ChatGPT Custom GPT** | this kit | ✅ LIVE 2026-06-09, https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner (planner + read actions + in-chat quote submission via the live `submitQuoteRequest` action) |
 | **ChatGPT App (directory)** | this kit | 🟡 SUBMITTED 2026-06-10, v1.0.0 in Review (business-verified org; schemas + annotations + domain verification all shipped same day; see SUBMISSIONS.md row for full package) |
 | **Gemini Gem (public)** | this kit | ⬜ build + share Public (~30m) |
