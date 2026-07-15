@@ -511,6 +511,17 @@ check("quote schema accepts bounded attribution + plan_id",
   }).success);
 check("quote schema rejects arbitrary skill attribution",
   !RequestQuoteSchema.safeParse({ ...base, skill_id: "made-up-skill" }).success);
+// Additive capture fields (venue / attendees / multi-city locations[]); required
+// fields stay required (additive-only change).
+check("quote schema accepts venue + attendees + multi-city locations[]",
+  RequestQuoteSchema.safeParse({
+    ...base, venue: "McCormick Place", attendees: 20000,
+    locations: [{ city: "Dallas", event_dates: "Aug 20, 2026", roles: [{ role: "registration-staff", headcount: 3 }] }],
+  }).success);
+check("quote schema still requires company (additive change did not relax it)",
+  !RequestQuoteSchema.safeParse({ ...base, company: undefined }).success);
+check("quote schema caps locations[] at 50",
+  !RequestQuoteSchema.safeParse({ ...base, locations: Array.from({ length: 51 }, () => ({ city: "Dallas" })) }).success);
 
 const { normalizeControlledSource, normalizeSourcePlatform } = await load(
   "src/lib/telemetry/source-tags.ts",
