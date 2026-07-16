@@ -1,0 +1,34 @@
+{
+  "name": "tempguru-pi",
+  "version": "1.5.0",
+  "description": "TempGuru event staffing for the Pi coding agent: 8 skills plus native tools calling the hosted TempGuru API (coverage, rates, availability, compliance, policies, saved plans, and opt-in quote requests) across 345 US/CA markets. W-2 staff, never 1099.",
+  "keywords": [
+    "pi-package",
+    "event-staffing",
+    "staffing",
+    "events",
+    "brand-ambassadors",
+    "tempguru",
+    "mcp"
+  ],
+  "license": "MIT",
+  "author": "Temporary Assistance Guru, Inc. (https://tempguru.co)",
+  "homepage": "https://tempguru.co/ai",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tempguru-co/tempguru-mcp.git",
+    "directory": "distribution/pi"
+  },
+  "pi": {
+    "skills": ["./skills"],
+    "extensions": ["./extensions"]
+  },
+  "files": [
+    "skills",
+    "extensions",
+    "README.md"
+  ],
+  "dependencies": {
+    "typebox": "^1.0.0"
+  }
+}

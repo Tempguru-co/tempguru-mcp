@@ -257,6 +257,7 @@ for (const skill of SKILLS) {
   const canonicalBody = read(`content/skills/${skill}.md`);
   const pluginBody = read(`plugins/tempguru/skills/${skill}/SKILL.md`);
   const portableBody = read(`skills/${skill}/SKILL.md`);
+  const piBody = read(`distribution/pi/skills/${skill}/SKILL.md`);
   const openAiMetadata = read(`skills/${skill}/agents/openai.yaml`);
   if (!canonicalBody.startsWith(`---\nname: ${skill}\ndescription: >-\n`)) {
     errors.push(`content/skills/${skill}.md: invalid or non-portable YAML frontmatter`);
@@ -269,6 +270,9 @@ for (const skill of SKILLS) {
   }
   if (portableBody !== canonicalBody) {
     errors.push(`skills/${skill}/SKILL.md: drifted from canonical skill`);
+  }
+  if (piBody !== canonicalBody) {
+    errors.push(`distribution/pi/skills/${skill}/SKILL.md: drifted from canonical skill`);
   }
   if (
     !openAiMetadata.includes(`$${skill}`) ||
