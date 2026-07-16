@@ -593,7 +593,7 @@ const missingArtifactResponse = await skillArtifactRoute.GET(
 );
 check("same-origin skill artifact resolves relative discovery URL with matching digest",
   skillsIndexResponse.status === 200
-    && skillsIndex.skills.length === 5
+    && skillsIndex.skills.length === 8
     && orderingEntry.url === "./event-staffing-ordering/SKILL.md"
     && orderingArtifactResponse.status === 200
     && orderingDigest === orderingEntry.digest

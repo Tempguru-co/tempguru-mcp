@@ -31,6 +31,9 @@ export const SKILLS = [
   "staffing-plan-from-event-brief",
   "urgent-event-backfill",
   "staffing-agency-partner-growth",
+  "multi-city-activation-planner",
+  "event-staffing-procurement",
+  "tempguru-pro-operations",
 ];
 
 export function skillDigests() {
@@ -49,6 +52,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   writeFileSync(path, JSON.stringify(digests, null, 2) + "\n");
   for (const name of SKILLS) {
     const canonical = readFileSync(join(skillsDir, `${name}.md`));
+    mkdirSync(join(claudePluginSkillsDir, name), { recursive: true });
     writeFileSync(join(claudePluginSkillsDir, name, "SKILL.md"), canonical);
     mkdirSync(join(portableSkillsDir, name), { recursive: true });
     writeFileSync(join(portableSkillsDir, name, "SKILL.md"), canonical);

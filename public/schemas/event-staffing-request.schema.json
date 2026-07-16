@@ -196,7 +196,10 @@
         "event-staffing-compliance",
         "staffing-plan-from-event-brief",
         "urgent-event-backfill",
-        "staffing-agency-partner-growth"
+        "staffing-agency-partner-growth",
+        "multi-city-activation-planner",
+        "event-staffing-procurement",
+        "tempguru-pro-operations"
       ]
     },
     "plan_id": {

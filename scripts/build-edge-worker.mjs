@@ -143,6 +143,39 @@ const agentCard = {
         "How does a local staffing agency join a national event staffing network?",
       ],
     },
+    {
+      id: "multi-city-activation-planner",
+      name: "Multi-City Activation Planner",
+      description:
+        "Plan and price a multi-city event staffing program (tour, roadshow, sampling tour, festival circuit, national activation) as one consolidated order. Confirms coverage per market, prices each leg with live W-2 rates, surfaces state and provincial overtime differences, and submits one quote covering all cities.",
+      tags: ["event-staffing", "multi-city", "tour", "roadshow", "activation", "w2"],
+      examples: [
+        "Plan staffing for a 6-city product roadshow next quarter",
+        "We need brand ambassadors in Chicago, Dallas, and Miami on one invoice",
+      ],
+    },
+    {
+      id: "event-staffing-procurement",
+      name: "Event Staffing Procurement",
+      description:
+        "Answer event staffing procurement and vendor-onboarding questions (COI, W-9, insurance and workers' comp posture, cancellation and payment terms, MSAs, approved-vendor setup) from published policy, explicit when a value is coordinator-confirmed, then bridge a real event into a priced quote.",
+      tags: ["event-staffing", "procurement", "vendor-onboarding", "coi", "insurance", "w2"],
+      examples: [
+        "Can you send a COI naming our venue as additional insured?",
+        "What are your payment terms and are you an approved vendor?",
+      ],
+    },
+    {
+      id: "tempguru-pro-operations",
+      name: "TempGuru Pro Operations",
+      description:
+        "For staffing-company operators: route interest in operations tooling (scheduling, dispatch, timesheets, invoicing) to a TempGuru contact. Lead capture only; does not promise product features, pricing, or availability, and never uses the buyer quote tool.",
+      tags: ["staffing-software", "operations", "scheduling", "dispatch", "b2b", "supply-side"],
+      examples: [
+        "We run a staffing company and need scheduling and invoicing software",
+        "Does TempGuru offer a platform to manage our own staff and shifts?",
+      ],
+    },
   ],
   defaultInputModes: ["text/plain", "application/json"],
   defaultOutputModes: ["text/plain", "application/json"],

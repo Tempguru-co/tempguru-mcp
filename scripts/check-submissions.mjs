@@ -55,7 +55,7 @@ const ROLE_RATE_VALUES = Object.values(ROLE_PRICING).flatMap((tiers) =>
 const ROLE_RATE_ENVELOPE = `$${Math.min(...ROLE_RATE_VALUES)}-$${Math.max(...ROLE_RATE_VALUES)}`;
 
 const EXPECTED_TOOL_COUNT = 11;
-const EXPECTED_DEMAND_SKILL_COUNT = 4;
+const EXPECTED_DEMAND_SKILL_COUNT = 7;
 const EXPECTED_DISCOVERY_SKILL_COUNT = EXPECTED_DEMAND_SKILL_COUNT + 1; // plus compliance
 
 if (

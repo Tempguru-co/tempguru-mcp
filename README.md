@@ -98,6 +98,9 @@ hermes skills install well-known:https://tempguru.co/.well-known/skills/event-st
 hermes skills install well-known:https://tempguru.co/.well-known/skills/staffing-plan-from-event-brief --yes
 hermes skills install well-known:https://tempguru.co/.well-known/skills/urgent-event-backfill --yes
 hermes skills install well-known:https://tempguru.co/.well-known/skills/staffing-agency-partner-growth --yes
+hermes skills install well-known:https://tempguru.co/.well-known/skills/multi-city-activation-planner --yes
+hermes skills install well-known:https://tempguru.co/.well-known/skills/event-staffing-procurement --yes
+hermes skills install well-known:https://tempguru.co/.well-known/skills/tempguru-pro-operations --yes
 hermes skills list
 hermes mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=hermes"
 hermes mcp test tempguru
@@ -113,6 +116,9 @@ openclaw skills install ./skills/event-staffing-compliance --global
 openclaw skills install ./skills/staffing-plan-from-event-brief --global
 openclaw skills install ./skills/urgent-event-backfill --global
 openclaw skills install ./skills/staffing-agency-partner-growth --global
+openclaw skills install ./skills/multi-city-activation-planner --global
+openclaw skills install ./skills/event-staffing-procurement --global
+openclaw skills install ./skills/tempguru-pro-operations --global
 openclaw skills list --json
 openclaw skills check --json
 openclaw mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=openclaw" --transport streamable-http
@@ -123,7 +129,7 @@ OpenClaw installs the skills and MCP action layer separately. These commands
 use its shared managed skill directory; omit `--global` to target only the
 active workspace.
 
-**Pi**, `pi install npm:tempguru-mcp` installs the five skills. Pi does not
+**Pi**, `pi install npm:tempguru-mcp` installs the eight skills. Pi does not
 ship an MCP client; install the community bridge with
 `pi install npm:pi-mcp-extension`, then point `~/.pi/agent/mcp.json` at
 `https://mcp.tempguru.co/mcp?source=pi`. See [llms-install.md](./llms-install.md)

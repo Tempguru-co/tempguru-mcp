@@ -25,6 +25,9 @@ export const QUOTE_SKILL_IDS = [
   "staffing-plan-from-event-brief",
   "urgent-event-backfill",
   "staffing-agency-partner-growth",
+  "multi-city-activation-planner",
+  "event-staffing-procurement",
+  "tempguru-pro-operations",
 ] as const;
 
 export type QuoteSkillId = (typeof QUOTE_SKILL_IDS)[number];
