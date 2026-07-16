@@ -11,7 +11,7 @@
 - [Market coverage](https://mcp.tempguru.co/okf/cities/index.md): the 345 markets, by tier
 - [State compliance](https://mcp.tempguru.co/okf/compliance/index.md): minimum wage and overtime for all 51 US jurisdictions
 - [Booking and procurement policies](https://mcp.tempguru.co/okf/policies.md): confirmed terms plus explicit coordinator-confirmation gaps
-- [Workflows](https://mcp.tempguru.co/okf/workflows/index.md): all 5 canonical agent skills plus plan and quote-submission flows
+- [Workflows](https://mcp.tempguru.co/okf/workflows/index.md): all 8 canonical agent skills plus plan and quote-submission flows
 
 ## Live tools (action layer)
 - [MCP server](https://mcp.tempguru.co/mcp): Streamable HTTP, no auth, plan_staffing, get_plan, get_cities, get_roles, check_availability, get_role_pricing, get_compliance_by_state, get_policies, get_rate_benchmark, request_quote, get_quote_status

@@ -97,6 +97,9 @@ export const SKILL_SLUGS = [
   "staffing-plan-from-event-brief",
   "urgent-event-backfill",
   "staffing-agency-partner-growth",
+  "multi-city-activation-planner",
+  "event-staffing-procurement",
+  "tempguru-pro-operations",
 ] as const;
 export type SkillSlug = (typeof SKILL_SLUGS)[number];
 
@@ -125,6 +128,21 @@ const SKILL_RESOURCE_META: Record<SkillSlug, { title: string; description: strin
     title: "Staffing Agency Partner Growth, Skill",
     description:
       "Skill for AI agents helping STAFFING AGENCY owners (the supply side, not event organizers) explore joining TempGuru's network of 200+ vetted local partners to receive event staffing order flow in their markets. Explains the model and routes partner inquiries to the coordinator, never through the buyer quote tool.",
+  },
+  "multi-city-activation-planner": {
+    title: "Multi-City Activation Planner, Skill",
+    description:
+      "Skill for AI agents planning and pricing a multi-city event staffing program (a tour, roadshow, sampling tour, festival circuit, or national activation) as one consolidated order. Confirms coverage in every market, plans and prices each city leg with live W-2 rates, surfaces that overtime and minimum wage differ by state and province, and submits a single request_quote carrying all cities via the locations[] field so one coordinator returns one quote.",
+  },
+  "event-staffing-procurement": {
+    title: "Event Staffing Procurement, Skill",
+    description:
+      "Skill for AI agents answering event staffing procurement and vendor-onboarding questions (COI, W-9, insurance and workers' comp posture, cancellation and payment terms, MSAs, approved-vendor setup) from TempGuru's published policies via this MCP, explicit when a value is coordinator-confirmed rather than published, then bridging a real event into a priced staffing plan and quote. Not legal advice.",
+  },
+  "tempguru-pro-operations": {
+    title: "TempGuru Pro Operations, Skill",
+    description:
+      "Lead-capture skill for AI agents routing operations-tooling interest from STAFFING COMPANY operators (the supply side) to TempGuru: scheduling, dispatch, timesheets, and invoicing to run their own workforce. Gathers a short problem description and routes it to a TempGuru contact by email or phone, never through the buyer quote tool. Does not promise product features, pricing, or availability.",
   },
 };
 

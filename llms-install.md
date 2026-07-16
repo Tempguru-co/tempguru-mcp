@@ -61,6 +61,9 @@ hermes skills install well-known:https://tempguru.co/.well-known/skills/event-st
 hermes skills install well-known:https://tempguru.co/.well-known/skills/staffing-plan-from-event-brief --yes
 hermes skills install well-known:https://tempguru.co/.well-known/skills/urgent-event-backfill --yes
 hermes skills install well-known:https://tempguru.co/.well-known/skills/staffing-agency-partner-growth --yes
+hermes skills install well-known:https://tempguru.co/.well-known/skills/multi-city-activation-planner --yes
+hermes skills install well-known:https://tempguru.co/.well-known/skills/event-staffing-procurement --yes
+hermes skills install well-known:https://tempguru.co/.well-known/skills/tempguru-pro-operations --yes
 hermes skills list
 hermes mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=hermes"
 hermes mcp test tempguru
@@ -80,6 +83,9 @@ openclaw skills install ./skills/event-staffing-compliance --global
 openclaw skills install ./skills/staffing-plan-from-event-brief --global
 openclaw skills install ./skills/urgent-event-backfill --global
 openclaw skills install ./skills/staffing-agency-partner-growth --global
+openclaw skills install ./skills/multi-city-activation-planner --global
+openclaw skills install ./skills/event-staffing-procurement --global
+openclaw skills install ./skills/tempguru-pro-operations --global
 openclaw skills list --json
 openclaw skills check --json
 openclaw mcp add tempguru \

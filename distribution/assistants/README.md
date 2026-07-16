@@ -37,7 +37,7 @@ included for the full picture.)
 
 | Surface | Type | Status |
 |---|---|---|
-| Official MCP Registry (`co.tempguru/event-staffing`) | MCP | ✅ live |
+| Official MCP Registry (`co.tempguru/event-staffing`) | MCP | ✅ live — v1.5.0 (approved 2026-07-10; auto-published 2026-07-15, `status: active`, `isLatest: true`) |
 | Smithery, Glama | MCP | ✅ live |
 | ModelScope MCP 广场 | MCP | ✅ live |
 | Docker MCP Registry | MCP | 🟡 PR #3902 awaiting review |
@@ -45,7 +45,10 @@ included for the full picture.)
 | Postman collection | REST | ✅ imported (re-import after city fix) |
 | Mistral connector directory | MCP | 🟡 outreach drafted, Megan to send via contact form |
 | Anthropic Connectors Directory (claude.ai) | MCP | 🟡 submitted, awaiting review (2026-06-09), do not re-submit |
-| npm CLI (`tempguru-mcp`), GHCR image | dev | ✅ live |
+| npm CLI (`tempguru-mcp`), GHCR image | dev | ✅ live — npm `1.5.0` (Trusted Publishing / OIDC via `publish-npm.yml`) |
+| Hermes agent catalog (NousResearch) | Agent Skill | 🟡 PR #39150 open — sweeper fixes pushed (`distribution/assistants/hermes/`), awaiting re-review |
+| Pi (`tempguru-pi` npm package) | Agent Skill + native tools | 🟡 scaffold ready in `distribution/pi/` (8 skills + 9 REST-backed tools, `?source=pi` attribution); publish per its README, then update the main README's Pi section to `pi install npm:tempguru-pi` |
+| OpenClaw / ClawHub | Agent Skill | ✅ live 2026-07-15 — all 8 skills published (owner `kissmyabs32`): `tempguru-event-staffing-ordering`, `tempguru-event-staffing-compliance`, `tempguru-staffing-plan-from-event-brief`, `tempguru-urgent-event-backfill`, `tempguru-staffing-agency-partner-growth`, `tempguru-multi-city-activation-planner`, `tempguru-event-staffing-procurement`, `tempguru-pro-operations`. 2 no-prefix duplicates merged→redirected. Verify: `GET clawhub.ai/api/v1/skills/<slug>` |
 | **ChatGPT Custom GPT** | this kit | ✅ LIVE 2026-06-09, https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner (planner + read actions + in-chat quote submission via the live `submitQuoteRequest` action) |
 | **ChatGPT App (directory)** | this kit | 🟡 SUBMITTED 2026-06-10, v1.0.0 in Review (business-verified org; schemas + annotations + domain verification all shipped same day; see SUBMISSIONS.md row for full package) |
 | **Gemini Gem (public)** | this kit | ⬜ build + share Public (~30m) |

@@ -55,7 +55,7 @@ const ROLE_RATE_VALUES = Object.values(ROLE_PRICING).flatMap((tiers) =>
 const ROLE_RATE_ENVELOPE = `$${Math.min(...ROLE_RATE_VALUES)}-$${Math.max(...ROLE_RATE_VALUES)}`;
 
 const EXPECTED_TOOL_COUNT = 11;
-const EXPECTED_DEMAND_SKILL_COUNT = 4;
+const EXPECTED_DEMAND_SKILL_COUNT = 7;
 const EXPECTED_DISCOVERY_SKILL_COUNT = EXPECTED_DEMAND_SKILL_COUNT + 1; // plus compliance
 
 if (
@@ -257,6 +257,7 @@ for (const skill of SKILLS) {
   const canonicalBody = read(`content/skills/${skill}.md`);
   const pluginBody = read(`plugins/tempguru/skills/${skill}/SKILL.md`);
   const portableBody = read(`skills/${skill}/SKILL.md`);
+  const piBody = read(`distribution/pi/skills/${skill}/SKILL.md`);
   const openAiMetadata = read(`skills/${skill}/agents/openai.yaml`);
   if (!canonicalBody.startsWith(`---\nname: ${skill}\ndescription: >-\n`)) {
     errors.push(`content/skills/${skill}.md: invalid or non-portable YAML frontmatter`);
@@ -269,6 +270,9 @@ for (const skill of SKILLS) {
   }
   if (portableBody !== canonicalBody) {
     errors.push(`skills/${skill}/SKILL.md: drifted from canonical skill`);
+  }
+  if (piBody !== canonicalBody) {
+    errors.push(`distribution/pi/skills/${skill}/SKILL.md: drifted from canonical skill`);
   }
   if (
     !openAiMetadata.includes(`$${skill}`) ||
@@ -779,6 +783,48 @@ try {
   }
   if (mcpJsonProto && !body.includes(mcpJsonProto)) {
     errors.push(`llms-install.md: does not mention the advertised protocolVersion ${mcpJsonProto}`);
+  }
+}
+
+// ── URL-map gate ─────────────────────────────────────────────────────────────
+// get_cities / get_roles deep-link to /insights pages. data.ts (resolveDetailUrl)
+// emits a link only when its path is in the published-URL snapshot
+// (content/mcp-data/site-urls.json, from `npm run build:url-map`), else it
+// degrades to the /insights index. This gate keeps that snapshot honest: the
+// fallback must exist, and every city/role whose slug pattern has NO published
+// page must be an explicit, conscious allowlist entry — so adding a new
+// city/role without its page fails CI instead of silently shipping a dead link.
+{
+  const sitePaths = new Set(JSON.parse(read("content/mcp-data/site-urls.json")).paths);
+  const roles = JSON.parse(read("content/mcp-data/roles.json")).roles;
+  // Known slugs with no published page yet; each degrades to /insights by design.
+  const UNMAPPED_CITY_SLUGS = new Set(["anaheim-event-staffing"]);
+  const UNMAPPED_ROLE_SLUGS = new Set(["assistant-leads"]);
+  if (!sitePaths.has("/insights")) {
+    errors.push("site-urls.json: missing the /insights fallback path (resolveDetailUrl depends on it)");
+  }
+  for (const c of CITIES_DATA.cities) {
+    const path = `/insights/${c.slug}`;
+    if (!sitePaths.has(path) && !UNMAPPED_CITY_SLUGS.has(c.slug)) {
+      errors.push(`site-urls.json: city "${c.slug}" has no published page (${path}); publish it or add to UNMAPPED_CITY_SLUGS`);
+    }
+  }
+  for (const r of roles) {
+    const path = `/insights/${r.slug}-in-new-york-city`;
+    if (!sitePaths.has(path) && !UNMAPPED_ROLE_SLUGS.has(r.slug)) {
+      errors.push(`site-urls.json: role "${r.slug}" has no published page (${path}); publish it or add to UNMAPPED_ROLE_SLUGS`);
+    }
+  }
+  // Guard against a stale allowlist: if a page now exists, drop the slug.
+  for (const slug of UNMAPPED_CITY_SLUGS) {
+    if (sitePaths.has(`/insights/${slug}`)) {
+      errors.push(`site-urls.json: "${slug}" now has a page; remove it from UNMAPPED_CITY_SLUGS`);
+    }
+  }
+  for (const slug of UNMAPPED_ROLE_SLUGS) {
+    if (sitePaths.has(`/insights/${slug}-in-new-york-city`)) {
+      errors.push(`site-urls.json: "${slug}" now has a page; remove it from UNMAPPED_ROLE_SLUGS`);
+    }
   }
 }
 

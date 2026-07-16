@@ -90,6 +90,15 @@ export interface StaffingRole {
   shifts?: string; // e.g. "2 shifts × 8h"
 }
 
+// One leg of a multi-city / tour program. The top-level city/dates/roles carry
+// the primary location; each entry here adds another.
+export interface QuoteLocation {
+  city: string;
+  venue?: string;
+  event_dates?: string;
+  roles?: StaffingRole[];
+}
+
 export interface CreateLeadInput {
   // Contact
   contact_name: string;
@@ -102,6 +111,10 @@ export interface CreateLeadInput {
   event_type: string;
   city: string;
   event_dates: string;
+  venue?: string;
+  attendees?: number;
+  // Additional cities for a multi-city / tour program.
+  locations?: QuoteLocation[];
 
   // Staffing plan
   roles: StaffingRole[];
@@ -179,6 +192,18 @@ function sanitizeInput(input: CreateLeadInput): CreateLeadInput {
     event_type: line(input.event_type),
     city: line(input.city),
     event_dates: line(input.event_dates),
+    venue: input.venue ? line(input.venue) : undefined,
+    attendees: input.attendees,
+    locations: input.locations?.map((loc) => ({
+      city: line(loc.city),
+      venue: loc.venue ? line(loc.venue) : undefined,
+      event_dates: loc.event_dates ? line(loc.event_dates) : undefined,
+      roles: loc.roles?.map((r) => ({
+        role: line(r.role),
+        headcount: r.headcount,
+        shifts: r.shifts ? line(r.shifts) : undefined,
+      })),
+    })),
     roles: input.roles.map((r) => ({
       role: line(r.role),
       headcount: r.headcount,
@@ -388,6 +413,8 @@ function buildCallNotes(
     `  Type:   ${input.event_type}`,
     `  City:   ${input.city}`,
     `  Dates:  ${input.event_dates}`,
+    ...(input.venue ? [`  Venue:  ${input.venue}`] : []),
+    ...(input.attendees ? [`  Attendees: ${input.attendees.toLocaleString("en-US")}`] : []),
     ``,
     `CONTACT`,
     `  Name:   ${input.contact_name}`,
@@ -402,6 +429,16 @@ function buildCallNotes(
     ),
   ];
 
+  if (input.locations?.length) {
+    lines.push(``, `ADDITIONAL LOCATIONS (multi-city)`);
+    for (const loc of input.locations) {
+      const head = [loc.city, loc.venue, loc.event_dates].filter(Boolean).join(" — ");
+      lines.push(`  ${head}`);
+      for (const r of loc.roles ?? []) {
+        lines.push(`    ${r.role}: ${r.headcount} staff${r.shifts ? ` (${r.shifts})` : ""}`);
+      }
+    }
+  }
   if (input.budget_range) {
     lines.push(``, `ESTIMATED BUDGET RANGE`, `  ${input.budget_range}`);
   }
@@ -435,6 +472,9 @@ function leadSummary(input: CreateLeadInput, reference: string, trust: LeadTrust
       type: input.event_type,
       city: input.city,
       dates: input.event_dates,
+      ...(input.venue ? { venue: input.venue } : {}),
+      ...(input.attendees ? { attendees: input.attendees } : {}),
+      ...(input.locations?.length ? { locations: input.locations } : {}),
     },
     roles: input.roles,
     budget_range: input.budget_range,

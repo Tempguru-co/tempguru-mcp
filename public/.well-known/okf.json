@@ -28,7 +28,10 @@
     "event-staffing-compliance",
     "staffing-plan-from-event-brief",
     "urgent-event-backfill",
-    "staffing-agency-partner-growth"
+    "staffing-agency-partner-growth",
+    "multi-city-activation-planner",
+    "event-staffing-procurement",
+    "tempguru-pro-operations"
   ],
   "license": "MIT",
   "data_version": "1.0.0",
@@ -37,8 +40,8 @@
     "root": "https://mcp.tempguru.co/okf/",
     "index": "https://mcp.tempguru.co/okf/index.md",
     "tarball": "https://mcp.tempguru.co/okf.tar.gz",
-    "file_count": 103,
-    "sha256": "a650c8cfdb7d51ac73d0a45418371d00b8c80380e799f661babe679666f6bbb9",
-    "bytes": 298027
+    "file_count": 106,
+    "sha256": "0753cb82b6fc12a1701ba6b82d518a55b6d0189fb8a96cadaca323d36d93b4ef",
+    "bytes": 320043
   }
 }

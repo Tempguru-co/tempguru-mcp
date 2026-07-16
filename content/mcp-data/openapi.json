@@ -1393,6 +1393,17 @@
             "maxLength": 160,
             "description": "Event dates as a human-readable string, e.g. 'June 15–17, 2026'"
           },
+          "venue": {
+            "description": "Primary venue name and/or address, when known",
+            "type": "string",
+            "maxLength": 200
+          },
+          "attendees": {
+            "description": "Expected event attendance, if known (informs coverage ratios)",
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 5000000
+          },
           "roles": {
             "minItems": 1,
             "maxItems": 50,
@@ -1425,6 +1436,68 @@
               "additionalProperties": false
             },
             "description": "Roles and headcount needed for the event"
+          },
+          "locations": {
+            "description": "Additional cities for a multi-city / tour program. The top-level city, dates, and roles describe the primary or first location; each entry here adds another.",
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "city": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120,
+                  "description": "City for this leg of a multi-city program"
+                },
+                "venue": {
+                  "description": "Venue for this location, if known",
+                  "type": "string",
+                  "maxLength": 200
+                },
+                "event_dates": {
+                  "description": "Dates for this location, if they differ from the top-level dates",
+                  "type": "string",
+                  "maxLength": 160
+                },
+                "roles": {
+                  "description": "Roles for this location if they differ from the top-level roles",
+                  "maxItems": 50,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "role": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80,
+                        "description": "Staffing role name"
+                      },
+                      "headcount": {
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 10000,
+                        "description": "Number of staff needed at this location"
+                      },
+                      "shifts": {
+                        "description": "Shift description for this location",
+                        "type": "string",
+                        "maxLength": 160
+                      }
+                    },
+                    "required": [
+                      "role",
+                      "headcount"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "city"
+              ],
+              "additionalProperties": false
+            }
           },
           "budget_range": {
             "description": "Estimated total budget range if calculated, e.g. '$8,400–$12,600'",
@@ -1466,7 +1539,10 @@
               "event-staffing-compliance",
               "staffing-plan-from-event-brief",
               "urgent-event-backfill",
-              "staffing-agency-partner-growth"
+              "staffing-agency-partner-growth",
+              "multi-city-activation-planner",
+              "event-staffing-procurement",
+              "tempguru-pro-operations"
             ]
           },
           "plan_id": {

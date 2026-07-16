@@ -25,6 +25,9 @@ export const QUOTE_SKILL_IDS = [
   "staffing-plan-from-event-brief",
   "urgent-event-backfill",
   "staffing-agency-partner-growth",
+  "multi-city-activation-planner",
+  "event-staffing-procurement",
+  "tempguru-pro-operations",
 ] as const;
 
 export type QuoteSkillId = (typeof QUOTE_SKILL_IDS)[number];
@@ -48,6 +51,8 @@ export const REQUEST_QUOTE_INPUT = {
   event_type: z.string().trim().min(1).max(80).describe("Event type: trade-show, conference, festival, concert, sporting-event, corporate, brand-activation, or other"),
   city: z.string().trim().min(1).max(120).describe("City where the event is held"),
   event_dates: z.string().trim().min(1).max(160).describe("Event dates as a human-readable string, e.g. 'June 15–17, 2026'"),
+  venue: z.string().trim().max(200).optional().describe("Primary venue name and/or address, when known"),
+  attendees: z.number().int().positive().max(5_000_000).optional().describe("Expected event attendance, if known (informs coverage ratios)"),
   roles: z.array(
     z.object({
       role: z.string().trim().min(1).max(80).describe("Staffing role name, e.g. brand-ambassadors, registration-staff"),
@@ -55,6 +60,28 @@ export const REQUEST_QUOTE_INPUT = {
       shifts: z.string().max(160).optional().describe("Shift description, e.g. '2 days × 8h'"),
     })
   ).min(1).max(50).describe("Roles and headcount needed for the event"),
+  locations: z
+    .array(
+      z.object({
+        city: z.string().trim().min(1).max(120).describe("City for this leg of a multi-city program"),
+        venue: z.string().trim().max(200).optional().describe("Venue for this location, if known"),
+        event_dates: z.string().trim().max(160).optional().describe("Dates for this location, if they differ from the top-level dates"),
+        roles: z
+          .array(
+            z.object({
+              role: z.string().trim().min(1).max(80).describe("Staffing role name"),
+              headcount: z.number().int().positive().max(10_000).describe("Number of staff needed at this location"),
+              shifts: z.string().max(160).optional().describe("Shift description for this location"),
+            }),
+          )
+          .max(50)
+          .optional()
+          .describe("Roles for this location if they differ from the top-level roles"),
+      }),
+    )
+    .max(50)
+    .optional()
+    .describe("Additional cities for a multi-city / tour program. The top-level city, dates, and roles describe the primary or first location; each entry here adds another."),
   budget_range: z.string().max(120).optional().describe("Estimated total budget range if calculated, e.g. '$8,400–$12,600'"),
   attire: z.string().max(500).optional().describe("Staff attire requirements"),
   special_requirements: z.string().max(2000).optional().describe("Any special requirements: language skills, certifications, overnight shifts, etc."),

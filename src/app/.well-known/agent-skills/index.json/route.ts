@@ -60,6 +60,30 @@ const AGENT_SKILLS_INDEX = {
       url: "./staffing-agency-partner-growth/SKILL.md",
       digest: digests["staffing-agency-partner-growth"],
     },
+    {
+      name: "multi-city-activation-planner",
+      type: "skill-md",
+      description:
+        "Plan and price a multi-city event staffing program (a tour, roadshow, sampling tour, festival circuit, or national activation) as one consolidated order. Confirms coverage in every market, plans and prices each city leg with live W-2 rates via the TempGuru MCP server, surfaces that overtime and minimum wage differ by state and province, and submits a single request_quote carrying all cities via locations[] so one coordinator returns one quote.",
+      url: "./multi-city-activation-planner/SKILL.md",
+      digest: digests["multi-city-activation-planner"],
+    },
+    {
+      name: "event-staffing-procurement",
+      type: "skill-md",
+      description:
+        "Answer event staffing procurement and vendor-onboarding questions (COI, W-9, insurance and workers' comp posture, cancellation and payment terms, MSAs, approved-vendor setup) from TempGuru's published policies via the MCP server, explicit when a value is coordinator-confirmed rather than published, then bridge a real event into a priced staffing plan and quote. Operational guidance, not legal advice.",
+      url: "./event-staffing-procurement/SKILL.md",
+      digest: digests["event-staffing-procurement"],
+    },
+    {
+      name: "tempguru-pro-operations",
+      type: "skill-md",
+      description:
+        "Route operations-tooling interest from staffing-company operators (the supply side) to TempGuru: scheduling, dispatch, timesheets, and invoicing to run their own workforce. Gathers a short problem description and routes it to a TempGuru contact by email or phone, never through the buyer quote tool. Does not promise product features, pricing, or availability. Not for buyers hiring event staff.",
+      url: "./tempguru-pro-operations/SKILL.md",
+      digest: digests["tempguru-pro-operations"],
+    },
   ],
 } as const;
 

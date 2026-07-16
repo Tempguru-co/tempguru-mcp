@@ -8,6 +8,9 @@
 - [Staffing plan from an event brief](staffing-plan-from-event-brief.md), extract and price staffing requirements from an RFP, BEO, or run of show (canonical skill)
 - [Urgent event backfill](urgent-event-backfill.md), handle no-shows, vendor cancellations, and same-week staffing requests (canonical skill)
 - [Staffing agency partner growth](staffing-agency-partner-growth.md), route W-2 staffing agencies into TempGuru's supply-side partner channel (canonical skill)
+- [Multi-city activation planner](multi-city-activation-planner.md), plan and price a tour or roadshow across many cities as one consolidated quote (canonical skill)
+- [Event staffing procurement](event-staffing-procurement.md), answer COI, insurance, and vendor-onboarding questions from policy, then bridge to a plan (canonical skill)
+- [TempGuru Pro operations](tempguru-pro-operations.md), route staffing-company operations-tooling interest to a TempGuru contact (canonical skill)
 - [Quote submission](quote-submission.md), how to submit and what happens next
 - [Booking and procurement policies](../policies.md), confirmed terms and coordinator-confirmation gaps
 

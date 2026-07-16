@@ -125,6 +125,24 @@ const SKILL_WORKFLOW_META = {
     primary_tool: "get_cities",
     tags: ["workflow", "staffing-agency", "partner-network", "supply-side"],
   },
+  "multi-city-activation-planner": {
+    label: "Multi-city activation planner",
+    blurb: "plan and price a tour or roadshow across many cities as one consolidated quote",
+    primary_tool: "plan_staffing",
+    tags: ["workflow", "multi-city", "tour", "roadshow", "activation"],
+  },
+  "event-staffing-procurement": {
+    label: "Event staffing procurement",
+    blurb: "answer COI, insurance, and vendor-onboarding questions from policy, then bridge to a plan",
+    primary_tool: "get_policies",
+    tags: ["workflow", "procurement", "vendor-onboarding", "coi", "compliance"],
+  },
+  "tempguru-pro-operations": {
+    label: "TempGuru Pro operations",
+    blurb: "route staffing-company operations-tooling interest to a TempGuru contact",
+    primary_tool: "get_cities",
+    tags: ["workflow", "operations", "software", "supply-side"],
+  },
 };
 
 // ─── constants ──────────────────────────────────────────────────────────────

@@ -36,7 +36,7 @@ same data for offline reading, indexing, and citation.
 - [Market coverage](cities/index.md), the 345 markets, by tier
 - [State compliance](compliance/index.md), minimum wage, overtime, and quirks for all 51 US jurisdictions
 - [Booking and procurement policies](policies.md), confirmed terms plus explicit coordinator-confirmation gaps
-- [Workflows](workflows/index.md), all 5 canonical agent skills plus plan and quote-submission flows
+- [Workflows](workflows/index.md), all 8 canonical agent skills plus plan and quote-submission flows
 - [Event archetypes](archetypes/index.md), reusable staffing templates by event type
 - [Reference](reference/index.md), MCP tools, REST API, data schemas, and the lead-time model
 - [Change log](log.md), what changed and when

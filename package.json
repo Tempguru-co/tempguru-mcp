@@ -17,6 +17,7 @@
     "build:okf": "node scripts/gen-skill-digests.mjs && node scripts/dump-openapi.mjs && node scripts/dump-request-schema.mjs && node scripts/build-okf.mjs",
     "build:worker": "node scripts/build-edge-worker.mjs",
     "build:llms-worker": "node scripts/build-llms-worker.mjs",
+    "build:url-map": "node scripts/build-url-map.mjs",
     "sync-rates": "node scripts/sync-rates.mjs",
     "sync:postman": "node scripts/sync-postman-examples.mjs",
     "check-rates": "node scripts/sync-rates.mjs --check",
