@@ -49,8 +49,9 @@ progresses, it doubles as the integration proof in that thread.
 
 European companies exhibiting at US shows have the same
 no-US-employment-entity problem as Chinese exhibitors, plus GDPR
-sensitivity: the no-auth, no-PII-telemetry design (no IPs stored, no request
-bodies logged, quote details go only to the CRM) is a legitimate selling
+sensitivity: the no-auth, no-quote-PII-telemetry design (no raw IPs in product
+telemetry, no request bodies logged, quote details routed only through the CRM,
+durable fallback queue, and configured notification processor) is a legitimate selling
 point. Say it plainly wherever the EU audience reads.
 
 ## Live-tools bridge (add to the suffix)

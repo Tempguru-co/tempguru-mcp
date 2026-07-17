@@ -1,9 +1,9 @@
 {
-  "version": "1.1.0",
-  "updated": "2026-07-10",
+  "version": "1.1.1",
+  "updated": "2026-07-16",
   "source": "TempGuru Rate Report 2026, per-city actual-paid weighted averages (7,900+ shifts)",
   "card_floor": 30,
   "card_ceiling": 85,
   "basis": "All-inclusive W-2 bill rates per hour: worker pay, payroll taxes, workers' comp, general liability, coordinator support.",
-  "notes": "Deduplicated 38 duplicate source rows (446 to 408 distinct measured markets) and reconciled the Kansas City tier conflict."
+  "notes": "Deduplicated 39 duplicate source rows (446 to 407 distinct measured markets), including the punctuation-only Champaign duplicate, and reconciled the Kansas City tier conflict."
 }

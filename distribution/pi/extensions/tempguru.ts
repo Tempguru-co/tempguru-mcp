@@ -61,13 +61,22 @@ export default function (pi: any) {
     name: "tempguru_get_cities",
     label: "TempGuru: Cities",
     description:
-      "List the 345 US/CA markets TempGuru serves (filter by state or tier: hub/mid/small). Use to confirm coverage before planning event staffing.",
+      "List up to 100 US/CA markets or check one named city directly. Use city, state, or country filters to confirm coverage before planning; list responses are capped to keep tool output complete.",
     parameters: Type.Object({
+      city: Type.Optional(Type.String({ description: "Exact city or common alias to check for coverage" })),
       state: Type.Optional(Type.String({ description: "2-letter state/province code, e.g. TX or ON" })),
+      country: Type.Optional(Type.String({ description: "US or CA" })),
       tier: Type.Optional(Type.String({ description: "hub | mid | small" })),
+      limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 100, description: "List result limit (default and maximum 100)" })),
     }),
     async execute(_id: string, p: any, signal: AbortSignal) {
-      return call("GET", "/api/v1/cities", signal, { state: p.state, tier: p.tier });
+      return call("GET", "/api/v1/cities", signal, {
+        city: p.city,
+        state: p.state,
+        country: p.country,
+        tier: p.tier,
+        limit: p.limit,
+      });
     },
   });
 
@@ -89,7 +98,7 @@ export default function (pi: any) {
       "Lead-time guidance for a city and event date (guidance only, never a reservation or a promise of availability).",
     parameters: Type.Object({
       city: Type.String(),
-      date: Type.Optional(Type.String({ description: "Event date, e.g. 2026-08-14" })),
+      date: Type.String({ description: "Required event date, e.g. 2026-08-14" }),
       role: Type.Optional(Type.String()),
       headcount: Type.Optional(Type.Integer({ minimum: 1 })),
     }),
@@ -167,7 +176,7 @@ export default function (pi: any) {
     name: "tempguru_request_quote",
     label: "TempGuru: Request Quote (write)",
     description:
-      "Submit a staffing request to TempGuru's CRM; a human coordinator replies with a binding quote within one business day. THE ONLY WRITE TOOL: call it LAST, once, and only after the user explicitly confirms sending their contact details. Not a reservation; no payment until the user approves the quote. On error, fall back to https://tempguru.co/get-staffing or megan@tempguru.co / (904) 206-8953.",
+      "Submit a staffing request to TempGuru's CRM or durable intake queue; a human coordinator replies with a binding quote within one business day. THE ONLY WRITE TOOL: call it LAST, once, and only after the user explicitly confirms sending their contact details. Not a reservation; no payment until the user approves the quote. On error, fall back to https://tempguru.co/get-staffing or megan@tempguru.co / (904) 206-8953.",
     parameters: Type.Object({
       contact_name: Type.String(),
       contact_email: Type.String(),

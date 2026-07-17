@@ -20,7 +20,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node scripts/check-submissions.mjs
+      - run: npm run check:submissions
 
   # Quality gate: typecheck + the MCP eval suite + the pure-logic unit tests.
   # Previously none of these ran in CI, so a type error or a behavior regression
@@ -40,8 +40,11 @@ jobs:
       # Generated artifacts (OKF bundle, llms.txt, openapi.json, skill digests)
       # must be committed in sync with their sources: regenerate and require a
       # clean tree, so "forgot to run build:okf" can't merge as silent drift.
-      - run: npm run build:okf
+      - run: npm run build
       - run: npm run build:worker
-      - run: git diff --exit-code -- public content skills plugins/tempguru/skills cloudflare/worker.js
+      # PR verification must be deterministic and network-independent. The
+      # explicit live refresh remains a maintainer/deployment canary.
+      - run: npm run build:llms-worker -- --from-committed
+      - run: git diff --exit-code -- public content skills plugins/tempguru/skills distribution/pi/skills cloudflare/worker.js cloudflare/llms-worker.js
       - run: npm run build:cli
       - run: npm run check:cli-package

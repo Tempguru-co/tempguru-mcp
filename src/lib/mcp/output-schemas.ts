@@ -6,16 +6,34 @@
 // returns as a successful result. queries.ts deliberately returns "expected
 // miss" states (city/role/state not found, invalid date) as success variants,
 // not errors, so each schema below is the FLATTENED union of its tool's
-// variants, with a discriminator field and everything else optional. The SDK
-// validates structuredContent against these on every call; a mismatch turns a
-// working tool into a broken one, so when queries.ts shapes change, change
-// this file in the same commit.
+// variants, with a discriminator field and everything else optional in the
+// advertised JSON Schema. SDK 1.26 cannot normalize a root discriminatedUnion
+// (it drops outputSchema and breaks calls), so each variant tool also exports a
+// root-object runtime schema with superRefine branch requirements. This keeps
+// the wire format backward-compatible while rejecting incomplete branches.
 //
 // Protocol errors (result.ok === false, unreachable in practice because the
 // zod input schemas catch bad params first) are returned with isError: true,
 // which exempts them from output validation.
 
 import { z } from "zod";
+
+const hasOwn = (value: object, key: string) => Object.prototype.hasOwnProperty.call(value, key);
+
+function requireFields(
+  value: Record<string, unknown>,
+  ctx: z.core.$RefinementCtx,
+  variant: string,
+  fields: string[],
+) {
+  const missing = fields.filter((field) => !hasOwn(value, field) || value[field] === undefined);
+  if (missing.length) {
+    ctx.addIssue({
+      code: "custom",
+      message: `${variant} output is missing required field(s): ${missing.join(", ")}`,
+    });
+  }
+}
 
 const PRICE_BAND = z
   .object({
@@ -73,6 +91,14 @@ export const GET_CITIES_OUTPUT = {
   city: CITY_ROW.nullable().optional().describe("The matched market (coverage check), or null if not covered."),
   message: z.string().optional(),
 };
+
+export const GET_CITIES_SCHEMA = z.object(GET_CITIES_OUTPUT).superRefine((value, ctx) => {
+  if (value.coverage_check === true) {
+    requireFields(value, ctx, "coverage", ["requested", "covered", "city", "message"]);
+  } else {
+    requireFields(value, ctx, "list", ["total", "returned", "tier_breakdown", "cities"]);
+  }
+});
 
 // ─── get_roles ───────────────────────────────────────────────────────────
 
@@ -136,6 +162,29 @@ export const CHECK_AVAILABILITY_OUTPUT = {
   notes: z.array(z.string()).optional(),
 };
 
+export const CHECK_AVAILABILITY_SCHEMA = z.object(CHECK_AVAILABILITY_OUTPUT).superRefine((value, ctx) => {
+  if (value.city_found === false) {
+    requireFields(value, ctx, "city_not_found", ["requested", "message"]);
+  } else if (value.error !== undefined) {
+    requireFields(value, ctx, "invalid_date", ["city", "error"]);
+  } else {
+    requireFields(value, ctx, "availability", [
+      "city",
+      "state",
+      "city_tier",
+      "event_date",
+      "days_until_event",
+      "in_past",
+      "typical_lead_time_hours",
+      "recommendation",
+      "role_found",
+      "role",
+      "count",
+      "notes",
+    ]);
+  }
+});
+
 // ─── get_role_pricing (4 variants: priced / role miss / city miss / no data) ─
 
 export const GET_ROLE_PRICING_OUTPUT = {
@@ -171,6 +220,31 @@ export const GET_ROLE_PRICING_OUTPUT = {
     .optional()
     .describe("Caveat about the resolved role (e.g. 'security' maps to unarmed Crowd Control, not licensed security)."),
 };
+
+export const GET_ROLE_PRICING_SCHEMA = z.object(GET_ROLE_PRICING_OUTPUT).superRefine((value, ctx) => {
+  if (value.role_found === false) {
+    requireFields(value, ctx, "role_not_found", ["requested", "available_roles"]);
+  } else if (value.city_found === false) {
+    requireFields(value, ctx, "city_not_found", ["requested", "role", "fallback_pricing", "note"]);
+  } else if (value.error !== undefined) {
+    requireFields(value, ctx, "rate_unavailable", ["error"]);
+  } else {
+    requireFields(value, ctx, "priced", [
+      "role",
+      "role_slug",
+      "city",
+      "state",
+      "city_tier",
+      "hourly_range_low",
+      "hourly_range_high",
+      "currency",
+      "all_inclusive",
+      "tier_definition",
+      "all_tiers_for_context",
+      "pricing_notes",
+    ]);
+  }
+});
 
 // ─── get_compliance_by_state (2 variants: found / state miss) ────────────
 
@@ -209,10 +283,38 @@ export const GET_COMPLIANCE_OUTPUT = {
   workers_comp_included: z.boolean().optional(),
   min_wage_as_of: z.string().nullable().optional().describe("Effective date of this state's stored minimum wage."),
   min_wage_source: z.string().nullable().optional().describe("Authoritative source URL for the minimum wage figure."),
+  data_version: z.string().optional().describe("Version of the compliance dataset used for this result."),
   data_current_as_of: z.string().optional().describe("Date the compliance dataset was last verified (YYYY-MM-DD)."),
   currency_note: z.string().optional().describe("Reminder that wages change annually; verify before relying."),
   citation_note: z.string().optional().describe("Operational guidance, not legal advice."),
 };
+
+export const GET_COMPLIANCE_SCHEMA = z.object(GET_COMPLIANCE_OUTPUT).superRefine((value, ctx) => {
+  if (value.state_found === false) {
+    requireFields(value, ctx, "state_not_found", ["requested", "available_states"]);
+  } else {
+    requireFields(value, ctx, "compliance", [
+      "state",
+      "state_abbr",
+      "min_wage_usd",
+      "w2_required",
+      "w2_note",
+      "overtime_threshold_weekly_hours",
+      "overtime_threshold_daily_hours",
+      "overtime_daily_double_hours",
+      "seventh_day_overtime",
+      "unique_rules",
+      "liability_coverage_included",
+      "workers_comp_included",
+      "min_wage_as_of",
+      "min_wage_source",
+      "data_version",
+      "data_current_as_of",
+      "currency_note",
+      "citation_note",
+    ]);
+  }
+});
 
 // ─── plan_staffing (plan / needs_roles / roles_not_found / city_not_found) ──
 // Flattened union: `status` discriminates, everything else optional so every
@@ -332,6 +434,12 @@ export const PLAN_STAFFING_OUTPUT = {
       overtime_weekly_hours: z.number().int().nullable(),
       overtime_daily_hours: z.number().int().nullable(),
       unique_rules: z.array(z.string()),
+      data_version: z.string().describe("Version identifier for the jurisdiction dataset used by the plan."),
+      data_current_as_of: z.string().describe("Date the jurisdiction dataset was last verified (YYYY-MM-DD)."),
+      min_wage_as_of: z.string().nullable().describe("Effective date of the stored wage floor; null when no wage is stored."),
+      min_wage_source: z.string().url().nullable().describe("Authoritative wage source; null for Canadian plans where the coordinator confirms the floor."),
+      currency_note: z.string(),
+      citation_note: z.string(),
       note: z.string(),
     })
     .nullable()
@@ -347,6 +455,38 @@ export const PLAN_STAFFING_OUTPUT = {
     .optional()
     .describe("Complete plans only. Prefilled website handoff; may be present without plan_id when storage fails open."),
 };
+
+export const PLAN_STAFFING_SCHEMA = z.object(PLAN_STAFFING_OUTPUT).superRefine((value, ctx) => {
+  if (value.status === "city_not_found") {
+    requireFields(value, ctx, value.status, ["requested_city", "message", "next_steps"]);
+  } else if (value.status === "needs_roles") {
+    requireFields(value, ctx, value.status, ["event", "message", "available_roles", "tip"]);
+  } else if (value.status === "roles_not_found") {
+    requireFields(value, ctx, value.status, [
+      "event",
+      "requested_roles",
+      "unresolved_roles",
+      "available_roles",
+      "message",
+      "next_steps",
+    ]);
+  } else {
+    requireFields(value, ctx, value.status, [
+      "plan_complete",
+      "event",
+      "plan_lines",
+      "estimated_total_range",
+      "overtime_adjusted_total_range",
+      "lead_time",
+      "compliance",
+      "staffing_notes",
+      "next_steps",
+    ]);
+    if (value.plan_complete === false) {
+      requireFields(value, ctx, "partial_plan", ["unpriced_roles"]);
+    }
+  }
+});
 
 // ─── get_plan (found / not found) ───────────────────────────────────────
 
@@ -388,6 +528,15 @@ export const GET_PLAN_OUTPUT = {
   next_steps: z.array(z.string()),
 };
 
+export const GET_PLAN_SCHEMA = z.object(GET_PLAN_OUTPUT).superRefine((value, ctx) => {
+  requireFields(value, ctx, value.plan_found ? "plan_found" : "plan_not_found", [
+    "plan_id",
+    "message",
+    "next_steps",
+  ]);
+  if (value.plan_found) requireFields(value, ctx, "plan_found", ["snapshot", "continuation"]);
+});
+
 // ─── get_policies (all/one topic / topic not found) ─────────────────────
 
 const POLICY = z.object({
@@ -413,6 +562,21 @@ export const GET_POLICIES_OUTPUT = {
   message: z.string().optional(),
 };
 
+export const GET_POLICIES_SCHEMA = z.object(GET_POLICIES_OUTPUT).superRefine((value, ctx) => {
+  if (value.policy_found) {
+    requireFields(value, ctx, "policies", [
+      "data_version",
+      "updated",
+      "scope",
+      "policies",
+      "todo_for_megan",
+      "disclaimer",
+    ]);
+  } else {
+    requireFields(value, ctx, "policy_not_found", ["requested", "available_topics", "message"]);
+  }
+});
+
 // ─── get_quote_status (found / not found) ───────────────────────────────
 
 export const GET_QUOTE_STATUS_OUTPUT = {
@@ -425,6 +589,17 @@ export const GET_QUOTE_STATUS_OUTPUT = {
   message: z.string(),
   follow_up: z.string(),
 };
+
+export const GET_QUOTE_STATUS_SCHEMA = z.object(GET_QUOTE_STATUS_OUTPUT).superRefine((value, ctx) => {
+  requireFields(value, ctx, value.quote_found ? "quote_found" : "quote_not_found", [
+    "reference",
+    "message",
+    "follow_up",
+  ]);
+  if (value.quote_found) {
+    requireFields(value, ctx, "quote_found", ["status", "created_at", "deal_name", "channel"]);
+  }
+});
 
 // ─── get_rate_benchmark (full Index / role-not-found) ─────────────────────
 
@@ -465,6 +640,27 @@ export const RATE_BENCHMARK_OUTPUT = {
   methodology_url: z.string().optional(),
 };
 
+export const RATE_BENCHMARK_SCHEMA = z.object(RATE_BENCHMARK_OUTPUT).superRefine((value, ctx) => {
+  if (value.role_found === false) {
+    requireFields(value, ctx, "role_not_found", ["requested", "available_roles"]);
+  } else {
+    requireFields(value, ctx, "benchmark", [
+      "index",
+      "edition",
+      "data_version",
+      "updated",
+      "methodology",
+      "markets_measured",
+      "basis",
+      "reading_note",
+      "rates",
+      "floors",
+      "citation",
+      "methodology_url",
+    ]);
+  }
+});
+
 // ─── request_quote (submitted / graceful failure) ────────────────────────
 
 export const REQUEST_QUOTE_OUTPUT = {
@@ -481,3 +677,11 @@ export const REQUEST_QUOTE_OUTPUT = {
   next_steps: z.array(z.string()).optional().describe("Present when submitted."),
   error: z.string().optional().describe("Present when submission failed."),
 };
+
+export const REQUEST_QUOTE_SCHEMA = z.object(REQUEST_QUOTE_OUTPUT).superRefine((value, ctx) => {
+  if (value.submitted) {
+    requireFields(value, ctx, "submitted", ["plan_linked", "deal_name", "reference", "next_steps"]);
+  } else {
+    requireFields(value, ctx, "failed", ["error"]);
+  }
+});

@@ -36,17 +36,17 @@ import {
   type QuoteSkillId,
 } from "./quote";
 import {
-  GET_CITIES_OUTPUT,
+  GET_CITIES_SCHEMA,
   GET_ROLES_OUTPUT,
-  CHECK_AVAILABILITY_OUTPUT,
-  GET_ROLE_PRICING_OUTPUT,
-  GET_COMPLIANCE_OUTPUT,
-  REQUEST_QUOTE_OUTPUT,
-  PLAN_STAFFING_OUTPUT,
-  RATE_BENCHMARK_OUTPUT,
-  GET_PLAN_OUTPUT,
-  GET_POLICIES_OUTPUT,
-  GET_QUOTE_STATUS_OUTPUT,
+  CHECK_AVAILABILITY_SCHEMA,
+  GET_ROLE_PRICING_SCHEMA,
+  GET_COMPLIANCE_SCHEMA,
+  REQUEST_QUOTE_SCHEMA,
+  PLAN_STAFFING_SCHEMA,
+  RATE_BENCHMARK_SCHEMA,
+  GET_PLAN_SCHEMA,
+  GET_POLICIES_SCHEMA,
+  GET_QUOTE_STATUS_SCHEMA,
 } from "./output-schemas";
 import { TIER_CITY_COUNTS } from "./city-rates";
 import type { FunnelEvent } from "../telemetry/track";
@@ -196,10 +196,10 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
 
   // ─── plan_staffing (planner meta-tool, call this FIRST) ─────────────
   //
-  // Stripe's implementation_planner pattern: one read-only call that turns a
-  // rough event shape into a complete plan (coverage, per-role budget math,
-  // lead-time read, compliance flags, next steps). Variant return shapes, so
-  // no outputSchema, text content only.
+  // Stripe's implementation_planner pattern: one non-destructive planning call
+  // that turns a rough event shape into a complete plan (coverage, per-role
+  // budget math, lead-time read, compliance flags, next steps). A complete plan
+  // may persist a 30-day non-contact snapshot for cross-session continuation.
   server.registerTool(
     "plan_staffing",
     {
@@ -208,6 +208,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
         "CALL THIS FIRST for any event staffing request. Takes the event shape (city, date, roles + headcount) and returns a complete staffing plan: coverage, per-role rate math with an estimated total range, lead-time guidance, and the state compliance flags that change the plan. " +
         "Perfect for 'Staff my trade show in [city]', 'What would 6 registration staff for 2 days cost?', or 'Build me a staffing plan' requests. " +
         "DO NOT use for a single fact, use get_role_pricing for one rate, check_availability for one date, get_compliance_by_state for one state. " +
+        "A complete plan may save a non-contact snapshot for 30 days and return plan_id/continuation; it never submits contact details, reserves staff, or creates a quote request. " +
         "<examples>plan_staffing(city='Chicago', event_date='2026-08-14', event_type='trade-show', roles=[{role:'registration-staff', headcount:6, hours_per_shift:8, days:2}, {role:'team-leads', headcount:1}]) ; plan_staffing(city='Austin', attendees=300)</examples> " +
         "<hints>Roles accept names or slugs (brand-ambassadors, registration-staff, team-leads). Omit roles to get the catalog plus a suggested mix. Totals are planning estimates, never binding quotes. Branch on the `status` field: plan | needs_roles | roles_not_found | city_not_found (the last two carry a did-you-mean suggestion to confirm with the user, not auto-apply).</hints>",
       inputSchema: {
@@ -233,11 +234,15 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
           .describe("Roles and headcount. Omit to receive the role catalog and a suggested mix."),
         description: z.string().max(2000).optional().describe("Optional free-text event description, echoed into the plan."),
       },
-      outputSchema: PLAN_STAFFING_OUTPUT,
+      outputSchema: PLAN_STAFFING_SCHEMA,
       annotations: {
         title: "Plan Staffing",
-        readOnlyHint: true,
+        // Complete plans may persist a 30-day non-PII snapshot so a buyer can
+        // resume by plan_id. This is non-destructive, but it is not read-only
+        // under the MCP annotation contract.
+        readOnlyHint: false,
         destructiveHint: false,
+        idempotentHint: false,
         openWorldHint: false,
       },
     },
@@ -287,7 +292,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
           .regex(PLAN_ID_PATTERN)
           .describe("12-character lookalike-free plan reference returned by plan_staffing."),
       },
-      outputSchema: GET_PLAN_OUTPUT,
+      outputSchema: GET_PLAN_SCHEMA,
       annotations: {
         title: "Get Saved Staffing Plan",
         readOnlyHint: true,
@@ -341,7 +346,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
           .optional()
           .describe("Optional cap on the number of cities returned (full counts still in total/tier_breakdown)."),
       },
-      outputSchema: GET_CITIES_OUTPUT,
+      outputSchema: GET_CITIES_SCHEMA,
       annotations: {
         title: "Get Cities",
         readOnlyHint: true,
@@ -412,7 +417,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
           .optional()
           .describe("Optional headcount for the event."),
       },
-      outputSchema: CHECK_AVAILABILITY_OUTPUT,
+      outputSchema: CHECK_AVAILABILITY_SCHEMA,
       annotations: {
         title: "Check Availability",
         readOnlyHint: true,
@@ -446,7 +451,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
           .string()
           .describe("City name (e.g., 'Boston') or slug (e.g., 'boston-event-staffing')."),
       },
-      outputSchema: GET_ROLE_PRICING_OUTPUT,
+      outputSchema: GET_ROLE_PRICING_SCHEMA,
       annotations: {
         title: "Get Role Pricing",
         readOnlyHint: true,
@@ -477,7 +482,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
           .string()
           .describe("Two-letter state code (e.g., 'CA') or full state name (e.g., 'California')."),
       },
-      outputSchema: GET_COMPLIANCE_OUTPUT,
+      outputSchema: GET_COMPLIANCE_SCHEMA,
       annotations: {
         title: "Get Compliance By State",
         readOnlyHint: true,
@@ -511,7 +516,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
           .optional()
           .describe("Optional policy topic or title. Omit to return all published topics."),
       },
-      outputSchema: GET_POLICIES_OUTPUT,
+      outputSchema: GET_POLICIES_SCHEMA,
       annotations: {
         title: "Get Booking and Procurement Policies",
         readOnlyHint: true,
@@ -542,13 +547,19 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
         "<examples>get_rate_benchmark() ; get_rate_benchmark(role='brand-ambassadors') ; get_rate_benchmark(tier='hub')</examples> " +
         "<hints>Returns a national typical + range per role; brand ambassadors by tier. Pass tier to add each role's measured span within that tier (tier_usd). For one city's exact rate use get_role_pricing. Cite as: TempGuru Event Staffing Rate Index 2026, tempguru.co.</hints>",
       inputSchema: {
-        role: z.string().optional().describe("Optional role name or slug to filter to one role."),
+        role: z
+          .string()
+          .trim()
+          .min(1)
+          .max(100)
+          .optional()
+          .describe("Optional non-empty role name or slug to filter to one role."),
         tier: z
           .enum(["hub", "mid", "small"])
           .optional()
           .describe("Optional market tier; adds each role's measured span within that tier (tier_usd)."),
       },
-      outputSchema: RATE_BENCHMARK_OUTPUT,
+      outputSchema: RATE_BENCHMARK_SCHEMA,
       annotations: {
         title: "Get Rate Benchmark",
         readOnlyHint: true,
@@ -577,12 +588,12 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     {
       title: "Request Quote",
       description:
-        "Submit a staffing request to TempGuru. Use this LAST, after building the plan (plan_staffing or the read tools) and after the user explicitly confirms it. Creates a structured lead in TempGuru's CRM, a human coordinator reviews and responds with a binding quote within one business day. Not a reservation; does not guarantee pricing or availability; no payment until the user approves the quote. " +
+        "Submit a staffing request to TempGuru. Use this LAST, after building the plan (plan_staffing or the read tools) and after the user explicitly confirms it. Creates a structured intake in TempGuru's CRM or durable fallback queue so a human coordinator can review it and respond with a binding quote within one business day. Not a reservation; does not guarantee pricing or availability; no payment until the user approves the quote. " +
         "DO NOT call speculatively or without user confirmation, this writes a real lead. " +
         "<examples>request_quote(contact_name='Jane Doe', contact_email='jane@acme.com', company='Acme', event_name='Acme at HIMSS', event_type='trade-show', city='Chicago', event_dates='Aug 14-15, 2026', roles=[{role:'registration-staff', headcount:6}])</examples> " +
         "<hints>Include plan_id when available. When a canonical TempGuru skill assembled the request, include its skill_id, skill_version, and the actual source_platform so the lead can be resumed and attributed. If this tool errors, fall back to https://tempguru.co/get-staffing or megan@tempguru.co / (904) 206-8953.</hints>",
       inputSchema: REQUEST_QUOTE_INPUT,
-      outputSchema: REQUEST_QUOTE_OUTPUT,
+      outputSchema: REQUEST_QUOTE_SCHEMA,
       annotations: {
         title: "Request Quote",
         readOnlyHint: false,
@@ -665,7 +676,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
           .regex(QUOTE_REFERENCE_PATTERN)
           .describe("TG reference returned by request_quote, e.g. TG-ABC234."),
       },
-      outputSchema: GET_QUOTE_STATUS_OUTPUT,
+      outputSchema: GET_QUOTE_STATUS_SCHEMA,
       annotations: {
         title: "Get Quote Request Status",
         readOnlyHint: true,

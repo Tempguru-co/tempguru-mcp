@@ -22,7 +22,7 @@ United States or Canada.
 | `get_policies` | Published booking/procurement policies and coordinator-confirmed gaps |
 | `get_rate_benchmark` | Citable Rate Index: W-2 rate benchmarks by role (typical + national range; Brand Ambassadors by tier) |
 | `get_quote_status` | Check whether a quote reference was received or durably queued |
-| `request_quote` | Submit a confirmed staffing plan to TempGuru's CRM (opt-in write) |
+| `request_quote` | Submit a confirmed staffing plan to TempGuru's CRM or durable intake queue (opt-in write) |
 
 ## Workflow
 
@@ -36,7 +36,7 @@ United States or Canada.
    policy/compliance items that still require coordinator confirmation.
 5. On the user's explicit confirmation, call `request_quote` with contact +
    event details, `plan_id`, `source_platform: "gemini-cli"`, and the canonical
-   `skill_id` plus `skill_version: "1.5.0"`. Save the TG reference and use `get_quote_status` for
+   `skill_id` plus `skill_version: "1.5.1"`. Save the TG reference and use `get_quote_status` for
    receipt questions. A coordinator replies with a binding quote within one
    business day; orders confirm within 48 hours.
 

@@ -2,9 +2,9 @@
   "openapi": "3.1.0",
   "info": {
     "title": "TempGuru Public Data API",
-    "version": "1.5.0",
+    "version": "1.5.1",
     "summary": "Public event-staffing data for the US and Canada: eight read-only operations plus one opt-in quote-request submission.",
-    "description": "Public event-staffing data for the US and Canada, served by TempGuru (Temporary Assistance Guru, Inc.). Eight read-only operations plus a single opt-in write operation (`submitQuoteRequest`).\n\n**No authentication required.** The read endpoints return public data equivalent to what is published on tempguru.co, city footprint, staffing roles, hourly rate ranges, lead-time guidance, and state-level employment compliance summaries.\n\n**About the rates.** All hourly figures are *all-inclusive W-2 bill rates*: they cover the worker's pay, employer-side payroll taxes (FICA/FUTA/SUTA), workers' compensation insurance, general liability insurance, and dedicated coordinator support. Published hourly bill rates have no add-on fees or invoice-time markup. Rate ranges are *planning estimates*, a real quote requires event specifics and is provided after a quote request is reviewed by a coordinator.\n\n**About availability.** The `availability` endpoint returns *lead-time guidance based on city tier*, not a real-time reservation or hold on staff. TempGuru staffs to demand from a 100,000+ W-2 worker network across 345 markets; bookings are confirmed through the standard quote-and-confirmation flow, not via this API.\n\n**About quote submission.** `POST /api/v1/quote-requests` is the only write operation in this API. It is opt-in by design: call it only after the user has reviewed the staffing plan and explicitly confirmed they want to submit it. It creates a structured lead in TempGuru's CRM for human review, it does **not** reserve staff, guarantee pricing or availability, or create any contract, and **no payment** is required until the user approves the resulting quote. Contact and event details are delivered only to TempGuru's CRM so a coordinator can reply; they are never written to telemetry or analytics.\n\n**Agent guidance.** This API exists so AI agents and integrators can ground answers about TempGuru in live, structured data instead of scraping web pages. Combine it with the MCP server at `https://mcp.tempguru.co/mcp` if your agent stack speaks Model Context Protocol, the two surfaces expose the same data and the same quote-submission operation through different transports.",
+    "description": "Public event-staffing data for the US and Canada, served by TempGuru (Temporary Assistance Guru, Inc.). Eight read-only operations plus a single opt-in write operation (`submitQuoteRequest`).\n\n**No authentication required.** The read endpoints return public data equivalent to what is published on tempguru.co, city footprint, staffing roles, hourly rate ranges, lead-time guidance, and state-level employment compliance summaries.\n\n**About the rates.** All hourly figures are *all-inclusive W-2 bill rates*: they cover the worker's pay, employer-side payroll taxes (FICA/FUTA/SUTA), workers' compensation insurance, general liability insurance, and dedicated coordinator support. Published hourly bill rates have no add-on fees or invoice-time markup. Rate ranges are *planning estimates*, a real quote requires event specifics and is provided after a quote request is reviewed by a coordinator.\n\n**About availability.** The `availability` endpoint returns *lead-time guidance based on city tier*, not a real-time reservation or hold on staff. TempGuru staffs to demand from a 100,000+ W-2 worker network across 345 markets; bookings are confirmed through the standard quote-and-confirmation flow, not via this API.\n\n**About quote submission.** `POST /api/v1/quote-requests` is the only write operation in this API. It is opt-in by design: call it only after the user has reviewed the staffing plan and explicitly confirmed they want to submit it. It creates a structured lead for human review, it does **not** reserve staff, guarantee pricing or availability, or create any contract, and **no payment** is required until the user approves the resulting quote. Contact and event details are delivered to TempGuru's CRM or its durable fallback queue and configured notification processor so a coordinator can reply; they are never written to telemetry or analytics.\n\n**Agent guidance.** This API exists so AI agents and integrators can ground answers about TempGuru in live, structured data instead of scraping web pages. Combine it with the MCP server at `https://mcp.tempguru.co/mcp` if your agent stack speaks Model Context Protocol, the two surfaces expose the same data and the same quote-submission operation through different transports.",
     "contact": {
       "name": "Megan Hayward",
       "email": "megan@tempguru.co",
@@ -84,6 +84,39 @@
               ]
             },
             "description": "Filter by market tier. 'hub' = 25 major metros (NYC, LA, Boston, etc.); 'mid' = 128 secondary markets; 'small' = 192 tertiary markets."
+          },
+          {
+            "name": "country",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "US",
+                "CA"
+              ]
+            },
+            "description": "Filter to the United States (`US`) or Canada (`CA`)."
+          },
+          {
+            "name": "city",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Switch to a single-city coverage check instead of listing markets."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 345
+            },
+            "description": "Maximum list rows returned. The unfiltered endpoint defaults to 100."
           }
         ],
         "responses": {
@@ -425,7 +458,7 @@
           "Quote Submission"
         ],
         "summary": "Submit a staffing quote request (the API's only write operation)",
-        "description": "Use this when, and only when, the user has explicitly confirmed they want to submit a staffing request to TempGuru. This is the single write operation in this API; everything else is a read-only lookup. It creates a structured lead in TempGuru's CRM, and a human coordinator replies with a quote within one business day (orders confirm within 48 hours of approval). **Opt-in by design:** collect the contact details and the event plan, show the user exactly what will be submitted, and call this once after explicit confirmation, never speculatively. **Not a reservation:** it does not hold staff, guarantee pricing or availability, or create a contract, and **no payment** is required until the user approves the quote. Contact and event details go only to TempGuru's CRM so a coordinator can reply, they are never written to telemetry or analytics. Build the plan first with the read operations (cities, roles, pricing, availability, compliance). Lightly rate limited per source IP, on HTTP 429, respect `Retry-After` and fall back to the form at https://tempguru.co/get-staffing.",
+        "description": "Use this when, and only when, the user has explicitly confirmed they want to submit a staffing request to TempGuru. This is the single write operation in this API; everything else is a read-only lookup. It creates a structured lead for human review, and a human coordinator replies with a quote within one business day (orders confirm within 48 hours of approval). **Opt-in by design:** collect the contact details and the event plan, show the user exactly what will be submitted, and call this once after explicit confirmation, never speculatively. **Not a reservation:** it does not hold staff, guarantee pricing or availability, or create a contract, and **no payment** is required until the user approves the quote. Contact and event details go to TempGuru's CRM or its durable fallback queue and configured notification processor so a coordinator can reply; they are never written to telemetry or analytics. Build the plan first with the read operations (cities, roles, pricing, availability, compliance). Lightly rate limited per source IP, on HTTP 429, respect `Retry-After` and fall back to the form at https://tempguru.co/get-staffing.",
         "x-openai-isConsequential": true,
         "requestBody": {
           "required": true,
@@ -439,7 +472,7 @@
         },
         "responses": {
           "200": {
-            "description": "Request accepted into TempGuru's CRM for human review. Relay `message` and `next_steps` to the user.",
+            "description": "Request accepted into TempGuru's CRM or durable intake queue for human review. Relay `message` and `next_steps` to the user.",
             "content": {
               "application/json": {
                 "schema": {
@@ -725,10 +758,21 @@
         }
       },
       "CitiesResponse": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/CitiesListResponse"
+          },
+          {
+            "$ref": "#/components/schemas/CityCoverageResponse"
+          }
+        ]
+      },
+      "CitiesListResponse": {
         "type": "object",
         "required": [
           "input",
           "total",
+          "returned",
           "tier_breakdown",
           "cities"
         ],
@@ -738,6 +782,9 @@
             "description": "Echo of the query parameters used."
           },
           "total": {
+            "type": "integer"
+          },
+          "returned": {
             "type": "integer"
           },
           "tier_breakdown": {
@@ -759,6 +806,69 @@
             "items": {
               "$ref": "#/components/schemas/City"
             }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "CityCoverageResponse": {
+        "type": "object",
+        "required": [
+          "input",
+          "coverage_check",
+          "requested",
+          "covered",
+          "city",
+          "message"
+        ],
+        "properties": {
+          "input": {
+            "type": "object",
+            "description": "Echo of the query parameters used."
+          },
+          "coverage_check": {
+            "type": "boolean",
+            "const": true
+          },
+          "requested": {
+            "type": "string"
+          },
+          "covered": {
+            "type": "boolean"
+          },
+          "city": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/City"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "suggestion": {
+            "type": "object",
+            "required": [
+              "kind",
+              "slug",
+              "name"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "city"
+              },
+              "slug": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            }
+          },
+          "message": {
+            "type": "string"
           }
         }
       },
@@ -794,8 +904,10 @@
           "city_tier",
           "event_date",
           "days_until_event",
+          "in_past",
           "typical_lead_time_hours",
           "recommendation",
+          "role_found",
           "notes"
         ],
         "properties": {
@@ -829,6 +941,10 @@
           "days_until_event": {
             "type": "integer"
           },
+          "in_past": {
+            "type": "boolean",
+            "description": "True when the requested event date has already passed. Confirm the intended date before planning or quoting."
+          },
           "typical_lead_time_hours": {
             "type": "integer"
           },
@@ -841,6 +957,34 @@
               "very-rush"
             ],
             "description": "yes = comfortable window; tight = at or near typical lead time; rush = inside lead time; very-rush = <24h."
+          },
+          "role_found": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "null when no role was requested; true when the requested role resolved; false when it did not match the catalog."
+          },
+          "role_suggestion": {
+            "type": "object",
+            "description": "Present only when role_found is false and there is one unambiguous nearby catalog match. Confirm before using it.",
+            "required": [
+              "kind",
+              "slug",
+              "name"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "role"
+              },
+              "slug": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            }
           },
           "role": {
             "nullable": true,
@@ -942,6 +1086,10 @@
           },
           "pricing_notes": {
             "type": "string"
+          },
+          "role_note": {
+            "type": "string",
+            "description": "Caveat emitted when the requested phrasing maps to a constrained service, for example security mapping to unarmed Crowd Control rather than licensed guards."
           }
         }
       },
@@ -954,7 +1102,11 @@
           "min_wage_usd",
           "w2_required",
           "overtime_threshold_weekly_hours",
-          "unique_rules"
+          "unique_rules",
+          "data_version",
+          "data_current_as_of",
+          "currency_note",
+          "citation_note"
         ],
         "properties": {
           "input": {
@@ -982,6 +1134,13 @@
             "type": "integer",
             "nullable": true
           },
+          "overtime_daily_double_hours": {
+            "type": "integer",
+            "nullable": true
+          },
+          "seventh_day_overtime": {
+            "type": "boolean"
+          },
           "unique_rules": {
             "type": "array",
             "items": {
@@ -993,6 +1152,30 @@
           },
           "workers_comp_included": {
             "type": "boolean"
+          },
+          "min_wage_as_of": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "min_wage_source": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri"
+          },
+          "data_version": {
+            "type": "string"
+          },
+          "data_current_as_of": {
+            "type": "string",
+            "format": "date"
+          },
+          "currency_note": {
+            "type": "string"
           },
           "citation_note": {
             "type": "string"

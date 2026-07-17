@@ -1,83 +1,91 @@
-# CRM attribution, receipts, and notification SLA — spec
+# CRM attribution, receipts, and notification SLA — contract
 
-_What the MCP repo already emits, and the ops/CRM automation that must be built
-on top of it. The automation itself runs in TempGuru's Notion + notification
-stack, **not** in this repository — this doc is the data contract between the
-two so they don't drift._
+_What the MCP repository emits today, what remains best-effort, and the ops/CRM
+automation that must be built around it. Email, Slack/SMS, CRM-stage, and
+revenue workflows run outside this repository._
 
-## 1. What this repo already emits (the integration surface)
+## 1. Outcomes the repository emits
 
-Every successful `request_quote` (MCP or REST) produces, via
-`src/lib/notion/create-lead.ts`:
+`request_quote` can finish in three persistence states:
 
-**A Notion CRM lead record** containing the buyer PII (name/email/phone,
-company), the event (name/type/city/dates), the roles+headcount, and a
-**Call Notes** block that already includes:
+- `captured: "notion"`: the Notion CRM lead was written during the request;
+- `captured: "queued"`: the full lead was accepted into the 90-day durable
+  Redis retry queue and Notion will be written by the drain; or
+- `captured: "unpersisted"`: neither Notion nor the fallback queue accepted the
+  lead. This is a failure and must never produce a success receipt.
 
-- `reference` — the crypto-random `TG-XXXXXX` code returned to the buyer.
-- a **LEAD TRUST** block (`high`/`medium`/`low` + reason flags) from
-  `lead-trust.ts`, so ops can triage before outreach.
-- an **ATTRIBUTION** line carrying, when supplied: `source_platform`
-  (canonical allowlist — chatgpt-gpt, claude-desktop, coze, …), `skill_id`
-  (one of the five canonical skills), `skill_version`, and `plan_id`.
-- `SOURCE: AI Agent (MCP)` or `AI Agent (REST)`, derived from the channel.
+For Notion-captured leads, and for queued leads after a successful drain, the
+CRM record contains buyer contact fields, event details, roles/headcount, and a
+Call Notes block with:
 
-**An outbound webhook** (best-effort, time-capped) to `LEAD_WEBHOOK_URL` when
-set. The payload is the lead itself (contact + event + roles) plus `reference`.
-**This webhook is the trigger the automations below should consume.**
+- `reference`, the crypto-random `TG-XXXXXX` code returned to the buyer;
+- a `LEAD TRUST` block (`high`/`medium`/`low` plus reason flags);
+- `source_platform`, `skill_id` (closed to the 8 canonical skills),
+  `skill_version`, and `plan_id` when supplied; and
+- `SOURCE: AI Agent (MCP)` or `AI Agent (REST)`.
 
-**Aggregate funnel telemetry** (non-PII counts) keyed by day:
-`plans_created`, `plans_resumed`, `quotes_submitted`, `quotes_linked`, plus
-`source-platforms:{date}` and `source-skills:{date}` for successful quote
-leads. See `src/lib/telemetry/track.ts`.
+The repository also emits non-PII funnel counters (`plans_created`,
+`plans_resumed`, `quotes_submitted`, `quotes_linked`) plus allowlisted
+source-platform/source-skill dimensions. Telemetry is best-effort and can drop
+after its time cap, so it is a directional product signal, not a financial or
+CRM ledger.
 
-## 2. Transactional buyer receipt (to build in ops)
+## 2. Webhook reliability boundary
 
-- **Trigger:** `LEAD_WEBHOOK_URL` fires with a new lead.
-- **Send:** an email to the buyer's `contact_email` immediately (target < 2
-  min), from a TempGuru sender, subject referencing `reference`.
-- **Body:** confirmation that the request was received, the `reference`, a
-  human-readable recap of the plan (city, dates, roles+headcount, estimated
-  range if present — labeled a **planning estimate, not a binding quote**), and
-  the "coordinator responds within one business day / orders confirmed within
-  48h of approval / no payment until approval" language already in
-  `quoteSubmittedPayload`.
-- **Idempotency:** de-dupe on `reference` so a webhook retry can't double-send.
+When `LEAD_WEBHOOK_URL` is set, the repository attempts a time-capped webhook
+with the lead, `reference`, and `captured` state. Today that hook is
+best-effort: errors/timeouts are swallowed, non-2xx status is not a durable
+retry contract, and the payload is not versioned or signed. It must not be the
+sole trigger for a receipt or a 15-minute alert SLA.
 
-## 3. Staff-alert SLA (to build in ops)
+Before treating the webhook as a reliable automation bus, add a typed/versioned
+payload, HMAC signature, non-2xx handling, durable outbox/retry, idempotency key,
+and tests. Until then, ops should use Notion polling/automation as the reliable
+path and treat the webhook as an acceleration hint. A queued lead must reach
+Notion through the repository drain before a Notion-only automation can see it.
 
-- **Trigger:** same webhook.
-- **Alert:** notify the coordinator channel (email/Slack/SMS) within a target
-  **15 minutes**, including `reference`, trust level, city/dates, and
-  `source_platform`/`skill_id`.
-- **Escalation:** if the CRM record is not moved out of "New" within **1
-  business day**, escalate. `low`-trust leads route to a verify step before
-  outreach (the trust block already says so).
-- **Status link:** expose a status the buyer can poll; the repo already ships
-  `get_quote_status` (received vs durably queued) — surface the same states in
-  the receipt/portal.
+## 3. Transactional buyer receipt (ops-side)
 
-## 4. Plan → won → revenue attribution (to build in ops)
+- **Reliable trigger:** a Notion lead creation, or a future durable webhook event
+  with `captured: notion|queued`; never `unpersisted`.
+- **Send target:** buyer `contact_email`, ideally within two minutes.
+- **Content:** `reference`, a human-readable event/roles recap, and any estimate
+  labeled as a planning estimate rather than a binding quote. Preserve the
+  one-business-day coordinator response, 48-hours-after-approval confirmation,
+  and no-payment-until-approval language.
+- **Queued wording:** if a durable webhook triggers before CRM delivery, say the
+  request was safely queued for coordinator intake, not already present in the
+  CRM.
+- **Idempotency:** deduplicate by `reference`.
 
-The repo tags the front of the funnel; ops must close the loop:
+## 4. Staff-alert SLA (ops-side)
 
-- **Key:** carry `reference` (and `plan_id` when present) as the join key on the
-  CRM deal. `source_platform` + `skill_id` + `skill_version` are already on the
-  record — copy them to CRM properties (not just Call Notes) so they're
-  filterable.
-- **Funnel to extend:** the repo emits up to `quotes_submitted`/`quotes_linked`.
-  Ops owns the later stages — `quote_sent → won/lost → revenue` — as CRM status
-  transitions, attributed by the copied `source_platform`/`skill_id`.
-- **Revenue sync:** on `won`, record deal value against the originating
-  `source_platform`/`skill_id`/`plan_id` so Hermes vs ChatGPT vs ClawHub vs Pi
-  can be compared on booked revenue, not just lead volume.
-- **Report:** platform × skill × {leads, quoted, won, revenue}, reconciled
-  monthly against the aggregate `source-platforms`/`source-skills` telemetry as
-  a sanity check (telemetry counts should be ≥ CRM leads, never fewer).
+- Notify the coordinator channel within a target 15 minutes with `reference`,
+  capture state, trust level, city/dates, and source platform/skill.
+- Route low-trust leads through verification before outreach.
+- Escalate if the Notion Deal Stage remains `Lead` for one business day; `Lead`
+  is the stage created by the current integration (not `New`).
+- Expose received/queued status consistently with `get_quote_status`.
 
-## 5. Env / config the ops side needs
+## 5. Plan → won → revenue attribution (ops-side)
 
-- `LEAD_WEBHOOK_URL` — set to the automation's ingest endpoint.
-- Notion CRM properties for `reference`, `source_platform`, `skill_id`,
-  `skill_version`, `plan_id`, trust level (promote from Call Notes text to
-  first-class properties so they're filterable and reportable).
+- Carry `reference` and optional `plan_id` as join keys.
+- Promote `source_platform`, `skill_id`, `skill_version`, `plan_id`, and trust
+  level from Call Notes to verified first-class CRM properties before writing
+  them from code.
+- Extend the repository funnel with CRM-owned `quote_sent → won/lost → revenue`
+  transitions.
+- Report platform × skill × {leads, quoted, won, revenue}, using the CRM as the
+  authoritative ledger. Compare telemetry directionally; do not assert it must
+  be greater than or equal to CRM totals.
+
+## 6. Configuration and ownership
+
+- `LEAD_WEBHOOK_URL`: optional best-effort notification target today; do not
+  advertise SLA delivery until the durable contract above ships.
+- `CRON_SECRET`: protects the bounded pending-lead drain that advances queued
+  records to Notion.
+- Notion first-class properties must be created and their names/types verified
+  before the repository integration writes attribution into them.
+- Email/Slack/SMS provider configuration, receipts, escalations, stage changes,
+  and revenue automation remain external ops work.

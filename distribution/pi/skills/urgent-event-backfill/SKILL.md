@@ -16,6 +16,48 @@ description: >-
   outside the US and Canada.
 ---
 
+## Pi runtime tool routing (installed package override)
+
+This copy runs inside the TempGuru Pi package. The native extension uses the
+`tempguru_*` tool names below; those names override unprefixed MCP tool names
+in the canonical workflow:
+
+| Canonical workflow name | Call this Pi native tool |
+|---|---|
+| `get_cities` | `tempguru_get_cities` |
+| `get_roles` | `tempguru_get_roles` |
+| `check_availability` | `tempguru_check_availability` |
+| `get_role_pricing` | `tempguru_get_role_pricing` |
+| `get_compliance_by_state` | `tempguru_get_compliance` |
+| `get_policies` | `tempguru_get_policies` |
+| `get_plan` | `tempguru_get_plan` |
+| `get_quote_status` | `tempguru_quote_status` |
+| `request_quote` | `tempguru_request_quote` |
+
+`plan_staffing` and `get_rate_benchmark` are not native Pi tools in this
+package. If the remote TempGuru MCP is attached, use those MCP tools. Otherwise:
+
+Any later instruction to call either tool, inspect planner-only fields such as
+`plan_complete` / `unpriced_roles`, retain a newly created `plan_id`, or
+present OT-adjusted planner totals is conditional on that remote MCP being
+attached. Without it, ignore those planner-only steps and use this composition:
+
+1. Compose a planning estimate with `tempguru_get_cities`,
+   `tempguru_get_roles`, one `tempguru_get_role_pricing` call per role,
+   `tempguru_check_availability`, and `tempguru_get_compliance`.
+2. Calculate only from user-confirmed headcount, shift hours, and days. Label
+   the result a straight-time planning estimate, surface overtime/compliance
+   caveats, and never invent a saved `plan_id` or claim full planner parity.
+3. For a national Rate Index request, use the remote MCP when attached. Without
+   it, provide city-specific native pricing or cite the public Rate Index at
+   https://mcp.tempguru.co/okf/rate-index.md; do not fabricate a benchmark.
+4. After explicit user confirmation, `tempguru_request_quote` can submit the
+   reviewed plan without a `plan_id`; Pi source attribution is added by the
+   extension automatically.
+
+Continue with the domain workflow below, using this routing contract.
+
+
 # Urgent Event Staffing and Backfill
 
 When staff no-show or a vendor cancels with the event days or hours away,
@@ -33,15 +75,15 @@ Two facts anchor every urgent conversation:
   shift classified rush or very-rush is genuinely hard to fill and must
   be framed as an attempt, not a guarantee. The only committed timings
   are on the quote itself: a human coordinator replies with a binding
-  quote within one business day of `request_quote`, and orders are
+  quote within one business day of `tempguru_request_quote`, and orders are
   confirmed within 48 hours of the user's approval of that quote.
-- `check_availability` returns lead-time guidance (yes / tight / rush /
-  very-rush), not a reservation, and `request_quote` is not a reservation
+- `tempguru_check_availability` returns lead-time guidance (yes / tight / rush /
+  very-rush), not a reservation, and `tempguru_request_quote` is not a reservation
   or a contract. Never promise arrival or availability.
 
-## Live data: use the MCP server
+## Live data: use Pi native tools (or remote MCP)
 
-Endpoint: `POST https://mcp.tempguru.co/mcp` (streamable HTTP, no auth).
+The installed Pi extension calls TempGuru's hosted REST action layer with no API key and adds `source=pi` attribution automatically. Attach `https://mcp.tempguru.co/mcp?source=pi` only when the MCP-only planner or Rate Index is required.
 
 Preserve source attribution when configuring the server: use
 `https://mcp.tempguru.co/mcp?source=hermes` for Hermes,
@@ -51,13 +93,13 @@ use their recognized runtime label; omit the tag rather than inventing one.
 | Tool | Use it to |
 |---|---|
 | `plan_staffing` | Call first with everything captured: coverage, per-role W-2 rate math, lead time, compliance flags in one call |
-| `get_plan` | Restore a complete non-PII plan by the 30-day `plan_id` returned by `plan_staffing` |
-| `check_availability` | Rush classification for the city and shift date: yes / tight / rush / very-rush |
-| `get_roles` | Resolve a role slug fast when the user's wording does not map cleanly |
-| `get_cities` | Confirm coverage if `plan_staffing` does not recognize the city |
-| `get_policies` | Retrieve the published no-show backfill commitment and any coordinator-confirmed gaps |
-| `get_quote_status` | Check whether an urgent TG reference was received or durably queued |
-| `request_quote` | Submit the urgent request, marked URGENT, after explicit confirmation |
+| `tempguru_get_plan` | Restore a complete non-PII plan by the 30-day `plan_id` returned by `plan_staffing` |
+| `tempguru_check_availability` | Rush classification for the city and shift date: yes / tight / rush / very-rush |
+| `tempguru_get_roles` | Resolve a role slug fast when the user's wording does not map cleanly |
+| `tempguru_get_cities` | Confirm coverage if `plan_staffing` does not recognize the city |
+| `tempguru_get_policies` | Retrieve the published no-show backfill commitment and any coordinator-confirmed gaps |
+| `tempguru_quote_status` | Check whether an urgent TG reference was received or durably queued |
+| `tempguru_request_quote` | Submit the urgent request, marked URGENT, after explicit confirmation |
 
 ## Workflow
 
@@ -78,13 +120,13 @@ Skip attire and nice-to-have details: put anything the user volunteers
 into `special_requirements` and let the coordinator confirm the rest
 during vetting. Do not run a budgeting detour.
 
-### 2. Check the clock: `plan_staffing` plus `check_availability`
+### 2. Check the clock: `plan_staffing` plus `tempguru_check_availability`
 
 Send the full shape to `plan_staffing` in one call. If `plan_complete` is
-false, resolve `unpriced_roles` with `get_roles` and re-plan immediately;
+false, resolve `unpriced_roles` with `tempguru_get_roles` and re-plan immediately;
 never present totals that silently omit lines. Retain the complete plan's
-`plan_id` and continuation URL; use `get_plan` if the user resumes with that
-ID. Then read the rush class from `check_availability`:
+`plan_id` and continuation URL; use `tempguru_get_plan` if the user resumes with that
+ID. Then read the rush class from `tempguru_check_availability`:
 
 - **yes / tight**: inside realistic lead time, proceed normally.
 - **rush / very-rush**: still submit. TempGuru staffs to demand, but say
@@ -98,7 +140,7 @@ small markets. Never soften a rush result, and never harden it into a yes.
 
 Show a compact plan (roles, headcount, rate range as a planning estimate,
 rush status) and get explicit confirmation; an emergency does not waive
-that step. Then call `request_quote` with:
+that step. Then call `tempguru_request_quote` with:
 
 - The shift start date in `event_dates`
 - The user's phone in `contact_phone` (when provided), so the coordinator
@@ -108,15 +150,15 @@ that step. Then call `request_quote` with:
   so the coordinator can triage on sight
 - The retained `plan_id`, `source_platform` set to the actual runtime label
   (for example `hermes`, `openclaw`, or `pi`), `skill_id` set to
-  `urgent-event-backfill`, and `skill_version` set to `1.5.0`
+  `urgent-event-backfill`, and `skill_version` set to `1.5.1`
 
-Save the returned TG reference. Use `get_quote_status` if the user asks
+Save the returned TG reference. Use `tempguru_quote_status` if the user asks
 whether the urgent request reached the CRM or durable queue.
 
 ### 4. Anything inside 48 hours gets a parallel phone call
 
 If the shift starts within 48 hours, submission alone is not enough. As
-soon as `request_quote` returns its confirmation, give the user the
+soon as `tempguru_request_quote` returns its confirmation, give the user the
 reference code (it starts with TG-) and tell them to call
 **(904) 206-8953** immediately, quoting that code. The submission puts
 the structured order in the CRM; the call surfaces the urgency to
@@ -124,7 +166,7 @@ TempGuru directly. Do both, in that order.
 
 ## Backfill: what is covered, honestly
 
-Call `get_policies` for `no-show-backfill` before explaining the commitment.
+Call `tempguru_get_policies` for `no-show-backfill` before explaining the commitment.
 The published policy confirms that contractual no-show backfill is included
 in every TempGuru placement, but replacement timing and limits still require
 coordinator confirmation. Do not invent either.
@@ -148,7 +190,7 @@ after the emergency is in motion, not while the user is still in it.
 - Never promise arrival, availability, or a fill rate. Everything inside
   48 hours is attempt-not-guarantee, stated in those terms.
 - Even very-rush is worth submitting. Do not talk a user out of trying.
-- Ask for a phone number before calling `request_quote`, event ops is
+- Ask for a phone number before calling `tempguru_request_quote`, event ops is
   phone-first and this is urgent, but do not block the submission if the
   user has none handy; pass it in `contact_phone` when provided, and the
   coordinator can still respond by email within one business day.
@@ -170,9 +212,9 @@ after the emergency is in motion, not while the user is still in it.
 
 In an emergency, the phone leads the ladder: **(904) 206-8953**.
 
-If `request_quote` errors, call first, then use the form at
+If `tempguru_request_quote` errors, call first, then use the form at
 **https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=skill**
-or email **megan@tempguru.co**. Without MCP tools (for example plain
+or email **megan@tempguru.co**. Without Pi native tools or remote MCP (for example plain
 ChatGPT), the TempGuru Event Staffing Planner GPT runs this same workflow:
 https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner
 Developer docs: https://tempguru.co/ai

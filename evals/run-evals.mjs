@@ -111,6 +111,22 @@ try {
       ]),
     toolNames.join(","),
   );
+  const toolByName = new Map((tools.result?.tools ?? []).map((tool) => [tool.name, tool]));
+  const pureReadTools = toolNames.filter(
+    (name) => name !== "plan_staffing" && name !== "request_quote",
+  );
+  check(
+    "tool annotations distinguish lookups, saved-plan persistence, and quote submission",
+    pureReadTools.every((name) => toolByName.get(name)?.annotations?.readOnlyHint === true) &&
+      toolByName.get("plan_staffing")?.annotations?.readOnlyHint === false &&
+      toolByName.get("plan_staffing")?.annotations?.destructiveHint === false &&
+      toolByName.get("request_quote")?.annotations?.readOnlyHint === false,
+    JSON.stringify(
+      Object.fromEntries(
+        toolNames.map((name) => [name, toolByName.get(name)?.annotations]),
+      ),
+    ),
+  );
 
   const prompts = await rpc("prompts/list", {});
   const promptNames = (prompts.result?.prompts ?? []).map((p) => p.name).sort();

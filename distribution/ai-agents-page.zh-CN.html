@@ -78,7 +78,7 @@
 
   <h2>MCP 工具</h2>
 
-  <p>共十一个工具：十个只读的规划、方案恢复、查询、政策、基准和报价状态工具，以及一个可选的写入工具。无需身份验证。请先调用 <code>plan_staffing</code> 并保留 <code>plan_id</code>，仅在用户确认方案并同意提交后调用 <code>request_quote</code>。</p>
+  <p>共十一个工具：九个只读查询工具、一个可保存 30 天非联系信息快照且不具破坏性的 <code>plan_staffing</code> 工具，以及一个可选的联系信息写入工具。无需身份验证。请先调用 <code>plan_staffing</code> 并保留 <code>plan_id</code>，仅在用户确认方案并同意提交后调用 <code>request_quote</code>。</p>
 
   <div class="tg-tools">
 
@@ -246,21 +246,22 @@ https://mcp.tempguru.co/mcp</div>
 
   <p class="tg-label">Hermes</p>
   <div class="tg-code">hermes skills search https://tempguru.co --source well-known --limit 10 --json
-// 安装全部五个技能后，再连接：
+// 安装全部 8 个技能后，再连接：
 hermes mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=hermes"</div>
 
   <p class="tg-label">OpenClaw</p>
   <div class="tg-code">git clone --depth 1 https://github.com/Tempguru-co/tempguru-mcp.git
-// 从 skills/ 分别安装五个目录，再连接 ?source=openclaw 的 MCP。
+// 从 skills/ 分别安装 8 个目录，再连接 ?source=openclaw 的 MCP。
 // 完整命令：https://github.com/Tempguru-co/tempguru-mcp#connect</div>
 
   <p class="tg-label">Pi</p>
-  <div class="tg-code">pi install npm:tempguru-mcp
-pi install npm:pi-mcp-extension</div>
+  <div class="tg-code">pi install npm:tempguru-pi
+// npm 1.5.0 已上线；请发布并验证源码 1.5.1 的 Pi 工具名适配。
+// 在此之前，请连接远程 MCP，以确保端到端执行可靠。</div>
 
   <p class="tg-label">Codex</p>
   <div class="tg-code">codex mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=openai-codex"
-// 请 $skill-installer 安装 Tempguru-co/tempguru-mcp/skills 下的五个技能。</div>
+// 请 $skill-installer 安装 Tempguru-co/tempguru-mcp/skills 下的 8 个技能。</div>
 
   <p class="tg-label">通用 MCP 客户端</p>
   <div class="tg-code">mcp_servers:
@@ -312,7 +313,7 @@ pi install npm:pi-mcp-extension</div>
 
   <h2>安全与隐私</h2>
 
-  <p>所有查询工具均无需身份验证，且只返回公开数据。<code>request_quote</code> 工具将用户提供的联系信息直接提交到 TempGuru 内部 CRM，MCP 服务器本身不存储任何数据。技能资源为纯 markdown，不含可执行代码。除用户明确提供给 <code>request_quote</code> 的信息外，不请求或传输任何用户机密。</p>
+  <p>查询工具均无需身份验证，也不会收集联系人信息。<code>plan_staffing</code> 可将不含联系信息、经过字段白名单限制的方案保存约 30 天；报价状态记录最多保留 90 天。<code>request_quote</code> 仅在用户明确确认后，将联系信息与活动信息发送到 TempGuru 的 CRM，或在 CRM 暂时不可用时进入最多保留 90 天的持久重试队列，并可发送给已配置的通知处理器；这些字段绝不会写入产品遥测。技能资源为纯 markdown，不含可执行代码。</p>
 
   <hr>
 

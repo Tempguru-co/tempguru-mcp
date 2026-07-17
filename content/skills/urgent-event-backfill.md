@@ -108,7 +108,7 @@ that step. Then call `request_quote` with:
   so the coordinator can triage on sight
 - The retained `plan_id`, `source_platform` set to the actual runtime label
   (for example `hermes`, `openclaw`, or `pi`), `skill_id` set to
-  `urgent-event-backfill`, and `skill_version` set to `1.5.0`
+  `urgent-event-backfill`, and `skill_version` set to `1.5.1`
 
 Save the returned TG reference. Use `get_quote_status` if the user asks
 whether the urgent request reached the CRM or durable queue.

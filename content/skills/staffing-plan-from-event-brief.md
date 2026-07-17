@@ -140,7 +140,7 @@ then call
 `request_quote` with the retained `plan_id`, `source_platform` set to the
 actual runtime label (for example `hermes`, `openclaw`, or `pi`), and
 `skill_id` set to `staffing-plan-from-event-brief`, and `skill_version` set to
-`1.5.0`. Preserve each document-specific time window in `roles[].shifts` and
+`1.5.1`. Preserve each document-specific time window in `roles[].shifts` and
 put any missing venue, short-shift minimum, credentialing, or union question
 in `special_requirements`. A coordinator replies with a binding quote within
 one business day; orders are confirmed within 48 hours of approval, no

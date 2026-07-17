@@ -30,6 +30,7 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm run test:unit
+      - run: npm run build:stdio
       - run: npm run evals
       - run: npm run build:cli
       - run: npm run check:cli-package

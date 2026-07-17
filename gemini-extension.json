@@ -1,6 +1,6 @@
 {
   "name": "tempguru-event-staffing",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "Plan and budget W-2 event staffing for 345 US and Canadian cities: live hourly rates, booking lead times, state labor compliance, and quote requests from TempGuru.",
   "mcpServers": {
     "tempguru-event-staffing": {

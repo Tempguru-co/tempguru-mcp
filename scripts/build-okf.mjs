@@ -63,12 +63,20 @@ const API_OPS = openapi
       .map((d) => ({ method: "GET", path: `/api/v1/${d.name}`, summary: "" }));
 
 const TOOLS = readFileSync(join(repoRoot, "src", "lib", "mcp", "register-tools.ts"), "utf8")
-  .split("registerTool(").slice(1).map((c) => ({
-    name: (c.match(/^\s*"([a-z_]+)"/) || [])[1],
-    title: (c.match(/title:\s*"([^"]+)"/) || [])[1],
-    summary: ((c.match(/description:\s*\n?\s*"((?:[^"\\]|\\.)*)"/) || [])[1] || "").split(/(?<=\.)\s/)[0],
-    kind: /readOnlyHint:\s*true/.test(c.slice(0, 4000)) ? "read" : "write",
-  })).filter((t) => t.name);
+  .split("registerTool(").slice(1).map((c) => {
+    const name = (c.match(/^\s*"([a-z_]+)"/) || [])[1];
+    return {
+      name,
+      title: (c.match(/title:\s*"([^"]+)"/) || [])[1],
+      summary: ((c.match(/description:\s*\n?\s*"((?:[^"\\]|\\.)*)"/) || [])[1] || "").split(/(?<=\.)\s/)[0],
+      kind:
+        name === "plan_staffing"
+          ? "saved-plan write"
+          : /readOnlyHint:\s*true/.test(c.slice(0, 4000))
+            ? "read"
+            : "contact write",
+    };
+  }).filter((t) => t.name);
 
 const readSkill = (f) => {
   const raw = readFileSync(join(repoRoot, "content", "skills", f), "utf8");
@@ -165,6 +173,7 @@ const DATA_DATE = [
   pricing._meta.updated,
   compliance._meta.updated,
   policies._meta.updated,
+  rateIndexMeta.updated,
 ].sort().slice(-1)[0];
 const TS = `${DATA_DATE}T00:00:00Z`;
 
@@ -1050,8 +1059,9 @@ write("workflows/quote-submission.md", doc(
   },
   `# Quote Submission
 
-\`request_quote\` is the one **write** tool. Call it **last**, and only after the
-user's explicit confirmation.
+\`request_quote\` is the only **contact/consequential write** tool. The planner's
+separate saved-plan side effect contains no contact details. Call
+\`request_quote\` **last**, and only after the user's explicit confirmation.
 
 ## Collect
 
@@ -1064,7 +1074,7 @@ user's explicit confirmation.
 
 ## What happens
 
-1. The request is submitted to TempGuru's CRM and a \`TG-XXXXXX\` reference is returned. Retain it.
+1. The request is submitted to TempGuru's CRM or durable fallback intake and a \`TG-XXXXXX\` reference is returned. Retain it.
 2. A human coordinator replies with a **binding quote within one business day**.
 3. **No payment** until the user approves the quote. A submitted request is **not** a reservation or a contract.
 4. Do not poll automatically. If the user asks whether the request arrived, call \`get_quote_status\` with the retained TG reference; received/queued status is not a booking confirmation.
@@ -1186,13 +1196,14 @@ and \`check-rates\`.`
 ));
 
 const toolRows = TOOLS.map((t) => `| \`${t.name}\` | ${t.kind} | ${(t.summary || t.title || "").trim()} |`).join("\n");
-const writeCount = TOOLS.filter((t) => t.kind === "write").length;
-const readCount = TOOLS.length - writeCount;
+const readCount = TOOLS.filter((t) => t.kind === "read").length;
+const savedPlanWriteCount = TOOLS.filter((t) => t.kind === "saved-plan write").length;
+const contactWriteCount = TOOLS.filter((t) => t.kind === "contact write").length;
 write("reference/mcp-tools.md", doc(
   {
     type: "Tool Reference",
     title: "MCP Tools",
-    description: `The ${TOOLS.length} tools exposed by the TempGuru MCP server: ${readCount} read-only lookups plus ${writeCount} opt-in write.`,
+    description: `The ${TOOLS.length} tools exposed by the TempGuru MCP server: ${readCount} read-only lookups, ${savedPlanWriteCount} non-destructive saved-plan write, and ${contactWriteCount} opt-in contact write.`,
     mcp_endpoint: MCP_ENDPOINT,
     tags: ["reference", "mcp", "tools"],
     timestamp: TS,
@@ -1200,7 +1211,7 @@ write("reference/mcp-tools.md", doc(
   `# MCP Tools
 
 The TempGuru MCP server (\`${MCP_ENDPOINT}\`, Streamable HTTP, no auth) exposes
-**${TOOLS.length} tools** (${readCount} read-only, ${writeCount} write). This table and its descriptions are
+**${TOOLS.length} tools** (${readCount} read-only, ${savedPlanWriteCount} non-destructive saved-plan write, ${contactWriteCount} contact write). This table and its descriptions are
 generated from the live tool registry (\`register-tools.ts\`), so they cannot drift
 from the server.
 

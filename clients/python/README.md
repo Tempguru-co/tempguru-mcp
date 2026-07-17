@@ -57,7 +57,7 @@ tools = TempGuruToolSpec().to_tool_list()
 ```
 
 **Quote submission** (`tg.request_quote(...)` / the `submit_event_staffing_
-quote_request` tool) sends a confirmed staffing plan to TempGuru's CRM; a
+quote_request` tool) sends a confirmed staffing plan to TempGuru's CRM or durable intake queue; a
 coordinator replies with a binding quote within one business day. It is
 opt-in, creates no reservation, requires no payment, and is rate-limited
 (20/hour/IP). Agents should confirm the full plan with the user before
@@ -93,7 +93,8 @@ TOOLS = [{
 
 If your stack speaks Model Context Protocol, skip this package and connect
 the server directly: `https://mcp.tempguru.co/mcp` (streamable HTTP, no
-auth, 11 tools: ten read-only plus opt-in quote submission). Docs:
+auth, 11 tools: nine read-only lookups, a non-destructive saved-plan planner,
+and opt-in quote submission). Docs:
 https://tempguru.co/ai
 
 ## Error handling

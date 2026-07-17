@@ -9,9 +9,10 @@ Live event staffing data for the US and Canada from TempGuru: city coverage
 (345 markets), 19 staffing roles, all-inclusive W-2 hourly rate ranges,
 booking lead-time guidance, state labor compliance summaries, and an opt-in
 `request_quote` tool that submits a staffing inquiry for a human-reviewed
-quote. Ten tools are read-only (`readOnlyHint: true`); `request_quote` is
-the single write tool (`destructiveHint: false`) and should only be called
-after the user explicitly confirms the plan.
+quote. Nine lookup tools are read-only. `plan_staffing` is non-destructive but
+uses `readOnlyHint: false` because a complete plan may save a non-PII snapshot
+for 30 days. `request_quote` is the only contact-creating, consequential write
+and should only be called after the user explicitly confirms the plan.
 
 ## Option A, remote server (preferred, zero install)
 
@@ -39,11 +40,12 @@ source from plan creation through quote submission without collecting PII:
 | OpenClaw | `https://mcp.tempguru.co/mcp?source=openclaw` |
 | Pi | `https://mcp.tempguru.co/mcp?source=pi` |
 
-## Canonical skills (five)
+## Canonical skills (8)
 
-The action layer above ships with five portable `SKILL.md` workflows: event
+The action layer above ships with 8 portable `SKILL.md` workflows: event
 staffing ordering, compliance assessment, staffing plans from event briefs,
-urgent backfill, and staffing-agency partner growth. Discover them at:
+urgent backfill, staffing-agency partner growth, multi-city activation planning,
+event-staffing procurement, and TempGuru Pro operations. Discover them at:
 
 ```text
 https://mcp.tempguru.co/.well-known/agent-skills/index.json
@@ -102,30 +104,22 @@ legacy OpenClaw VPS container.
 
 ## Pi
 
-Install the TempGuru package (five skills) and an MCP client extension:
+The live npm package is `tempguru-pi@1.5.0` (8 skills + 9 native REST-backed
+tools with `?source=pi` attribution). This repository prepares `1.5.1`, which
+adapts every installed skill to the real Pi tool names. Until `1.5.1` is
+published and verified, attach the remote MCP for dependable end-to-end skill
+execution:
 
 ```bash
-pi install npm:tempguru-mcp
-pi install npm:pi-mcp-extension
+pi install npm:tempguru-pi
 ```
 
-Then create `~/.pi/agent/mcp.json`:
-
-```json
-{
-  "mcpServers": {
-    "tempguru": {
-      "transport": "streamable-http",
-      "url": "https://mcp.tempguru.co/mcp?source=pi",
-      "lifecycle": "eager"
-    }
-  }
-}
-```
-
-Restart Pi, verify `/skill:event-staffing-ordering`, then use `/mcp` to
-confirm the TempGuru tools are connected. `pi-mcp-extension` is a community
-bridge; review and pin it under your normal dependency policy.
+Restart Pi, verify `/skill:event-staffing-ordering`, and confirm the tool list
+contains `tempguru_get_cities` through `tempguru_request_quote`. No community
+MCP bridge is required for those native tools. The full `plan_staffing` planner
+and `get_rate_benchmark` Rate Index remain MCP-only in the current native package; when a Pi
+deployment also has a trusted MCP client, attach
+`https://mcp.tempguru.co/mcp?source=pi` for those two capabilities.
 
 ## Codex
 
@@ -139,7 +133,9 @@ codex mcp get tempguru
 Then ask Codex to use `$skill-installer` to install these GitHub paths from
 `Tempguru-co/tempguru-mcp`: `skills/event-staffing-ordering`,
 `skills/event-staffing-compliance`, `skills/staffing-plan-from-event-brief`,
-`skills/urgent-event-backfill`, and `skills/staffing-agency-partner-growth`.
+`skills/urgent-event-backfill`, `skills/staffing-agency-partner-growth`,
+`skills/multi-city-activation-planner`, `skills/event-staffing-procurement`,
+and `skills/tempguru-pro-operations`.
 The skills become available on the next turn.
 
 ## Option B, local stdio via npm

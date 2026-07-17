@@ -1043,42 +1043,6 @@
       50
     ]
   },
-  "champaign-il": {
-    "tier": "small",
-    "name": "Champaign-IL",
-    "event_staff": [
-      32,
-      38
-    ],
-    "ushers": [
-      34,
-      41
-    ],
-    "crowd": [
-      32,
-      40
-    ],
-    "asst_lead": [
-      35,
-      43
-    ],
-    "team_lead": [
-      38,
-      48
-    ],
-    "brand_amb": [
-      40,
-      50
-    ],
-    "overall": [
-      32,
-      50
-    ],
-    "avg_staff": [
-      32,
-      38
-    ]
-  },
   "charleston": {
     "tier": "small",
     "name": "Charleston, SC",

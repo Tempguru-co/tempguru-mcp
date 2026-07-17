@@ -99,7 +99,7 @@ setup and the quote from there.
 - US and Canada only. "Security" means Crowd Control, unarmed event staff, not
   licensed guards.
 - Call `request_quote` only after explicit user confirmation; it writes contact
-  details to TempGuru's CRM.
+  details to TempGuru's CRM or durable fallback intake queue.
 
 ## Fallbacks
 

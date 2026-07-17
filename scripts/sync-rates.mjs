@@ -23,6 +23,8 @@ const PAIRS = [
 const check = process.argv.includes("--check");
 let drift = 0;
 let synced = 0;
+let checked = 0;
+let skipped = 0;
 
 for (const [srcRel, dstRel] of PAIRS) {
   const src = join(root, srcRel);
@@ -32,8 +34,10 @@ for (const [srcRel, dstRel] of PAIRS) {
     // Canonical source not present (deployed build, fresh clone), the committed
     // MCP copy is authoritative here, nothing to do.
     console.log(`  skip: ${srcRel} not present (using committed MCP copy)`);
+    skipped++;
     continue;
   }
+  checked++;
   const srcData = readFileSync(src, "utf8");
   const dstData = existsSync(dst) ? readFileSync(dst, "utf8") : null;
 
@@ -55,4 +59,10 @@ if (check && drift > 0) {
   console.error(`\nrate data drift detected (${drift} file(s)). The MCP would ship stale rates.`);
   process.exit(1);
 }
-console.log(check ? "\nrate sync: in sync." : `\nrate sync: ${synced} file(s) updated.`);
+if (check && checked === 0) {
+  console.log(`\nrate sync: skipped; ${skipped} canonical website source file(s) absent, using committed MCP copies.`);
+} else if (check) {
+  console.log(`\nrate sync: ${checked} source file(s) in sync${skipped ? `; ${skipped} absent source file(s) skipped` : ""}.`);
+} else {
+  console.log(`\nrate sync: ${synced} file(s) updated.`);
+}

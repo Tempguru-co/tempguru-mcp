@@ -17,7 +17,7 @@ Ship both.
 | Requirement | Status |
 |---|---|
 | Remote MCP server over HTTPS | ✅ `https://mcp.tempguru.co/mcp` (streamable HTTP) |
-| Tool annotations (read-only vs write) | ✅ 10 read-only + `request_quote` flagged write |
+| Tool annotations (read-only vs write) | ✅ 9 read-only; `plan_staffing` and `request_quote` truthfully flagged write/non-destructive as applicable |
 | No-auth or OAuth | ✅ no-auth (simplest review path) |
 | Tool descriptions written for model selection | ✅ "use this when..." style |
 | Privacy policy | ✅ `https://tempguru.co/privacy-policy` |
@@ -74,7 +74,7 @@ Request a staffing quote for my festival
 ## Write-action justification (reviewers will ask about `request_quote`)
 
 > `request_quote` submits a staffing inquiry (contact info + event details the
-> user explicitly provides in conversation) to TempGuru's CRM so a human
+> user explicitly provides in conversation) to TempGuru's CRM or durable intake queue so a human
 > coordinator can respond with a quote. It is opt-in, requires explicit user
 > confirmation of the summarized plan, creates no reservation, charges no
 > payment, and stores no conversation content. Equivalent to submitting the

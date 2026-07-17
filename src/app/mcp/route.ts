@@ -1,6 +1,6 @@
 // TempGuru MCP server, streamable-HTTP transport (production, on Vercel).
 //
-// The 11 tools and 5 Skill resources are registered by the shared registerTools()
+// The 11 tools and Skill resources are registered by the shared registerTools()
 // in @/lib/mcp/register-tools, so this hosted endpoint and the stdio binary
 // (src/mcp-stdio.ts) expose byte-identical tools, no behavior drift between the
 // remote server and a local/Docker build. This file owns only what is
@@ -74,7 +74,7 @@ const handler = createMcpHandler(
       version: pkg.version,
       title: "TempGuru Event Staffing",
       description:
-        "W-2 event staffing data for AI agents across 345 US/CA markets. Eleven tools: ten read-only planning, saved-plan, lookup, policy, benchmark, and quote-status tools plus one opt-in request_quote submission. Ships skill resources and guided prompts. No authentication required.",
+        "W-2 event staffing data for AI agents across 345 US/CA markets. Eleven tools: nine read-only lookups, a non-destructive planner that may save a 30-day non-PII snapshot, and one opt-in request_quote contact submission. Ships skill resources and guided prompts. No authentication required.",
       icons: [
         {
           src: "https://mcp.tempguru.co/logo.svg",

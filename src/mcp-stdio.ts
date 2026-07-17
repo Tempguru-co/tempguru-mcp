@@ -1,16 +1,16 @@
 // TempGuru MCP server, stdio transport (local / Docker / embedded).
 //
 // A self-contained build of the same MCP server that runs at
-// https://mcp.tempguru.co/mcp. It registers the identical 11 tools + 5 Skill
+// https://mcp.tempguru.co/mcp. It registers the identical 11 tools and Skill
 // resources via the shared registerTools(), but speaks MCP over stdin/stdout
 // instead of streamable HTTP, the form that Claude Desktop, the Docker MCP
 // Catalog, on-device assistants, and Glama's sandboxed checker expect from a
 // locally-run server.
 //
-// Boots with no configuration: the ten read-only tools serve static data or
-// clean not-found variants when Redis is absent. request_quote registers but returns a
-// clean error if NOTION_API_KEY is unset (e.g. a credential-less Docker build),
-// so the server never crashes on startup.
+// Boots with no configuration: nine lookup tools serve static data or clean
+// not-found variants, plan_staffing fails open without saved-plan storage, and
+// request_quote returns a clean error if NOTION_API_KEY is unset (e.g. a
+// credential-less Docker build), so the server never crashes on startup.
 //
 // IMPORTANT: stdout is the MCP protocol channel, nothing may write to it except
 // the transport. All diagnostics go to stderr.
@@ -64,7 +64,7 @@ const server = new McpServer({
   version: pkg.version,
   title: "TempGuru Event Staffing",
   description:
-    "W-2 event staffing data for AI agents: 345 US/CA markets. Eleven tools: ten read-only planning, saved-plan, lookup, policy, benchmark, and quote-status tools plus one opt-in request_quote submission. Ships skill resources and guided prompts. No authentication required.",
+    "W-2 event staffing data for AI agents: 345 US/CA markets. Eleven tools: nine read-only lookups, a non-destructive planner that may save a 30-day non-PII snapshot, and one opt-in request_quote contact submission. Ships skill resources and guided prompts. No authentication required.",
   icons: [
     {
       src: "https://mcp.tempguru.co/logo.svg",
@@ -79,7 +79,7 @@ registerTools(server, { resources: loadSkills() });
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("[tempguru-mcp] stdio server ready, 11 tools, 5 skill resources, 2 prompts.");
+  console.error(`[tempguru-mcp] stdio server ready, 11 tools, ${SKILL_SLUGS.length} skill resources, 2 prompts.`);
 }
 
 main().catch((err) => {

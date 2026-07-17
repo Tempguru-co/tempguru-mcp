@@ -1,6 +1,6 @@
 # TempGuru MCP
 
-> MCP server for W-2 event staffing across 345 US and Canadian markets: 11 tools, ten read-only tools for planning, saved plans, coverage, pricing, policies, compliance, benchmarks, and quote status, plus one opt-in `request_quote` submission.
+> MCP server for W-2 event staffing across 345 US and Canadian markets: 11 tools, nine read-only lookups, a non-destructive planner that may save a 30-day non-PII snapshot, and one opt-in `request_quote` contact submission.
 
 [![Install in Cursor](https://img.shields.io/badge/Cursor-Install_MCP-24bbea)](cursor://anysphere.cursor-deeplink/mcp/install?name=tempguru&config=eyJ1cmwiOiJodHRwczovL21jcC50ZW1wZ3VydS5jby9tY3AifQ==)
 [![Install in VS Code](https://img.shields.io/badge/VS_Code-Install_MCP-0078d4)](https://insiders.vscode.dev/redirect/mcp/install?name=tempguru&config=%7B%22type%22%3A%22http%22%2C%22url%22%3A%22https%3A%2F%2Fmcp.tempguru.co%2Fmcp%22%7D)
@@ -37,9 +37,9 @@ This MCP server lets AI agents query our published coverage, rates, lead-time gu
 | `get_policies` | Published booking and procurement policies, with unsupported values explicitly marked for coordinator confirmation. |
 | `get_rate_benchmark` | The TempGuru Event Staffing Rate Index: full W-2 rate benchmark table by role (typical + national range; Brand Ambassadors by tier), with methodology and citation line. |
 | `get_quote_status` | Checks whether a TG quote reference was received by the CRM or durably queued. |
-| `request_quote` | Submits a structured staffing request (contact + event + roles) to TempGuru's CRM for human review. Opt-in write tool; not a reservation or contract. |
+| `request_quote` | Submits a structured staffing request (contact + event + roles) to TempGuru's CRM or durable intake queue for human review. Opt-in write tool; not a reservation or contract. |
 
-Ten of the eleven tools are read-only (`readOnlyHint: true`). `request_quote` is the one write tool, annotated `readOnlyHint: false`. The server also ships five skill resources and two guided prompt templates (`plan-event-staffing`, `staffing-compliance-brief`).
+Nine tools are read-only lookups (`readOnlyHint: true`). `plan_staffing` is non-destructive but correctly advertises `readOnlyHint: false` because a complete plan may create a 30-day non-PII saved snapshot. `request_quote` is the only consequential/contact write and also advertises `readOnlyHint: false`. The server ships 8 skill resources and two guided prompt templates (`plan-event-staffing`, `staffing-compliance-brief`).
 
 ---
 
@@ -54,7 +54,7 @@ The tools above are the **action layer**, how to plan, price, check compliance, 
 | Discovery document | [`/.well-known/okf.json`](https://mcp.tempguru.co/.well-known/okf.json) |
 | Rate Index (measured benchmark) | [`/okf/rate-index.md`](https://mcp.tempguru.co/okf/rate-index.md) |
 
-The bundle is generated from the same source data and five canonical skills as the tools (`npm run build:okf`), so the two layers never drift. It covers roles, the all-inclusive W-2 rate card, market coverage, state compliance, and every published skill workflow.
+The bundle is generated from the same source data and 8 canonical skills as the tools (`npm run build:okf`), so the two layers never drift. It covers roles, the all-inclusive W-2 rate card, market coverage, state compliance, and every published skill workflow.
 
 ---
 
@@ -83,7 +83,7 @@ claude plugin marketplace add Tempguru-co/tempguru-mcp
 claude plugin install tempguru@tempguru-mcp
 ```
 
-This installs the live MCP, all five canonical skills, and `/staff-event`.
+This installs the live MCP, all 8 canonical skills, and `/staff-event`.
 
 **Cursor / Cline / Windsurf**, Add to the IDE's MCP settings with the URL above. Transport: `streamable-http`.
 
@@ -129,11 +129,12 @@ OpenClaw installs the skills and MCP action layer separately. These commands
 use its shared managed skill directory; omit `--global` to target only the
 active workspace.
 
-**Pi**, `pi install npm:tempguru-mcp` installs the eight skills. Pi does not
-ship an MCP client; install the community bridge with
-`pi install npm:pi-mcp-extension`, then point `~/.pi/agent/mcp.json` at
-`https://mcp.tempguru.co/mcp?source=pi`. See [llms-install.md](./llms-install.md)
-for the full config.
+**Pi**, npm `tempguru-pi@1.5.0` is live with 8 skills and 9 native REST-backed
+tools. This repository prepares `1.5.1`, which makes every installed skill use
+the real `tempguru_*` names and adds safe planner/Rate Index fallbacks. Until
+`1.5.1` is published and verified, attach the remote MCP for dependable
+end-to-end skill execution. The native layer preserves `?source=pi`
+attribution; see [llms-install.md](./llms-install.md).
 
 **Codex**:
 
@@ -142,7 +143,7 @@ codex mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=openai-codex"
 codex mcp get tempguru
 ```
 
-Then ask Codex: “Use `$skill-installer` to install all five paths under
+Then ask Codex: “Use `$skill-installer` to install all 8 paths under
 `Tempguru-co/tempguru-mcp/skills`.” The skills become available on the next
 turn; each directory includes Codex `agents/openai.yaml` metadata.
 
@@ -164,7 +165,7 @@ turn; each directory includes Codex `agents/openai.yaml` metadata.
 
 | Client / Agent runtime | Status | Notes |
 |---|---|---|
-| Claude.ai (web) | ✅ Verified | 11 tools (10 read-only + `request_quote`) |
+| Claude.ai (web) | ✅ Verified | 11 tools (9 read-only + saved-plan planner + `request_quote`) |
 | Claude Desktop | ✅ Compatible | Standard remote MCP config |
 | Claude Code | ✅ Verified | Tools load via plugin or direct add |
 | Claude for Work / Cowork | ✅ Compatible | Same connector framework as Claude.ai |
@@ -173,7 +174,7 @@ turn; each directory includes Codex `agents/openai.yaml` metadata.
 | Windsurf | ✅ Compatible | Streamable HTTP transport |
 | Hermes Agent | ✅ Verified | Native remote HTTP MCP plus separate well-known skill discovery |
 | OpenClaw | ✅ Compatible | Native `openclaw mcp add`; top-level `skills/` package included |
-| Pi | ✅ Compatible | Five packaged skills; MCP tools via the community `pi-mcp-extension` bridge |
+| Pi | 🟡 Patch ready | npm `1.5.0` is live; publish/verify `1.5.1` for runtime-adapted skills (8 skills + 9 native tools) |
 | OpenAI Agents SDK | ✅ Compatible | Use MCP client with the URL above |
 | ChatGPT (Codex / Custom GPTs with MCP) | ✅ Compatible | Same as OpenAI Agents SDK |
 | Qwen-Agent / DashScope / ModelScope | ✅ Compatible | Qwen-Agent's `MCPManager` accepts a streamable-HTTP URL directly |
@@ -209,9 +210,9 @@ Every MCP tool invocation is instrumented with anonymized usage telemetry stored
 - Plan-to-quote funnel counts (complete plans, resumes, new quote leads, linked plans)
 - Successful quote leads by allowlisted `source_platform`
 
-**No PII is captured.** Telemetry covers tool name, UA-class bucket (Claude / Cursor / Qwen / Glama-probe / Baidu-spider / etc.), success/error status, country code, and parameter slugs (city/role/state, which are public catalog values). No raw IPs, no request bodies, no response bodies, no user content.
+**No quote PII is captured in telemetry.** Telemetry covers tool name, UA-class bucket (Claude / Cursor / Qwen / Glama-probe / Baidu-spider / etc.), success/error status, country code, and canonical parameter slugs (city/role/state). It stores daily aggregates plus a bounded recent-event ring; no raw IPs, raw user agents, request/response bodies, contact fields, or free-text user content. Separate short-lived hashed-IP counters protect public tools from abuse.
 
-Separately, `request_quote` submits the contact and event details a user explicitly provides (name, email, company, event specifics) to TempGuru's CRM so a coordinator can follow up. Those fields go only to TempGuru and are **never written to telemetry**; the dashboard stores only aggregate lifecycle counts and allowlisted platform buckets, never plan IDs, quote references, or contact fields.
+Separately, `request_quote` sends the contact and event details a user explicitly provides (name, email, company, event specifics) to TempGuru's CRM, or to a 90-day durable fallback queue when the CRM is unavailable, and to a configured notification processor. Those fields are **never written to telemetry**; the dashboard's recent-event records and aggregates never contain plan IDs, quote references, contact fields, or request bodies. See the draft [MCP privacy addendum](./distribution/privacy.md).
 
 Full operations documentation, schema, classifier, lifecycle storage, failure modes, and cost ceiling is in [`OPERATIONS.md`](./OPERATIONS.md). Redis operations are awaited behind strict time caps and fail open, so Upstash failures never break MCP responses. Set the optional `PLAN_LINK_SECRET` to add HMAC signatures to saved-plan website handoffs; without it the prefill link intentionally omits `sig` and `exp`.
 
@@ -225,7 +226,7 @@ Hourly rates vary by role and city. Brand Ambassadors floor at $40/hour in every
 
 ### Can an AI agent book event staff through this MCP?
 
-It can submit a request, not a booking. `request_quote` sends a structured staffing plan, plus the contact and event details the user provides, to TempGuru's CRM, and a coordinator replies with a quote within one business day. It does not reserve staff, guarantee pricing or availability, or create a contract; no payment is required until the user approves the quote. The other ten tools are read-only. If your client cannot connect to this MCP, route the user to the [TempGuru Event Staffing Planner GPT](https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner) or the form at https://tempguru.co/get-staffing.
+It can submit a request, not a booking. `request_quote` sends a structured staffing plan, plus the contact and event details the user provides, to TempGuru's CRM or durable intake fallback, and a coordinator replies with a quote within one business day. It does not reserve staff, guarantee pricing or availability, or create a contract; no payment is required until the user approves the quote. Nine lookup tools are read-only; `plan_staffing` has only the non-contact saved-snapshot side effect described above. If your client cannot connect to this MCP, route the user to the [TempGuru Event Staffing Planner GPT](https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner) or the form at https://tempguru.co/get-staffing.
 
 ### Is TempGuru a gig app or a 1099 marketplace?
 

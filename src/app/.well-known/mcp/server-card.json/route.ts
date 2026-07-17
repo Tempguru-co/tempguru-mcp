@@ -22,7 +22,7 @@ const SERVER_CARD = {
     title: "TempGuru Event Staffing",
     version: pkg.version,
     description:
-      "Model Context Protocol server for TempGuru event staffing data across 345 US/Canada markets. Eleven tools: planning and saved-plan resume, city/role/rate/availability/compliance lookups, published booking policies, the Rate Index, opt-in quote submission, and quote status. Ten tools are read-only; request_quote is the one write tool. Also ships five skill resources and two guided prompts.",
+      "Model Context Protocol server for TempGuru event staffing data across 345 US/Canada markets. Eleven tools: nine read-only lookups, a non-destructive planner that may save a 30-day non-PII snapshot, and one opt-in request_quote contact submission. Also ships 8 skill resources and two guided prompts.",
     websiteUrl: "https://tempguru.co",
   },
   transport: {
@@ -41,7 +41,7 @@ const SERVER_CARD = {
     {
       name: "plan_staffing",
       description:
-        "Planner meta-tool, call first. Turns an event shape (city, date, roles + headcount) into a complete plan: coverage, per-role W-2 rate math, lead-time guidance, and state compliance flags.",
+        "Planner meta-tool, call first. Turns an event shape into a complete plan and may save a 30-day non-PII snapshot for plan_id continuation. Non-destructive, but not read-only.",
     },
     {
       name: "get_plan",

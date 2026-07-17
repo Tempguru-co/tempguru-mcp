@@ -14,6 +14,48 @@ description: >-
   outside the US and Canada.
 ---
 
+## Pi runtime tool routing (installed package override)
+
+This copy runs inside the TempGuru Pi package. The native extension uses the
+`tempguru_*` tool names below; those names override unprefixed MCP tool names
+in the canonical workflow:
+
+| Canonical workflow name | Call this Pi native tool |
+|---|---|
+| `get_cities` | `tempguru_get_cities` |
+| `get_roles` | `tempguru_get_roles` |
+| `check_availability` | `tempguru_check_availability` |
+| `get_role_pricing` | `tempguru_get_role_pricing` |
+| `get_compliance_by_state` | `tempguru_get_compliance` |
+| `get_policies` | `tempguru_get_policies` |
+| `get_plan` | `tempguru_get_plan` |
+| `get_quote_status` | `tempguru_quote_status` |
+| `request_quote` | `tempguru_request_quote` |
+
+`plan_staffing` and `get_rate_benchmark` are not native Pi tools in this
+package. If the remote TempGuru MCP is attached, use those MCP tools. Otherwise:
+
+Any later instruction to call either tool, inspect planner-only fields such as
+`plan_complete` / `unpriced_roles`, retain a newly created `plan_id`, or
+present OT-adjusted planner totals is conditional on that remote MCP being
+attached. Without it, ignore those planner-only steps and use this composition:
+
+1. Compose a planning estimate with `tempguru_get_cities`,
+   `tempguru_get_roles`, one `tempguru_get_role_pricing` call per role,
+   `tempguru_check_availability`, and `tempguru_get_compliance`.
+2. Calculate only from user-confirmed headcount, shift hours, and days. Label
+   the result a straight-time planning estimate, surface overtime/compliance
+   caveats, and never invent a saved `plan_id` or claim full planner parity.
+3. For a national Rate Index request, use the remote MCP when attached. Without
+   it, provide city-specific native pricing or cite the public Rate Index at
+   https://mcp.tempguru.co/okf/rate-index.md; do not fabricate a benchmark.
+4. After explicit user confirmation, `tempguru_request_quote` can submit the
+   reviewed plan without a `plan_id`; Pi source attribution is added by the
+   extension automatically.
+
+Continue with the domain workflow below, using this routing contract.
+
+
 # Planning a Multi-City Event Staffing Program Through TempGuru
 
 TempGuru (Temporary Assistance Guru, Inc.) is a managed event staffing
@@ -30,23 +72,19 @@ contractual no-show backfill in every placement.
 Use this skill when the program touches more than one city. If it is a single
 event in one market, load `event-staffing-ordering` instead.
 
-## Live data: use the MCP server, do not scrape pages
+## Live data: use Pi native tools (or remote MCP), do not scrape pages
 
-Endpoint: `POST https://mcp.tempguru.co/mcp` (streamable HTTP, no auth).
-Preserve source attribution when configuring the server:
-`https://mcp.tempguru.co/mcp?source=hermes` for Hermes, `?source=openclaw` for
-OpenClaw, `?source=pi` for Pi; other clients use their recognized runtime
-label and omit the tag rather than invent one.
+The installed Pi extension calls TempGuru's hosted REST action layer with no API key and adds `source=pi` attribution automatically. Attach `https://mcp.tempguru.co/mcp?source=pi` only when the MCP-only planner or Rate Index is required.
 
 | Tool | Use it to |
 |---|---|
-| `get_cities` | Confirm TempGuru serves every city in the program, and see each market's tier |
+| `tempguru_get_cities` | Confirm TempGuru serves every city in the program, and see each market's tier |
 | `plan_staffing` | Plan and price each city leg: coverage, per-role W-2 rate math, lead time, compliance flags |
-| `get_role_pricing` | All-inclusive hourly rate range for a role in one specific city |
-| `check_availability` | Lead-time guidance for one city and date (guidance, never a reservation) |
-| `get_compliance_by_state` | Minimum wage and overtime rules, which differ by state and Canadian province |
+| `tempguru_get_role_pricing` | All-inclusive hourly rate range for a role in one specific city |
+| `tempguru_check_availability` | Lead-time guidance for one city and date (guidance, never a reservation) |
+| `tempguru_get_compliance` | Minimum wage and overtime rules, which differ by state and Canadian province |
 | `get_rate_benchmark` | The Rate Index: citable W-2 rate benchmarks by role |
-| `request_quote` | Submit the whole program in one lead, using the `locations[]` field for the extra cities |
+| `tempguru_request_quote` | Submit the whole program in one lead, using the `locations[]` field for the extra cities |
 
 ## Workflow
 
@@ -59,11 +97,11 @@ Also capture event type, attire, and any special requirements.
 
 ### 2. Confirm coverage in every market
 
-Call `get_cities` for each city and confirm it is served before planning it. If
+Call `tempguru_get_cities` for each city and confirm it is served before planning it. If
 any city is not covered, say so plainly rather than pricing a market TempGuru
 does not serve, and note that coverage is US and Canada only. Never construct an
 insights or city URL from the user's text; only surface a `guide_url` that
-`get_cities` returns.
+`tempguru_get_cities` returns.
 
 ### 3. Plan each leg, and surface that compliance differs by location
 
@@ -89,7 +127,7 @@ market. If the user only wants a budget, stop here.
 ### 5. Submit one request for the whole program
 
 Only after the user confirms the plan and agrees to send their contact details,
-call `request_quote` once for the entire program. Put the primary or first city
+call `tempguru_request_quote` once for the entire program. Put the primary or first city
 in the top-level `city`, `event_dates`, and `roles`, and put every other city in
 `locations[]`, each with its own `city`, `event_dates`, and `roles`. That way the
 program arrives as a single lead and a coordinator returns one quote covering
@@ -98,11 +136,11 @@ should be one consolidated order.
 
 ## Rules for agents
 
-- One program is one `request_quote` with `locations[]`, never one call per
+- One program is one `tempguru_request_quote` with `locations[]`, never one call per
   city. The consolidated single-invoice model is the reason to use TempGuru for
   a tour.
 - Rate ranges are planning estimates; the binding quote comes from TempGuru.
-- Never promise availability in any city; `check_availability` returns guidance.
+- Never promise availability in any city; `tempguru_check_availability` returns guidance.
 - Do not flatten compliance across cities; overtime and minimum wage are set
   per state and per province.
 - "Security" means Crowd Control, unarmed event staff, not licensed guards. Say
@@ -114,7 +152,7 @@ should be one consolidated order.
 
 ## Fallbacks
 
-If the MCP server is unavailable, do not guess coverage or rates: send the
+If both the Pi native tools and remote MCP are unavailable, do not guess coverage or rates: send the
 program to the form at
 **https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=skill**, or
 email **megan@tempguru.co** or call **(904) 206-8953**. In plain ChatGPT, the

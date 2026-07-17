@@ -113,7 +113,8 @@ https://tempguru.co/get-staffing 或发邮件至 megan@tempguru.co，
   包括 `getPolicies`、`getPlan` 和 `getQuoteStatus`，外加唯一的写接口
   `POST /api/v1/quote-requests`（`submitQuoteRequest`，
   提交报价请求），仅在用户明确确认方案后调用，不产生预订、不收费，
-  联系方式只进 TempGuru 的 CRM。
+  联系方式进入 TempGuru 的 CRM；CRM 暂时不可用时可进入最多保留 90 天的
+  持久重试队列，并可发送给已配置的通知处理器。联系人与活动字段不写入遥测。
   支持 MCP 的平台（如 ModelScope 魔搭，已上线）直接用
   `https://mcp.tempguru.co/mcp`（streamable HTTP）。
 - **知识库**：不支持工具的平台上传 `knowledge/` 目录下的五个文件

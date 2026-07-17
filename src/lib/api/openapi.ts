@@ -27,7 +27,7 @@ export function buildOpenApiSpec() {
         "",
         "**About availability.** The `availability` endpoint returns *lead-time guidance based on city tier*, not a real-time reservation or hold on staff. TempGuru staffs to demand from a 100,000+ W-2 worker network across 345 markets; bookings are confirmed through the standard quote-and-confirmation flow, not via this API.",
         "",
-        "**About quote submission.** `POST /api/v1/quote-requests` is the only write operation in this API. It is opt-in by design: call it only after the user has reviewed the staffing plan and explicitly confirmed they want to submit it. It creates a structured lead in TempGuru's CRM for human review, it does **not** reserve staff, guarantee pricing or availability, or create any contract, and **no payment** is required until the user approves the resulting quote. Contact and event details are delivered only to TempGuru's CRM so a coordinator can reply; they are never written to telemetry or analytics.",
+        "**About quote submission.** `POST /api/v1/quote-requests` is the only write operation in this API. It is opt-in by design: call it only after the user has reviewed the staffing plan and explicitly confirmed they want to submit it. It creates a structured lead for human review, it does **not** reserve staff, guarantee pricing or availability, or create any contract, and **no payment** is required until the user approves the resulting quote. Contact and event details are delivered to TempGuru's CRM or its durable fallback queue and configured notification processor so a coordinator can reply; they are never written to telemetry or analytics.",
         "",
         "**Agent guidance.** This API exists so AI agents and integrators can ground answers about TempGuru in live, structured data instead of scraping web pages. Combine it with the MCP server at `https://mcp.tempguru.co/mcp` if your agent stack speaks Model Context Protocol, the two surfaces expose the same data and the same quote-submission operation through different transports.",
       ].join("\n"),
@@ -103,6 +103,27 @@ export function buildOpenApiSpec() {
               schema: { type: "string", enum: ["hub", "mid", "small"] },
               description:
                 "Filter by market tier. 'hub' = 25 major metros (NYC, LA, Boston, etc.); 'mid' = 128 secondary markets; 'small' = 192 tertiary markets.",
+            },
+            {
+              name: "country",
+              in: "query",
+              required: false,
+              schema: { type: "string", enum: ["US", "CA"] },
+              description: "Filter to the United States (`US`) or Canada (`CA`).",
+            },
+            {
+              name: "city",
+              in: "query",
+              required: false,
+              schema: { type: "string" },
+              description: "Switch to a single-city coverage check instead of listing markets.",
+            },
+            {
+              name: "limit",
+              in: "query",
+              required: false,
+              schema: { type: "integer", minimum: 1, maximum: 345 },
+              description: "Maximum list rows returned. The unfiltered endpoint defaults to 100.",
             },
           ],
           responses: {
@@ -388,7 +409,7 @@ export function buildOpenApiSpec() {
           tags: ["Quote Submission"],
           summary: "Submit a staffing quote request (the API's only write operation)",
           description:
-            "Use this when, and only when, the user has explicitly confirmed they want to submit a staffing request to TempGuru. This is the single write operation in this API; everything else is a read-only lookup. It creates a structured lead in TempGuru's CRM, and a human coordinator replies with a quote within one business day (orders confirm within 48 hours of approval). **Opt-in by design:** collect the contact details and the event plan, show the user exactly what will be submitted, and call this once after explicit confirmation, never speculatively. **Not a reservation:** it does not hold staff, guarantee pricing or availability, or create a contract, and **no payment** is required until the user approves the quote. Contact and event details go only to TempGuru's CRM so a coordinator can reply, they are never written to telemetry or analytics. Build the plan first with the read operations (cities, roles, pricing, availability, compliance). Lightly rate limited per source IP, on HTTP 429, respect `Retry-After` and fall back to the form at https://tempguru.co/get-staffing.",
+            "Use this when, and only when, the user has explicitly confirmed they want to submit a staffing request to TempGuru. This is the single write operation in this API; everything else is a read-only lookup. It creates a structured lead for human review, and a human coordinator replies with a quote within one business day (orders confirm within 48 hours of approval). **Opt-in by design:** collect the contact details and the event plan, show the user exactly what will be submitted, and call this once after explicit confirmation, never speculatively. **Not a reservation:** it does not hold staff, guarantee pricing or availability, or create a contract, and **no payment** is required until the user approves the quote. Contact and event details go to TempGuru's CRM or its durable fallback queue and configured notification processor so a coordinator can reply; they are never written to telemetry or analytics. Build the plan first with the read operations (cities, roles, pricing, availability, compliance). Lightly rate limited per source IP, on HTTP 429, respect `Retry-After` and fall back to the form at https://tempguru.co/get-staffing.",
           "x-openai-isConsequential": true,
           requestBody: {
             required: true,
@@ -401,7 +422,7 @@ export function buildOpenApiSpec() {
           responses: {
             "200": {
               description:
-                "Request accepted into TempGuru's CRM for human review. Relay `message` and `next_steps` to the user.",
+                "Request accepted into TempGuru's CRM or durable intake queue for human review. Relay `message` and `next_steps` to the user.",
               content: {
                 "application/json": {
                   schema: { $ref: "#/components/schemas/QuoteRequestConfirmation" },
@@ -578,11 +599,18 @@ export function buildOpenApiSpec() {
           },
         },
         CitiesResponse: {
+          oneOf: [
+            { $ref: "#/components/schemas/CitiesListResponse" },
+            { $ref: "#/components/schemas/CityCoverageResponse" },
+          ],
+        },
+        CitiesListResponse: {
           type: "object",
-          required: ["input", "total", "tier_breakdown", "cities"],
+          required: ["input", "total", "returned", "tier_breakdown", "cities"],
           properties: {
             input: { type: "object", description: "Echo of the query parameters used." },
             total: { type: "integer" },
+            returned: { type: "integer" },
             tier_breakdown: {
               type: "object",
               properties: {
@@ -592,6 +620,30 @@ export function buildOpenApiSpec() {
               },
             },
             cities: { type: "array", items: { $ref: "#/components/schemas/City" } },
+            note: { type: "string" },
+          },
+        },
+        CityCoverageResponse: {
+          type: "object",
+          required: ["input", "coverage_check", "requested", "covered", "city", "message"],
+          properties: {
+            input: { type: "object", description: "Echo of the query parameters used." },
+            coverage_check: { type: "boolean", const: true },
+            requested: { type: "string" },
+            covered: { type: "boolean" },
+            city: {
+              oneOf: [{ $ref: "#/components/schemas/City" }, { type: "null" }],
+            },
+            suggestion: {
+              type: "object",
+              required: ["kind", "slug", "name"],
+              properties: {
+                kind: { type: "string", const: "city" },
+                slug: { type: "string" },
+                name: { type: "string" },
+              },
+            },
+            message: { type: "string" },
           },
         },
         RolesResponse: {
@@ -613,8 +665,10 @@ export function buildOpenApiSpec() {
             "city_tier",
             "event_date",
             "days_until_event",
+            "in_past",
             "typical_lead_time_hours",
             "recommendation",
+            "role_found",
             "notes",
           ],
           properties: {
@@ -625,12 +679,33 @@ export function buildOpenApiSpec() {
             city_tier: { type: "string", enum: ["hub", "mid", "small"] },
             event_date: { type: "string", format: "date" },
             days_until_event: { type: "integer" },
+            in_past: {
+              type: "boolean",
+              description:
+                "True when the requested event date has already passed. Confirm the intended date before planning or quoting.",
+            },
             typical_lead_time_hours: { type: "integer" },
             recommendation: {
               type: "string",
               enum: ["yes", "tight", "rush", "very-rush"],
               description:
                 "yes = comfortable window; tight = at or near typical lead time; rush = inside lead time; very-rush = <24h.",
+            },
+            role_found: {
+              type: ["boolean", "null"],
+              description:
+                "null when no role was requested; true when the requested role resolved; false when it did not match the catalog.",
+            },
+            role_suggestion: {
+              type: "object",
+              description:
+                "Present only when role_found is false and there is one unambiguous nearby catalog match. Confirm before using it.",
+              required: ["kind", "slug", "name"],
+              properties: {
+                kind: { type: "string", const: "role" },
+                slug: { type: "string" },
+                name: { type: "string" },
+              },
             },
             role: {
               nullable: true,
@@ -680,6 +755,11 @@ export function buildOpenApiSpec() {
               },
             },
             pricing_notes: { type: "string" },
+            role_note: {
+              type: "string",
+              description:
+                "Caveat emitted when the requested phrasing maps to a constrained service, for example security mapping to unarmed Crowd Control rather than licensed guards.",
+            },
           },
         },
         ComplianceResponse: {
@@ -692,6 +772,10 @@ export function buildOpenApiSpec() {
             "w2_required",
             "overtime_threshold_weekly_hours",
             "unique_rules",
+            "data_version",
+            "data_current_as_of",
+            "currency_note",
+            "citation_note",
           ],
           properties: {
             input: { type: "object" },
@@ -702,9 +786,16 @@ export function buildOpenApiSpec() {
             w2_note: { type: "string" },
             overtime_threshold_weekly_hours: { type: "integer" },
             overtime_threshold_daily_hours: { type: "integer", nullable: true },
+            overtime_daily_double_hours: { type: "integer", nullable: true },
+            seventh_day_overtime: { type: "boolean" },
             unique_rules: { type: "array", items: { type: "string" } },
             liability_coverage_included: { type: "boolean" },
             workers_comp_included: { type: "boolean" },
+            min_wage_as_of: { type: ["string", "null"], format: "date" },
+            min_wage_source: { type: ["string", "null"], format: "uri" },
+            data_version: { type: "string" },
+            data_current_as_of: { type: "string", format: "date" },
+            currency_note: { type: "string" },
             citation_note: { type: "string" },
           },
         },
