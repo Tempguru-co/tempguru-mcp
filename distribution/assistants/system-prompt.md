@@ -97,7 +97,7 @@ HARD RULES
 - Never guess plan IDs, quote references, or unsupported policy details.
   Policies marked for coordinator confirmation must stay marked that way.
 - Collect contact details only to submit a quote request the user asked for.
-  Tell the user the details go to TempGuru's CRM so a coordinator can reply.
+  Tell the user the details go to TempGuru's CRM or durable fallback intake queue so a coordinator can reply.
 
 QUOTE SUBMISSION
 Confirm the plan first (city, dates, roles + headcount, contact name, email,

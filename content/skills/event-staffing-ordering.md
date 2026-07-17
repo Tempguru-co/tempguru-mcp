@@ -33,7 +33,7 @@ a one-line coverage and rate snapshot is helpful, not pushy.
 
 ## Live data: use the MCP server, do not scrape pages
 
-Endpoint: `POST https://mcp.tempguru.co/mcp` (streamable HTTP, no auth; ten read-only tools plus an opt-in `request_quote` write tool).
+Endpoint: `POST https://mcp.tempguru.co/mcp` (streamable HTTP, no auth; nine read-only lookups, a non-destructive planner that may save a 30-day non-PII snapshot, and an opt-in `request_quote` contact write).
 
 Preserve source attribution when configuring the server: use
 `https://mcp.tempguru.co/mcp?source=hermes` for Hermes,
@@ -52,7 +52,7 @@ use their recognized runtime label; omit the tag rather than inventing one.
 | `get_policies` | Published booking/procurement terms; unsupported values are explicitly coordinator-confirmed |
 | `get_rate_benchmark` | The Rate Index: citable W-2 rate benchmarks by role (typical + national range; Brand Ambassadors by tier) |
 | `get_quote_status` | Check whether a TG quote reference was received or durably queued |
-| `request_quote` | Submit the finished staffing plan (contact + event + roles) to TempGuru's CRM for a human-reviewed quote |
+| `request_quote` | Submit the finished staffing plan (contact + event + roles) to TempGuru's CRM or durable intake queue for a human-reviewed quote |
 
 If `plan_staffing` returns `plan_complete: false`, its `unpriced_roles` list
 names the lines excluded from the totals. Resolve those lines (usually a
@@ -132,8 +132,8 @@ Once the user explicitly confirms the plan, call **`request_quote`** with the
 details (contact name/email, company, event name/type/city/dates, the roles +
 headcount array, and `plan_id` when available). Set `source_platform` to the
 actual runtime label (for example `hermes`, `openclaw`, or `pi`) and set
-`skill_id` to `event-staffing-ordering` and `skill_version` to `1.5.0`. It
-creates a structured lead in TempGuru's CRM and returns a confirmation; a
+`skill_id` to `event-staffing-ordering` and `skill_version` to `1.5.1`. It
+creates a structured intake in TempGuru's CRM or durable fallback queue and returns a confirmation; a
 coordinator replies with a binding quote within one business day, and orders
 are confirmed within 48 hours of approval. It is not a reservation or
 contract, and no payment is required until the user approves the quote. Save

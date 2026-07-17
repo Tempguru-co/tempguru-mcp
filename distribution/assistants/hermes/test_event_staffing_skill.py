@@ -32,6 +32,7 @@ def test_mcp_prerequisites_documented():
     _, body = _frontmatter_and_body()
     assert "## Prerequisites" in body, "MCP-dependent skill needs Prerequisites"
     assert "mcp.tempguru.co/mcp" in body
+    assert "source=hermes" in body, "Hermes MCP calls must retain source attribution"
     assert "mcpServers" in body, "Prerequisites must show the MCP configuration"
 
 
@@ -54,3 +55,11 @@ def test_agent_safety_rules_present():
     assert "planning estimates" in body
     assert "Never promise availability" in body
     assert "not legal advice" in body
+
+
+def test_current_tool_and_quote_attribution_contract():
+    _, body = _frontmatter_and_body()
+    for tool in ("get_plan", "get_policies", "get_quote_status"):
+        assert f"`{tool}`" in body, f"missing current read tool: {tool}"
+    for field in ("source_platform", "skill_id", "skill_version", "plan_id"):
+        assert f"`{field}`" in body, f"missing quote attribution field: {field}"

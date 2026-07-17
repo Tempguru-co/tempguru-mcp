@@ -78,7 +78,7 @@
 
   <h2>MCP Tools</h2>
 
-  <p>Eleven tools: ten read-only planning, saved-plan, lookup, policy, benchmark, and quote-status tools, plus one opt-in write tool. No authentication required. Start with <code>plan_staffing</code>, retain its <code>plan_id</code>, then call <code>request_quote</code> only after the user confirms the plan and consents to submission.</p>
+  <p>Eleven tools: nine read-only lookups, a non-destructive <code>plan_staffing</code> tool that may save a 30-day non-PII snapshot, and one opt-in contact write. No authentication required. Start with <code>plan_staffing</code>, retain its <code>plan_id</code>, then call <code>request_quote</code> only after the user confirms the plan and consents to submission.</p>
 
   <div class="tg-tools">
 
@@ -134,7 +134,7 @@
 
     <div class="tg-tool">
       <div class="tg-tool-name">request_quote <span class="tg-tool-badge">write · opt-in</span></div>
-      <p>Submit a structured staffing request to TempGuru's CRM. A human coordinator reviews and responds within one business day. Not a reservation, no payment until the user approves the quote. Requires: contact name/email, company, event name/type/city/dates, and roles with headcount.</p>
+      <p>Submit a structured staffing request to TempGuru's CRM or durable intake queue. A human coordinator reviews and responds within one business day. Not a reservation, no payment until the user approves the quote. Requires: contact name/email, company, event name/type/city/dates, and roles with headcount.</p>
     </div>
 
   </div>
@@ -239,7 +239,7 @@ https://mcp.tempguru.co/mcp  (authentication: Open)</div>
 
   <p class="tg-label">Hermes</p>
   <div class="tg-code">hermes skills search https://tempguru.co --source well-known --limit 10 --json
-// Install all five results, then attach the action layer:
+// Install all 8 results, then attach the action layer:
 hermes mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=hermes"
 hermes mcp test tempguru</div>
 
@@ -248,16 +248,16 @@ hermes mcp test tempguru</div>
 cd tempguru-mcp
 // Install each directory under skills/ with openclaw skills install --global,
 // then attach https://mcp.tempguru.co/mcp?source=openclaw.
-// Exact five-skill commands: https://github.com/Tempguru-co/tempguru-mcp#connect</div>
+// Exact 8-skill commands: https://github.com/Tempguru-co/tempguru-mcp#connect</div>
 
   <p class="tg-label">Pi</p>
-  <div class="tg-code">pi install npm:tempguru-mcp
-pi install npm:pi-mcp-extension
-// MCP URL: https://mcp.tempguru.co/mcp?source=pi</div>
+  <div class="tg-code">pi install npm:tempguru-pi
+// npm 1.5.0 is live. Publish/verify source 1.5.1 for Pi-adapted skill routing;
+// until then, attach the remote MCP for dependable end-to-end execution.</div>
 
   <p class="tg-label">Codex</p>
   <div class="tg-code">codex mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=openai-codex"
-// Ask $skill-installer to install all five paths under Tempguru-co/tempguru-mcp/skills.</div>
+// Ask $skill-installer to install all 8 paths under Tempguru-co/tempguru-mcp/skills.</div>
 
   <p class="tg-label">Generic MCP Client</p>
   <div class="tg-code">mcp_servers:
@@ -309,7 +309,7 @@ pi install npm:pi-mcp-extension
 
   <h2>Security &amp; Privacy</h2>
 
-  <p>All lookup tools are unauthenticated and return public data only. The <code>request_quote</code> tool submits contact information provided by the user directly to TempGuru's internal CRM, no data is stored by the MCP server itself. Skills are plain markdown with no executable code. No user secrets are requested or transmitted beyond what the user explicitly provides to <code>request_quote</code>.</p>
+  <p>All lookup tools are unauthenticated and return public data. The <code>request_quote</code> tool sends user-confirmed contact and event information to TempGuru's CRM or its durable fallback queue and configured notification processor; those fields are never written to product telemetry. Saved plans exclude contact details. Skills are plain markdown with no executable code. See TempGuru's privacy policy for retention and processor details.</p>
 
   <hr>
 

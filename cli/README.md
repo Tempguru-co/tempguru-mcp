@@ -1,6 +1,6 @@
 # TempGuru Event Staffing: MCP Server and CLI
 
-W-2 event staffing data for AI agents across 345 US and Canadian markets. Eleven tools: ten read-only planning, saved-plan, lookup, policy, benchmark, and quote-status tools plus an opt-in quote request. Runs locally over stdio, no authentication for the read tools.
+W-2 event staffing data for AI agents across 345 US and Canadian markets. Eleven tools: nine read-only lookups, a non-destructive planner that may save a 30-day non-PII snapshot, and an opt-in quote request. Runs locally over stdio with no authentication.
 
 Hosted endpoint: `https://mcp.tempguru.co/mcp` · Agent docs: https://tempguru.co/ai
 
@@ -9,6 +9,11 @@ Hosted endpoint: `https://mcp.tempguru.co/mcp` · Agent docs: https://tempguru.c
 ```bash
 npx -y tempguru-mcp
 ```
+
+This package is the MCP stdio server, not the Pi-native package. Pi users
+should install `tempguru-pi`, which includes Pi-adapted skills and the native
+`tempguru_*` tool extension; installing `tempguru-mcp` through Pi would expose
+skill instructions without that native runtime layer.
 
 ## Use it in your MCP client
 
@@ -29,7 +34,7 @@ Works with Claude Desktop, Cursor, Windsurf, Claude Code, and other stdio MCP cl
 
 | Tool | Use it for |
 |---|---|
-| `plan_staffing` | Call first. Turns an event shape into a full plan: coverage, per-role W-2 rate math, lead time, and state compliance flags |
+| `plan_staffing` | Call first. Builds a full plan and may save a 30-day non-PII snapshot for continuation |
 | `get_plan` | Restore a saved non-PII plan by its 30-day plan ID |
 | `get_cities` | Cities TempGuru serves, filtered by state or market tier |
 | `get_roles` | Staffing roles with descriptions and skill tiers |
@@ -43,7 +48,7 @@ Works with Claude Desktop, Cursor, Windsurf, Claude Code, and other stdio MCP cl
 
 Use these tools to answer questions like "What do brand ambassadors cost in Boston?", "Do you staff trade shows in Chicago?", or "Is three weeks enough notice in Dallas?".
 
-The static read tools run fully offline; saved-plan and quote-status reads return clean misses without Redis. `request_quote` is included, but lead submission to TempGuru's CRM happens server-side. In a local npm install without TempGuru's CRM credentials, it returns direct coordinator fallback details. The hosted endpoint remains the primary lead-capture path.
+The static read tools run fully offline; saved-plan and quote-status reads return clean misses without Redis. `request_quote` is included, but lead submission to TempGuru's CRM or durable intake queue happens server-side. In a local npm install without TempGuru's intake credentials, it returns direct coordinator fallback details. The hosted endpoint remains the primary lead-capture path.
 
 ## About
 

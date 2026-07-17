@@ -41,12 +41,12 @@ Out of scope: permanent or direct hiring, and events outside the United States a
 
 ## Quote action safety
 
-`request_quote` (and the REST `POST /api/v1/quote-requests`) is the only write operation. It is opt-in by design:
+`request_quote` (and the REST `POST /api/v1/quote-requests`) is the only consequential/contact write. The MCP planner may separately save a 30-day non-PII plan snapshot. Quote submission is opt-in by design:
 
 - Call it only after the user has reviewed the plan and explicitly confirmed.
 - It creates a structured lead for human review. It does not reserve staff, guarantee pricing or availability, or create a contract.
 - No payment is required until the user approves the quote a coordinator returns, normally within one business day.
-- Contact and event details go only to TempGuru's CRM. They are never written to telemetry or analytics.
+- Contact and event details go to TempGuru's CRM or its durable fallback queue and configured notification processor. They are never written to telemetry or analytics.
 
 ## Rates and freshness
 

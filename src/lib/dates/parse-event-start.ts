@@ -37,8 +37,10 @@ const MONTH_RE =
   /\b(january|february|march|april|june|july|august|september|october|november|december|jan|feb|mar|apr|may|jun|jul|aug|sept|sep|oct|nov|dec)\b/;
 
 export function parseEventStart(value: string): Date | null {
-  // Collect every valid ISO/US numeric date and select the latest one, so
-  // "setup 2026-01-05, event 2026-08-14" resolves to the event date.
+  // Collect every valid ISO/US numeric date. Explicit ranges collapse to their
+  // START date; independent dates still select the latest one, so
+  // "setup 2026-01-05, event 2026-08-14" resolves to the event date while
+  // "2026-08-14 to 2026-08-15" resolves to August 14.
   const validUtc = (year: number, month: number, day: number): number | null => {
     if (month < 0 || month > 11 || day < 1 || day > 31) return null;
     const timestamp = Date.UTC(year, month, day);
@@ -50,14 +52,17 @@ export function parseEventStart(value: string): Date | null {
       : null;
   };
 
-  const candidates: number[] = [];
+  type Candidate = { timestamp: number; start: number; end: number };
+  const candidates: Candidate[] = [];
   for (const match of value.matchAll(/\b(20[2-9]\d)[-/](\d{1,2})[-/](\d{1,2})(?!\d)/g)) {
     const timestamp = validUtc(
       Number(match[1]),
       Number(match[2]) - 1,
       Number(match[3]),
     );
-    if (timestamp !== null) candidates.push(timestamp);
+    if (timestamp !== null && match.index !== undefined) {
+      candidates.push({ timestamp, start: match.index, end: match.index + match[0].length });
+    }
   }
   for (const match of value.matchAll(/\b(\d{1,2})[-/](\d{1,2})[-/](20[2-9]\d)\b/g)) {
     const timestamp = validUtc(
@@ -65,9 +70,26 @@ export function parseEventStart(value: string): Date | null {
       Number(match[1]) - 1,
       Number(match[2]),
     );
-    if (timestamp !== null) candidates.push(timestamp);
+    if (timestamp !== null && match.index !== undefined) {
+      candidates.push({ timestamp, start: match.index, end: match.index + match[0].length });
+    }
   }
-  if (candidates.length) return new Date(Math.max(...candidates));
+  if (candidates.length) {
+    candidates.sort((a, b) => a.start - b.start);
+    const effective: number[] = [];
+    for (let i = 0; i < candidates.length; i++) {
+      const current = candidates[i];
+      const next = candidates[i + 1];
+      const between = next ? value.slice(current.end, next.start) : "";
+      if (next && /^\s*(?:-|–|—|\/|to|through|thru|until)\s*$/i.test(between)) {
+        effective.push(current.timestamp);
+        i++; // The range end is intentionally not a candidate start date.
+      } else {
+        effective.push(current.timestamp);
+      }
+    }
+    return new Date(Math.max(...effective));
+  }
 
   // For named months, use the first month token in text order and only inspect
   // the text after it for a day. A leading crew/shift count therefore cannot be

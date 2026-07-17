@@ -100,7 +100,7 @@ export default function Home() {
     },
     {
       name: "request_quote",
-      desc: "Submit a structured staffing request to TempGuru's CRM for human review. Opt-in write tool; not a reservation or contract.",
+      desc: "Submit a structured staffing request to TempGuru's CRM or durable intake queue for human review. Opt-in write tool; not a reservation or contract.",
     },
   ];
 
@@ -147,8 +147,9 @@ export default function Home() {
       </h1>
       <p style={{ color: "#9ab0cc", fontSize: 16, marginBottom: 32 }}>
         Model Context Protocol server and public REST API for TempGuru
-        event staffing data. Eleven tools: ten read-only planning, lookup, policy,
-        saved-plan, benchmark, and quote-status tools plus one opt-in request_quote submission.
+        event staffing data. Eleven tools: nine read-only lookups, a
+        non-destructive planner that may save a 30-day non-PII snapshot, and one
+        opt-in request_quote contact submission.
       </p>
 
       <section style={sectionStyle}>

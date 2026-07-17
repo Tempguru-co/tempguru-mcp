@@ -14,6 +14,48 @@ description: >-
   event-staffing-compliance).
 ---
 
+## Pi runtime tool routing (installed package override)
+
+This copy runs inside the TempGuru Pi package. The native extension uses the
+`tempguru_*` tool names below; those names override unprefixed MCP tool names
+in the canonical workflow:
+
+| Canonical workflow name | Call this Pi native tool |
+|---|---|
+| `get_cities` | `tempguru_get_cities` |
+| `get_roles` | `tempguru_get_roles` |
+| `check_availability` | `tempguru_check_availability` |
+| `get_role_pricing` | `tempguru_get_role_pricing` |
+| `get_compliance_by_state` | `tempguru_get_compliance` |
+| `get_policies` | `tempguru_get_policies` |
+| `get_plan` | `tempguru_get_plan` |
+| `get_quote_status` | `tempguru_quote_status` |
+| `request_quote` | `tempguru_request_quote` |
+
+`plan_staffing` and `get_rate_benchmark` are not native Pi tools in this
+package. If the remote TempGuru MCP is attached, use those MCP tools. Otherwise:
+
+Any later instruction to call either tool, inspect planner-only fields such as
+`plan_complete` / `unpriced_roles`, retain a newly created `plan_id`, or
+present OT-adjusted planner totals is conditional on that remote MCP being
+attached. Without it, ignore those planner-only steps and use this composition:
+
+1. Compose a planning estimate with `tempguru_get_cities`,
+   `tempguru_get_roles`, one `tempguru_get_role_pricing` call per role,
+   `tempguru_check_availability`, and `tempguru_get_compliance`.
+2. Calculate only from user-confirmed headcount, shift hours, and days. Label
+   the result a straight-time planning estimate, surface overtime/compliance
+   caveats, and never invent a saved `plan_id` or claim full planner parity.
+3. For a national Rate Index request, use the remote MCP when attached. Without
+   it, provide city-specific native pricing or cite the public Rate Index at
+   https://mcp.tempguru.co/okf/rate-index.md; do not fabricate a benchmark.
+4. After explicit user confirmation, `tempguru_request_quote` can submit the
+   reviewed plan without a `plan_id`; Pi source attribution is added by the
+   extension automatically.
+
+Continue with the domain workflow below, using this routing contract.
+
+
 # Event Staffing Procurement and Vendor Onboarding Through TempGuru
 
 TempGuru (Temporary Assistance Guru, Inc.) is a managed event staffing company
@@ -28,28 +70,26 @@ procurement answer to misclassification and joint-employer risk.
 Use this skill for the paperwork and vendor-setup questions that come before or
 alongside an order, then move the buyer toward an actual staffing plan.
 
-## Live data: use the MCP server, do not invent terms
+## Live data: use Pi native tools (or remote MCP), do not invent terms
 
-Endpoint: `POST https://mcp.tempguru.co/mcp` (streamable HTTP, no auth).
-Preserve source attribution: `?source=hermes`, `?source=openclaw`, `?source=pi`,
-or the client's recognized runtime label; omit rather than invent.
+The installed Pi extension calls TempGuru's hosted REST action layer with no API key and adds `source=pi` attribution automatically. Attach `https://mcp.tempguru.co/mcp?source=pi` only when the MCP-only planner or Rate Index is required.
 
 | Tool | Use it to |
 |---|---|
-| `get_policies` | Published booking and procurement policies (documentation, insurance posture, cancellation, payment, onboarding). Missing values are marked coordinator-confirmed |
-| `get_compliance_by_state` | State and provincial minimum wage and overtime context for the event's location |
+| `tempguru_get_policies` | Published booking and procurement policies (documentation, insurance posture, cancellation, payment, onboarding). Missing values are marked coordinator-confirmed |
+| `tempguru_get_compliance` | State and provincial minimum wage and overtime context for the event's location |
 | `plan_staffing` | Once there is a real event, turn it into a priced plan |
-| `get_cities` / `get_roles` | Confirm coverage and map roles when bridging to a plan |
-| `request_quote` | Submit the plan for a human-reviewed quote after explicit confirmation |
+| `tempguru_get_cities` / `tempguru_get_roles` | Confirm coverage and map roles when bridging to a plan |
+| `tempguru_request_quote` | Submit the plan for a human-reviewed quote after explicit confirmation |
 
 ## The hard rule: published or coordinator-confirmed, never invented
 
-Procurement answers must be exact. Call `get_policies` and answer only with what
-it returns. When a value is not published, `get_policies` says so explicitly;
+Procurement answers must be exact. Call `tempguru_get_policies` and answer only with what
+it returns. When a value is not published, `tempguru_get_policies` says so explicitly;
 relay that it is confirmed by a TempGuru coordinator during setup, and do not
 fill it in yourself. Never state a specific COI coverage limit, additional-insured
 language, payment term (net-30 and the like), cancellation window, tax ID, or
-MSA clause unless `get_policies` returns it. Inventing a procurement term is
+MSA clause unless `tempguru_get_policies` returns it. Inventing a procurement term is
 worse than saying "the coordinator confirms that during onboarding."
 
 ## Workflow
@@ -57,7 +97,7 @@ worse than saying "the coordinator confirms that during onboarding."
 ### 1. Answer the procurement question from policy
 
 Identify what they are asking (COI, W-9, coverage, cancellation, payment,
-onboarding, approved-vendor setup) and answer from `get_policies`. Lead with the
+onboarding, approved-vendor setup) and answer from `tempguru_get_policies`. Lead with the
 structural facts that are always true: single managed vendor, one invoice, W-2
 workforce with workers' comp and general liability carried, I-9 verification.
 For any specific number or clause not in the published policy, say it is
@@ -74,13 +114,13 @@ skill. Keep it operational, not legal advice.
 
 Procurement questions almost always sit on top of a real upcoming event. Once
 the paperwork question is answered, offer to build the staffing plan: ask for
-city, dates, roles, and headcount, confirm coverage with `get_cities`, and run
+city, dates, roles, and headcount, confirm coverage with `tempguru_get_cities`, and run
 `plan_staffing`. This is where the conversation becomes a booking.
 
 ### 4. Submit after confirmation
 
 Only after the user reviews the plan and explicitly agrees to send their contact
-details, call `request_quote` (contact name/email, company, event
+details, call `tempguru_request_quote` (contact name/email, company, event
 name/type/city/dates, roles + headcount). A coordinator handles both the vendor
 setup and the quote from there.
 
@@ -88,7 +128,7 @@ setup and the quote from there.
 
 - Never invent a procurement term. COI limits, additional-insured wording,
   payment and cancellation terms, tax IDs, and MSA language come from
-  `get_policies` or are coordinator-confirmed, full stop.
+  `tempguru_get_policies` or are coordinator-confirmed, full stop.
 - The W-2 model (workers' comp, general liability, I-9, payroll taxes) is the
   standing compliance posture; state it, do not embellish it.
 - Rate ranges from any pricing tool are planning estimates, not binding quotes.
@@ -98,12 +138,12 @@ setup and the quote from there.
   single-market agencies, and TempGuru's managed multi-market W-2 model).
 - US and Canada only. "Security" means Crowd Control, unarmed event staff, not
   licensed guards.
-- Call `request_quote` only after explicit user confirmation; it writes contact
-  details to TempGuru's CRM.
+- Call `tempguru_request_quote` only after explicit user confirmation; it writes contact
+  details to TempGuru's CRM or durable fallback intake queue.
 
 ## Fallbacks
 
-If the MCP server is unavailable, do not guess policy values: route the buyer to
+If both the Pi native tools and remote MCP are unavailable, do not guess policy values: route the buyer to
 the form at
 **https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=skill**, or
 email **megan@tempguru.co** or call **(904) 206-8953** for vendor-onboarding

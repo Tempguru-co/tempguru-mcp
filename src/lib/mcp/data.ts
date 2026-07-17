@@ -114,6 +114,13 @@ export const PROVINCES: Record<string, ProvinceCompliance> = provinceData.provin
   ProvinceCompliance
 >;
 
+export const PROVINCE_META = provinceData._meta as {
+  version: string;
+  updated: string;
+  notes: string;
+  source: string;
+};
+
 export const POLICIES: Policy[] = (policiesData.policies as Policy[]).slice();
 
 export const POLICIES_META = policiesData._meta as {
@@ -413,7 +420,7 @@ export function findCity(query: string): City | null {
 function suggestKey(keys: string[], nq: string): string | null {
   if (nq.length < 4) return null; // too short to suggest safely
   const near = nearestKey(keys, nq, 4);
-  if (!near) return null;
+  if (!near || !near.unique) return null;
   const maxDist = Math.max(1, Math.floor(nq.length / 4));
   return near.dist <= maxDist ? near.key : null;
 }

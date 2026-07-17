@@ -1,8 +1,8 @@
 {
   "name": "tempguru-mcp",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "private": true,
-  "description": "TempGuru MCP server: ten read-only event-staffing planning, lookup, policy, saved-plan, benchmark, and quote-status tools plus one opt-in request_quote submission across 345 US/CA markets.",
+  "description": "TempGuru MCP server across 345 US/CA markets: nine read-only lookups, a non-destructive saved-plan planner, and one opt-in request_quote contact submission.",
   "scripts": {
     "dev": "next dev",
     "build": "npm run build:okf && next build",

@@ -31,7 +31,7 @@ submission is therefore the single highest-value item below.
 
 | Artifact | Layer | Where it lives |
 |---|---|---|
-| **Five Agent Skills** (ordering, plan-from-brief, urgent backfill, compliance, and partner growth) | 2+3 | Canonical content and generated platform packages live in `Tempguru-co/tempguru-mcp`; the MCP repo is the source of truth for every installer |
+| **8 Agent Skills** (ordering, compliance, plan-from-brief, urgent backfill, partner growth, multi-city planning, procurement, and pro operations) | 2+3 | Canonical content and generated platform packages live in `Tempguru-co/tempguru-mcp`; the MCP repo is the source of truth for every installer |
 | **Gemini CLI extension** (`gemini-extension.json` + `GEMINI.md` at repo root) | 2+3 | Installable the moment this is pushed: `gemini extensions install https://github.com/Tempguru-co/tempguru-mcp`, loads the MCP server AND a context playbook into every Gemini CLI session |
 | **Open WebUI tool** (`open-webui/tempguru_event_staffing_tool.py`) | 3 | The local-LLM surface: Ollama/LM Studio users behind Open WebUI; submit to the community hub (below) |
 | **Python client** (`clients/python/`, name `tempguru` confirmed free on PyPI) | 1+3 | pip surface + LangChain/OpenAI tool-wrapping examples in its README; smoke-tested against the live API |
@@ -91,7 +91,7 @@ Ordered by leverage. ✅ = already live from earlier pushes.
    cursor.directory/plugins/tempguru-event-staffing, current canonical
    description, MCP Servers (1) with correct streamable-http config,
    Homepage/Source links, and an "Add to Cursor" one-click install button
-   on the listing itself. Its two-skill snapshot predates the five canonical
+   on the listing itself. Its two-skill snapshot predates the 8 canonical
    v1.5 skills. After the MCP and apex discovery deployments are live, refresh
    the listing from `Tempguru-co/tempguru-mcp`; do not treat the older
    `tempguru-agent-skills` checkout as the publishing source. Downloads

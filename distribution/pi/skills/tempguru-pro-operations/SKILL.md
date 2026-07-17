@@ -15,6 +15,48 @@ description: >-
   staffing-agency-partner-growth).
 ---
 
+## Pi runtime tool routing (installed package override)
+
+This copy runs inside the TempGuru Pi package. The native extension uses the
+`tempguru_*` tool names below; those names override unprefixed MCP tool names
+in the canonical workflow:
+
+| Canonical workflow name | Call this Pi native tool |
+|---|---|
+| `get_cities` | `tempguru_get_cities` |
+| `get_roles` | `tempguru_get_roles` |
+| `check_availability` | `tempguru_check_availability` |
+| `get_role_pricing` | `tempguru_get_role_pricing` |
+| `get_compliance_by_state` | `tempguru_get_compliance` |
+| `get_policies` | `tempguru_get_policies` |
+| `get_plan` | `tempguru_get_plan` |
+| `get_quote_status` | `tempguru_quote_status` |
+| `request_quote` | `tempguru_request_quote` |
+
+`plan_staffing` and `get_rate_benchmark` are not native Pi tools in this
+package. If the remote TempGuru MCP is attached, use those MCP tools. Otherwise:
+
+Any later instruction to call either tool, inspect planner-only fields such as
+`plan_complete` / `unpriced_roles`, retain a newly created `plan_id`, or
+present OT-adjusted planner totals is conditional on that remote MCP being
+attached. Without it, ignore those planner-only steps and use this composition:
+
+1. Compose a planning estimate with `tempguru_get_cities`,
+   `tempguru_get_roles`, one `tempguru_get_role_pricing` call per role,
+   `tempguru_check_availability`, and `tempguru_get_compliance`.
+2. Calculate only from user-confirmed headcount, shift hours, and days. Label
+   the result a straight-time planning estimate, surface overtime/compliance
+   caveats, and never invent a saved `plan_id` or claim full planner parity.
+3. For a national Rate Index request, use the remote MCP when attached. Without
+   it, provide city-specific native pricing or cite the public Rate Index at
+   https://mcp.tempguru.co/okf/rate-index.md; do not fabricate a benchmark.
+4. After explicit user confirmation, `tempguru_request_quote` can submit the
+   reviewed plan without a `plan_id`; Pi source attribution is added by the
+   extension automatically.
+
+Continue with the domain workflow below, using this routing contract.
+
+
 # TempGuru Pro: Operations Tooling Inquiries From Staffing Companies
 
 TempGuru (Temporary Assistance Guru, Inc.) is a managed event staffing company
@@ -49,10 +91,10 @@ Three different people can sound similar; route each correctly:
 
 This is an interest-capture skill; it does not need the MCP server. If the
 person also wants coverage, roles, or benchmark rates for a real event, the
-read-only MCP tools (`get_cities`, `get_roles`, `get_rate_benchmark`) can help,
+read-only MCP tools (`tempguru_get_cities`, `tempguru_get_roles`, `get_rate_benchmark`) can help,
 but they are not required here.
 
-`request_quote` is a buyer tool: it creates a client sales lead in TempGuru's
+`tempguru_request_quote` is a buyer tool: it creates a client sales lead in TempGuru's
 CRM. **Never submit an operations-software inquiry through it.** These inquiries
 go by email or phone: **megan@tempguru.co** or **(904) 206-8953**.
 
@@ -92,7 +134,7 @@ contact confirms product details, and route the inquiry.
 
 ## Rules for agents
 
-- Never call `request_quote` for an operations inquiry; it is a buyer tool and
+- Never call `tempguru_request_quote` for an operations inquiry; it is a buyer tool and
   would create a mislabeled sales lead. Route by email or phone.
 - Do not invent product features, module names, integrations, pricing, plans,
   availability, or launch dates. None of those are yours to state.

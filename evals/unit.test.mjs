@@ -125,6 +125,7 @@ check("roleDetailUrl(unmapped assistant-leads) falls back to /insights, not a 40
 const { parseEventStart } = await load("src/lib/notion/lead-trust.ts");
 const { buildStaffingPlan } = await load("src/lib/mcp/plan-staffing.ts");
 const { buildRateBenchmark } = await load("src/lib/mcp/rate-benchmark.ts");
+const outputSchemas = await load("src/lib/mcp/output-schemas.ts");
 
 function memoryStore() {
   const rows = new Map();
@@ -175,6 +176,7 @@ check("findCity('Gary') does NOT resolve to Cary", findCity("Gary") === null, `g
 check("findCity('Napa') does NOT resolve to Tampa", findCity("Napa") === null, `got ${findCity("Napa")?.name}`);
 check("findCity('Cincinatti') is null (typo -> suggestion, not auto-resolve)", findCity("Cincinatti") === null);
 check("suggestCity('Cincinatti') offers Cincinnati", suggestCity("Cincinatti")?.name === "Cincinnati", `got ${suggestCity("Cincinatti")?.name}`);
+check("suggestCity('hoston') offers nothing when Boston and Houston tie", suggestCity("hoston") === null, `got ${suggestCity("hoston")?.name}`);
 // Springfield: the bare slug is the IL market (matches the canonical rate row);
 // MO keeps its explicit springfield-mo slug; a supplied state must be honored.
 check("findCity('Springfield, IL') is Springfield, Illinois", findCity("Springfield, IL")?.state === "Illinois", `got ${findCity("Springfield, IL")?.state}`);
@@ -225,6 +227,12 @@ check("parseEventStart: ISO datetime with T parses",
 const multi = parseEventStart("Setup 2026-01-05, event 2026-08-14");
 check("parseEventStart: picks the later of setup vs event date (August)",
   multi?.getUTCMonth() === 7 && multi?.getUTCDate() === 14, `got ${multi?.toISOString()?.slice(0,10)}`);
+check("parseEventStart: ISO range uses its start date",
+  parseEventStart("2026-08-14 to 2026-08-15")?.toISOString().slice(0, 10) === "2026-08-14");
+check("parseEventStart: US-numeric range with en dash uses its start date",
+  parseEventStart("8/14/2026–8/15/2026")?.toISOString().slice(0, 10) === "2026-08-14");
+check("parseEventStart: later event range still wins over an independent setup date",
+  parseEventStart("Setup 2026-08-01, event 2026-08-14 through 2026-08-15")?.toISOString().slice(0, 10) === "2026-08-14");
 
 // ── plan_staffing weekly OT is per-workweek, not whole-engagement ──
 const ot = buildStaffingPlan({ city: "Chicago", roles: [{ role: "brand-ambassadors", headcount: 1, hours_per_shift: 8, days: 14 }] });
@@ -237,9 +245,29 @@ check("plan_staffing OT ratio is per-week (~1.14), not whole-engagement (~1.32)"
 // ── get_rate_benchmark unknown role ──
 check("buildRateBenchmark('wizard') returns role_found:false",
   buildRateBenchmark({ role: "wizard" }).role_found === false);
+check("buildRateBenchmark(blank role) returns role_found:false instead of the full index",
+  buildRateBenchmark({ role: "   " }).role_found === false);
 check("buildRateBenchmark('ushers') returns rates", Array.isArray(buildRateBenchmark({ role: "ushers" }).rates));
 check("buildRateBenchmark('event staff') resolves (synonym) to rates",
   Array.isArray(buildRateBenchmark({ role: "event staff" }).rates));
+
+// ── MCP structured-output branch contracts ──
+// SDK 1.26 cannot advertise a root oneOf, but the root-object superRefine
+// schemas must still reject incomplete variant payloads at runtime.
+for (const [name, schema, payload] of [
+  ["get_cities", outputSchemas.GET_CITIES_SCHEMA, {}],
+  ["check_availability", outputSchemas.CHECK_AVAILABILITY_SCHEMA, { city_found: true }],
+  ["get_role_pricing", outputSchemas.GET_ROLE_PRICING_SCHEMA, {}],
+  ["get_compliance_by_state", outputSchemas.GET_COMPLIANCE_SCHEMA, {}],
+  ["plan_staffing", outputSchemas.PLAN_STAFFING_SCHEMA, { status: "plan" }],
+  ["get_plan", outputSchemas.GET_PLAN_SCHEMA, { plan_found: true, plan_id: "x", message: "x", next_steps: [] }],
+  ["get_policies", outputSchemas.GET_POLICIES_SCHEMA, { status: "policies", policy_found: true }],
+  ["get_quote_status", outputSchemas.GET_QUOTE_STATUS_SCHEMA, { quote_found: true, reference: "x", message: "x", follow_up: "x" }],
+  ["get_rate_benchmark", outputSchemas.RATE_BENCHMARK_SCHEMA, {}],
+  ["request_quote", outputSchemas.REQUEST_QUOTE_SCHEMA, { submitted: true, message: "x" }],
+]) {
+  check(`${name} output schema rejects an incomplete branch`, !schema.safeParse(payload).success);
+}
 
 // ── Foreign qualifiers must reject, country names must scope ──
 check("findCity('London, UK') is null (never London, Ontario)", findCity("London, UK") === null, `got ${findCity("London, UK")?.state}`);
@@ -296,6 +324,11 @@ check("partial plan: next_steps blocks quoting first",
   partial.next_steps[0].includes("Do NOT submit"));
 const complete = buildStaffingPlan({ city: "Chicago", roles: [{ role: "registration-staff", headcount: 2 }] });
 check("complete plan: plan_complete is true", complete.status === "plan" && complete.plan_complete === true);
+check("US plan compliance retains wage source and dataset freshness",
+  complete.status === "plan"
+    && !!complete.compliance?.min_wage_source
+    && !!complete.compliance?.min_wage_as_of
+    && !!complete.compliance?.data_current_as_of);
 
 // ── plan persistence / handoff: allowlist, TTL, signature, resume ──
 const {

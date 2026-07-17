@@ -1,6 +1,6 @@
 # TempGuru MCP（中文）
 
-> MCP 服务器，覆盖美国和加拿大 345 个城市，共 11 个工具：十个只读工具用于规划、方案恢复、覆盖、定价、政策、合规、基准和报价状态，外加一个可选的 `request_quote` 写入工具。
+> MCP 服务器，覆盖美国和加拿大 345 个城市，共 11 个工具：九个只读查询工具、一个可保存 30 天非联系信息方案快照且不具破坏性的规划工具，以及一个可选的 `request_quote` 联系信息提交工具。
 
 **服务端点：** `https://mcp.tempguru.co/mcp` （Streamable HTTP，无需身份验证）
 **注册项：** [`co.tempguru/event-staffing`](https://registry.modelcontextprotocol.io/v0/servers/co.tempguru/event-staffing)
@@ -34,7 +34,7 @@ TempGuru 是一家总部位于美国佛罗里达州杰克逊维尔海滩（Jacks
 | `get_quote_status` | 查询 TG 报价编号是否已由 CRM 接收或进入持久队列。 |
 | `request_quote` | 将结构化的人员配备请求（联系人 + 活动 + 岗位）提交到 TempGuru 的 CRM，由人工审核。可选的写入工具；不构成预订或合同。 |
 
-十一个工具中有十个为只读（`readOnlyHint: true`）。`request_quote` 是唯一的写入工具，标注为 `readOnlyHint: false`。服务器另提供五个技能资源和两个引导式提示模板（`plan-event-staffing`、`staffing-compliance-brief`）。
+九个查询工具为只读（`readOnlyHint: true`）。完整方案可由 `plan_staffing` 保存为 30 天、不含联系信息的快照，因此该工具虽不具破坏性，但会如实标注 `readOnlyHint: false`。`request_quote` 是唯一会提交联系信息的业务写入工具，同样标注为 `readOnlyHint: false`。服务器另提供 8 个技能资源和两个引导式提示模板（`plan-event-staffing`、`staffing-compliance-brief`）。
 
 ---
 
@@ -49,7 +49,7 @@ TempGuru 是一家总部位于美国佛罗里达州杰克逊维尔海滩（Jacks
 | 发现文档 | [`/.well-known/okf.json`](https://mcp.tempguru.co/.well-known/okf.json) |
 | 费率指数（实测基准） | [`/okf/rate-index.md`](https://mcp.tempguru.co/okf/rate-index.md) |
 
-知识包与工具来自同一份源数据及五个标准技能（`npm run build:okf`），因此两层永不偏离。内容涵盖角色、全包式 W-2 费率表、市场覆盖、各州合规以及所有已发布的技能工作流。
+知识包与工具来自同一份源数据及 8 个标准技能（`npm run build:okf`），因此两层永不偏离。内容涵盖角色、全包式 W-2 费率表、市场覆盖、各州合规以及所有已发布的技能工作流。
 
 ---
 
@@ -78,19 +78,19 @@ claude plugin marketplace add Tempguru-co/tempguru-mcp
 claude plugin install tempguru@tempguru-mcp
 ```
 
-该插件会安装实时 MCP、五个标准技能和 `/staff-event` 命令。
+该插件会安装实时 MCP、8 个标准技能和 `/staff-event` 命令。
 
 **Cursor / Cline / Windsurf**，在 IDE 的 MCP 设置中添加上述 URL，传输方式选 `streamable-http`。
 
 **Gemini CLI**，执行 `gemini extensions install https://github.com/Tempguru-co/tempguru-mcp`（安装 MCP 服务器，并附带一份 [GEMINI.md](./GEMINI.md) 用工操作手册；清单见 [gemini-extension.json](./gemini-extension.json)）
 
-**Hermes Agent**，技能与 MCP 工具需要分别安装。先按 [llms-install.md](./llms-install.md) 中的五条 `hermes skills install well-known:...` 命令安装全部技能并执行 `hermes skills list`；再执行 `hermes mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=hermes"`，最后用 `hermes mcp test tempguru` 验证。
+**Hermes Agent**，技能与 MCP 工具需要分别安装。先按 [llms-install.md](./llms-install.md) 中的 8 条 `hermes skills install well-known:...` 命令安装全部技能并执行 `hermes skills list`；再执行 `hermes mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=hermes"`，最后用 `hermes mcp test tempguru` 验证。
 
-**OpenClaw**，技能与 MCP 工具也需要分别安装。先克隆本仓库并按 [llms-install.md](./llms-install.md) 中的五条 `openclaw skills install ./tempguru-mcp/skills/...` 命令安装技能；再执行 `openclaw mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=openclaw" --transport streamable-http`，最后用 `openclaw mcp doctor tempguru --probe` 验证。
+**OpenClaw**，技能与 MCP 工具也需要分别安装。先克隆本仓库并按 [llms-install.md](./llms-install.md) 中的 8 条 `openclaw skills install ./tempguru-mcp/skills/...` 命令安装技能；再执行 `openclaw mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=openclaw" --transport streamable-http`，最后用 `openclaw mcp doctor tempguru --probe` 验证。
 
-**Pi**，执行 `pi install npm:tempguru-mcp` 安装五个技能；再执行 `pi install npm:pi-mcp-extension` 添加社区 MCP 桥，并将 `~/.pi/agent/mcp.json` 指向 `https://mcp.tempguru.co/mcp?source=pi`。完整配置见 [llms-install.md](./llms-install.md)。
+**Pi**：npm `tempguru-pi@1.5.0` 已上线，包含 8 个技能和 9 个带 `?source=pi` 归因的原生 REST 工具。本仓库已准备 `1.5.1`，让每个已安装技能使用真实的 `tempguru_*` 工具名，并加入安全的规划器 / Rate Index 回退路径。在 `1.5.1` 发布并验证前，请连接远程 MCP，以确保端到端技能执行可靠。完整说明见 [llms-install.md](./llms-install.md)。
 
-**Codex**，先执行 `codex mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=openai-codex"`；然后请 Codex 使用 `$skill-installer` 安装 `Tempguru-co/tempguru-mcp/skills` 下的五个技能。技能会在下一轮对话中可用。
+**Codex**，先执行 `codex mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=openai-codex"`；然后请 Codex 使用 `$skill-installer` 安装 `Tempguru-co/tempguru-mcp/skills` 下的 8 个技能。技能会在下一轮对话中可用。
 
 **npm / npx**，执行 `npx -y tempguru-mcp` 在本地运行 TempGuru MCP（[npm 包](https://www.npmjs.com/package/tempguru-mcp)；以 stdio 方式为 Claude Desktop、Cursor、Windsurf 和 Claude Code 运行本服务器）
 
@@ -122,7 +122,7 @@ mcp_manager.add_server({
 
 | 客户端 / 智能体运行时 | 状态 | 备注 |
 |---|---|---|
-| Claude.ai（网页版） | ✅ 已验证 | 11 个工具（10 个只读 + `request_quote`） |
+| Claude.ai（网页版） | ✅ 已验证 | 11 个工具（9 个只读 + 方案快照规划工具 + `request_quote`） |
 | Claude Desktop | ✅ 兼容 | 标准远程 MCP 配置 |
 | Claude Code | ✅ 已验证 | 工具可通过插件或直接添加加载 |
 | Claude for Work / Cowork | ✅ 兼容 | 与 Claude.ai 使用同一连接器框架 |
@@ -131,7 +131,7 @@ mcp_manager.add_server({
 | Windsurf | ✅ 兼容 | Streamable HTTP 传输 |
 | Hermes Agent | ✅ 已验证 | 原生远程 HTTP MCP，技能通过 well-known 目录单独发现 |
 | OpenClaw | ✅ 兼容 | 原生 `openclaw mcp add`，并包含顶层 `skills/` 包 |
-| Pi | ✅ 兼容 | 包含五个技能；MCP 工具通过社区 `pi-mcp-extension` 桥接 |
+| Pi | 🟡 补丁待发布 | npm `1.5.0` 已上线；发布并验证 `1.5.1` 后可获得适配 Pi 工具名的 8 个技能 + 9 个原生工具 |
 | OpenAI Agents SDK | ✅ 兼容 | 通过 MCP 客户端使用上述 URL |
 | ChatGPT（Codex / 支持 MCP 的自定义 GPT） | ✅ 兼容 | 同 OpenAI Agents SDK |
 | Qwen-Agent / DashScope / ModelScope | ✅ 兼容 | Qwen-Agent 的 `MCPManager` 可直接接受 streamable-HTTP URL |
@@ -167,9 +167,9 @@ mcp_manager.add_server({
 
 **不收集任何个人身份信息(PII)。** 遥测仅包含:工具名称、客户端类别桶(Claude / Cursor / 通义千问 / Glama 探针 / 百度蜘蛛 等)、成功/失败状态、国家代码,以及参数 slug(城市/岗位/州，这些都是公开的目录数据)。不存储原始 IP、不存储请求或响应内容、不存储用户内容。
 
-此外，`request_quote` 会将用户明确提供的联系人与活动信息（姓名、邮箱、公司、活动详情）提交到 TempGuru 的 CRM，以便协调员跟进。这些字段仅发送给 TempGuru，绝不写入遥测层；仪表板只统计工具名称、城市与成功/失败结果。
+此外，`request_quote` 会将用户明确提供的联系人与活动信息（姓名、邮箱、公司、活动详情）提交到 TempGuru 的 CRM；当 CRM 暂时不可用时，记录可进入最多保留 90 天的持久重试队列，并可发送给已配置的通知处理器，以便协调员跟进。这些字段绝不写入遥测层；仪表板只统计工具名称、城市与成功/失败结果。
 
-完整运维文档(架构、分类器、故障模式、成本上限)见 `OPERATIONS.md`。遥测采用 fire-and-forget 模式，Upstash 故障不会阻塞 MCP 响应。
+完整运维文档(架构、分类器、故障模式、成本上限)见 `OPERATIONS.md`。遥测写入会在请求内等待，但有 1 秒硬上限；Upstash 故障或超时不会使 MCP 响应失败。
 
 ---
 
@@ -181,7 +181,7 @@ mcp_manager.add_server({
 
 ### AI 智能体能直接通过此 MCP 预定活动人员吗?
 
-可以提交请求，但不是预订。`request_quote` 工具会将结构化的人员配备方案，连同用户提供的联系人和活动信息，提交到 TempGuru 的 CRM，协调员将在一个工作日内回复报价。它不会预留人员、不保证价格或可用性，也不构成合同；在用户确认报价之前无需付款。其余十个工具均为只读。
+可以提交请求，但不是预订。`request_quote` 工具会将结构化的人员配备方案，连同用户提供的联系人和活动信息，提交到 TempGuru 的 CRM 或持久接收队列，协调员将在一个工作日内回复报价。它不会预留人员、不保证价格或可用性，也不构成合同；在用户确认报价之前无需付款。九个查询工具为只读；`plan_staffing` 仅具有上述不含联系信息的方案快照副作用。
 
 ### TempGuru 是零工平台或 1099 市场吗?
 

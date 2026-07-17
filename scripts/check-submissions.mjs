@@ -15,7 +15,11 @@ import { readFileSync, existsSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { SKILLS } from "./gen-skill-digests.mjs";
+import {
+  SKILLS,
+  PI_NATIVE_TOOL_MAP,
+  adaptSkillForPi,
+} from "./gen-skill-digests.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const read = (p) => readFileSync(join(root, p), "utf8");
@@ -45,6 +49,7 @@ const ROLE_COUNT = JSON.parse(read("content/mcp-data/roles.json")).roles.length;
 const CLAUDE_PLUGIN = JSON.parse(read("plugins/tempguru/.claude-plugin/plugin.json"));
 const CLAUDE_MARKETPLACE = JSON.parse(read(".claude-plugin/marketplace.json"));
 const CLI_PKG = JSON.parse(read("cli/package.json"));
+const PI_PKG = JSON.parse(read("distribution/pi/package.json"));
 const GEMINI_EXTENSION = JSON.parse(read("gemini-extension.json"));
 const PACKAGE_LOCK = JSON.parse(read("package-lock.json"));
 const RATE_INDEX_META = JSON.parse(read("content/mcp-data/rate-index-meta.json"));
@@ -187,8 +192,17 @@ for (const [surface, version] of [
     errors.push(`${surface} version "${version}" != package.json "${PKG_VERSION}"`);
   }
 }
-if (!CLI_PKG.keywords?.includes("pi-package") || !CLI_PKG.pi?.skills?.includes("./skills")) {
-  errors.push("cli/package.json: Pi package metadata must expose ./skills");
+if (CLI_PKG.keywords?.includes("pi-package") || Object.hasOwn(CLI_PKG, "pi")) {
+  errors.push("cli/package.json: MCP stdio package must not masquerade as the Pi-native package");
+}
+if (!PI_PKG.keywords?.includes("pi-package") || !PI_PKG.pi?.skills?.includes("./skills") || !PI_PKG.pi?.extensions?.includes("./extensions")) {
+  errors.push("distribution/pi/package.json: Pi package metadata must expose adapted skills and native extensions");
+}
+if (PI_PKG.peerDependencies?.typebox !== "*" || PI_PKG.dependencies?.typebox) {
+  errors.push("distribution/pi/package.json: Pi core typebox must be an unbundled '*' peer dependency");
+}
+if (!read("cli/README.md").includes("tempguru-pi")) {
+  errors.push("cli/README.md: missing migration direction to the dedicated Pi-native package");
 }
 const REGISTRY_NPM_PACKAGE = SERVER_JSON.packages?.find(
   (pkg) => pkg.registryType === "npm" && pkg.identifier === "tempguru-mcp",
@@ -271,14 +285,71 @@ for (const skill of SKILLS) {
   if (portableBody !== canonicalBody) {
     errors.push(`skills/${skill}/SKILL.md: drifted from canonical skill`);
   }
-  if (piBody !== canonicalBody) {
-    errors.push(`distribution/pi/skills/${skill}/SKILL.md: drifted from canonical skill`);
+  if (piBody !== adaptSkillForPi(canonicalBody)) {
+    errors.push(`distribution/pi/skills/${skill}/SKILL.md: drifted from the generated Pi runtime adaptation`);
   }
   if (
     !openAiMetadata.includes(`$${skill}`) ||
     !openAiMetadata.includes("https://mcp.tempguru.co/mcp?source=openai-codex")
   ) {
     errors.push(`skills/${skill}/agents/openai.yaml: missing default prompt or attributed MCP dependency`);
+  }
+}
+
+// Pi skills and extension must agree on the exact callable native layer. A
+// README-only mapping is not runtime context, so every installed skill receives
+// the generated routing guide above and the extension inventory is gated here.
+{
+  const piExtension = read("distribution/pi/extensions/tempguru.ts");
+  const registeredPiTools = [
+    ...piExtension.matchAll(/name:\s*"(tempguru_[a-z_]+)"/g),
+  ].map((match) => match[1]);
+  const expectedPiTools = Object.values(PI_NATIVE_TOOL_MAP);
+  if (!sameStringSet(registeredPiTools, expectedPiTools)) {
+    errors.push(
+      `distribution/pi/extensions/tempguru.ts: native tool set [${registeredPiTools.join(", ")}] != expected [${expectedPiTools.join(", ")}]`,
+    );
+  }
+  const citiesTool = piExtension.match(
+    /name:\s*"tempguru_get_cities"[\s\S]*?(?=\n\s*pi\.registerTool\(|$)/,
+  )?.[0] ?? "";
+  for (const parameter of ["city", "country", "limit"]) {
+    if (!new RegExp(`\\b${parameter}:\\s*Type\\.Optional`).test(citiesTool) || !citiesTool.includes(`${parameter}: p.${parameter}`)) {
+      errors.push(`distribution/pi/extensions/tempguru.ts: get_cities must declare and forward ${parameter}`);
+    }
+  }
+  if (!/\blimit:\s*Type\.Optional\(Type\.Integer\(\{[^}]*maximum:\s*100\b/.test(citiesTool) || /paginated/i.test(citiesTool)) {
+    errors.push("distribution/pi/extensions/tempguru.ts: get_cities lists must be capped at 100 and must not claim pagination");
+  }
+  const availabilityTool = piExtension.match(
+    /name:\s*"tempguru_check_availability"[\s\S]*?(?=\n\s*pi\.registerTool\(|$)/,
+  )?.[0] ?? "";
+  if (!/\bdate:\s*Type\.String\(/.test(availabilityTool) || /\bdate:\s*Type\.Optional/.test(availabilityTool)) {
+    errors.push("distribution/pi/extensions/tempguru.ts: check_availability date must be required like the REST contract");
+  }
+  for (const skill of SKILLS) {
+    const body = read(`distribution/pi/skills/${skill}/SKILL.md`);
+    if (!body.includes("Pi runtime tool routing (installed package override)")) {
+      errors.push(`distribution/pi/skills/${skill}/SKILL.md: Pi runtime routing guide missing`);
+    }
+    for (const nativeName of expectedPiTools) {
+      if (!body.includes(`\`${nativeName}\``)) {
+        errors.push(`distribution/pi/skills/${skill}/SKILL.md: missing native tool mapping ${nativeName}`);
+      }
+    }
+    if (/MCP-only\s+(?:plan_staffing|get_rate_benchmark)/.test(body)) {
+      errors.push(`distribution/pi/skills/${skill}/SKILL.md: remote MCP tool identifier was renamed into a nonexistent tool`);
+    }
+    for (const phrase of [
+      "not native Pi tools",
+      "straight-time planning estimate",
+      "never invent a saved `plan_id`",
+      "https://mcp.tempguru.co/okf/rate-index.md",
+    ]) {
+      if (!body.includes(phrase)) {
+        errors.push(`distribution/pi/skills/${skill}/SKILL.md: missing planner/benchmark fallback rule ${phrase}`);
+      }
+    }
   }
 }
 
@@ -362,22 +433,59 @@ for (const p of [
     "https://github.com/Tempguru-co/tempguru-mcp",
     "source=hermes",
     "source=openai-codex",
-    "pi install npm:tempguru-mcp",
+    "pi install npm:tempguru-pi",
   ]) {
     if (!body.includes(fragment)) errors.push(`${p}: multi-runtime activation guidance missing ${fragment}`);
   }
 }
 
 // Descriptive surfaces have drifted independently from discovery before.
-// Ban the old count so adding a skill cannot leave public install copy behind.
+// Require the canonical numeric count and ban historical English/Chinese count
+// phrases so a new skill cannot leave public install copy behind.
+for (const [p, countPattern] of [
+  ["README.md", new RegExp(`\\b${SKILLS.length} (?:canonical )?skill`, "i")],
+  ["README.zh-CN.md", new RegExp(`${SKILLS.length} 个(?:标准)?技能`)],
+  ["llms-install.md", new RegExp(`Canonical skills \\(${SKILLS.length}\\)`, "i")],
+  ["AGENTS.md", new RegExp(`${SKILLS.length} SKILL\\.md resources`, "i")],
+  ["CLAUDE.md", new RegExp(`${SKILLS.length} SKILL\\.md resources`, "i")],
+  ["src/app/.well-known/mcp/server-card.json/route.ts", new RegExp(`${SKILLS.length} skill resources`, "i")],
+  ["distribution/ai-agents-page.html", new RegExp(`all ${SKILLS.length} results`, "i")],
+  ["distribution/ai-agents-page.zh-CN.html", new RegExp(`全部 ${SKILLS.length} 个技能`)],
+]) {
+  const body = read(p);
+  if (!countPattern.test(body)) {
+    errors.push(`${p}: canonical skill count missing (expected ${SKILLS.length})`);
+  }
+  if (/\b(?:two|five)(?:-skill|\s+(?:canonical\s+)?skill)/i.test(body) || /(?:两个|五个|五条).*技能/.test(body)) {
+    errors.push(`${p}: stale canonical skill count (expected ${SKILLS.length})`);
+  }
+}
+
+// plan_staffing persists a 30-day non-PII snapshot for complete plans. It is
+// non-destructive but not read-only under MCP annotations; public inventories
+// must not collapse it into the nine pure lookup tools.
+if (!/"plan_staffing"[\s\S]*?readOnlyHint:\s*false[\s\S]*?destructiveHint:\s*false/.test(REGISTER_TOOLS_SOURCE)) {
+  errors.push("src/lib/mcp/register-tools.ts: plan_staffing must advertise non-read-only, non-destructive persistence");
+}
 for (const p of [
   "README.md",
   "README.zh-CN.md",
+  "AGENTS.md",
+  "CLAUDE.md",
+  "llms-install.md",
+  "src/app/.well-known/mcp.json/route.ts",
+  "src/app/mcp/route.ts",
   "src/app/.well-known/mcp/server-card.json/route.ts",
+  "src/mcp-stdio.ts",
+  "distribution/ai-agents-page.html",
+  "distribution/ai-agents-page.zh-CN.html",
 ]) {
   const body = read(p);
-  if (/two skill resources/i.test(body) || /两个技能资源/.test(body)) {
-    errors.push(`${p}: stale canonical skill count (expected ${SKILLS.length})`);
+  if (/\b(?:ten|10) read-only\b/i.test(body) || /(?:十个|10\s*个)只读/.test(body)) {
+    errors.push(`${p}: stale claim that plan_staffing is read-only`);
+  }
+  if (!body.includes("plan_staffing") || !/(?:non-destructive|不具破坏性|非联系信息|saved-plan write)/i.test(body)) {
+    errors.push(`${p}: saved-plan planner side effect is not disclosed`);
   }
 }
 
@@ -538,8 +646,8 @@ if (!existsSync(join(root, "src/app/.well-known/agent-skills/[skill]/SKILL.md/ro
   errors.push("mcp.tempguru.co canonical skill artifact route is missing");
 }
 
-// All discovery/runtime surfaces must expose the exact same five skills: the
-// four demand-layer skills from PR #27 plus the compliance skill. Checking sets
+// All discovery/runtime surfaces must expose the exact same canonical skills.
+// Checking sets
 // (not just individual substrings) catches omissions, duplicates, and stale
 // extras. The edge builder imports SKILLS directly; its generated worker must
 // still prove that both public discovery URL trees were emitted.
@@ -596,6 +704,12 @@ const llmsWorker = read("cloudflare/llms-worker.js");
 if (!JSON.parse(read("package.json")).scripts?.["build:llms-worker"]) {
   errors.push("package.json: missing build:llms-worker generator command");
 }
+if (!read(".github/workflows/check-submissions.yml").includes("npm run build:llms-worker -- --from-committed")) {
+  errors.push(".github/workflows/check-submissions.yml: llms worker regeneration must use the committed offline snapshot in PR CI");
+}
+if (!read("scripts/build-llms-worker.mjs").includes('process.argv.includes("--from-committed")')) {
+  errors.push("scripts/build-llms-worker.mjs: deterministic --from-committed mode is missing");
+}
 if (llmsWorker.includes("tempguru-agent-skills")) {
   errors.push("cloudflare/llms-worker.js: points agents at the stale two-skill repository");
 }
@@ -609,6 +723,11 @@ for (const fragment of [
   if (!llmsWorker.includes(fragment)) {
     errors.push(`cloudflare/llms-worker.js: canonical agent guidance missing ${fragment}`);
   }
+}
+
+const okfRateTimestamp = okfRateIndex.match(/^timestamp:\s*"(\d{4}-\d{2}-\d{2})T/m)?.[1];
+if (!read("scripts/build-okf.mjs").includes("rateIndexMeta.updated") || !okfRateTimestamp || okfRateTimestamp < RATE_INDEX_META.updated) {
+  errors.push(`public/okf/rate-index.md: freshness ${okfRateTimestamp ?? "missing"} predates Rate Index ${RATE_INDEX_META.updated}`);
 }
 
 // ── MCP discovery-doc protocol consistency ────────────────────────────────
@@ -726,13 +845,20 @@ try {
 // (a) cities.json: (name, state, country) must be unique — a duplicate row
 //     (Springfield MO twice, once as the bare slug) shipped and split the
 //     market's identity across two tiers.
-// (b) city-rates.json: .name must be unique — 36 space-key/typo-key duplicate
-//     rows (446 "measured markets" that were really 410) double-weighted modes
-//     and let Kansas City carry two different tiers.
+// (b) city-rates.json: punctuation-insensitive .name must be unique — 39
+//     space-key/typo-key duplicate rows (446 "measured markets" that were really
+//     407) double-weighted modes and let Kansas City carry two different tiers.
 // (c) where a rate row's "City, ST" matches a served city, tiers must agree.
 // (d) Brand Ambassador rates floor at $40 in EVERY market and every tier.
 {
   const cities = JSON.parse(read("content/mcp-data/cities.json")).cities;
+  const marketNameKey = (value) =>
+    value
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, " ")
+      .trim();
   const seen = new Map();
   for (const c of cities) {
     const k = `${c.name}|${c.state_abbr}|${c.country}`;
@@ -743,11 +869,12 @@ try {
   const rates = JSON.parse(read("content/mcp-data/city-rates.json"));
   const rateEntries = Object.entries(rates).filter(([k]) => k !== "_meta");
   const namesSeen = new Map();
-  const tierByCity = new Map(cities.map((c) => [`${c.name}, ${c.state_abbr}`, c.tier]));
+  const tierByCity = new Map(cities.map((c) => [marketNameKey(`${c.name}, ${c.state_abbr}`), c.tier]));
   for (const [key, row] of rateEntries) {
-    // Case-insensitive: "College station, TX" vs "College Station, TX" was a
-    // real duplicate that exact-match comparison missed.
-    const nameKey = row.name.toLowerCase();
+    // Case- and punctuation-insensitive: "College station, TX" vs
+    // "College Station, TX" and "Champaign-IL" vs "Champaign, IL" were real
+    // duplicates that exact-match comparison missed.
+    const nameKey = marketNameKey(row.name);
     if (namesSeen.has(nameKey)) {
       errors.push(`city-rates.json: duplicate market "${row.name}" (keys "${namesSeen.get(nameKey)}" and "${key}")`);
     }
@@ -755,7 +882,7 @@ try {
     if (key.includes(" ")) {
       errors.push(`city-rates.json: key "${key}" contains a space (keys are hyphenated slugs)`);
     }
-    const servedTier = tierByCity.get(row.name);
+    const servedTier = tierByCity.get(nameKey);
     if (servedTier && row.tier !== servedTier) {
       errors.push(`city-rates.json: "${row.name}" is tier "${row.tier}" but cities.json says "${servedTier}"`);
     }
@@ -770,6 +897,16 @@ try {
     if (ba?.[tier]?.low < 40) {
       errors.push(`role-pricing.json: brand-ambassadors ${tier} low $${ba[tier].low} breaks the $40 floor`);
     }
+  }
+  if (rateEntries.length !== namesSeen.size) {
+    errors.push(
+      `city-rates.json: ${rateEntries.length} rows collapse to ${namesSeen.size} punctuation-normalized market names`,
+    );
+  }
+  if (!rateIndexHtml.includes(`${rateEntries.length} measured`)) {
+    errors.push(
+      `distribution/event-staffing-rate-index.html: measured-market copy must use derived count ${rateEntries.length}`,
+    );
   }
 }
 

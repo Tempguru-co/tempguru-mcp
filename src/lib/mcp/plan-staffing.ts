@@ -30,6 +30,7 @@ import {
   suggestRole,
   isSecurityPhrase,
   SECURITY_ROLE_NOTE,
+  PROVINCE_META,
 } from "./data";
 
 export type PlanRoleInput = {
@@ -275,6 +276,12 @@ export function buildStaffingPlan(input: PlanStaffingInput) {
     overtime_weekly_hours: number | null;
     overtime_daily_hours: number | null;
     unique_rules: string[];
+    data_version: string;
+    data_current_as_of: string;
+    min_wage_as_of: string | null;
+    min_wage_source: string | null;
+    currency_note: string;
+    citation_note: string;
     note: string;
   } | null = null;
   let otRules: OtRules | null = null;
@@ -288,6 +295,12 @@ export function buildStaffingPlan(input: PlanStaffingInput) {
         overtime_weekly_hours: prov.overtime_weekly,
         overtime_daily_hours: prov.overtime_daily,
         unique_rules: prov.unique_rules,
+        data_version: PROVINCE_META.version,
+        data_current_as_of: PROVINCE_META.updated,
+        min_wage_as_of: null,
+        min_wage_source: null,
+        currency_note: "Canadian rates are billed in CAD. Provincial minimum wages change frequently and are confirmed by the coordinator on the binding quote.",
+        citation_note: `${PROVINCE_META.source} Operational guidance, not legal advice.`,
         note: "Canadian market: provincial employment standards apply (overtime thresholds shown; billed in CAD). Provincial minimum wages change frequently and are confirmed by the coordinator on the binding quote. All workers are payroll employees, never contractors. General information, not legal advice.",
       };
       otRules = {
@@ -303,6 +316,12 @@ export function buildStaffingPlan(input: PlanStaffingInput) {
         overtime_weekly_hours: null,
         overtime_daily_hours: null,
         unique_rules: [],
+        data_version: PROVINCE_META.version,
+        data_current_as_of: PROVINCE_META.updated,
+        min_wage_as_of: null,
+        min_wage_source: null,
+        currency_note: "Canadian rates are billed in CAD. Provincial minimum wages change frequently and are confirmed by the coordinator on the binding quote.",
+        citation_note: `${PROVINCE_META.source} Operational guidance, not legal advice.`,
         note: "Canadian market: provincial employment standards apply but are not modeled for this province — the estimate is straight-time only, and the coordinator confirms provincial wage and overtime rules on the binding quote.",
       };
     }
@@ -315,6 +334,12 @@ export function buildStaffingPlan(input: PlanStaffingInput) {
         overtime_weekly_hours: comp.data.overtime_threshold_weekly_hours,
         overtime_daily_hours: comp.data.overtime_threshold_daily_hours,
         unique_rules: comp.data.unique_rules,
+        data_version: comp.data.data_version,
+        data_current_as_of: comp.data.data_current_as_of,
+        min_wage_as_of: comp.data.min_wage_as_of,
+        min_wage_source: comp.data.min_wage_source,
+        currency_note: comp.data.currency_note,
+        citation_note: comp.data.citation_note,
         note: "All TempGuru placements are W-2 with workers comp and general liability included. General information, not legal advice.",
       };
       otRules = {

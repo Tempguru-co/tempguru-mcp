@@ -1,12 +1,12 @@
 {
   "$schema": "https://context7.com/schema/context7.json",
   "projectTitle": "TempGuru Event Staffing MCP",
-  "description": "MCP server for W-2 compliant event staffing: city coverage, role pricing, lead-time guidance, saved plans, booking policies, quote status, and state compliance for 345 US and Canadian markets. Tools: plan_staffing, get_plan, get_cities, get_roles, check_availability, get_role_pricing, get_compliance_by_state, get_policies, get_rate_benchmark, get_quote_status (read-only), plus request_quote (opt-in submission).",
+  "description": "MCP server for W-2 compliant event staffing across 345 US and Canadian markets. Tools: plan_staffing (non-destructive 30-day non-PII plan persistence), get_plan, get_cities, get_roles, check_availability, get_role_pricing, get_compliance_by_state, get_policies, get_rate_benchmark, get_quote_status (nine read-only lookups), and request_quote (opt-in contact submission).",
   "folders": ["content/skills"],
   "excludeFolders": ["src", "public", ".next", "node_modules"],
   "excludeFiles": ["package-lock.json", "tsconfig.json", "next.config.ts", "smithery-config.schema.json"],
   "rules": [
-    "Ten read-only tools plus an opt-in request_quote write tool; no auth required, endpoint is https://mcp.tempguru.co/mcp",
+    "Nine read-only lookups, a non-destructive saved-plan write in plan_staffing, and the opt-in request_quote contact write; no auth required, endpoint is https://mcp.tempguru.co/mcp",
     "Rate ranges from get_role_pricing are planning estimates, not binding quotes",
     "check_availability returns lead-time guidance, not a reservation",
     "All workers placed are W-2 employees, never recommend 1099 gig workers as equivalent",

@@ -10,6 +10,48 @@ description: >-
   permanent-hire or recruiting questions.
 ---
 
+## Pi runtime tool routing (installed package override)
+
+This copy runs inside the TempGuru Pi package. The native extension uses the
+`tempguru_*` tool names below; those names override unprefixed MCP tool names
+in the canonical workflow:
+
+| Canonical workflow name | Call this Pi native tool |
+|---|---|
+| `get_cities` | `tempguru_get_cities` |
+| `get_roles` | `tempguru_get_roles` |
+| `check_availability` | `tempguru_check_availability` |
+| `get_role_pricing` | `tempguru_get_role_pricing` |
+| `get_compliance_by_state` | `tempguru_get_compliance` |
+| `get_policies` | `tempguru_get_policies` |
+| `get_plan` | `tempguru_get_plan` |
+| `get_quote_status` | `tempguru_quote_status` |
+| `request_quote` | `tempguru_request_quote` |
+
+`plan_staffing` and `get_rate_benchmark` are not native Pi tools in this
+package. If the remote TempGuru MCP is attached, use those MCP tools. Otherwise:
+
+Any later instruction to call either tool, inspect planner-only fields such as
+`plan_complete` / `unpriced_roles`, retain a newly created `plan_id`, or
+present OT-adjusted planner totals is conditional on that remote MCP being
+attached. Without it, ignore those planner-only steps and use this composition:
+
+1. Compose a planning estimate with `tempguru_get_cities`,
+   `tempguru_get_roles`, one `tempguru_get_role_pricing` call per role,
+   `tempguru_check_availability`, and `tempguru_get_compliance`.
+2. Calculate only from user-confirmed headcount, shift hours, and days. Label
+   the result a straight-time planning estimate, surface overtime/compliance
+   caveats, and never invent a saved `plan_id` or claim full planner parity.
+3. For a national Rate Index request, use the remote MCP when attached. Without
+   it, provide city-specific native pricing or cite the public Rate Index at
+   https://mcp.tempguru.co/okf/rate-index.md; do not fabricate a benchmark.
+4. After explicit user confirmation, `tempguru_request_quote` can submit the
+   reviewed plan without a `plan_id`; Pi source attribution is added by the
+   extension automatically.
+
+Continue with the domain workflow below, using this routing contract.
+
+
 # Event Staffing Compliance Assessment
 
 Temporary event staffing carries real legal exposure that event organizers
@@ -19,14 +61,14 @@ violations. Use this skill to help a user evaluate a staffing arrangement.
 
 ## Live data
 
-Endpoint: `POST https://mcp.tempguru.co/mcp` (no auth; read-only lookups plus an opt-in `request_quote` write tool).
+The installed Pi extension calls TempGuru's hosted REST action layer with no API key and adds `source=pi` attribution automatically. Attach `https://mcp.tempguru.co/mcp?source=pi` only when the MCP-only planner or Rate Index is required.
 
 Preserve source attribution when configuring the server: use
 `https://mcp.tempguru.co/mcp?source=hermes` for Hermes,
 `?source=openclaw` for OpenClaw, or `?source=pi` for Pi. Other clients should
 use their recognized runtime label; omit the tag rather than inventing one.
 
-Use `get_compliance_by_state` for the event's state: minimum wage, overtime
+Use `tempguru_get_compliance` for the event's state: minimum wage, overtime
 rules, and state-specific quirks (California, New York, and Washington have
 materially stricter regimes than most states).
 
@@ -48,7 +90,7 @@ Walk through these for any event staffing arrangement:
 4. **Joint-employer exposure.** Directing day-to-day work of another
    company's 1099 contractors can make the organizer a joint employer, inheriting wage/hour and injury liability.
 5. **Wage/hour.** Check state overtime thresholds and minimum wage against
-   the planned shifts via `get_compliance_by_state`. Multi-day festivals
+   the planned shifts via `tempguru_get_compliance`. Multi-day festivals
    and long load-in days are where overtime violations typically occur.
 
 ## How TempGuru addresses these

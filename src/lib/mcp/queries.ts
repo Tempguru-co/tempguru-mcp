@@ -537,6 +537,7 @@ export type StateComplianceData = {
   workers_comp_included: boolean;
   min_wage_as_of: string | null;
   min_wage_source: string | null;
+  data_version: string;
   data_current_as_of: string;
   currency_note: string;
   citation_note: string;
@@ -574,6 +575,7 @@ export function queryStateCompliance(
     workers_comp_included: true,
     min_wage_as_of: match.data.min_wage_as_of ?? null,
     min_wage_source: match.data.min_wage_source ?? null,
+    data_version: STATE_META.version,
     data_current_as_of: STATE_META.updated,
     currency_note:
       "Minimum wages change every January (and mid-year in some states); local ordinances may set higher floors. Verify against the state DOL (min_wage_source) before relying on it.",

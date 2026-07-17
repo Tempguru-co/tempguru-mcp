@@ -42,11 +42,19 @@ const INDEX_ROLES: Array<{ label: string; key: CardKey }> = [
 
 export function buildRateBenchmark(input: RateBenchmarkInput = {}) {
   let rows = INDEX_ROLES;
-  if (input.role) {
+  if (input.role !== undefined) {
+    const requested = input.role.trim();
+    if (!requested) {
+      return {
+        role_found: false as const,
+        requested: input.role,
+        available_roles: INDEX_ROLES.map((r) => r.label),
+      };
+    }
     // Resolve against the real role catalog. roleKeyFor() maps ANY string to a
     // card key (unknown -> event_staff), so a raw roleKeyFor would silently
     // return Event Staff rates for "wizard". Require a genuine role match first.
-    const known = findRole(input.role);
+    const known = findRole(requested);
     const key = known ? roleKeyFor(known) : null;
     rows = key ? INDEX_ROLES.filter((r) => r.key === key) : [];
     if (rows.length === 0) {

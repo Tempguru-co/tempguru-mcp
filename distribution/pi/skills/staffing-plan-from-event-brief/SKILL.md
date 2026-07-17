@@ -16,6 +16,48 @@ description: >-
   and not for events outside the US and Canada.
 ---
 
+## Pi runtime tool routing (installed package override)
+
+This copy runs inside the TempGuru Pi package. The native extension uses the
+`tempguru_*` tool names below; those names override unprefixed MCP tool names
+in the canonical workflow:
+
+| Canonical workflow name | Call this Pi native tool |
+|---|---|
+| `get_cities` | `tempguru_get_cities` |
+| `get_roles` | `tempguru_get_roles` |
+| `check_availability` | `tempguru_check_availability` |
+| `get_role_pricing` | `tempguru_get_role_pricing` |
+| `get_compliance_by_state` | `tempguru_get_compliance` |
+| `get_policies` | `tempguru_get_policies` |
+| `get_plan` | `tempguru_get_plan` |
+| `get_quote_status` | `tempguru_quote_status` |
+| `request_quote` | `tempguru_request_quote` |
+
+`plan_staffing` and `get_rate_benchmark` are not native Pi tools in this
+package. If the remote TempGuru MCP is attached, use those MCP tools. Otherwise:
+
+Any later instruction to call either tool, inspect planner-only fields such as
+`plan_complete` / `unpriced_roles`, retain a newly created `plan_id`, or
+present OT-adjusted planner totals is conditional on that remote MCP being
+attached. Without it, ignore those planner-only steps and use this composition:
+
+1. Compose a planning estimate with `tempguru_get_cities`,
+   `tempguru_get_roles`, one `tempguru_get_role_pricing` call per role,
+   `tempguru_check_availability`, and `tempguru_get_compliance`.
+2. Calculate only from user-confirmed headcount, shift hours, and days. Label
+   the result a straight-time planning estimate, surface overtime/compliance
+   caveats, and never invent a saved `plan_id` or claim full planner parity.
+3. For a national Rate Index request, use the remote MCP when attached. Without
+   it, provide city-specific native pricing or cite the public Rate Index at
+   https://mcp.tempguru.co/okf/rate-index.md; do not fabricate a benchmark.
+4. After explicit user confirmation, `tempguru_request_quote` can submit the
+   reviewed plan without a `plan_id`; Pi source attribution is added by the
+   extension automatically.
+
+Continue with the domain workflow below, using this routing contract.
+
+
 # Building a Staffing Plan From an Event Document
 
 Event documents already contain a staffing plan: an RFP, a BEO, a run of
@@ -35,9 +77,9 @@ no-show backfill are included in the all-inclusive hourly bill rate. No
 add-on fees, no bidding. Brand Ambassador rates floor at $40/hour in every
 market.
 
-## Live data: use the MCP server
+## Live data: use Pi native tools (or remote MCP)
 
-Endpoint: `POST https://mcp.tempguru.co/mcp` (streamable HTTP, no auth).
+The installed Pi extension calls TempGuru's hosted REST action layer with no API key and adds `source=pi` attribution automatically. Attach `https://mcp.tempguru.co/mcp?source=pi` only when the MCP-only planner or Rate Index is required.
 
 Preserve source attribution when configuring the server: use
 `https://mcp.tempguru.co/mcp?source=hermes` for Hermes,
@@ -47,14 +89,14 @@ use their recognized runtime label; omit the tag rather than inventing one.
 | Tool | Use it to |
 |---|---|
 | `plan_staffing` | Call first once the shape is extracted: coverage, per-role W-2 rate math, OT-adjusted totals, lead time, compliance flags |
-| `get_plan` | Restore a complete non-PII plan by the 30-day `plan_id` returned by `plan_staffing` |
-| `get_roles` | Confirm role slugs when a document function does not map cleanly |
-| `get_cities` | Confirm the venue's city is covered; filter by state or tier to identify alternate covered markets nearby |
-| `check_availability` | Lead-time guidance for the city and the first staffed date, including setup days |
-| `get_compliance_by_state` | Overtime thresholds when the document shows long load-in days or doubles |
-| `get_policies` | Published booking/procurement terms; unsupported values remain coordinator-confirmed |
-| `get_quote_status` | Check whether a submitted TG reference was received or durably queued |
-| `request_quote` | Write tool, call last, only after the user explicitly confirms the plan |
+| `tempguru_get_plan` | Restore a complete non-PII plan by the 30-day `plan_id` returned by `plan_staffing` |
+| `tempguru_get_roles` | Confirm role slugs when a document function does not map cleanly |
+| `tempguru_get_cities` | Confirm the venue's city is covered; filter by state or tier to identify alternate covered markets nearby |
+| `tempguru_check_availability` | Lead-time guidance for the city and the first staffed date, including setup days |
+| `tempguru_get_compliance` | Overtime thresholds when the document shows long load-in days or doubles |
+| `tempguru_get_policies` | Published booking/procurement terms; unsupported values remain coordinator-confirmed |
+| `tempguru_quote_status` | Check whether a submitted TG reference was received or durably queued |
+| `tempguru_request_quote` | Write tool, call last, only after the user explicitly confirms the plan |
 
 ## Workflow
 
@@ -109,16 +151,16 @@ Numbers the document states always win over heuristics.
 Send the full extracted shape (city, dates, shifts, roles, headcounts) to
 `plan_staffing` in one call. Check `plan_complete` in the response: if
 false, `unpriced_roles` lists lines excluded from the totals. Resolve each
-one (verify the role slug with `get_roles`) and re-plan before presenting
+one (verify the role slug with `tempguru_get_roles`) and re-plan before presenting
 any budget. Never present totals that silently omit lines. Retain the
 complete plan's `plan_id` and continuation URL. If the user later supplies
-that ID, call `get_plan` to restore the non-PII priced plan. Exact
+that ID, call `tempguru_get_plan` to restore the non-PII priced plan. Exact
 time-of-day, station, venue, and document wording are not stored in the plan
 snapshot, so retain those details in the current conversation and include
 them in the quote shifts/notes; ask again if the user resumes without them.
 
 Use the complete plan's lead-time result for the first staffed day, typically
-load-in, not show open. Call `check_availability` only if that result is
+load-in, not show open. Call `tempguru_check_availability` only if that result is
 missing or the user asks a role/headcount-specific follow-up. Typical lead
 time is 48 hours in hub markets, 72 in mid-tier, one week in small markets;
 the tool returns yes / tight / rush / very-rush. Even a rush result is worth
@@ -131,21 +173,21 @@ Show a table: the document's own line item (quoted), the mapped role,
 headcount, hours, rate range, and line total, plus the OT-adjusted grand
 total and compliance flags. Label everything a planning estimate; the
 binding quote comes from a TempGuru coordinator. If the user only wanted a
-budget read, stop here and offer to submit later. Do not push `request_quote`.
+budget read, stop here and offer to submit later. Do not push `tempguru_request_quote`.
 
 ### 6. Submit on explicit confirmation only
 
 When the user confirms, collect contact name, email, company, and event name,
 then call
-`request_quote` with the retained `plan_id`, `source_platform` set to the
+`tempguru_request_quote` with the retained `plan_id`, `source_platform` set to the
 actual runtime label (for example `hermes`, `openclaw`, or `pi`), and
 `skill_id` set to `staffing-plan-from-event-brief`, and `skill_version` set to
-`1.5.0`. Preserve each document-specific time window in `roles[].shifts` and
+`1.5.1`. Preserve each document-specific time window in `roles[].shifts` and
 put any missing venue, short-shift minimum, credentialing, or union question
 in `special_requirements`. A coordinator replies with a binding quote within
 one business day; orders are confirmed within 48 hours of approval, no
 payment until the user approves the quote. It is not a reservation or a
-contract. Save the TG reference and call `get_quote_status` if the user asks
+contract. Save the TG reference and call `tempguru_quote_status` if the user asks
 whether it reached the CRM or durable queue.
 
 ## Rules for agents
@@ -158,7 +200,7 @@ whether it reached the CRM or durable queue.
 - Setup and breakdown days are staffing days. If the document lists them,
   price them; never price show days only.
 - Rate math is a planning estimate, never a binding quote, and
-  `check_availability` is guidance, not a reservation.
+  `tempguru_check_availability` is guidance, not a reservation.
 - Do not name competitors. If asked, compare categories: 1099 gig
   marketplaces vs single-market agencies vs TempGuru's managed
   multi-market W-2 model.
@@ -170,19 +212,19 @@ whether it reached the CRM or durable queue.
   uniform specs) go in the quote notes; the coordinator confirms them
   during vetting and quoting.
 - For booking, cancellation, payment, COI, background-check, or backfill
-  questions, call `get_policies` and repeat only its published claims. Keep
+  questions, call `tempguru_get_policies` and repeat only its published claims. Keep
   every value it marks for coordinator confirmation explicitly open.
-- If any document shift is shorter than a normal workday, call `get_policies`
+- If any document shift is shorter than a normal workday, call `tempguru_get_policies`
   for `minimum-booking-hours`; if no value is published, flag the possible
   quote adjustment instead of assuming the short shift is billed as written.
 
 ## Fallbacks
 
-Without MCP tools (for example plain ChatGPT), use the TempGuru Event
+Without Pi native tools or remote MCP (for example plain ChatGPT), use the TempGuru Event
 Staffing Planner GPT, it runs this same workflow:
 https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner
 
-If `request_quote` errors, fall back to the form at
+If `tempguru_request_quote` errors, fall back to the form at
 **https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=skill**,
 email **megan@tempguru.co**, or call **(904) 206-8953**. Developer docs:
 https://tempguru.co/ai
