@@ -106,6 +106,7 @@ function Dashboard({ m }: { m: DashboardMetrics }) {
       .filter(([key]) => key.endsWith(`:${event}`))
       .reduce((sum, [, count]) => sum + count, 0);
   const plansCreated = funnelTotal("plans_created");
+  const plansSaved = funnelTotal("plans_saved");
   const plansResumed = funnelTotal("plans_resumed");
   const quotesSubmitted = funnelTotal("quotes_submitted");
   const quotesLinked = funnelTotal("quotes_linked");
@@ -138,13 +139,15 @@ function Dashboard({ m }: { m: DashboardMetrics }) {
           }}
         >
           <Stat label="Complete plans" value={plansCreated.toLocaleString()} />
+          <Stat label="Explicit saves" value={plansSaved.toLocaleString()} />
           <Stat label="Plans resumed" value={plansResumed.toLocaleString()} />
           <Stat label="New quote leads" value={quotesSubmitted.toLocaleString()} />
           <Stat label="Quotes linked" value={quotesLinked.toLocaleString()} sub={linkedRate} />
         </div>
         <p style={{ color: "#94a8c4", fontSize: 12, margin: "12px 0 0" }}>
-          Linked rate is resolved-plan quotes ÷ successful new quote leads. Plans and quotes are
-          window totals, not a cohort conversion rate.
+          Explicit saves count successful <code>save_staffing_plan</code> calls. Linked rate is
+          resolved-plan quotes ÷ successful new quote leads. Plans and quotes are window totals,
+          not a cohort conversion rate.
         </p>
         <div style={{ marginTop: 12 }}>
           <KeyValueTable

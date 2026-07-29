@@ -94,7 +94,7 @@ try {
   const tools = await rpc("tools/list", {});
   const toolNames = (tools.result?.tools ?? []).map((t) => t.name).sort();
   check(
-    "tools/list advertises all 11 tools",
+    "tools/list advertises all 12 tools",
     JSON.stringify(toolNames) ===
       JSON.stringify([
         "check_availability",
@@ -108,18 +108,24 @@ try {
         "get_roles",
         "plan_staffing",
         "request_quote",
+        "save_staffing_plan",
       ]),
     toolNames.join(","),
   );
   const toolByName = new Map((tools.result?.tools ?? []).map((tool) => [tool.name, tool]));
   const pureReadTools = toolNames.filter(
-    (name) => name !== "plan_staffing" && name !== "request_quote",
+    (name) =>
+      name !== "plan_staffing" &&
+      name !== "save_staffing_plan" &&
+      name !== "request_quote",
   );
   check(
-    "tool annotations distinguish lookups, saved-plan persistence, and quote submission",
+    "tool annotations distinguish lookups, compatibility persistence, explicit save, and quote submission",
     pureReadTools.every((name) => toolByName.get(name)?.annotations?.readOnlyHint === true) &&
       toolByName.get("plan_staffing")?.annotations?.readOnlyHint === false &&
       toolByName.get("plan_staffing")?.annotations?.destructiveHint === false &&
+      toolByName.get("save_staffing_plan")?.annotations?.readOnlyHint === false &&
+      toolByName.get("save_staffing_plan")?.annotations?.destructiveHint === false &&
       toolByName.get("request_quote")?.annotations?.readOnlyHint === false,
     JSON.stringify(
       Object.fromEntries(
@@ -144,7 +150,14 @@ try {
         arguments: c.arguments.plan,
       });
       const plan = planned.result?.structuredContent;
-      const planId = plan?.plan_id;
+      const saved = plan?.plan_id
+        ? null
+        : await rpc("tools/call", {
+            name: "save_staffing_plan",
+            arguments: c.arguments.plan,
+          });
+      const savedPlan = saved?.result?.structuredContent;
+      const planId = plan?.plan_id ?? savedPlan?.plan_id;
       const restored = planId
         ? await rpc("tools/call", { name: "get_plan", arguments: { plan_id: planId } })
         : null;
@@ -161,7 +174,7 @@ try {
             arguments: { reference },
           })
         : null;
-      const text = JSON.stringify({ plan, restored, quoted, status });
+      const text = JSON.stringify({ plan, savedPlan, restored, quoted, status });
       const missing = c.expect.filter((marker) => !text.includes(marker));
       if (quoted?.result?.structuredContent?.plan_linked !== true) {
         missing.push("plan_linked:true");

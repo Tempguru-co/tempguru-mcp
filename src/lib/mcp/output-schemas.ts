@@ -1,5 +1,5 @@
 // MCP outputSchema definitions for all 11 MCP tools, structured-output support
-// (spec rev 2025-06-18). Clients like ChatGPT Apps use these to render and
+// (dual-era MCP, preferred rev 2026-07-28). Clients like ChatGPT Apps use these to render and
 // ground tool results ("Output schema recommended" flag in the app console).
 //
 // CRITICAL CONTRACT: these schemas must accept EVERY shape the query layer
@@ -487,6 +487,93 @@ export const PLAN_STAFFING_SCHEMA = z.object(PLAN_STAFFING_OUTPUT).superRefine((
     }
   }
 });
+
+// ─── save_staffing_plan (saved / incomplete / limited / unavailable) ─────
+//
+// The explicit write recomputes the plan from bounded event inputs. It never
+// accepts caller-supplied rates or totals. `status` distinguishes the durable
+// artifact from expected operational misses without turning them into protocol
+// errors.
+
+const SAVE_PLAN_CONTINUATION = z.object({
+  form_url: z.string().url(),
+  note: z.string(),
+});
+
+const SAVE_PLAN_NEXT_ACTION = z.enum([
+  "share",
+  "revise",
+  "request_quote",
+  "plan_again",
+  "retry_save",
+  "continue_on_website",
+  "request_quote_without_plan_id",
+]);
+
+export const SAVE_STAFFING_PLAN_OUTPUT = {
+  status: z
+    .enum([
+      "saved",
+      "plan_incomplete",
+      "rate_limited",
+      "storage_unavailable",
+    ])
+    .describe("Discriminator. Only status:saved means a resumable plan_id exists."),
+  schema_version: z.literal("1.0").optional(),
+  plan_id: z
+    .string()
+    .regex(/^[A-HJ-NP-Z2-9]{12}$/)
+    .optional()
+    .describe("12-character reference for the saved non-PII snapshot."),
+  created_at: z.string().datetime().optional(),
+  expires_at: z
+    .string()
+    .datetime()
+    .optional()
+    .describe("Conservative 30-day expiry for the saved snapshot."),
+  resource_uri: z
+    .string()
+    .url()
+    .optional()
+    .describe("Public no-store REST URI that restores the saved artifact."),
+  continuation: SAVE_PLAN_CONTINUATION.optional(),
+  quote_readiness: z
+    .literal("needs_contact")
+    .optional()
+    .describe("The plan is complete; contact details are still required before request_quote."),
+  plan_status: z
+    .enum(["plan", "needs_roles", "roles_not_found", "city_not_found"])
+    .optional()
+    .describe("Planner branch that prevented persistence."),
+  retry_after_seconds: z.number().int().positive().optional(),
+  message: z.string(),
+  next_actions: z.array(SAVE_PLAN_NEXT_ACTION),
+};
+
+export const SAVE_STAFFING_PLAN_SCHEMA = z
+  .object(SAVE_STAFFING_PLAN_OUTPUT)
+  .superRefine((value, ctx) => {
+    if (value.status === "saved") {
+      requireFields(value, ctx, value.status, [
+        "schema_version",
+        "plan_id",
+        "created_at",
+        "expires_at",
+        "resource_uri",
+        "continuation",
+        "quote_readiness",
+      ]);
+    } else if (value.status === "plan_incomplete") {
+      requireFields(value, ctx, value.status, ["plan_status"]);
+    } else if (value.status === "rate_limited") {
+      requireFields(value, ctx, value.status, [
+        "retry_after_seconds",
+        "continuation",
+      ]);
+    } else {
+      requireFields(value, ctx, value.status, ["continuation"]);
+    }
+  });
 
 // ─── get_plan (found / not found) ───────────────────────────────────────
 

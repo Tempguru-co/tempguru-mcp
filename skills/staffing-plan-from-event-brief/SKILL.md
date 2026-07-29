@@ -47,7 +47,8 @@ use their recognized runtime label; omit the tag rather than inventing one.
 | Tool | Use it to |
 |---|---|
 | `plan_staffing` | Call first once the shape is extracted: coverage, per-role W-2 rate math, OT-adjusted totals, lead time, compliance flags |
-| `get_plan` | Restore a complete non-PII plan by the 30-day `plan_id` returned by `plan_staffing` |
+| `save_staffing_plan` | Explicitly save the server-recomputed plan when the user needs a resumable artifact and `plan_staffing` did not return a `plan_id` |
+| `get_plan` | Restore a complete non-PII plan by a 30-day `plan_id` returned by the planner or explicit save |
 | `get_roles` | Confirm role slugs when a document function does not map cleanly |
 | `get_cities` | Confirm the venue's city is covered; filter by state or tier to identify alternate covered markets nearby |
 | `check_availability` | Lead-time guidance for the city and the first staffed date, including setup days |
@@ -110,8 +111,11 @@ Send the full extracted shape (city, dates, shifts, roles, headcounts) to
 `plan_staffing` in one call. Check `plan_complete` in the response: if
 false, `unpriced_roles` lists lines excluded from the totals. Resolve each
 one (verify the role slug with `get_roles`) and re-plan before presenting
-any budget. Never present totals that silently omit lines. Retain the
-complete plan's `plan_id` and continuation URL. If the user later supplies
+any budget. Never present totals that silently omit lines. Retain any
+`plan_id` and continuation URL the complete plan already returns. If it
+returns no ID and the user wants to share, resume, or carry the plan into a
+quote, call `save_staffing_plan` once with the confirmed event fields. Do not
+save again when the planner already returned an ID. If the user later supplies
 that ID, call `get_plan` to restore the non-PII priced plan. Exact
 time-of-day, station, venue, and document wording are not stored in the plan
 snapshot, so retain those details in the current conversation and include
@@ -140,7 +144,7 @@ then call
 `request_quote` with the retained `plan_id`, `source_platform` set to the
 actual runtime label (for example `hermes`, `openclaw`, or `pi`), and
 `skill_id` set to `staffing-plan-from-event-brief`, and `skill_version` set to
-`1.5.1`. Preserve each document-specific time window in `roles[].shifts` and
+`1.6.0`. Preserve each document-specific time window in `roles[].shifts` and
 put any missing venue, short-shift minimum, credentialing, or union question
 in `special_requirements`. A coordinator replies with a binding quote within
 one business day; orders are confirmed within 48 hours of approval, no

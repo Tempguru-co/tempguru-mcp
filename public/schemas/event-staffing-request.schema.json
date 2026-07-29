@@ -203,7 +203,7 @@
       ]
     },
     "plan_id": {
-      "description": "Optional plan_id returned by plan_staffing; links the submitted quote to its saved non-PII plan",
+      "description": "Optional plan_id returned by plan_staffing or save_staffing_plan; links the submitted quote to its saved non-PII plan",
       "type": "string",
       "maxLength": 12,
       "pattern": "^[A-HJ-NP-Z2-9]{12}$"

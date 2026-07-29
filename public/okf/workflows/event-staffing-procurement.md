@@ -39,6 +39,7 @@ or the client's recognized runtime label; omit rather than invent.
 | `get_policies` | Published booking and procurement policies (documentation, insurance posture, cancellation, payment, onboarding). Missing values are marked coordinator-confirmed |
 | `get_compliance_by_state` | State and provincial minimum wage and overtime context for the event's location |
 | `plan_staffing` | Once there is a real event, turn it into a priced plan |
+| `save_staffing_plan` | Save the complete non-PII plan for handoff when the planner did not already return a `plan_id` |
 | `get_cities` / `get_roles` | Confirm coverage and map roles when bridging to a plan |
 | `request_quote` | Submit the plan for a human-reviewed quote after explicit confirmation |
 
@@ -75,7 +76,10 @@ skill. Keep it operational, not legal advice.
 Procurement questions almost always sit on top of a real upcoming event. Once
 the paperwork question is answered, offer to build the staffing plan: ask for
 city, dates, roles, and headcount, confirm coverage with `get_cities`, and run
-`plan_staffing`. This is where the conversation becomes a booking.
+`plan_staffing`. Retain any `plan_id` it returns. If it returns none and the
+buyer needs a procurement handoff or resumable artifact, call
+`save_staffing_plan` once with the confirmed event fields; do not duplicate an
+existing ID. This is where the conversation becomes a booking.
 
 ### 4. Submit after confirmation
 

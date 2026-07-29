@@ -93,8 +93,10 @@ TOOLS = [{
 
 If your stack speaks Model Context Protocol, skip this package and connect
 the server directly: `https://mcp.tempguru.co/mcp` (streamable HTTP, no
-auth, 11 tools: nine read-only lookups, a non-destructive saved-plan planner,
-and opt-in quote submission). Docs:
+auth, 12 tools: nine read-only lookups, a compatibility planner, an explicit
+non-contact `save_staffing_plan` artifact write, and opt-in quote submission).
+The endpoint prefers MCP 2026-07-28 and retains stateless 2025-era
+compatibility. Docs:
 https://tempguru.co/ai
 
 ## Error handling

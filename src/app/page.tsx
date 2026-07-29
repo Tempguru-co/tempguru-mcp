@@ -30,7 +30,7 @@ const JSON_LD = {
       "@id": "https://mcp.tempguru.co/#api",
       name: "TempGuru MCP Server & REST API",
       description:
-        "Model Context Protocol server and REST API for event-staffing data: role catalog, all-inclusive W-2 hourly rates, city coverage, lead times, and state compliance, plus an opt-in quote request.",
+        "Dual-era MCP 2026-07-28 and 2025-compatible server with twelve event-staffing tools, plus a public REST API: role catalog, all-inclusive W-2 hourly rates, city coverage, lead times, state compliance, resumable non-PII plans, and an opt-in quote request.",
       documentation: "https://tempguru.co/ai",
       provider: { "@id": "https://tempguru.co/#org" },
       termsOfService: "https://tempguru.co/ai",
@@ -60,7 +60,11 @@ export default function Home() {
   const tools = [
     {
       name: "plan_staffing",
-      desc: "Planner meta-tool, call first. Turns an event shape (city, date, roles + headcount) into a full plan: coverage, per-role W-2 rate math, lead-time guidance, and state compliance flags.",
+      desc: "Planner meta-tool, call first. Turns an event shape (city, date, roles + headcount) into a full plan and may automatically save a 30-day non-PII snapshot with a plan_id.",
+    },
+    {
+      name: "save_staffing_plan",
+      desc: "Explicitly save a complete plan after the server recomputes rates and totals from bounded event inputs. Use only when no plan_id already exists; never duplicate a plan_staffing autosave.",
     },
     {
       name: "get_plan",
@@ -147,17 +151,48 @@ export default function Home() {
       </h1>
       <p style={{ color: "#9ab0cc", fontSize: 16, marginBottom: 32 }}>
         Model Context Protocol server and public REST API for TempGuru
-        event staffing data. Eleven tools: nine read-only lookups, a
-        non-destructive planner that may save a 30-day non-PII snapshot, and one
-        opt-in request_quote contact submission.
+        event staffing data. Twelve tools: nine read-only lookups, a
+        non-destructive planner that may save a 30-day non-PII snapshot, an
+        explicit non-destructive save tool, and one opt-in request_quote contact
+        submission.
       </p>
 
       <section style={sectionStyle}>
         <h2 style={{ fontSize: 18, marginBottom: 12 }}>MCP Endpoint</h2>
         <code style={codeBlockStyle}>POST /mcp</code>
         <p style={descStyle}>
-          Streamable HTTP transport, negotiates MCP protocol 2025-06-18. SSE disabled. No auth.
+          Official dual-era HTTP transport. Preferred MCP 2026-07-28
+          per-request envelopes, with stateless initialize/streamable-HTTP
+          compatibility for supported 2025-era clients. Responses use JSON or
+          SSE as required. No authentication.
         </p>
+      </section>
+
+      <section style={sectionStyle}>
+        <h2 style={{ fontSize: 18, marginBottom: 12 }}>Phase A workflow</h2>
+        <ol style={{ color: "#9ab0cc", fontSize: 14, lineHeight: 1.6, paddingLeft: 24 }}>
+          <li>
+            Call <code style={codeNameStyle}>plan_staffing</code> first with the
+            event city, date, roles, and headcount.
+          </li>
+          <li>
+            If the complete plan already includes a{" "}
+            <code style={codeNameStyle}>plan_id</code>, retain it and do not call{" "}
+            <code style={codeNameStyle}>save_staffing_plan</code>. The planner
+            already saved the non-PII snapshot.
+          </li>
+          <li>
+            Call <code style={codeNameStyle}>save_staffing_plan</code> only when
+            a complete plan has no <code style={codeNameStyle}>plan_id</code>{" "}
+            and needs a durable 30-day artifact. The server recomputes rates and
+            totals before saving.
+          </li>
+          <li>
+            Only after the user explicitly confirms, call{" "}
+            <code style={codeNameStyle}>request_quote</code> and include the{" "}
+            <code style={codeNameStyle}>plan_id</code> when available.
+          </li>
+        </ol>
       </section>
 
       <section style={sectionStyle}>
@@ -212,8 +247,8 @@ export default function Home() {
           {[
             { path: "/llms.txt", desc: "LLM-oriented summary + links" },
             { path: "/okf/index.md", desc: "Open Knowledge Format bundle (roles, rates, coverage, compliance, workflows)" },
-            { path: "/.well-known/mcp.json", desc: "MCP server discovery document" },
-            { path: "/.well-known/mcp/server-card.json", desc: "SEP-1649 server card" },
+            { path: "/.well-known/mcp.json", desc: "Dual-era MCP discovery document and Phase A workflow" },
+            { path: "/.well-known/mcp/server-card.json", desc: "SEP-1649 server card with the 12-tool inventory" },
             { path: "/.well-known/agent-skills/index.json", desc: "Agent Skills index (SKILL.md digests)" },
             { path: "/.well-known/okf.json", desc: "OKF bundle discovery" },
             { path: "/openapi.json", desc: "OpenAPI 3.1 spec for the REST API" },

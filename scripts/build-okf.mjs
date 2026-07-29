@@ -70,7 +70,7 @@ const TOOLS = readFileSync(join(repoRoot, "src", "lib", "mcp", "register-tools.t
       title: (c.match(/title:\s*"([^"]+)"/) || [])[1],
       summary: ((c.match(/description:\s*\n?\s*"((?:[^"\\]|\\.)*)"/) || [])[1] || "").split(/(?<=\.)\s/)[0],
       kind:
-        name === "plan_staffing"
+        name === "plan_staffing" || name === "save_staffing_plan"
           ? "saved-plan write"
           : /readOnlyHint:\s*true/.test(c.slice(0, 4000))
             ? "read"
@@ -1024,8 +1024,8 @@ flags, and next steps.
 4. **Check lead time** against the [lead-time model](../reference/lead-time-model.md): hub 48h, mid 72h, small 168h typical.
 5. **Flag compliance:** check the event's [state profile](../compliance/index.md). Call out the daily-overtime states (${dailyOtStates.join(", ")}).
 6. **Present the plan** with totals labeled as **planning estimates**, never binding quotes. Never promise availability.
-7. If the completed plan returns a \`plan_id\`, retain it so another conversation can restore the non-PII snapshot with \`get_plan\`, and pass it into \`request_quote\`.
-8. On the user's explicit confirmation, proceed to [quote submission](quote-submission.md).
+7. Retain any \`plan_id\` returned by the completed plan. If persistence is useful and no ID was returned, call \`save_staffing_plan\` once with the same confirmed event fields; never duplicate an existing save.
+8. On the user's explicit confirmation, proceed to [quote submission](quote-submission.md) and call \`request_quote\` only after collecting the required contact details.
 
 The team-lead auto-add rule inserts one Team Lead when any single shift reaches
 **20 staff**. See [event archetypes](../archetypes/index.md) for event-type defaults.`
@@ -1059,8 +1059,10 @@ write("workflows/quote-submission.md", doc(
   },
   `# Quote Submission
 
-\`request_quote\` is the only **contact/consequential write** tool. The planner's
-separate saved-plan side effect contains no contact details. Call
+\`request_quote\` is the only **contact/consequential write** tool.
+\`plan_staffing\` may still save during the compatibility release, and
+\`save_staffing_plan\` is the explicit non-contact artifact write; neither
+stores contact details. Call
 \`request_quote\` **last**, and only after the user's explicit confirmation.
 
 ## Collect
@@ -1154,7 +1156,7 @@ See [booking and procurement policies](../policies.md) and [quote submission](..
 write("reference/index.md", plainDoc(
   `# Reference
 
-- [MCP tools](mcp-tools.md), the 11 tools the server exposes
+- [MCP tools](mcp-tools.md), the ${TOOLS.length} tools the server exposes
 - [REST API](api.md), the HTTP mirror of the same data
 - [Data schemas](data-schema.md), the shape of the underlying datasets
 - [Lead-time model](lead-time-model.md), how availability guidance is computed
@@ -1221,11 +1223,12 @@ ${toolRows}
 
 ## Golden order
 
-1. \`plan_staffing\` with everything the user gave you; retain its \`plan_id\` when the plan is complete.
+1. \`plan_staffing\` with everything the user gave you.
 2. Fill gaps with \`get_roles\` / \`get_cities\`; flag the daily-overtime states (${dailyOtStates.join(", ")}).
 3. Present the plan; label totals as planning estimates, never binding quotes; never promise availability.
-4. On explicit confirmation, collect contact details and call \`request_quote\` once with the retained \`plan_id\`, actual \`source_platform\`, and canonical \`skill_id\` / \`skill_version\` when a TempGuru skill assembled it.
-5. Retain the returned TG reference and use \`get_quote_status\` only when the user asks for receipt status.
+4. Retain any \`plan_id\` the planner returned. If the user needs a shareable/resumable artifact and no ID exists, call \`save_staffing_plan\` once with the same confirmed event fields; never duplicate an existing save.
+5. On explicit confirmation, collect contact details and call \`request_quote\` once with the retained \`plan_id\`, actual \`source_platform\`, and canonical \`skill_id\` / \`skill_version\` when a TempGuru skill assembled it.
+6. Retain the returned TG reference and use \`get_quote_status\` only when the user asks for receipt status.
 
 The REST API at \`${API_BASE}\` mirrors the same query layer, so MCP and HTTP
 cannot drift. See [the REST API](api.md) and [data schemas](data-schema.md).`

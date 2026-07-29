@@ -335,9 +335,9 @@ export async function querySavedPlan(
       plan_found: false,
       plan_id: normalized,
       message:
-        "That plan was not found or has expired. Saved plans are retained for 30 days; re-run plan_staffing to create a current plan.",
+        "That plan was not found or has expired. Saved plans are retained for 30 days; re-run plan_staffing and save the complete plan when needed.",
       next_steps: [
-        "Call plan_staffing again with the event city, date, roles, and headcount.",
+        "Call plan_staffing again with the event city, date, roles, and headcount, then call save_staffing_plan only if no plan_id was returned and persistence is needed.",
         "If a quote was already submitted, use get_quote_status with the TG reference instead.",
       ],
     };

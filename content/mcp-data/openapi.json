@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "TempGuru Public Data API",
-    "version": "1.5.1",
+    "version": "1.6.0",
     "summary": "Public event-staffing data for the US and Canada: eight read-only operations plus one opt-in quote-request submission.",
     "description": "Public event-staffing data for the US and Canada, served by TempGuru (Temporary Assistance Guru, Inc.). Eight read-only operations plus a single opt-in write operation (`submitQuoteRequest`).\n\n**No authentication required.** The read endpoints return public data equivalent to what is published on tempguru.co, city footprint, staffing roles, hourly rate ranges, lead-time guidance, and state-level employment compliance summaries.\n\n**About the rates.** All hourly figures are *all-inclusive W-2 bill rates*: they cover the worker's pay, employer-side payroll taxes (FICA/FUTA/SUTA), workers' compensation insurance, general liability insurance, and dedicated coordinator support. Published hourly bill rates have no add-on fees or invoice-time markup. Rate ranges are *planning estimates*, a real quote requires event specifics and is provided after a quote request is reviewed by a coordinator.\n\n**About availability.** The `availability` endpoint returns *lead-time guidance based on city tier*, not a real-time reservation or hold on staff. TempGuru staffs to demand from a 100,000+ W-2 worker network across 345 markets; bookings are confirmed through the standard quote-and-confirmation flow, not via this API.\n\n**About quote submission.** `POST /api/v1/quote-requests` is the only write operation in this API. It is opt-in by design: call it only after the user has reviewed the staffing plan and explicitly confirmed they want to submit it. It creates a structured lead for human review, it does **not** reserve staff, guarantee pricing or availability, or create any contract, and **no payment** is required until the user approves the resulting quote. Contact and event details are delivered to TempGuru's CRM or its durable fallback queue and configured notification processor so a coordinator can reply; they are never written to telemetry or analytics.\n\n**Agent guidance.** This API exists so AI agents and integrators can ground answers about TempGuru in live, structured data instead of scraping web pages. Combine it with the MCP server at `https://mcp.tempguru.co/mcp` if your agent stack speaks Model Context Protocol, the two surfaces expose the same data and the same quote-submission operation through different transports.",
     "contact": {
@@ -413,7 +413,7 @@
           "Planning"
         ],
         "summary": "Restore a saved staffing plan",
-        "description": "Restores a complete, non-PII staffing-plan snapshot created within the last 30 days. Use the plan ID returned by `plan_staffing`; never guess or enumerate IDs. The response is never cached and returns a clean not-found variant when the snapshot is absent or expired.",
+        "description": "Restores a complete, non-PII staffing-plan snapshot created within the last 30 days. Use the plan ID returned by `plan_staffing` or `save_staffing_plan`; never guess or enumerate IDs. The response is never cached and returns a clean not-found variant when the snapshot is absent or expired.",
         "parameters": [
           {
             "name": "id",
@@ -424,7 +424,7 @@
               "pattern": "^[A-HJ-NP-Z2-9]{12}$",
               "maxLength": 12
             },
-            "description": "12-character plan ID returned by plan_staffing."
+            "description": "12-character plan ID returned by plan_staffing or save_staffing_plan."
           }
         ],
         "responses": {
@@ -1729,7 +1729,7 @@
             ]
           },
           "plan_id": {
-            "description": "Optional plan_id returned by plan_staffing; links the submitted quote to its saved non-PII plan",
+            "description": "Optional plan_id returned by plan_staffing or save_staffing_plan; links the submitted quote to its saved non-PII plan",
             "type": "string",
             "maxLength": 12,
             "pattern": "^[A-HJ-NP-Z2-9]{12}$"

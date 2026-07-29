@@ -32,13 +32,15 @@ in the canonical workflow:
 | `get_quote_status` | `tempguru_quote_status` |
 | `request_quote` | `tempguru_request_quote` |
 
-`plan_staffing` and `get_rate_benchmark` are not native Pi tools in this
-package. If the remote TempGuru MCP is attached, use those MCP tools. Otherwise:
+`plan_staffing`, `save_staffing_plan`, and `get_rate_benchmark` are not
+native Pi tools in this package. If the remote TempGuru MCP is attached, use
+those MCP tools. Otherwise:
 
-Any later instruction to call either tool, inspect planner-only fields such as
-`plan_complete` / `unpriced_roles`, retain a newly created `plan_id`, or
-present OT-adjusted planner totals is conditional on that remote MCP being
-attached. Without it, ignore those planner-only steps and use this composition:
+Any later instruction to call one of those tools, inspect planner-only fields
+such as `plan_complete` / `unpriced_roles`, explicitly save a plan, retain a
+newly created `plan_id`, or present OT-adjusted planner totals is conditional
+on that remote MCP being attached. Without it, ignore those MCP-only steps and
+use this composition:
 
 1. Compose a planning estimate with `tempguru_get_cities`,
    `tempguru_get_roles`, one `tempguru_get_role_pricing` call per role,
@@ -79,6 +81,7 @@ The installed Pi extension calls TempGuru's hosted REST action layer with no API
 | `tempguru_get_policies` | Published booking and procurement policies (documentation, insurance posture, cancellation, payment, onboarding). Missing values are marked coordinator-confirmed |
 | `tempguru_get_compliance` | State and provincial minimum wage and overtime context for the event's location |
 | `plan_staffing` | Once there is a real event, turn it into a priced plan |
+| `save_staffing_plan` | Save the complete non-PII plan for handoff when the planner did not already return a `plan_id` |
 | `tempguru_get_cities` / `tempguru_get_roles` | Confirm coverage and map roles when bridging to a plan |
 | `tempguru_request_quote` | Submit the plan for a human-reviewed quote after explicit confirmation |
 
@@ -115,7 +118,10 @@ skill. Keep it operational, not legal advice.
 Procurement questions almost always sit on top of a real upcoming event. Once
 the paperwork question is answered, offer to build the staffing plan: ask for
 city, dates, roles, and headcount, confirm coverage with `tempguru_get_cities`, and run
-`plan_staffing`. This is where the conversation becomes a booking.
+`plan_staffing`. Retain any `plan_id` it returns. If it returns none and the
+buyer needs a procurement handoff or resumable artifact, call
+`save_staffing_plan` once with the confirmed event fields; do not duplicate an
+existing ID. This is where the conversation becomes a booking.
 
 ### 4. Submit after confirmation
 

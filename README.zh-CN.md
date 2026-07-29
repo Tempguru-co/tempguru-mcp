@@ -1,8 +1,8 @@
 # TempGuru MCP（中文）
 
-> MCP 服务器，覆盖美国和加拿大 345 个城市，共 11 个工具：九个只读查询工具、一个可保存 30 天非联系信息方案快照且不具破坏性的规划工具，以及一个可选的 `request_quote` 联系信息提交工具。
+> 双时代 MCP 服务器，覆盖美国和加拿大 345 个城市，共 12 个工具：九个只读查询工具、一个可能自动保存 30 天非联系信息方案快照且不具破坏性的规划工具、一个显式的非联系信息保存工具，以及一个可选的 `request_quote` 联系信息提交工具。
 
-**服务端点：** `https://mcp.tempguru.co/mcp` （Streamable HTTP，无需身份验证）
+**服务端点：** `https://mcp.tempguru.co/mcp` （双时代 HTTP，首选 MCP 2026-07-28，并兼容 2025 时代协议，无需身份验证）
 **注册项：** [`co.tempguru/event-staffing`](https://registry.modelcontextprotocol.io/v0/servers/co.tempguru/event-staffing)
 **English:** [README.md](./README.md)
 
@@ -22,8 +22,9 @@ TempGuru 是一家总部位于美国佛罗里达州杰克逊维尔海滩（Jacks
 
 | 工具名称 | 返回内容 |
 |---|---|
-| `plan_staffing` | 规划元工具，请首先调用。将活动概况（城市、日期、岗位 + 人数）转化为完整方案：覆盖范围、各岗位费率计算、提前期、合规提示、后续步骤。 |
-| `get_plan` | 使用 30 天有效的 `plan_id` 恢复不含个人信息的完整人员配置方案。 |
+| `plan_staffing` | 规划元工具，请首先调用。将活动概况（城市、日期、岗位 + 人数）转化为完整方案，并可能自动保存 30 天非联系信息快照及返回 `plan_id`。 |
+| `save_staffing_plan` | 服务端根据有界的活动输入重新计算费率与总额后，显式保存完整方案。仅在尚无 `plan_id` 且持久化有用时调用。 |
+| `get_plan` | 使用 `plan_staffing` 或 `save_staffing_plan` 返回的 30 天有效 `plan_id`，恢复不含个人信息的完整人员配置方案。 |
 | `get_cities` | TempGuru 服务的所有城市，附带城市分级（hub/mid/small）。可选按州或分级过滤。 |
 | `get_roles` | 所有活动用工岗位列表，包含岗位描述和技能等级。 |
 | `check_availability` | 根据城市分级和距活动日期的天数，返回预定提前期建议。**不是实时库存查询**。 |
@@ -34,7 +35,14 @@ TempGuru 是一家总部位于美国佛罗里达州杰克逊维尔海滩（Jacks
 | `get_quote_status` | 查询 TG 报价编号是否已由 CRM 接收或进入持久队列。 |
 | `request_quote` | 将结构化的人员配备请求（联系人 + 活动 + 岗位）提交到 TempGuru 的 CRM，由人工审核。可选的写入工具；不构成预订或合同。 |
 
-九个查询工具为只读（`readOnlyHint: true`）。完整方案可由 `plan_staffing` 保存为 30 天、不含联系信息的快照，因此该工具虽不具破坏性，但会如实标注 `readOnlyHint: false`。`request_quote` 是唯一会提交联系信息的业务写入工具，同样标注为 `readOnlyHint: false`。服务器另提供 8 个技能资源和两个引导式提示模板（`plan-event-staffing`、`staffing-compliance-brief`）。
+九个查询工具为只读（`readOnlyHint: true`）。`plan_staffing` 与 `save_staffing_plan` 都是不具破坏性、不提交联系信息的写入工具，并如实标注 `readOnlyHint: false`：Phase A 中规划器保留尽力自动保存，而显式保存工具会先重新计算方案，再创建 30 天非联系信息快照。`request_quote` 是独立的可选联系信息提交，也是唯一会创建联系记录的业务写入工具。服务器另提供 8 个技能资源和两个引导式提示模板（`plan-event-staffing`、`staffing-compliance-brief`）。
+
+### Phase A 规划与保存流程
+
+1. 首先使用活动城市、日期、岗位和人数调用 `plan_staffing`。
+2. 如果完整方案已包含 `plan_id`，请保留该编号，**不要调用 `save_staffing_plan`**；规划器已保存快照。
+3. 仅当完整方案没有 `plan_id`，且确实需要可恢复或可分享的持久方案时，才使用同一组已确认活动输入调用一次 `save_staffing_plan`。
+4. 只有在用户明确确认提交报价后，才调用 `request_quote`，并在有编号时传入现有 `plan_id`。
 
 ---
 
@@ -55,7 +63,7 @@ TempGuru 是一家总部位于美国佛罗里达州杰克逊维尔海滩（Jacks
 
 ## 接入方式
 
-服务器使用 MCP Streamable HTTP 传输，并协商协议版本 2025-06-18。任何符合 MCP 规范的客户端均可接入。
+服务器使用官方双时代 HTTP 入口：首选 MCP 2026-07-28 每请求信封协议，同时通过无状态兼容层支持 2025 时代的 initialize / Streamable HTTP 客户端；响应按协议要求使用 JSON 或 SSE。任何符合 MCP 规范的客户端均可接入。
 
 **Claude.ai 网页版**，设置 → 连接器 → 添加自定义连接器 → `https://mcp.tempguru.co/mcp`
 
@@ -88,7 +96,7 @@ claude plugin install tempguru@tempguru-mcp
 
 **OpenClaw**，技能与 MCP 工具也需要分别安装。先克隆本仓库并按 [llms-install.md](./llms-install.md) 中的 8 条 `openclaw skills install ./tempguru-mcp/skills/...` 命令安装技能；再执行 `openclaw mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=openclaw" --transport streamable-http`，最后用 `openclaw mcp doctor tempguru --probe` 验证。
 
-**Pi**：npm `tempguru-pi@1.5.0` 已上线，包含 8 个技能和 9 个带 `?source=pi` 归因的原生 REST 工具。本仓库已准备 `1.5.1`，让每个已安装技能使用真实的 `tempguru_*` 工具名，并加入安全的规划器 / Rate Index 回退路径。在 `1.5.1` 发布并验证前，请连接远程 MCP，以确保端到端技能执行可靠。完整说明见 [llms-install.md](./llms-install.md)。
+**Pi**：npm `tempguru-pi@1.5.0` 已上线，包含 8 个技能和 9 个带 `?source=pi` 归因的原生 REST 工具。本仓库已准备 `1.6.0`，让每个已安装技能使用真实的 `tempguru_*` 工具名，并加入安全的规划器、显式保存及 Rate Index 回退路径。在 `1.6.0` 发布并验证前，请连接远程 MCP，以确保端到端技能执行可靠。完整说明见 [llms-install.md](./llms-install.md)。
 
 **Codex**，先执行 `codex mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=openai-codex"`；然后请 Codex 使用 `$skill-installer` 安装 `Tempguru-co/tempguru-mcp/skills` 下的 8 个技能。技能会在下一轮对话中可用。
 
@@ -122,7 +130,7 @@ mcp_manager.add_server({
 
 | 客户端 / 智能体运行时 | 状态 | 备注 |
 |---|---|---|
-| Claude.ai（网页版） | ✅ 已验证 | 11 个工具（9 个只读 + 方案快照规划工具 + `request_quote`） |
+| Claude.ai（网页版） | ✅ 已验证 | 12 个工具（9 个只读 + 规划工具 + 显式非联系信息保存 + `request_quote`） |
 | Claude Desktop | ✅ 兼容 | 标准远程 MCP 配置 |
 | Claude Code | ✅ 已验证 | 工具可通过插件或直接添加加载 |
 | Claude for Work / Cowork | ✅ 兼容 | 与 Claude.ai 使用同一连接器框架 |
@@ -131,7 +139,7 @@ mcp_manager.add_server({
 | Windsurf | ✅ 兼容 | Streamable HTTP 传输 |
 | Hermes Agent | ✅ 已验证 | 原生远程 HTTP MCP，技能通过 well-known 目录单独发现 |
 | OpenClaw | ✅ 兼容 | 原生 `openclaw mcp add`，并包含顶层 `skills/` 包 |
-| Pi | 🟡 补丁待发布 | npm `1.5.0` 已上线；发布并验证 `1.5.1` 后可获得适配 Pi 工具名的 8 个技能 + 9 个原生工具 |
+| Pi | 🟡 次版本待发布 | npm `1.5.0` 已上线；发布并验证 `1.6.0` 后可获得适配 Pi 工具名的 8 个技能 + 9 个原生工具，以及仅通过远程 MCP 提供的规划、保存和 Rate Index 路径 |
 | OpenAI Agents SDK | ✅ 兼容 | 通过 MCP 客户端使用上述 URL |
 | ChatGPT（Codex / 支持 MCP 的自定义 GPT） | ✅ 兼容 | 同 OpenAI Agents SDK |
 | Qwen-Agent / DashScope / ModelScope | ✅ 兼容 | Qwen-Agent 的 `MCPManager` 可直接接受 streamable-HTTP URL |
@@ -145,8 +153,8 @@ mcp_manager.add_server({
 ## 架构说明
 
 - **运行时：** Next.js 16 App Router，部署于 Vercel Fluid Compute
-- **MCP 处理器：** `mcp-handler` v1.1.0 + `@modelcontextprotocol/sdk` v1.26.0
-- **传输：** 仅支持 Streamable HTTP（SSE 已禁用，在 MCP 规范 2025-03-26 中移除）
+- **MCP 处理器：** 官方 `@modelcontextprotocol/server` v2.0.0 双时代入口
+- **传输：** MCP 2026-07-28 每请求 HTTP，加上无状态的 2025 时代 initialize / Streamable HTTP 兼容；响应按需使用 JSON 或 SSE
 - **身份验证：** 无。数据为公开数据。
 - **数据源：** `content/mcp-data/` 下的 JSON 文件（城市、岗位、岗位定价、州合规）
 - **身份认证：** `tempguru.co` 根域的 DNS TXT 记录承载 Ed25519 公钥，授权在官方 MCP 注册中心以 `co.tempguru` 命名空间发布
@@ -181,7 +189,7 @@ mcp_manager.add_server({
 
 ### AI 智能体能直接通过此 MCP 预定活动人员吗?
 
-可以提交请求，但不是预订。`request_quote` 工具会将结构化的人员配备方案，连同用户提供的联系人和活动信息，提交到 TempGuru 的 CRM 或持久接收队列，协调员将在一个工作日内回复报价。它不会预留人员、不保证价格或可用性，也不构成合同；在用户确认报价之前无需付款。九个查询工具为只读；`plan_staffing` 仅具有上述不含联系信息的方案快照副作用。
+可以提交请求，但不是预订。`request_quote` 工具会将结构化的人员配备方案，连同用户提供的联系人和活动信息，提交到 TempGuru 的 CRM 或持久接收队列，协调员将在一个工作日内回复报价。它不会预留人员、不保证价格或可用性，也不构成合同；在用户确认报价之前无需付款。九个查询工具为只读；`plan_staffing` 与按条件调用的 `save_staffing_plan` 仅具有上述不含联系信息的方案快照副作用。请保留规划器返回的 `plan_id`，绝不重复保存。
 
 ### TempGuru 是零工平台或 1099 市场吗?
 
@@ -229,7 +237,7 @@ mcp_manager.add_server({
 ```
 src/
   app/
-    mcp/route.ts          # MCP 处理器（11 个工具）
+    mcp/route.ts          # MCP 处理器（12 个工具）
     api/v1/*/route.ts     # REST 镜像
     .well-known/          # api-catalog、mcp.json、mcp/server-card、agent-skills
     openapi.json/         # OpenAPI 3.1 构建器

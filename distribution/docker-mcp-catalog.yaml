@@ -3,23 +3,25 @@
 # Submit as a PR to: https://github.com/docker/mcp-catalog
 # (verify the exact YAML schema from Docker's submission guide before filing)
 #
-# Docker Hub image: https://hub.docker.com/r/tempguru/event-staffing
-# GitHub CI workflow: .github/workflows/docker.yml publishes on every push to main.
+# GHCR image: ghcr.io/tempguru-co/event-staffing
+# GitHub CI workflow: .github/workflows/docker.yml publishes `latest` + `sha-*`
+# from main and semver tags from `v*` Git tags.
 #
 # Steps before filing PR:
-#   1. Create Docker Hub account / namespace "tempguru" if not already done
-#   2. Add DOCKERHUB_USERNAME + DOCKERHUB_TOKEN secrets in GitHub repo settings
-#   3. Push to main once to trigger the workflow and confirm the image is live
-#   4. Copy this file into the docker/mcp-catalog repo at the path their CONTRIBUTING says
+#   1. Merge to main and confirm the GHCR `latest` image is public and pullable
+#   2. Push the matching `vX.Y.Z` Git tag and confirm the `X.Y.Z` image exists
+#   3. Copy this file into the docker/mcp-catalog repo at the path their CONTRIBUTING says
 
 name: tempguru-event-staffing
 title: TempGuru Event Staffing
 description: |
   W-2 event staffing data for AI agents across 345 US and Canadian markets.
-  Nine read-only lookup tools surface city coverage, staffing roles,
+  Twelve tools include nine read-only lookups that surface city coverage, staffing roles,
   all-inclusive hourly rates, saved plans, booking policies, quote status,
-  lead-time availability, and state-level compliance summaries. The
-  non-destructive plan_staffing tool may save a 30-day non-PII plan snapshot.
+  lead-time availability, and state-level compliance summaries. In Phase A,
+  the non-destructive plan_staffing tool may best-effort save a 30-day non-PII
+  snapshot; save_staffing_plan is the explicit non-contact write used only when
+  a complete plan has no plan_id and persistence is needed, never to duplicate a save.
   The only contact write (request_quote) submits a confirmed staffing request
   for coordinator review.
 
@@ -76,12 +78,22 @@ tools:
       Call first. Turns an event description (city, date, headcount, roles) into a
       complete staffing plan: role coverage, per-role all-inclusive W-2 rate math,
       lead-time guidance, state compliance flags, and recommended next steps.
-      Planning estimates only, not a binding quote.
-    readOnly: true
+      Planning estimates only, not a binding quote. May best-effort save a
+      30-day non-PII snapshot; retain any returned plan_id.
+    readOnly: false
+
+  - name: save_staffing_plan
+    description: >
+      Explicitly save a server-recomputed, complete non-contact staffing plan
+      for 30 days. Use once only when plan_staffing returned no plan_id and a
+      resumable or shareable plan is needed; never duplicate an existing save.
+      Does not reserve staff, collect contact details, or request a quote.
+    readOnly: false
 
   - name: get_plan
     description: >
-      Restore a non-PII staffing plan saved by plan_staffing within the last 30 days.
+      Restore a non-PII staffing plan saved by plan_staffing or
+      save_staffing_plan within the last 30 days.
     readOnly: true
 
   - name: get_cities

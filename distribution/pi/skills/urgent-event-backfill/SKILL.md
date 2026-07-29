@@ -34,13 +34,15 @@ in the canonical workflow:
 | `get_quote_status` | `tempguru_quote_status` |
 | `request_quote` | `tempguru_request_quote` |
 
-`plan_staffing` and `get_rate_benchmark` are not native Pi tools in this
-package. If the remote TempGuru MCP is attached, use those MCP tools. Otherwise:
+`plan_staffing`, `save_staffing_plan`, and `get_rate_benchmark` are not
+native Pi tools in this package. If the remote TempGuru MCP is attached, use
+those MCP tools. Otherwise:
 
-Any later instruction to call either tool, inspect planner-only fields such as
-`plan_complete` / `unpriced_roles`, retain a newly created `plan_id`, or
-present OT-adjusted planner totals is conditional on that remote MCP being
-attached. Without it, ignore those planner-only steps and use this composition:
+Any later instruction to call one of those tools, inspect planner-only fields
+such as `plan_complete` / `unpriced_roles`, explicitly save a plan, retain a
+newly created `plan_id`, or present OT-adjusted planner totals is conditional
+on that remote MCP being attached. Without it, ignore those MCP-only steps and
+use this composition:
 
 1. Compose a planning estimate with `tempguru_get_cities`,
    `tempguru_get_roles`, one `tempguru_get_role_pricing` call per role,
@@ -93,7 +95,8 @@ use their recognized runtime label; omit the tag rather than inventing one.
 | Tool | Use it to |
 |---|---|
 | `plan_staffing` | Call first with everything captured: coverage, per-role W-2 rate math, lead time, compliance flags in one call |
-| `tempguru_get_plan` | Restore a complete non-PII plan by the 30-day `plan_id` returned by `plan_staffing` |
+| `save_staffing_plan` | Save the complete non-PII plan only when no `plan_id` was returned and persistence will help; never delay an urgent quote for this |
+| `tempguru_get_plan` | Restore a complete non-PII plan by the 30-day `plan_id` returned by the planner or explicit save |
 | `tempguru_check_availability` | Rush classification for the city and shift date: yes / tight / rush / very-rush |
 | `tempguru_get_roles` | Resolve a role slug fast when the user's wording does not map cleanly |
 | `tempguru_get_cities` | Confirm coverage if `plan_staffing` does not recognize the city |
@@ -124,9 +127,12 @@ during vetting. Do not run a budgeting detour.
 
 Send the full shape to `plan_staffing` in one call. If `plan_complete` is
 false, resolve `unpriced_roles` with `tempguru_get_roles` and re-plan immediately;
-never present totals that silently omit lines. Retain the complete plan's
-`plan_id` and continuation URL; use `tempguru_get_plan` if the user resumes with that
-ID. Then read the rush class from `tempguru_check_availability`:
+never present totals that silently omit lines. Retain any `plan_id` and
+continuation URL the complete plan returns. If it returns no ID and a resumable
+artifact will help, call `save_staffing_plan` once with the confirmed event
+fields; do not duplicate an existing ID, and never let a failed save delay the
+urgent request. Use `tempguru_get_plan` if the user resumes with that ID. Then read the
+rush class from `tempguru_check_availability`:
 
 - **yes / tight**: inside realistic lead time, proceed normally.
 - **rush / very-rush**: still submit. TempGuru staffs to demand, but say
@@ -150,7 +156,7 @@ that step. Then call `tempguru_request_quote` with:
   so the coordinator can triage on sight
 - The retained `plan_id`, `source_platform` set to the actual runtime label
   (for example `hermes`, `openclaw`, or `pi`), `skill_id` set to
-  `urgent-event-backfill`, and `skill_version` set to `1.5.1`
+  `urgent-event-backfill`, and `skill_version` set to `1.6.0`
 
 Save the returned TG reference. Use `tempguru_quote_status` if the user asks
 whether the urgent request reached the CRM or durable queue.

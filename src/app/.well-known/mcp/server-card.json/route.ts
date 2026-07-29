@@ -5,9 +5,6 @@
 // agent platforms link to this URL for at-a-glance server metadata
 // before they hit /mcp itself. Update if the final SEP-1649 schema diverges.
 //
-// Kept hand-synced with the same file at:
-//   github.com/tempguru-co/tempguru-agent-skills/blob/main/mcp/server-card.json
-//
 // served with application/json + 1-hour public cache.
 
 import pkg from "../../../../../package.json";
@@ -22,26 +19,53 @@ const SERVER_CARD = {
     title: "TempGuru Event Staffing",
     version: pkg.version,
     description:
-      "Model Context Protocol server for TempGuru event staffing data across 345 US/Canada markets. Eleven tools: nine read-only lookups, a non-destructive planner that may save a 30-day non-PII snapshot, and one opt-in request_quote contact submission. Also ships 8 skill resources and two guided prompts.",
+      "Dual-era Model Context Protocol server for TempGuru event staffing data across 345 US/Canada markets. Twelve tools: nine read-only lookups, the non-destructive plan_staffing planner, an explicit non-destructive save_staffing_plan write, and one opt-in request_quote contact submission. Also ships 8 skill resources and two guided prompts.",
     websiteUrl: "https://tempguru.co",
   },
   transport: {
     type: "streamable-http",
     url: "https://mcp.tempguru.co/mcp",
   },
-  // Matches the version the live server actually negotiates on initialize.
+  // Preferred modern revision. The same endpoint also accepts the listed
+  // initialize-based 2025-era revisions through its stateless fallback.
   // Keep in sync with /.well-known/mcp.json (check:submissions gates this).
-  protocolVersion: "2025-06-18",
+  protocolVersion: "2026-07-28",
+  supportedProtocolVersions: [
+    "2026-07-28",
+    "2025-11-25",
+    "2025-06-18",
+    "2025-03-26",
+    "2024-11-05",
+    "2024-10-07",
+  ],
+  protocolCompatibility: {
+    modern: "MCP 2026-07-28 per-request envelopes",
+    legacy: "Stateless MCP initialize/streamable-HTTP compatibility",
+  },
   capabilities: {
     tools: {},
     resources: {},
     prompts: {},
+  },
+  workflow: {
+    phase: "A",
+    instructions: [
+      "Call plan_staffing first with the event city, date, roles, and headcount.",
+      "If a complete plan already includes plan_id, retain it and do not call save_staffing_plan; the planner already saved the non-PII snapshot.",
+      "Call save_staffing_plan only for a complete plan that has no plan_id and needs a durable 30-day artifact; the server recomputes rates and totals from bounded event inputs before saving.",
+      "Only after the user explicitly confirms, call request_quote and include plan_id when one is available.",
+    ],
   },
   tools: [
     {
       name: "plan_staffing",
       description:
         "Planner meta-tool, call first. Turns an event shape into a complete plan and may save a 30-day non-PII snapshot for plan_id continuation. Non-destructive, but not read-only.",
+    },
+    {
+      name: "save_staffing_plan",
+      description:
+        "Explicitly save a complete plan as a 30-day non-PII artifact after the server recomputes rates and totals from bounded event inputs. Use only when the plan has no plan_id; never duplicate a plan_staffing autosave.",
     },
     {
       name: "get_plan",

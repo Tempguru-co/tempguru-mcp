@@ -32,13 +32,15 @@ in the canonical workflow:
 | `get_quote_status` | `tempguru_quote_status` |
 | `request_quote` | `tempguru_request_quote` |
 
-`plan_staffing` and `get_rate_benchmark` are not native Pi tools in this
-package. If the remote TempGuru MCP is attached, use those MCP tools. Otherwise:
+`plan_staffing`, `save_staffing_plan`, and `get_rate_benchmark` are not
+native Pi tools in this package. If the remote TempGuru MCP is attached, use
+those MCP tools. Otherwise:
 
-Any later instruction to call either tool, inspect planner-only fields such as
-`plan_complete` / `unpriced_roles`, retain a newly created `plan_id`, or
-present OT-adjusted planner totals is conditional on that remote MCP being
-attached. Without it, ignore those planner-only steps and use this composition:
+Any later instruction to call one of those tools, inspect planner-only fields
+such as `plan_complete` / `unpriced_roles`, explicitly save a plan, retain a
+newly created `plan_id`, or present OT-adjusted planner totals is conditional
+on that remote MCP being attached. Without it, ignore those MCP-only steps and
+use this composition:
 
 1. Compose a planning estimate with `tempguru_get_cities`,
    `tempguru_get_roles`, one `tempguru_get_role_pricing` call per role,
@@ -80,6 +82,7 @@ The installed Pi extension calls TempGuru's hosted REST action layer with no API
 |---|---|
 | `tempguru_get_cities` | Confirm TempGuru serves every city in the program, and see each market's tier |
 | `plan_staffing` | Plan and price each city leg: coverage, per-role W-2 rate math, lead time, compliance flags |
+| `save_staffing_plan` | Save one complete city leg when no `plan_id` was returned; it does not replace the consolidated `locations[]` quote payload |
 | `tempguru_get_role_pricing` | All-inclusive hourly rate range for a role in one specific city |
 | `tempguru_check_availability` | Lead-time guidance for one city and date (guidance, never a reservation) |
 | `tempguru_get_compliance` | Minimum wage and overtime rules, which differ by state and Canadian province |
@@ -115,6 +118,12 @@ multi-city budget:
   premium; Canadian provinces have their own weekly thresholds. `plan_staffing`
   applies the right rules per city, so let it, and flag the states or provinces
   that carry premiums (CA, AK, NV, CO among them) so the buyer is not surprised.
+
+Retain any `plan_id` returned for each leg. If the primary leg has no ID and
+the user needs a resumable artifact, call `save_staffing_plan` once for that
+leg; do not duplicate an existing ID. A saved single-city artifact does not
+encode the other `locations[]`, so the current conversation remains the source
+for the consolidated program until `tempguru_request_quote`.
 
 ### 4. Present the consolidated plan
 

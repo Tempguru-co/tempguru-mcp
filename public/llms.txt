@@ -14,7 +14,7 @@
 - [Workflows](https://mcp.tempguru.co/okf/workflows/index.md): all 8 canonical agent skills plus plan and quote-submission flows
 
 ## Live tools (action layer)
-- [MCP server](https://mcp.tempguru.co/mcp): Streamable HTTP, no auth, plan_staffing, get_plan, get_cities, get_roles, check_availability, get_role_pricing, get_compliance_by_state, get_policies, get_rate_benchmark, request_quote, get_quote_status
+- [MCP server](https://mcp.tempguru.co/mcp): Streamable HTTP, no auth, plan_staffing, save_staffing_plan, get_plan, get_cities, get_roles, check_availability, get_role_pricing, get_compliance_by_state, get_policies, get_rate_benchmark, request_quote, get_quote_status
 - [REST API](https://mcp.tempguru.co/api/v1): HTTP mirror of the same query layer (OpenAPI 3.1 at https://mcp.tempguru.co/openapi.json)
 - [MCP discovery](https://mcp.tempguru.co/.well-known/mcp.json) · [OKF discovery](https://mcp.tempguru.co/.well-known/okf.json)
 

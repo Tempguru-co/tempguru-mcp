@@ -28,13 +28,15 @@ in the canonical workflow:
 | `get_quote_status` | `tempguru_quote_status` |
 | `request_quote` | `tempguru_request_quote` |
 
-`plan_staffing` and `get_rate_benchmark` are not native Pi tools in this
-package. If the remote TempGuru MCP is attached, use those MCP tools. Otherwise:
+`plan_staffing`, `save_staffing_plan`, and `get_rate_benchmark` are not
+native Pi tools in this package. If the remote TempGuru MCP is attached, use
+those MCP tools. Otherwise:
 
-Any later instruction to call either tool, inspect planner-only fields such as
-`plan_complete` / `unpriced_roles`, retain a newly created `plan_id`, or
-present OT-adjusted planner totals is conditional on that remote MCP being
-attached. Without it, ignore those planner-only steps and use this composition:
+Any later instruction to call one of those tools, inspect planner-only fields
+such as `plan_complete` / `unpriced_roles`, explicitly save a plan, retain a
+newly created `plan_id`, or present OT-adjusted planner totals is conditional
+on that remote MCP being attached. Without it, ignore those MCP-only steps and
+use this composition:
 
 1. Compose a planning estimate with `tempguru_get_cities`,
    `tempguru_get_roles`, one `tempguru_get_role_pricing` call per role,

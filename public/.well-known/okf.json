@@ -12,6 +12,7 @@
   },
   "tools": [
     "plan_staffing",
+    "save_staffing_plan",
     "get_plan",
     "get_cities",
     "get_roles",
@@ -41,7 +42,7 @@
     "index": "https://mcp.tempguru.co/okf/index.md",
     "tarball": "https://mcp.tempguru.co/okf.tar.gz",
     "file_count": 106,
-    "sha256": "26765ad9588cd70e5558b191d2dd2488a218342563d0bd5bcf85ed1b9bc90d5e",
-    "bytes": 320555
+    "sha256": "488ed731e3aadf55ee426c5621e6b25458acd2e9d09b932964dc8e23fbae1302",
+    "bytes": 324139
   }
 }

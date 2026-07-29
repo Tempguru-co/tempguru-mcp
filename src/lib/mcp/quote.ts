@@ -111,7 +111,7 @@ export const REQUEST_QUOTE_INPUT = {
     .max(12)
     .regex(PLAN_ID_PATTERN, "plan_id must be a 12-character TempGuru plan reference")
     .optional()
-    .describe("Optional plan_id returned by plan_staffing; links the submitted quote to its saved non-PII plan"),
+    .describe("Optional plan_id returned by plan_staffing or save_staffing_plan; links the submitted quote to its saved non-PII plan"),
 };
 
 /** Whole-body schema for surfaces that validate a JSON document (REST). */

@@ -1,6 +1,6 @@
 // TempGuru MCP server, streamable-HTTP transport (production, on Vercel).
 //
-// The 11 tools and Skill resources are registered by the shared registerTools()
+// The 12 tools and Skill resources are registered by the shared registerTools()
 // in @/lib/mcp/register-tools, so this hosted endpoint and the stdio binary
 // (src/mcp-stdio.ts) expose byte-identical tools, no behavior drift between the
 // remote server and a local/Docker build. This file owns only what is
@@ -8,6 +8,7 @@
 // CORS, and the streamable-HTTP handler wiring.
 //
 //   - plan_staffing              build a complete plan from city/date/roles
+//   - save_staffing_plan         explicitly save a complete non-contact plan
 //   - get_plan                    restore a non-PII saved staffing plan
 //   - get_cities                 list all cities TempGuru serves (with tier)
 //   - get_roles                  list all staffing roles with descriptions
@@ -19,16 +20,24 @@
 //   - get_quote_status            received/queued quote status by TG reference
 //   - request_quote              submit a staffing plan → Notion Inbound Deal Pipeline
 //
-// Transport: streamable HTTP (MCP spec rev 2025-03-26). SSE disabled.
+// plan_staffing retains its Phase A non-destructive saved-plan side effect for
+// compatibility. save_staffing_plan is the explicit non-contact saved-plan
+// write; request_quote is the separate opt-in contact submission.
+//
+// Transport: official dual-era HTTP entry (2025 initialize/streamable HTTP
+// plus the 2026-07-28 per-request envelope protocol).
 // Public endpoint: https://mcp.tempguru.co/mcp
 
-import { createMcpHandler } from "mcp-handler";
-import pkg from "../../../package.json";
+import { createMcpHandler } from "@modelcontextprotocol/server";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { registerTools, SERVER_INSTRUCTIONS, SKILL_SLUGS, type SkillSlug } from "@/lib/mcp/register-tools";
+import { createTempGuruMcpServer } from "@/lib/mcp/create-server";
+import { SKILL_SLUGS, type SkillSlug } from "@/lib/mcp/register-tools";
 import { runWithContext, currentContext } from "@/lib/telemetry/context";
 import { track } from "@/lib/telemetry/track";
+
+export const runtime = "nodejs";
+export const maxDuration = 60;
 
 // ─── Skill resource content ───────────────────────────────────────────────
 //
@@ -47,74 +56,41 @@ const SKILL_BODIES = Object.fromEntries(
 // ─── Handler ──────────────────────────────────────────────────────────────
 
 const handler = createMcpHandler(
-  (server) => {
-    // Tools + resources come from the shared module. The HTTP route's only
-    // addition is telemetry: enrich each record with the request context bound
-    // in withAcceptNormalization (User-Agent + Vercel IP-country), then write
-    // to Redis. The stdio binary calls registerTools() with no onTrack at all.
-    registerTools(server, {
+  () =>
+    createTempGuruMcpServer({
+      // Tools + resources come from the shared module. The HTTP route's only
+      // addition is telemetry: enrich each record with the request context
+      // bound in withAcceptNormalization (User-Agent + Vercel IP-country),
+      // then write to Redis. The stdio binary omits onTrack entirely.
       onTrack: async (record) => {
         const ctx = currentContext();
         await track({ ...record, channel: "mcp", userAgent: ctx.userAgent, ipCountry: ctx.ipCountry, source: ctx.source });
       },
       resources: SKILL_BODIES,
-    });
-  },
+    }),
   {
-    // mcp-handler v1.1.0's serverInfo type only exposes `name` and `version`,
-    // but the value is passed verbatim into the MCP SDK's `new McpServer(...)`,
-    // whose Implementation/BaseMetadata shape accepts the wider set defined by
-    // MCP spec rev 2025-03-26: title, description, icons. Casting through
-    // `as { name: string; version: string }` keeps the call type-correct from
-    // mcp-handler's perspective while still passing the extra fields through
-    // to the SDK at runtime. Surfaces these in registry scanners (Smithery,
-    // ClawHub) and Claude.ai connector listings.
-    serverInfo: {
-      name: "tempguru-mcp",
-      version: pkg.version,
-      title: "TempGuru Event Staffing",
-      description:
-        "W-2 event staffing data for AI agents across 345 US/CA markets. Eleven tools: nine read-only lookups, a non-destructive planner that may save a 30-day non-PII snapshot, and one opt-in request_quote contact submission. Ships skill resources and guided prompts. No authentication required.",
-      icons: [
-        {
-          src: "https://mcp.tempguru.co/logo.svg",
-          mimeType: "image/svg+xml",
-          // sizes must be an array per MCP spec rev 2025-03-26 (and Glama's
-          // strict validator), single string "any" was rejected with:
-          // { expected: 'array', code: 'invalid_type', path: ['serverInfo',
-          //   'icons', 0, 'sizes'], message: 'Invalid input' }
-          sizes: ["any"],
-        },
-      ],
-    } as { name: string; version: string },
-    // Returned in the initialize result; clients (Claude) inject it into the
-    // system prompt, so the golden order + estimates-not-quotes rule reach the
-    // agent before it reads any tool description. Shared with the stdio binary.
-    instructions: SERVER_INSTRUCTIONS,
-  },
-  {
-    // Endpoint at /mcp (default streamableHttpEndpoint with empty basePath)
-    verboseLogs: process.env.NODE_ENV !== "production",
-    disableSse: true, // SSE removed from MCP spec 2025-03-26
-    maxDuration: 60,
+    // Preserve the installed endpoint for initialize-based clients while the
+    // same factory also serves the 2026-07-28 per-request protocol.
+    legacy: "stateless",
+    responseMode: "auto",
+    onerror: (error) => {
+      console.error("[tempguru-mcp] HTTP transport error:", error);
+    },
   },
 );
 
 // ─── Accept header normalization wrapper ────────────────────────────────
 //
-// mcp-handler enforces the MCP spec rev 2025-03-26 requirement that
-// clients MUST send `Accept: application/json, text/event-stream`. Real-
-// world clients (Anthropic's claude.ai connectors among them) often send
-// only `application/json` and get a 406, which surfaces as "This connector
-// has no tools available" with no further diagnostic.
+// The official transport enforces the MCP requirement that clients advertise
+// both `application/json` and `text/event-stream`. Real-world clients
+// (Anthropic's claude.ai connectors among them) sometimes send only one and
+// get a 406, which surfaces as "This connector has no tools available" with
+// no further diagnostic.
 //
 // We rewrite the incoming Accept header to include both content types when
 // either is missing, so the downstream handler always sees a spec-compliant
-// request. Responses are unchanged (SSE-framed), which any compliant MCP
-// client handles correctly.
-//
-// Remove this wrapper when mcp-handler upgrades to the 2026-07-28 spec
-// (stateless protocol, Accept enforcement is relaxed in that revision).
+// request. Response shaping remains transport-owned: legacy calls retain
+// streamable-HTTP behavior and modern calls use the configured auto mode.
 
 // ─── CORS headers ──────────────────────────────────────────────────────
 //
@@ -124,8 +100,7 @@ const handler = createMcpHandler(
 // succeed before the actual request lands.
 //
 // Until 2026-06-04 ~04:30 UTC the route returned 204 to OPTIONS without
-// Access-Control-* headers, mcp-handler's built-in OPTIONS handler does
-// the bare minimum. That looked fine to server-to-server clients
+// Access-Control-* headers. That looked fine to server-to-server clients
 // (Anthropic's connectors, Smithery's scanner, our own curl probes) but
 // silently failed Glama's browser-context health probe, which surfaced
 // as a generic "unhealthy" status with no diagnostic.
@@ -140,7 +115,7 @@ const CORS_HEADERS: Record<string, string> = {
   "access-control-allow-origin": "*",
   "access-control-allow-methods": "GET, POST, DELETE, OPTIONS",
   "access-control-allow-headers":
-    "Content-Type, Accept, Mcp-Session-Id, Last-Event-ID, Authorization, X-TempGuru-Source",
+    "Content-Type, Accept, MCP-Protocol-Version, Mcp-Method, Mcp-Name, Mcp-Session-Id, Last-Event-ID, Authorization, X-TempGuru-Source",
   "access-control-expose-headers": "Mcp-Session-Id, WWW-Authenticate",
   "access-control-max-age": "86400",
 };
@@ -186,7 +161,7 @@ async function withAcceptNormalization(request: Request): Promise<Response> {
     const accept = request.headers.get("accept") ?? "";
 
     if (accept.includes("application/json") && accept.includes("text/event-stream")) {
-      return withCors(await handler(request));
+      return withCors(await handler.fetch(request));
     }
 
     // Clone the request with a normalized Accept header. Body must be read first
@@ -203,9 +178,10 @@ async function withAcceptNormalization(request: Request): Promise<Response> {
       method: request.method,
       headers: normalizedHeaders,
       body,
+      signal: request.signal,
     });
 
-    return withCors(await handler(normalized));
+    return withCors(await handler.fetch(normalized));
   });
 }
 

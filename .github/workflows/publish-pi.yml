@@ -1,0 +1,76 @@
+name: Publish Pi package to npm
+
+# One-time npm setup for the existing `tempguru-pi` package:
+# - Package settings -> Trusted Publisher -> GitHub Actions
+# - Organization: Tempguru-co
+# - Repository: tempguru-mcp
+# - Workflow filename: publish-pi.yml (filename only; it is case-sensitive)
+# - Environment: Production
+# - Allowed action: npm publish
+# npm binds OIDC to that exact identity, and each package can have only one
+# trusted publisher. The package must already exist before trust is configured.
+# Publishing remains manual so a merge cannot release it accidentally.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Exact semver already committed to distribution/pi/package.json
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: publish-tempguru-pi-${{ github.repository }}-${{ inputs.version }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: Production
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+          package-manager-cache: false
+      # Keep current trust/staging-aware npm tooling on the release runner.
+      - run: npm install --global "npm@^11.15.0"
+      - run: npm ci
+      - run: npm run check:submissions
+      - name: Verify release version and package identity
+        id: release
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          PI=$(node -p 'require("./distribution/pi/package.json").version')
+          PI_NAME=$(node -p 'require("./distribution/pi/package.json").name')
+          PI_REPOSITORY=$(node -p 'require("./distribution/pi/package.json").repository.url')
+          test "$PI" = "$RELEASE_VERSION"
+          test "$PI_NAME" = "tempguru-pi"
+          test "$PI_REPOSITORY" = "git+https://github.com/Tempguru-co/tempguru-mcp.git"
+          if [ "$(npm view "tempguru-pi@$RELEASE_VERSION" version 2>/dev/null || true)" = "$RELEASE_VERSION" ]; then
+            echo "::notice::tempguru-pi@$RELEASE_VERSION is already published; validating the candidate and skipping the immutable npm write."
+            echo "already_published=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "already_published=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Verify generated Pi package contents
+        run: |
+          node scripts/gen-skill-digests.mjs
+          if [ -n "$(git status --porcelain --untracked-files=all -- distribution/pi/skills)" ]; then
+            git status --short -- distribution/pi/skills
+            echo "Generated Pi skills differ from the committed release artifacts."
+            exit 1
+          fi
+          npm pack --dry-run --json ./distribution/pi
+      - name: Publish with npm trusted publishing
+        if: steps.release.outputs.already_published != 'true'
+        working-directory: distribution/pi
+        run: npm publish --access public

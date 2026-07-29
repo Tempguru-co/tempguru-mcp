@@ -1,8 +1,8 @@
 {
   "name": "tempguru-mcp",
-  "version": "1.5.1",
+  "version": "1.6.0",
   "private": true,
-  "description": "TempGuru MCP server across 345 US/CA markets: nine read-only lookups, a non-destructive saved-plan planner, and one opt-in request_quote contact submission.",
+  "description": "TempGuru MCP server across 345 US/CA markets: nine read-only lookups, a compatibility planner, an explicit non-contact saved-plan write, and one opt-in request_quote contact submission.",
   "scripts": {
     "dev": "next dev",
     "build": "npm run build:okf && next build",
@@ -13,6 +13,7 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "evals": "node evals/run-evals.mjs",
+    "test:protocol": "node evals/protocol-eras.test.mjs",
     "test:unit": "node evals/unit.test.mjs",
     "build:okf": "node scripts/gen-skill-digests.mjs && node scripts/dump-openapi.mjs && node scripts/dump-request-schema.mjs && node scripts/build-okf.mjs",
     "build:worker": "node scripts/build-edge-worker.mjs",
@@ -25,9 +26,8 @@
     "check:submissions": "node scripts/sync-postman-examples.mjs --check && node scripts/check-submissions.mjs"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.26.0",
+    "@modelcontextprotocol/server": "2.0.0",
     "@upstash/redis": "^1.38.0",
-    "mcp-handler": "^1.1.0",
     "next": "16.2.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

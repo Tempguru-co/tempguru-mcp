@@ -8,12 +8,23 @@ use short-lived Redis records so an agent can resume work across conversations.
 
 ## Deployment
 
+- **Release runbook:** follow [`RELEASE.md`](./RELEASE.md) for the authoritative
+  package, Registry, Vercel, GHCR, Cloudflare, Pi, Hermes, and ClawHub order.
 - **Source repo:** [`Tempguru-co/tempguru-mcp`](https://github.com/Tempguru-co/tempguru-mcp) (GitHub, public)
 - **Vercel project:** `temp-guru/tempguru-mcp` (team `temp-guru`)
 - **Auto-deploy:** every push to `main` ships to **Production** via Vercel's GitHub App, no manual `vercel --prod` needed.
 - **OKF bundle + discovery:** `npm run build` runs `build:okf` first, so `public/okf/`, `llms.txt`, `sitemap.xml`, `robots.txt`, and `.well-known/okf.json` regenerate from `content/mcp-data/` on every deploy. Never hand-edit `public/okf/`.
+- **npm packages:** neither package publishes on merge. Run
+  `publish-npm.yml` with the exact committed CLI version, then
+  `publish-pi.yml` with the exact committed Pi version. Both use npm Trusted
+  Publishing from the GitHub `Production` environment; do not publish from a
+  maintainer laptop.
+- **GHCR:** `docker.yml` publishes
+  `ghcr.io/tempguru-co/event-staffing:latest` plus a `sha-*` tag from `main`.
+  Pushing `vX.Y.Z` also publishes immutable `X.Y.Z` and `X.Y` tags. This
+  workflow uses `GITHUB_TOKEN`; there is no Docker Hub release or credential.
 - **Apex (`tempguru.co`) discovery is NOT Vercel.** Two Cloudflare workers serve it: `.well-known/*` + `robots.txt` from `cloudflare/worker.js`, and `llms.txt` + `llms-full.txt` from `cloudflare/llms-worker.js`. Both are generated (`npm run build:worker`, `npm run build:llms-worker`), version-controlled in `cloudflare/` as the source of truth, and deployed **manually** by pasting the file into the Cloudflare worker editor. The `check-submissions` CI gate guards them against drift. (Pasting non-code text or a partial file into that editor deploys instantly and can wipe live content; the Cloudflare Deployments tab offers rollback.)
-- **MCP Registry (`registry.modelcontextprotocol.io`):** the listing comes from `server.json`, published to the DNS-verified `co.tempguru` namespace (Ed25519). The `publish-registry.yml` workflow auto-publishes whenever `server.json`'s `version` changes on `main` (or on manual `workflow_dispatch`), guarded so an unchanged version is a no-op. Requires the repo secret **`MCP_PRIVATE_KEY`** (the Ed25519 private key; public half lives in the `tempguru.co` DNS TXT record). For a one-off manual publish: `brew install mcp-publisher` -> `mcp-publisher login dns --domain tempguru.co --private-key <key>` -> `mcp-publisher publish`. The registry rejects re-publishing the same version, so bump `package.json`/`server.json` first.
+- **MCP Registry (`registry.modelcontextprotocol.io`):** the listing comes from `server.json`, published to the DNS-verified `co.tempguru` namespace (Ed25519). A `server.json` version change on `main` starts `publish-registry.yml`, but that push-triggered run defers cleanly until the matching `tempguru-mcp` npm version exists. `publish-npm.yml` dispatches it again after npm succeeds. An unchanged Registry version is a no-op. The Ed25519 private key must be stored as **`MCP_PRIVATE_KEY` in the GitHub `Production` environment's secrets**, because the job declares that environment; the public half lives in the `tempguru.co` DNS TXT record. The Registry rejects re-publishing the same version, so bump `package.json`/`server.json` first.
 
 > **Failure mode, pushes stop deploying after a repo transfer/rename.** Vercel's Git integration breaks *silently*: `git push` no longer triggers a build, and the last good deploy keeps serving, so nothing looks broken until you notice prod is stale. Root cause: a GitHub repo transfer does **not** carry the Vercel GitHub App installation to the new owner/org (the org ends up with zero app installations).
 >

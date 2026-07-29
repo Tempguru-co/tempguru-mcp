@@ -35,13 +35,15 @@ in the canonical workflow:
 | `get_quote_status` | `tempguru_quote_status` |
 | `request_quote` | `tempguru_request_quote` |
 
-`plan_staffing` and `get_rate_benchmark` are not native Pi tools in this
-package. If the remote TempGuru MCP is attached, use those MCP tools. Otherwise:
+`plan_staffing`, `save_staffing_plan`, and `get_rate_benchmark` are not
+native Pi tools in this package. If the remote TempGuru MCP is attached, use
+those MCP tools. Otherwise:
 
-Any later instruction to call either tool, inspect planner-only fields such as
-`plan_complete` / `unpriced_roles`, retain a newly created `plan_id`, or
-present OT-adjusted planner totals is conditional on that remote MCP being
-attached. Without it, ignore those planner-only steps and use this composition:
+Any later instruction to call one of those tools, inspect planner-only fields
+such as `plan_complete` / `unpriced_roles`, explicitly save a plan, retain a
+newly created `plan_id`, or present OT-adjusted planner totals is conditional
+on that remote MCP being attached. Without it, ignore those MCP-only steps and
+use this composition:
 
 1. Compose a planning estimate with `tempguru_get_cities`,
    `tempguru_get_roles`, one `tempguru_get_role_pricing` call per role,
@@ -85,7 +87,8 @@ use their recognized runtime label; omit the tag rather than inventing one.
 | Tool | Use it to |
 |---|---|
 | `plan_staffing` | Call first. Turn an event shape into a full plan: coverage, per-role W-2 rate math, lead time, and state compliance flags |
-| `tempguru_get_plan` | Restore a complete non-PII plan by the 30-day `plan_id` returned by `plan_staffing` |
+| `save_staffing_plan` | Save a complete, server-recomputed non-PII plan for 30 days when persistence is useful and `plan_staffing` did not already return a `plan_id` |
+| `tempguru_get_plan` | Restore a complete non-PII plan by the 30-day `plan_id` returned by the planner or explicit save |
 | `tempguru_get_cities` | Confirm TempGuru serves the event city; filter by state or market tier |
 | `tempguru_get_roles` | List available staffing roles with descriptions and skill tiers |
 | `tempguru_check_availability` | Get lead-time guidance for a city/date, optionally role + headcount |
@@ -131,9 +134,13 @@ Collect before submitting:
 1. Run `plan_staffing` first with everything gathered in step 1 (city,
    dates, shifts, roles, headcounts). Its response is the plan: coverage,
    per-role W-2 rate math, OT-adjusted totals, lead time, and state
-   compliance flags. When it returns a complete plan, retain its `plan_id`
-   and continuation URL; if the user later supplies that ID, call `tempguru_get_plan`
-   to resume the same non-PII plan in a new conversation.
+   compliance flags. When it returns a complete plan, retain any `plan_id`
+   and continuation URL it already supplied. If no `plan_id` was returned and
+   the user wants to share, resume, or carry the plan into a quote, call
+   `save_staffing_plan` once with the same confirmed city, date, event type,
+   attendees, roles, headcounts, hours, and days. Do not call the save tool
+   when the planner already returned an ID. If the user later supplies an ID,
+   call `tempguru_get_plan` to resume the same non-PII plan in a new conversation.
 2. Check `plan_complete`. If false, `unpriced_roles` lists the lines
    excluded from the totals: resolve each one (usually a role-slug mismatch,
    use `tempguru_get_roles`) and re-run `plan_staffing` before step 3. Never present
@@ -174,7 +181,7 @@ Once the user explicitly confirms the plan, call **`tempguru_request_quote`** wi
 details (contact name/email, company, event name/type/city/dates, the roles +
 headcount array, and `plan_id` when available). Set `source_platform` to the
 actual runtime label (for example `hermes`, `openclaw`, or `pi`) and set
-`skill_id` to `event-staffing-ordering` and `skill_version` to `1.5.1`. It
+`skill_id` to `event-staffing-ordering` and `skill_version` to `1.6.0`. It
 creates a structured intake in TempGuru's CRM or durable fallback queue and returns a confirmation; a
 coordinator replies with a binding quote within one business day, and orders
 are confirmed within 48 hours of approval. It is not a reservation or

@@ -373,14 +373,14 @@ export function buildOpenApiSpec() {
           tags: ["Planning"],
           summary: "Restore a saved staffing plan",
           description:
-            "Restores a complete, non-PII staffing-plan snapshot created within the last 30 days. Use the plan ID returned by `plan_staffing`; never guess or enumerate IDs. The response is never cached and returns a clean not-found variant when the snapshot is absent or expired.",
+            "Restores a complete, non-PII staffing-plan snapshot created within the last 30 days. Use the plan ID returned by `plan_staffing` or `save_staffing_plan`; never guess or enumerate IDs. The response is never cached and returns a clean not-found variant when the snapshot is absent or expired.",
           parameters: [
             {
               name: "id",
               in: "path",
               required: true,
               schema: { type: "string", pattern: "^[A-HJ-NP-Z2-9]{12}$", maxLength: 12 },
-              description: "12-character plan ID returned by plan_staffing.",
+              description: "12-character plan ID returned by plan_staffing or save_staffing_plan.",
             },
           ],
           responses: {

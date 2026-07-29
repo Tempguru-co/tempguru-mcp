@@ -1,8 +1,8 @@
 # tempguru-pi — TempGuru event staffing for the Pi coding agent
 
-> Release status: npm `1.5.0` is live. This directory is the `1.5.1` source
-> candidate and must be published and smoke-tested before the runtime-adapted
-> skill behavior below is described as live.
+This package documents the runtime-adapted skill and native-tool behavior
+included in version `1.6.0`. Publication status is tracked in the repository,
+not inside this immutable npm artifact.
 
 One `pi install` gives Pi both layers:
 
@@ -19,8 +19,9 @@ One `pi install` gives Pi both layers:
 This closes most of the gap the audit flagged: Pi does not gain MCP access from
 a Markdown skill alone, so the package installs an attributed native action
 layer with the skills. No MCP bridge is required for the 9 granular operations.
-The full `plan_staffing` planner and `get_rate_benchmark` remain MCP-only in
-version 1.5.1; agents that need them can attach the remote MCP per
+The full `plan_staffing` planner, explicit `save_staffing_plan` artifact write,
+and `get_rate_benchmark` remain MCP-only in version 1.6.0; agents that need
+them can attach the remote MCP per
 `llms-install.md` until native REST parity ships in a follow-up release.
 
 The generated Pi copies perform this mapping inside every installed skill, so
@@ -38,11 +39,12 @@ the model sees it at runtime (the README is not relied on as hidden context):
 | `get_quote_status` | `tempguru_quote_status` |
 | `request_quote` | `tempguru_request_quote` |
 
-There is no native mapping yet for `plan_staffing` or `get_rate_benchmark`.
-Every generated Pi skill therefore contains the same explicit fallback: use the
-remote MCP when attached; otherwise compose a transparent straight-time plan
-from the granular native tools, and use city pricing or the public OKF Rate
-Index instead of inventing planner/benchmark output.
+There is no native mapping yet for `plan_staffing`, `save_staffing_plan`, or
+`get_rate_benchmark`. Every generated Pi skill therefore contains the same
+explicit fallback: use the remote MCP when attached; otherwise compose a
+transparent straight-time plan from the granular native tools, never invent a
+saved `plan_id`, and use city pricing or the public OKF Rate Index instead of
+inventing planner/benchmark output.
 
 ## Install (users)
 
@@ -67,16 +69,27 @@ node scripts/gen-skill-digests.mjs
 
 ## Publish (maintainer)
 
-From the repo root:
+The canonical publisher is the manual
+`.github/workflows/publish-pi.yml` GitHub Action. It validates the requested
+version, package identity, generated skill digests, and tarball contents before
+publishing with npm Trusted Publishing (OIDC). From the repository:
 
 ```bash
-node scripts/gen-skill-digests.mjs      # ensure skills are current
-cd distribution/pi
-npm publish                              # unscoped, like tempguru-mcp
+gh workflow run publish-pi.yml \
+  --repo Tempguru-co/tempguru-mcp \
+  --ref main \
+  -f version=1.6.0
 ```
 
 Notes:
 
+- Before the first OIDC release, configure the existing `tempguru-pi` package's
+  npm Trusted Publisher with this exact identity: organization
+  `Tempguru-co`, repository `tempguru-mcp`, workflow filename
+  `publish-pi.yml`, environment `Production`, allowed action `npm publish`.
+  The workflow must be run from `main`.
+- Do not run `npm publish` locally. The GitHub workflow is the release path and
+  requires no long-lived npm token.
 - The name is **unscoped `tempguru-pi`** to match `tempguru-mcp` (no npm org
   required). If you later create the `@tempguru` npm org, publish as
   `@tempguru/pi-event-staffing` and deprecate this name in favor of it.
@@ -89,6 +102,8 @@ Notes:
 - After publishing, verify the promise the README makes:
   `pi install npm:tempguru-pi`, then in Pi run `/skills` (8 TempGuru skills)
   and check the tool list for `tempguru_get_cities` … `tempguru_request_quote`.
+- Confirm npm independently before calling the release live:
+  `npm view tempguru-pi@1.6.0 version`.
 - Record the listing in `distribution/assistants/README.md`'s status tracker.
 
 ## Safety posture (mirrors the MCP server)
