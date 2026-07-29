@@ -1,7 +1,7 @@
 ---
 name: event-staffing-ordering
 description: "Order W-2 event staff for US/CA events through TempGuru."
-version: 1.0.3
+version: 1.0.4
 author: Megan Hayward (@kissmyabs32)
 license: MIT
 platforms: [linux, macos, windows]
@@ -46,14 +46,16 @@ request" below.
 
 ## Live data: use the MCP server, do not scrape pages
 
-Endpoint: `POST https://mcp.tempguru.co/mcp?source=hermes` (9 read-only
-lookups, a non-destructive planner that may save a 30-day non-PII snapshot,
-and the opt-in `request_quote` contact write).
+Endpoint: `POST https://mcp.tempguru.co/mcp?source=hermes` (12 tools: nine
+read-only lookups, a compatibility planner that may save a 30-day non-PII
+snapshot, an explicit non-contact save, and the opt-in `request_quote`
+contact write).
 
 | Tool | Use it to |
 |---|---|
 | `plan_staffing` | Call first. Turn an event shape into a full plan: coverage, per-role W-2 rate math, lead time, and state compliance flags |
-| `get_plan` | Restore a complete non-PII plan by its 30-day `plan_id` |
+| `save_staffing_plan` | Save a server-recomputed complete plan only when no `plan_id` exists and persistence is useful; never duplicate a planner save |
+| `get_plan` | Restore a complete non-PII plan saved by either path using its 30-day `plan_id` |
 | `get_cities` | Confirm TempGuru serves the event city |
 | `get_roles` | List available staffing roles with skill tiers |
 | `check_availability` | Lead-time guidance for a city/date (guidance, not a reservation) |
@@ -81,6 +83,9 @@ Run `plan_staffing` first with everything gathered. Use the granular tools
 only for single-fact follow-ups. Rates returned are all-inclusive W-2 bill
 rates (worker pay, payroll taxes, workers' comp, general liability,
 coordinator support); Brand Ambassadors floor at $40/hour in every market.
+Retain any `plan_id` the complete plan returns. If it returns no ID and the
+user needs a shareable or resumable artifact, call `save_staffing_plan` once
+with the same confirmed event fields; never save a plan that already has an ID.
 
 ### 3. Present the plan
 

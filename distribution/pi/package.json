@@ -1,6 +1,6 @@
 {
   "name": "tempguru-pi",
-  "version": "1.5.1",
+  "version": "1.6.0",
   "description": "TempGuru event staffing for the Pi coding agent: 8 skills plus native tools calling the hosted TempGuru API (coverage, rates, availability, compliance, policies, saved plans, and opt-in quote requests) across 345 US/CA markets. W-2 staff, never 1099.",
   "keywords": [
     "pi-package",
@@ -26,7 +26,8 @@
   "files": [
     "skills",
     "extensions",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "peerDependencies": {
     "typebox": "*"

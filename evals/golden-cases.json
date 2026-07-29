@@ -418,6 +418,31 @@
     ]
   },
   {
+    "name": "save_staffing_plan explicitly persists a server-recomputed non-PII artifact",
+    "tool": "save_staffing_plan",
+    "arguments": {
+      "city": "Boston",
+      "event_date": "2027-04-18",
+      "event_type": "conference",
+      "attendees": 400,
+      "roles": [
+        {
+          "role": "registration-staff",
+          "headcount": 6,
+          "hours_per_shift": 8,
+          "days": 2
+        }
+      ]
+    },
+    "expect": [
+      "\"status\":\"saved\"",
+      "\"schema_version\":\"1.0\"",
+      "\"plan_id\"",
+      "\"resource_uri\"",
+      "\"quote_readiness\":\"needs_contact\""
+    ]
+  },
+  {
     "name": "plan_id round-trip restores the plan, links request_quote, and exposes queued status",
     "workflow": "plan_quote_roundtrip",
     "arguments": {

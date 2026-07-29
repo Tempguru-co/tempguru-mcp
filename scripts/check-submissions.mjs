@@ -1,7 +1,7 @@
 // Drift gate for the submission / distribution artifacts (MCP registry manifest,
 // Docker MCP catalog, Postman collection, Context7, Dockerfile, Glama). These are
 // hand-maintained and have no generator, so they silently fell behind the live
-// server (345 markets, all 11 tools). This script fails if any of them drift
+// server (345 markets, all 12 tools). This script fails if any of them drift
 // from the canonical sources:
 //   - market count: content/mcp-data/cities.json
 //   - MCP tool set:  src/lib/mcp/register-tools.ts
@@ -59,7 +59,7 @@ const ROLE_RATE_VALUES = Object.values(ROLE_PRICING).flatMap((tiers) =>
 );
 const ROLE_RATE_ENVELOPE = `$${Math.min(...ROLE_RATE_VALUES)}-$${Math.max(...ROLE_RATE_VALUES)}`;
 
-const EXPECTED_TOOL_COUNT = 11;
+const EXPECTED_TOOL_COUNT = 12;
 const EXPECTED_DEMAND_SKILL_COUNT = 7;
 const EXPECTED_DISCOVERY_SKILL_COUNT = EXPECTED_DEMAND_SKILL_COUNT + 1; // plus compliance
 
@@ -201,8 +201,21 @@ if (!PI_PKG.keywords?.includes("pi-package") || !PI_PKG.pi?.skills?.includes("./
 if (PI_PKG.peerDependencies?.typebox !== "*" || PI_PKG.dependencies?.typebox) {
   errors.push("distribution/pi/package.json: Pi core typebox must be an unbundled '*' peer dependency");
 }
+if (
+  !PI_PKG.files?.includes("LICENSE") ||
+  read("distribution/pi/LICENSE") !== read("LICENSE")
+) {
+  errors.push(
+    "distribution/pi: npm artifact must include the canonical MIT LICENSE",
+  );
+}
 if (!read("cli/README.md").includes("tempguru-pi")) {
   errors.push("cli/README.md: missing migration direction to the dedicated Pi-native package");
+}
+if (!read("cli/README.md").includes("Requires Node 20")) {
+  errors.push(
+    "cli/README.md: npm-facing install instructions must disclose the Node 20+ runtime floor",
+  );
 }
 const REGISTRY_NPM_PACKAGE = SERVER_JSON.packages?.find(
   (pkg) => pkg.registryType === "npm" && pkg.identifier === "tempguru-mcp",
@@ -329,6 +342,7 @@ for (const skill of SKILLS) {
   }
   for (const skill of SKILLS) {
     const body = read(`distribution/pi/skills/${skill}/SKILL.md`);
+    const normalizedBody = body.replace(/\s+/g, " ");
     if (!body.includes("Pi runtime tool routing (installed package override)")) {
       errors.push(`distribution/pi/skills/${skill}/SKILL.md: Pi runtime routing guide missing`);
     }
@@ -337,7 +351,7 @@ for (const skill of SKILLS) {
         errors.push(`distribution/pi/skills/${skill}/SKILL.md: missing native tool mapping ${nativeName}`);
       }
     }
-    if (/MCP-only\s+(?:plan_staffing|get_rate_benchmark)/.test(body)) {
+    if (/MCP-only\s+(?:plan_staffing|save_staffing_plan|get_rate_benchmark)/.test(body)) {
       errors.push(`distribution/pi/skills/${skill}/SKILL.md: remote MCP tool identifier was renamed into a nonexistent tool`);
     }
     for (const phrase of [
@@ -346,7 +360,7 @@ for (const skill of SKILLS) {
       "never invent a saved `plan_id`",
       "https://mcp.tempguru.co/okf/rate-index.md",
     ]) {
-      if (!body.includes(phrase)) {
+      if (!normalizedBody.includes(phrase)) {
         errors.push(`distribution/pi/skills/${skill}/SKILL.md: missing planner/benchmark fallback rule ${phrase}`);
       }
     }
@@ -397,9 +411,9 @@ for (const p of [
   "public/okf/reference/mcp-tools.md",
 ]) {
   const body = read(p);
-  for (const fragment of ["`plan_id`", "`request_quote`"]) {
+  for (const fragment of ["`plan_id`", "`save_staffing_plan`", "`request_quote`"]) {
     if (!body.includes(fragment)) {
-      errors.push(`${p}: v1.5 plan-to-quote handoff missing ${fragment}`);
+      errors.push(`${p}: explicit-save plan-to-quote handoff missing ${fragment}`);
     }
   }
 }
@@ -439,6 +453,32 @@ for (const p of [
   }
 }
 
+// The Hermes catalog PR carries a deliberately compact single-skill copy
+// rather than the generated multi-skill tree. Guard its action contract
+// separately so a canonical tool change cannot leave the posted artifact
+// teaching an obsolete workflow.
+{
+  const path = "distribution/assistants/hermes/SKILL.md";
+  const body = read(path);
+  const missing = TOOLS.filter((tool) => !body.includes(`\`${tool}\``));
+  if (missing.length) {
+    errors.push(`${path}: posted Hermes skill is missing MCP tools ${missing.join(", ")}`);
+  }
+  for (const fragment of [
+    "source=hermes",
+    "save_staffing_plan",
+    "never save a plan that already has an ID",
+    "request_quote",
+  ]) {
+    if (!body.includes(fragment)) {
+      errors.push(`${path}: posted Hermes Phase A contract missing ${fragment}`);
+    }
+  }
+  if (!read("distribution/assistants/hermes/test_event_staffing_skill.py").includes("save_staffing_plan")) {
+    errors.push("distribution/assistants/hermes/test_event_staffing_skill.py: explicit-save contract is not tested");
+  }
+}
+
 // Descriptive surfaces have drifted independently from discovery before.
 // Require the canonical numeric count and ban historical English/Chinese count
 // phrases so a new skill cannot leave public install copy behind.
@@ -467,6 +507,9 @@ for (const [p, countPattern] of [
 if (!/"plan_staffing"[\s\S]*?readOnlyHint:\s*false[\s\S]*?destructiveHint:\s*false/.test(REGISTER_TOOLS_SOURCE)) {
   errors.push("src/lib/mcp/register-tools.ts: plan_staffing must advertise non-read-only, non-destructive persistence");
 }
+if (!/"save_staffing_plan"[\s\S]*?readOnlyHint:\s*false[\s\S]*?destructiveHint:\s*false/.test(REGISTER_TOOLS_SOURCE)) {
+  errors.push("src/lib/mcp/register-tools.ts: save_staffing_plan must advertise a non-read-only, non-destructive artifact write");
+}
 for (const p of [
   "README.md",
   "README.zh-CN.md",
@@ -486,6 +529,9 @@ for (const p of [
   }
   if (!body.includes("plan_staffing") || !/(?:non-destructive|不具破坏性|非联系信息|saved-plan write)/i.test(body)) {
     errors.push(`${p}: saved-plan planner side effect is not disclosed`);
+  }
+  if (!body.includes("save_staffing_plan")) {
+    errors.push(`${p}: explicit saved-plan tool is missing`);
   }
 }
 
@@ -775,13 +821,21 @@ const nameOf = (p, re) => (read(p).match(re) || [])[1];
 const nameChecks = [
   ["src/app/.well-known/mcp.json/route.ts", /name:\s*"([^"]+)"/],
   ["src/app/.well-known/mcp/server-card.json/route.ts", /serverInfo:\s*\{[\s\S]*?name:\s*"([^"]+)"/],
-  ["src/app/mcp/route.ts", /serverInfo:\s*\{\s*\n\s*name:\s*"([^"]+)"/],
-  ["src/mcp-stdio.ts", /new McpServer\(\{\s*\n\s*name:\s*"([^"]+)"/],
+  ["src/lib/mcp/create-server.ts", /new McpServer\(\s*\{[\s\S]*?name:\s*"([^"]+)"/],
 ];
 for (const [p, re] of nameChecks) {
   const got = nameOf(p, re);
   if (got !== RUNTIME_NAME) {
     errors.push(`${p}: MCP server name "${got ?? "unreadable"}" != canonical "${RUNTIME_NAME}"`);
+  }
+}
+for (const p of ["src/app/mcp/route.ts", "src/mcp-stdio.ts"]) {
+  const body = read(p);
+  if (
+    !body.includes('import { createTempGuruMcpServer }') ||
+    !body.includes("createTempGuruMcpServer(")
+  ) {
+    errors.push(`${p}: transport must use the canonical createTempGuruMcpServer factory`);
   }
 }
 
@@ -920,6 +974,87 @@ try {
   }
   if (mcpJsonProto && !body.includes(mcpJsonProto)) {
     errors.push(`llms-install.md: does not mention the advertised protocolVersion ${mcpJsonProto}`);
+  }
+  if (!body.includes("Requires Node 20+")) {
+    errors.push("llms-install.md: CLI runtime requirement must match cli/package.json (Node 20+)");
+  }
+}
+
+// ── release-workflow safety ─────────────────────────────────────────────────
+// Publishing is intentionally manual, but the manual button must never bypass
+// the same deterministic gates used on pull requests or publish an
+// operator-mistyped version. Pi is a separate npm package and therefore keeps
+// its own trusted-publishing identity and version input.
+{
+  const ci = read(".github/workflows/check-submissions.yml");
+  if ((ci.match(/- run: npm ci/g) ?? []).length < 2) {
+    errors.push(".github/workflows/check-submissions.yml: every independent CI job must install dependencies");
+  }
+  if (!ci.includes("- run: npm run test:protocol")) {
+    errors.push(".github/workflows/check-submissions.yml: dual-era protocol test is missing from PR/main verification");
+  }
+  if (
+    !ci.includes("cli-node-20:") ||
+    !ci.includes("node-version: 20") ||
+    !ci.includes("- run: npm run check:cli-package")
+  ) {
+    errors.push(
+      ".github/workflows/check-submissions.yml: the declared Node 20 CLI floor must have a packaged smoke test",
+    );
+  }
+
+  const npmPublish = read(".github/workflows/publish-npm.yml");
+  for (const fragment of [
+    "workflow_dispatch:",
+    "version:",
+    "id-token: write",
+    "environment: Production",
+    'npm install --global "npm@^11.15.0"',
+    "npm run test:protocol",
+    "npm run build",
+    "npm run check:submissions",
+    'test "$ROOT" = "$RELEASE_VERSION"',
+    "working-directory: cli",
+    "npm publish --access public",
+    "gh workflow run publish-registry.yml",
+  ]) {
+    if (!npmPublish.includes(fragment)) {
+      errors.push(`.github/workflows/publish-npm.yml: release safety fragment missing: ${fragment}`);
+    }
+  }
+
+  const piPublish = read(".github/workflows/publish-pi.yml");
+  for (const fragment of [
+    "workflow_dispatch:",
+    "version:",
+    "id-token: write",
+    "environment: Production",
+    'npm install --global "npm@^11.15.0"',
+    "npm run check:submissions",
+    'test "$PI" = "$RELEASE_VERSION"',
+    "node scripts/gen-skill-digests.mjs",
+    "git status --porcelain --untracked-files=all -- distribution/pi/skills",
+    "npm pack --dry-run --json ./distribution/pi",
+    "working-directory: distribution/pi",
+    "npm publish --access public",
+  ]) {
+    if (!piPublish.includes(fragment)) {
+      errors.push(`.github/workflows/publish-pi.yml: release safety fragment missing: ${fragment}`);
+    }
+  }
+
+  const dockerPublish = read(".github/workflows/docker.yml");
+  for (const fragment of [
+    "github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main'",
+    "Verify release tag matches package version",
+    '"${TAG_NAME#v}" != "$PACKAGE_VERSION"',
+    "persist-credentials: false",
+  ]) {
+    if (!dockerPublish.includes(fragment)) {
+      errors.push(
+        `.github/workflows/docker.yml: release safety fragment missing: ${fragment}`,
+      );
+    }
   }
 }
 

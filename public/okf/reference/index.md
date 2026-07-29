@@ -2,7 +2,7 @@
 
 # Reference
 
-- [MCP tools](mcp-tools.md), the 11 tools the server exposes
+- [MCP tools](mcp-tools.md), the 12 tools the server exposes
 - [REST API](api.md), the HTTP mirror of the same data
 - [Data schemas](data-schema.md), the shape of the underlying datasets
 - [Lead-time model](lead-time-model.md), how availability guidance is computed

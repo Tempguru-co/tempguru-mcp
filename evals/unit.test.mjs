@@ -260,6 +260,9 @@ for (const [name, schema, payload] of [
   ["get_role_pricing", outputSchemas.GET_ROLE_PRICING_SCHEMA, {}],
   ["get_compliance_by_state", outputSchemas.GET_COMPLIANCE_SCHEMA, {}],
   ["plan_staffing", outputSchemas.PLAN_STAFFING_SCHEMA, { status: "plan" }],
+  ["save_staffing_plan", outputSchemas.SAVE_STAFFING_PLAN_SCHEMA, {
+    status: "saved", message: "x", next_actions: [],
+  }],
   ["get_plan", outputSchemas.GET_PLAN_SCHEMA, { plan_found: true, plan_id: "x", message: "x", next_steps: [] }],
   ["get_policies", outputSchemas.GET_POLICIES_SCHEMA, { status: "policies", policy_found: true }],
   ["get_quote_status", outputSchemas.GET_QUOTE_STATUS_SCHEMA, { quote_found: true, reference: "x", message: "x", follow_up: "x" }],
@@ -468,6 +471,170 @@ check("plan persistence retries actual ID collisions only",
 check("plan role drift canonicalizes synonyms and sums duplicate rows",
   rolesMateriallyDiffer([{ role: "promo models", headcount: 2 }, { role: "brand-ambassadors", headcount: 3 }], safeSnapshot) === false
     && rolesMateriallyDiffer([{ role: "brand-ambassadors", headcount: 7 }], safeSnapshot) === true);
+
+// ── explicit save_staffing_plan: bounded input + outcome contract ──
+const {
+  SaveStaffingPlanInputSchema,
+  saveStaffingPlan,
+} = await load("src/lib/mcp/save-staffing-plan.ts");
+const explicitSaveInput = {
+  city: "Chicago",
+  event_date: "2027-03-10",
+  event_type: "trade-show",
+  attendees: 500,
+  roles: [
+    {
+      role: "brand-ambassadors",
+      headcount: 5,
+      hours_per_shift: 8,
+      days: 2,
+    },
+  ],
+};
+check("save_staffing_plan input accepts bounded canonical event fields",
+  SaveStaffingPlanInputSchema.safeParse(explicitSaveInput).success);
+check("save_staffing_plan input rejects free text and caller-supplied totals/rates",
+  !SaveStaffingPlanInputSchema.safeParse({
+    ...explicitSaveInput,
+    description: "Ask Alice at alice@example.com",
+  }).success
+    && !SaveStaffingPlanInputSchema.safeParse({
+      ...explicitSaveInput,
+      estimated_total_range: { low: 1, high: 1 },
+    }).success
+    && !SaveStaffingPlanInputSchema.safeParse({
+      ...explicitSaveInput,
+      roles: [{
+        ...explicitSaveInput.roles[0],
+        hourly_range: { low: 1, high: 1 },
+      }],
+    }).success);
+
+const explicitSaveStore = memoryStore();
+let limiterIp = "";
+let persistedServerPlan;
+const fixedSaveNow = new Date("2026-07-28T12:00:00.000Z");
+const explicitSaved = await saveStaffingPlan(
+  explicitSaveInput,
+  { channel: "mcp", ip: "203.0.113.10", source: "openclaw" },
+  {
+    checkRateLimit: async (ip) => {
+      limiterIp = ip;
+      return { allowed: true };
+    },
+    persistPlan: async (plan, city, channel, source) => {
+      persistedServerPlan = plan;
+      return persistCompletePlan(
+        plan,
+        city,
+        channel,
+        source,
+        explicitSaveStore,
+      );
+    },
+    now: () => fixedSaveNow,
+  },
+);
+const expectedExplicitPlan = buildStaffingPlan(explicitSaveInput);
+const restoredExplicit = explicitSaved.status === "saved"
+  ? await querySavedPlan(explicitSaved.plan_id, explicitSaveStore)
+  : null;
+check("save_staffing_plan recomputes canonical rates/totals before persistence",
+  persistedServerPlan?.plan_lines?.[0]?.hourly_range?.low
+      === expectedExplicitPlan.plan_lines[0].hourly_range.low
+    && persistedServerPlan?.estimated_total_range?.low
+      === expectedExplicitPlan.estimated_total_range.low);
+check("save_staffing_plan saved outcome carries the portable artifact metadata",
+  explicitSaved.status === "saved"
+    && limiterIp === "203.0.113.10"
+    && explicitSaved.schema_version === "1.0"
+    && explicitSaved.created_at === fixedSaveNow.toISOString()
+    && explicitSaved.expires_at
+      === new Date(fixedSaveNow.getTime() + PLAN_TTL_SECONDS * 1000).toISOString()
+    && explicitSaved.resource_uri
+      === `https://mcp.tempguru.co/api/v1/plans/${explicitSaved.plan_id}`
+    && explicitSaved.quote_readiness === "needs_contact"
+    && explicitSaved.next_actions.includes("request_quote")
+    && restoredExplicit?.plan_found === true
+    && restoredExplicit.snapshot.source === "openclaw",
+  JSON.stringify(explicitSaved));
+check("save_staffing_plan saved outcome matches its output schema",
+  outputSchemas.SAVE_STAFFING_PLAN_SCHEMA.safeParse(explicitSaved).success);
+
+let incompleteLimiterCalls = 0;
+let incompletePersistCalls = 0;
+const explicitIncomplete = await saveStaffingPlan(
+  {
+    ...explicitSaveInput,
+    roles: [
+      explicitSaveInput.roles[0],
+      { role: "flying trapeze artists", headcount: 2 },
+    ],
+  },
+  {},
+  {
+    checkRateLimit: async () => {
+      incompleteLimiterCalls++;
+      return { allowed: true };
+    },
+    persistPlan: async () => {
+      incompletePersistCalls++;
+      throw new Error("must not persist");
+    },
+  },
+);
+check("save_staffing_plan refuses partial recomputed plans before limiter/storage",
+  explicitIncomplete.status === "plan_incomplete"
+    && explicitIncomplete.plan_status === "plan"
+    && incompleteLimiterCalls === 0
+    && incompletePersistCalls === 0
+    && outputSchemas.SAVE_STAFFING_PLAN_SCHEMA.safeParse(explicitIncomplete).success,
+  JSON.stringify(explicitIncomplete));
+
+let limitedPersistCalls = 0;
+const explicitLimited = await saveStaffingPlan(
+  explicitSaveInput,
+  {},
+  {
+    checkRateLimit: async () => ({
+      allowed: false,
+      retryAfterSeconds: 90,
+    }),
+    persistPlan: async () => {
+      limitedPersistCalls++;
+      throw new Error("must not persist");
+    },
+    now: () => fixedSaveNow,
+  },
+);
+check("save_staffing_plan returns rate_limited without touching persistence",
+  explicitLimited.status === "rate_limited"
+    && explicitLimited.retry_after_seconds === 90
+    && limitedPersistCalls === 0
+    && explicitLimited.continuation.form_url.includes("tempguru.co/get-staffing")
+    && outputSchemas.SAVE_STAFFING_PLAN_SCHEMA.safeParse(explicitLimited).success,
+  JSON.stringify(explicitLimited));
+
+const unavailableContinuation = {
+  form_url:
+    "https://tempguru.co/get-staffing?city=Chicago&utm_source=ai-agent&utm_medium=mcp",
+  note: "Storage unavailable.",
+};
+const explicitUnavailable = await saveStaffingPlan(
+  explicitSaveInput,
+  {},
+  {
+    checkRateLimit: async () => ({ allowed: true }),
+    persistPlan: async () => ({ continuation: unavailableContinuation }),
+    now: () => fixedSaveNow,
+  },
+);
+check("save_staffing_plan returns storage_unavailable without claiming a plan_id",
+  explicitUnavailable.status === "storage_unavailable"
+    && !("plan_id" in explicitUnavailable)
+    && explicitUnavailable.continuation === unavailableContinuation
+    && outputSchemas.SAVE_STAFFING_PLAN_SCHEMA.safeParse(explicitUnavailable).success,
+  JSON.stringify(explicitUnavailable));
 
 // ── plan_staffing: OT engine (partial weeks, CA premiums, Canada) ──
 // Anchorage (AK: daily 8h, weekly 40h), 8 consecutive 12h days:

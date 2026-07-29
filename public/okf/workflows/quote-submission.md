@@ -13,8 +13,10 @@ timestamp: "2026-07-16T00:00:00Z"
 
 # Quote Submission
 
-`request_quote` is the only **contact/consequential write** tool. The planner's
-separate saved-plan side effect contains no contact details. Call
+`request_quote` is the only **contact/consequential write** tool.
+`plan_staffing` may still save during the compatibility release, and
+`save_staffing_plan` is the explicit non-contact artifact write; neither
+stores contact details. Call
 `request_quote` **last**, and only after the user's explicit confirmation.
 
 ## Collect

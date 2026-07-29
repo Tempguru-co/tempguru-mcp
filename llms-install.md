@@ -9,10 +9,19 @@ Live event staffing data for the US and Canada from TempGuru: city coverage
 (345 markets), 19 staffing roles, all-inclusive W-2 hourly rate ranges,
 booking lead-time guidance, state labor compliance summaries, and an opt-in
 `request_quote` tool that submits a staffing inquiry for a human-reviewed
-quote. Nine lookup tools are read-only. `plan_staffing` is non-destructive but
-uses `readOnlyHint: false` because a complete plan may save a non-PII snapshot
-for 30 days. `request_quote` is the only contact-creating, consequential write
-and should only be called after the user explicitly confirms the plan.
+quote. The server exposes 12 tools. Nine lookup tools are read-only.
+`plan_staffing` and `save_staffing_plan` are non-destructive, non-contact
+writes that use `readOnlyHint: false`: the planner may automatically save a
+complete non-PII snapshot for 30 days, while the explicit save recomputes the
+plan before persistence. `request_quote` is the separate contact-creating,
+consequential write and should only be called after the user explicitly
+confirms quote submission.
+
+Phase A workflow: call `plan_staffing` first. If its complete result contains a
+`plan_id`, retain it and do not call `save_staffing_plan`. Only when a complete
+plan has no ID and a resumable or shareable artifact is useful should the agent
+call `save_staffing_plan` once with the same confirmed event inputs. Pass the
+existing `plan_id` to `request_quote` when available.
 
 ## Option A, remote server (preferred, zero install)
 
@@ -29,7 +38,10 @@ Add to the client's MCP settings (for Cline: `cline_mcp_settings.json`):
 }
 ```
 
-Transport is MCP Streamable HTTP (negotiates protocol 2025-06-18). No auth headers.
+Transport uses the official dual-era HTTP entry: preferred MCP 2026-07-28
+per-request envelopes plus stateless initialize/Streamable HTTP compatibility
+for supported 2025-era clients. Responses use JSON or SSE as required. No auth
+headers.
 
 Use a runtime-tagged URL when the client supports it. This preserves the
 source from plan creation through quote submission without collecting PII:
@@ -105,8 +117,8 @@ legacy OpenClaw VPS container.
 ## Pi
 
 The live npm package is `tempguru-pi@1.5.0` (8 skills + 9 native REST-backed
-tools with `?source=pi` attribution). This repository prepares `1.5.1`, which
-adapts every installed skill to the real Pi tool names. Until `1.5.1` is
+tools with `?source=pi` attribution). This repository prepares `1.6.0`, which
+adapts every installed skill to the real Pi tool names. Until `1.6.0` is
 published and verified, attach the remote MCP for dependable end-to-end skill
 execution:
 
@@ -116,10 +128,11 @@ pi install npm:tempguru-pi
 
 Restart Pi, verify `/skill:event-staffing-ordering`, and confirm the tool list
 contains `tempguru_get_cities` through `tempguru_request_quote`. No community
-MCP bridge is required for those native tools. The full `plan_staffing` planner
-and `get_rate_benchmark` Rate Index remain MCP-only in the current native package; when a Pi
-deployment also has a trusted MCP client, attach
-`https://mcp.tempguru.co/mcp?source=pi` for those two capabilities.
+MCP bridge is required for those native tools. The full `plan_staffing`
+planner, conditional `save_staffing_plan`, and `get_rate_benchmark` Rate Index
+remain MCP-only in the current native package; when a Pi deployment also has a
+trusted MCP client, attach `https://mcp.tempguru.co/mcp?source=pi` for those
+capabilities.
 
 ## Codex
 
@@ -151,12 +164,16 @@ The skills become available on the next turn.
 }
 ```
 
-Requires Node 18+. The package is self-contained (no runtime deps); lookup
-tools work offline from bundled data, and `request_quote` degrades to
-returning TempGuru's contact info when run locally.
+Requires Node 20+. The package is self-contained (no runtime deps) and uses the
+official dual-era stdio entry for MCP 2026-07-28 plus 2025-era initialize
+clients. Lookup tools work offline from bundled data, `save_staffing_plan`
+returns a clean storage-unavailable continuation without hosted persistence,
+and `request_quote` degrades to returning TempGuru's contact info when run
+locally.
 
 ## Verify the install
 
+Confirm `tools/list` exposes all 12 tools, including `save_staffing_plan`.
 Call the `get_roles` tool. Expect a JSON catalog of 19 roles (brand
 ambassadors, registration staff, ushers, etc.). Then try
 `get_role_pricing` with `role: "brand-ambassadors", city: "Boston"`, expect an hourly range of $56–65 (hub market).
@@ -165,7 +182,7 @@ ambassadors, registration staff, ushers, etc.). Then try
 
 - **404 / connection refused:** confirm the URL is exactly
   `https://mcp.tempguru.co/mcp` (no trailing slash).
-- **Client requires SSE:** SSE is not supported (removed in spec rev
-  2025-03-26); use a client version with Streamable HTTP support, or
-  Option B.
+- **Client rejects JSON or SSE responses:** use a current MCP client that
+  supports the dual-era HTTP endpoint and advertises both
+  `application/json` and `text/event-stream`, or use Option B.
 - Docs: https://tempguru.co/ai · Maintainer: megan@tempguru.co

@@ -78,18 +78,23 @@
 
   <h2>MCP 工具</h2>
 
-  <p>共十一个工具：九个只读查询工具、一个可保存 30 天非联系信息快照且不具破坏性的 <code>plan_staffing</code> 工具，以及一个可选的联系信息写入工具。无需身份验证。请先调用 <code>plan_staffing</code> 并保留 <code>plan_id</code>，仅在用户确认方案并同意提交后调用 <code>request_quote</code>。</p>
+  <p>共十二个工具：九个只读查询工具、一个可尽力自动保存 30 天非联系信息快照且不具破坏性的 <code>plan_staffing</code> 规划工具、一个显式的非联系信息写入工具 <code>save_staffing_plan</code>，以及一个可选的联系信息写入工具。Phase A（阶段 A）中，请先调用 <code>plan_staffing</code> 并保留其返回的任何 <code>plan_id</code>。仅当完整方案没有编号且确需恢复或分享时，调用一次 <code>save_staffing_plan</code>；已有编号时绝不重复保存。仅在用户确认方案并同意提交后调用 <code>request_quote</code>。</p>
 
   <div class="tg-tools">
 
     <div class="tg-tool">
       <div class="tg-tool-name">plan_staffing <span class="tg-tool-badge">请首先调用</span></div>
-      <p>规划元工具。输入活动概况（城市、日期、岗位 + 人数），输出完整方案：覆盖范围、各岗位 W-2 费率计算与合计、提前期建议、州级合规提示，以及后续步骤。</p>
+      <p>规划元工具。输入活动概况（城市、日期、岗位 + 人数），输出完整方案：覆盖范围、各岗位 W-2 费率计算与合计、提前期建议、州级合规提示，以及后续步骤。完整方案可能会自动保存；请保留其返回的任何 <code>plan_id</code>。</p>
+    </div>
+
+    <div class="tg-tool">
+      <div class="tg-tool-name">save_staffing_plan <span class="tg-tool-badge">写入 | 非联系信息</span></div>
+      <p>显式保存由服务器重新计算的完整方案 30 天。仅当 <code>plan_staffing</code> 未返回 <code>plan_id</code> 且确需恢复或分享方案时使用；已有保存记录时绝不重复调用。不预订人员，也不提交联系信息。</p>
     </div>
 
     <div class="tg-tool">
       <div class="tg-tool-name">get_plan</div>
-      <p>使用 <code>plan_staffing</code> 返回的编号恢复 30 天内保存且不含个人信息的完整方案。</p>
+      <p>使用 <code>plan_staffing</code> 或 <code>save_staffing_plan</code> 返回的编号，恢复 30 天内保存且不含联系信息的完整方案。</p>
     </div>
 
     <div class="tg-tool">
@@ -256,7 +261,7 @@ hermes mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=hermes"</div>
 
   <p class="tg-label">Pi</p>
   <div class="tg-code">pi install npm:tempguru-pi
-// npm 1.5.0 已上线；请发布并验证源码 1.5.1 的 Pi 工具名适配。
+// npm 1.5.0 已上线；请发布并验证源码 1.6.0 的 Pi 工具名适配。
 // 在此之前，请连接远程 MCP，以确保端到端执行可靠。</div>
 
   <p class="tg-label">Codex</p>
@@ -287,11 +292,15 @@ hermes mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=hermes"</div>
       </tr>
       <tr>
         <td>3. 呈现</td>
-        <td>展示岗位、人数、各岗位费率区间、预估合计、提前期建议与合规提示。费率区间为规划估算值，正式报价由 TempGuru 经协调员审核后给出。</td>
+        <td>展示岗位、人数、各岗位费率区间、预估合计、提前期建议与合规提示，并保留任何 <code>plan_id</code>。费率区间为规划估算值，正式报价由 TempGuru 经协调员审核后给出。</td>
       </tr>
       <tr>
-        <td>4. 提交</td>
-        <td>在用户同意后，附联系人信息与最终方案调用 <code>request_quote</code>。一个工作日内回复；48 小时内确认订单。</td>
+        <td>4. 按需保存</td>
+        <td>仅当完整方案没有 <code>plan_id</code> 且用户需要可恢复或可分享的方案时，使用相同活动输入调用一次 <code>save_staffing_plan</code>。已有编号时绝不调用。</td>
+      </tr>
+      <tr>
+        <td>5. 提交</td>
+        <td>在用户同意后，附联系人信息、最终方案以及现有的 <code>plan_id</code>（如有）调用 <code>request_quote</code>。一个工作日内回复；48 小时内确认订单。</td>
       </tr>
     </tbody>
   </table>
@@ -313,7 +322,7 @@ hermes mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=hermes"</div>
 
   <h2>安全与隐私</h2>
 
-  <p>查询工具均无需身份验证，也不会收集联系人信息。<code>plan_staffing</code> 可将不含联系信息、经过字段白名单限制的方案保存约 30 天；报价状态记录最多保留 90 天。<code>request_quote</code> 仅在用户明确确认后，将联系信息与活动信息发送到 TempGuru 的 CRM，或在 CRM 暂时不可用时进入最多保留 90 天的持久重试队列，并可发送给已配置的通知处理器；这些字段绝不会写入产品遥测。技能资源为纯 markdown，不含可执行代码。</p>
+  <p>查询工具均无需身份验证，也不会收集联系人信息。<code>plan_staffing</code> 与 <code>save_staffing_plan</code> 仅保存经过字段白名单限制且不含联系信息的方案字段；Phase A（阶段 A）中，规划工具已返回 <code>plan_id</code> 时不得再次调用显式保存工具。报价状态记录最多保留 90 天。<code>request_quote</code> 仅在用户明确确认后，将联系信息与活动信息发送到 TempGuru 的 CRM，或在 CRM 暂时不可用时进入最多保留 90 天的持久重试队列，并可发送给已配置的通知处理器；这些字段绝不会写入产品遥测。技能资源为纯 markdown，不含可执行代码。</p>
 
   <hr>
 
@@ -408,6 +417,7 @@ hermes mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=hermes"</div>
 
   <p style="font-size:0.8rem; color:#888;">
     本页为 TempGuru /ai 页面的简体中文版，内容与英文版保持同步。<br>
+    v1.9（2026 年 7 月）：MCP 2026 双协议时代传输与 Phase A 显式 <code>save_staffing_plan</code> 后备保存；十二个工具<br>
     v1.8（2026 年 6 月）：开放知识格式（OKF v0.1）知识包、知识层端点（okf.json、压缩包、导入指南）、345 市场标准化<br>
     v1.8（2026 年 7 月）：方案恢复、预订政策、报价状态与来源归因；十一个工具<br>
     v1.7（2026 年 6 月）：核实 TempGuru 实体区块（sameAs 身份、可核实声明表）、get_rate_benchmark 费率指数工具、Organization JSON-LD<br>

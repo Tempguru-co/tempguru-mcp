@@ -62,6 +62,7 @@ export interface TrackInput {
 
 export type FunnelEvent =
   | "plans_created"
+  | "plans_saved"
   | "plans_resumed"
   | "quotes_submitted"
   | "quotes_linked";

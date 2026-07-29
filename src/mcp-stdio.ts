@@ -1,27 +1,29 @@
 // TempGuru MCP server, stdio transport (local / Docker / embedded).
 //
 // A self-contained build of the same MCP server that runs at
-// https://mcp.tempguru.co/mcp. It registers the identical 11 tools and Skill
+// https://mcp.tempguru.co/mcp. It registers the identical 12 tools and Skill
 // resources via the shared registerTools(), but speaks MCP over stdin/stdout
 // instead of streamable HTTP, the form that Claude Desktop, the Docker MCP
 // Catalog, on-device assistants, and Glama's sandboxed checker expect from a
-// locally-run server.
+// locally-run server. The official stdio entry accepts both 2025-era
+// initialize handshakes and 2026-07-28 per-request envelope clients.
 //
 // Boots with no configuration: nine lookup tools serve static data or clean
-// not-found variants, plan_staffing fails open without saved-plan storage, and
-// request_quote returns a clean error if NOTION_API_KEY is unset (e.g. a
-// credential-less Docker build), so the server never crashes on startup.
+// not-found variants; plan_staffing's Phase A non-destructive saved-plan side
+// effect and the explicit non-contact save_staffing_plan write both fail open
+// without storage; request_quote returns a clean error if NOTION_API_KEY is
+// unset (e.g. a credential-less Docker build), so the server never crashes on
+// startup.
 //
 // IMPORTANT: stdout is the MCP protocol channel, nothing may write to it except
 // the transport. All diagnostics go to stderr.
 
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import pkg from "../package.json";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { serveStdio } from "@modelcontextprotocol/server/stdio";
 import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { registerTools, SERVER_INSTRUCTIONS, SKILL_SLUGS, type SkillSlug } from "./lib/mcp/register-tools";
+import { createTempGuruMcpServer } from "./lib/mcp/create-server";
+import { SKILL_SLUGS, type SkillSlug } from "./lib/mcp/register-tools";
 
 // Skill resource bodies, loaded best-effort. Resolved relative to this binary
 // first (so they load when the server is installed as an npm package and run via
@@ -59,30 +61,19 @@ function loadSkills(): Partial<Record<SkillSlug, string>> | undefined {
   return undefined;
 }
 
-const server = new McpServer({
-  name: "tempguru-mcp",
-  version: pkg.version,
-  title: "TempGuru Event Staffing",
-  description:
-    "W-2 event staffing data for AI agents: 345 US/CA markets. Eleven tools: nine read-only lookups, a non-destructive planner that may save a 30-day non-PII snapshot, and one opt-in request_quote contact submission. Ships skill resources and guided prompts. No authentication required.",
-  icons: [
+try {
+  const skillBodies = loadSkills();
+  serveStdio(
+    () => createTempGuruMcpServer({ resources: skillBodies }),
     {
-      src: "https://mcp.tempguru.co/logo.svg",
-      mimeType: "image/svg+xml",
-      sizes: ["any"],
+      legacy: "serve",
+      onerror: (error) => {
+        console.error("[tempguru-mcp] stdio transport error:", error);
+      },
     },
-  ],
-} as { name: string; version: string }, { instructions: SERVER_INSTRUCTIONS });
-
-registerTools(server, { resources: loadSkills() });
-
-async function main() {
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
-  console.error(`[tempguru-mcp] stdio server ready, 11 tools, ${SKILL_SLUGS.length} skill resources, 2 prompts.`);
-}
-
-main().catch((err) => {
+  );
+  console.error(`[tempguru-mcp] stdio server ready, 12 tools, ${SKILL_SLUGS.length} skill resources, 2 prompts.`);
+} catch (err) {
   console.error("[tempguru-mcp] fatal:", err);
   process.exit(1);
-});
+}

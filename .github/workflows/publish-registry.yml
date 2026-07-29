@@ -2,8 +2,10 @@ name: publish-registry
 
 # Auto-publish server.json to the official MCP Registry
 # (registry.modelcontextprotocol.io) whenever its version changes on main, so the
-# live listing never goes stale. Also runnable on demand (workflow_dispatch) — use
-# that for the first publish after adding the secret.
+# live listing never goes stale. A main push defers cleanly until the matching npm
+# package exists; publish-npm.yml re-dispatches this workflow after npm succeeds.
+# Also runnable on demand (workflow_dispatch) — use that for recovery or the first
+# publish after adding the secret.
 #
 # Auth: the DNS-verified `co.tempguru` namespace (Ed25519). Add the private key as
 # the repo secret MCP_PRIVATE_KEY (64 hex chars; its public half is the Ed25519 key
@@ -19,12 +21,21 @@ on:
     paths: ["server.json"]
   workflow_dispatch:
 
+# The main-push defer and npm post-publish dispatch can overlap. Serialize them
+# so only one run can evaluate/publish an immutable Registry version at a time.
+concurrency:
+  group: publish-registry-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
 jobs:
   publish:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    # MCP_PRIVATE_KEY is stored as a "Production" environment secret; the job must
-    # declare the environment to read it. (Production has no protection rules.)
+    # MCP_PRIVATE_KEY is stored as a "Production" environment secret; the job
+    # must declare that environment to read it.
     environment: Production
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
@@ -35,7 +46,9 @@ jobs:
         id: ver
         run: |
           LOCAL=$(jq -r .version server.json)
-          PUBLISHED=$(curl -s "https://registry.modelcontextprotocol.io/v0/servers?search=co.tempguru/event-staffing&version=latest" | jq -r '.servers[0].server.version // "none"')
+          PUBLISHED=$(curl --fail --silent --show-error --retry 3 \
+            "https://registry.modelcontextprotocol.io/v0/servers?search=co.tempguru/event-staffing&version=latest" \
+            | jq -er 'if (.servers | type) != "array" then error("unexpected MCP Registry response") else (.servers[0].server.version // "none") end')
           echo "local=$LOCAL  published=$PUBLISHED"
           PACKAGE=$(jq -r '.packages[]? | select(.registryType == "npm") | .identifier' server.json)
           PACKAGE_READY=false
@@ -53,8 +66,13 @@ jobs:
             echo "Already published v$LOCAL; nothing to do."
             echo "skip=true" >> "$GITHUB_OUTPUT"
           elif [ -n "$PACKAGE" ] && [ "$PACKAGE_READY" != "true" ]; then
-            echo "::error::$PACKAGE@$LOCAL is not visible on npm after six checks. Run publish-npm.yml; it dispatches this workflow again after a successful publish."
-            exit 1
+            if [ "$GITHUB_EVENT_NAME" = "push" ]; then
+              echo "::notice::Deferring MCP Registry v$LOCAL until $PACKAGE@$LOCAL is published. Run publish-npm.yml; it will dispatch this workflow again."
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "::error::$PACKAGE@$LOCAL is not visible on npm after six checks. Run publish-npm.yml; it dispatches this workflow again after a successful publish."
+              exit 1
+            fi
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi

@@ -1,6 +1,6 @@
 # TempGuru event staffing extension
 
-This extension connects the TempGuru MCP server (11 tools, no auth). Use it
+This extension connects the TempGuru MCP server (12 tools, no auth). Use it
 whenever the user mentions hiring, booking, pricing, or planning temporary
 event staff, brand ambassadors, registration, ushers, hospitality, gate
 staff, booth monitors, crowd control, guest services, setup/breakdown crews,
@@ -12,8 +12,9 @@ United States or Canada.
 
 | Tool | Use it to |
 |---|---|
-| `plan_staffing` | Call first. Event shape in, complete plan out: coverage, per-role W-2 rate math, lead time, state compliance flags, next steps |
-| `get_plan` | Restore a saved non-PII plan by its 30-day plan ID |
+| `plan_staffing` | Call first. Event shape in, complete plan out: coverage, per-role W-2 rate math, lead time, state compliance flags, and best-effort non-destructive 30-day persistence |
+| `save_staffing_plan` | Explicitly save a server-recomputed complete non-contact plan only when `plan_staffing` returned no `plan_id` and persistence is needed; never duplicate an existing save. Does not reserve staff or submit contact details |
+| `get_plan` | Restore a non-PII plan saved by either planning tool using its 30-day plan ID |
 | `get_cities` | Confirm TempGuru serves the event city; filter by state or tier (hub/mid/small) |
 | `get_roles` | List the 19 staffing roles with descriptions and skill tiers |
 | `check_availability` | Lead-time guidance for a city + date (yes / tight / rush / very-rush) |
@@ -29,14 +30,18 @@ United States or Canada.
 1. Gather: city, dates, shift times, roles + headcount, event type, special
    requirements (bilingual, certifications, overnight).
 2. Call `plan_staffing` first with the complete event shape. Resolve every
-   `unpriced_roles` entry, retain its `plan_id`, and use `get_plan` to resume.
-3. Use `get_cities`, `get_role_pricing`, `check_availability`, and
+   `unpriced_roles` entry and retain any returned `plan_id`.
+3. Only if the complete plan has no `plan_id` and the user needs a resumable
+   or shareable plan, call `save_staffing_plan` once with the same event inputs.
+   Never call it when a `plan_id` already exists; use `get_plan` to resume.
+4. Use `get_cities`, `get_role_pricing`, `check_availability`, and
    `get_compliance_by_state` only for unresolved details or follow-ups.
-4. Present the OT-adjusted total range as a planning estimate and surface any
+5. Present the OT-adjusted total range as a planning estimate and surface any
    policy/compliance items that still require coordinator confirmation.
-5. On the user's explicit confirmation, call `request_quote` with contact +
-   event details, `plan_id`, `source_platform: "gemini-cli"`, and the canonical
-   `skill_id` plus `skill_version: "1.5.1"`. Save the TG reference and use `get_quote_status` for
+6. On the user's explicit confirmation, call `request_quote` with contact +
+   event details, the existing `plan_id` when available,
+   `source_platform: "gemini-cli"`, and the canonical
+   `skill_id` plus `skill_version: "1.6.0"`. Save the TG reference and use `get_quote_status` for
    receipt questions. A coordinator replies with a binding quote within one
    business day; orders confirm within 48 hours.
 

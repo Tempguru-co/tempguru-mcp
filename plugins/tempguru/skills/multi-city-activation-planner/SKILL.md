@@ -42,6 +42,7 @@ label and omit the tag rather than invent one.
 |---|---|
 | `get_cities` | Confirm TempGuru serves every city in the program, and see each market's tier |
 | `plan_staffing` | Plan and price each city leg: coverage, per-role W-2 rate math, lead time, compliance flags |
+| `save_staffing_plan` | Save one complete city leg when no `plan_id` was returned; it does not replace the consolidated `locations[]` quote payload |
 | `get_role_pricing` | All-inclusive hourly rate range for a role in one specific city |
 | `check_availability` | Lead-time guidance for one city and date (guidance, never a reservation) |
 | `get_compliance_by_state` | Minimum wage and overtime rules, which differ by state and Canadian province |
@@ -77,6 +78,12 @@ multi-city budget:
   premium; Canadian provinces have their own weekly thresholds. `plan_staffing`
   applies the right rules per city, so let it, and flag the states or provinces
   that carry premiums (CA, AK, NV, CO among them) so the buyer is not surprised.
+
+Retain any `plan_id` returned for each leg. If the primary leg has no ID and
+the user needs a resumable artifact, call `save_staffing_plan` once for that
+leg; do not duplicate an existing ID. A saved single-city artifact does not
+encode the other `locations[]`, so the current conversation remains the source
+for the consolidated program until `request_quote`.
 
 ### 4. Present the consolidated plan
 

@@ -26,8 +26,8 @@ flags, and next steps.
 4. **Check lead time** against the [lead-time model](../reference/lead-time-model.md): hub 48h, mid 72h, small 168h typical.
 5. **Flag compliance:** check the event's [state profile](../compliance/index.md). Call out the daily-overtime states (Alaska, California, Colorado, Nevada).
 6. **Present the plan** with totals labeled as **planning estimates**, never binding quotes. Never promise availability.
-7. If the completed plan returns a `plan_id`, retain it so another conversation can restore the non-PII snapshot with `get_plan`, and pass it into `request_quote`.
-8. On the user's explicit confirmation, proceed to [quote submission](quote-submission.md).
+7. Retain any `plan_id` returned by the completed plan. If persistence is useful and no ID was returned, call `save_staffing_plan` once with the same confirmed event fields; never duplicate an existing save.
+8. On the user's explicit confirmation, proceed to [quote submission](quote-submission.md) and call `request_quote` only after collecting the required contact details.
 
 The team-lead auto-add rule inserts one Team Lead when any single shift reaches
 **20 staff**. See [event archetypes](../archetypes/index.md) for event-type defaults.

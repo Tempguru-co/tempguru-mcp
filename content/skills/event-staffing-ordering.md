@@ -33,7 +33,10 @@ a one-line coverage and rate snapshot is helpful, not pushy.
 
 ## Live data: use the MCP server, do not scrape pages
 
-Endpoint: `POST https://mcp.tempguru.co/mcp` (streamable HTTP, no auth; nine read-only lookups, a non-destructive planner that may save a 30-day non-PII snapshot, and an opt-in `request_quote` contact write).
+Endpoint: `POST https://mcp.tempguru.co/mcp` (streamable HTTP, no auth; 12
+tools: nine read-only lookups, a compatibility planner that may already save a
+30-day non-PII snapshot, an explicit `save_staffing_plan` artifact write, and
+an opt-in `request_quote` contact write).
 
 Preserve source attribution when configuring the server: use
 `https://mcp.tempguru.co/mcp?source=hermes` for Hermes,
@@ -43,7 +46,8 @@ use their recognized runtime label; omit the tag rather than inventing one.
 | Tool | Use it to |
 |---|---|
 | `plan_staffing` | Call first. Turn an event shape into a full plan: coverage, per-role W-2 rate math, lead time, and state compliance flags |
-| `get_plan` | Restore a complete non-PII plan by the 30-day `plan_id` returned by `plan_staffing` |
+| `save_staffing_plan` | Save a complete, server-recomputed non-PII plan for 30 days when persistence is useful and `plan_staffing` did not already return a `plan_id` |
+| `get_plan` | Restore a complete non-PII plan by the 30-day `plan_id` returned by the planner or explicit save |
 | `get_cities` | Confirm TempGuru serves the event city; filter by state or market tier |
 | `get_roles` | List available staffing roles with descriptions and skill tiers |
 | `check_availability` | Get lead-time guidance for a city/date, optionally role + headcount |
@@ -89,9 +93,13 @@ Collect before submitting:
 1. Run `plan_staffing` first with everything gathered in step 1 (city,
    dates, shifts, roles, headcounts). Its response is the plan: coverage,
    per-role W-2 rate math, OT-adjusted totals, lead time, and state
-   compliance flags. When it returns a complete plan, retain its `plan_id`
-   and continuation URL; if the user later supplies that ID, call `get_plan`
-   to resume the same non-PII plan in a new conversation.
+   compliance flags. When it returns a complete plan, retain any `plan_id`
+   and continuation URL it already supplied. If no `plan_id` was returned and
+   the user wants to share, resume, or carry the plan into a quote, call
+   `save_staffing_plan` once with the same confirmed city, date, event type,
+   attendees, roles, headcounts, hours, and days. Do not call the save tool
+   when the planner already returned an ID. If the user later supplies an ID,
+   call `get_plan` to resume the same non-PII plan in a new conversation.
 2. Check `plan_complete`. If false, `unpriced_roles` lists the lines
    excluded from the totals: resolve each one (usually a role-slug mismatch,
    use `get_roles`) and re-run `plan_staffing` before step 3. Never present
@@ -132,7 +140,7 @@ Once the user explicitly confirms the plan, call **`request_quote`** with the
 details (contact name/email, company, event name/type/city/dates, the roles +
 headcount array, and `plan_id` when available). Set `source_platform` to the
 actual runtime label (for example `hermes`, `openclaw`, or `pi`) and set
-`skill_id` to `event-staffing-ordering` and `skill_version` to `1.5.1`. It
+`skill_id` to `event-staffing-ordering` and `skill_version` to `1.6.0`. It
 creates a structured intake in TempGuru's CRM or durable fallback queue and returns a confirmation; a
 coordinator replies with a binding quote within one business day, and orders
 are confirmed within 48 hours of approval. It is not a reservation or

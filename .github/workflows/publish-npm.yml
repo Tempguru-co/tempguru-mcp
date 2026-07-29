@@ -6,11 +6,20 @@ name: Publish MCP CLI to npm
 # merging a draft product PR cannot release a package by accident.
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: Exact semver already committed to package.json, cli/package.json, and server.json
+        required: true
+        type: string
 
 permissions:
   actions: write
   contents: read
   id-token: write
+
+concurrency:
+  group: publish-tempguru-mcp-${{ github.repository }}-${{ inputs.version }}
+  cancel-in-progress: false
 
 jobs:
   publish:
@@ -26,23 +35,37 @@ jobs:
           node-version: "24"
           registry-url: "https://registry.npmjs.org"
           package-manager-cache: false
-      - run: npm install --global "npm@^11.5.1"
+      - run: npm install --global "npm@^11.15.0"
       - run: npm ci
       - run: npm run typecheck
       - run: npm run test:unit
       - run: npm run build:stdio
       - run: npm run evals
+      - run: npm run test:protocol
+      - run: npm run build
+      - run: npm run check:submissions
       - run: npm run build:cli
       - run: npm run check:cli-package
       - name: Verify release versions and package contents
+        id: release
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
         run: |
           ROOT=$(node -p 'require("./package.json").version')
           CLI=$(node -p 'require("./cli/package.json").version')
           REGISTRY=$(node -p 'require("./server.json").version')
+          test "$ROOT" = "$RELEASE_VERSION"
           test "$ROOT" = "$CLI"
           test "$ROOT" = "$REGISTRY"
           npm pack --dry-run --json ./cli
+          if [ "$(npm view "tempguru-mcp@$RELEASE_VERSION" version 2>/dev/null || true)" = "$RELEASE_VERSION" ]; then
+            echo "::notice::tempguru-mcp@$RELEASE_VERSION is already published; skipping the immutable npm write and re-dispatching the Registry check."
+            echo "already_published=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "already_published=false" >> "$GITHUB_OUTPUT"
+          fi
       - name: Publish with npm trusted publishing
+        if: steps.release.outputs.already_published != 'true'
         working-directory: cli
         run: npm publish --access public
       - name: Publish the same version to the MCP Registry

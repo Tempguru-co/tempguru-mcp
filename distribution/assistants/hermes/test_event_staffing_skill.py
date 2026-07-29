@@ -59,7 +59,8 @@ def test_agent_safety_rules_present():
 
 def test_current_tool_and_quote_attribution_contract():
     _, body = _frontmatter_and_body()
-    for tool in ("get_plan", "get_policies", "get_quote_status"):
+    for tool in ("save_staffing_plan", "get_plan", "get_policies", "get_quote_status"):
         assert f"`{tool}`" in body, f"missing current read tool: {tool}"
+    assert "never save a plan that already has an ID" in body
     for field in ("source_platform", "skill_id", "skill_version", "plan_id"):
         assert f"`{field}`" in body, f"missing quote attribution field: {field}"

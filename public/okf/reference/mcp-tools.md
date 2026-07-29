@@ -1,7 +1,7 @@
 ---
 type: "Tool Reference"
 title: "MCP Tools"
-description: "The 11 tools exposed by the TempGuru MCP server: 9 read-only lookups, 1 non-destructive saved-plan write, and 1 opt-in contact write."
+description: "The 12 tools exposed by the TempGuru MCP server: 9 read-only lookups, 2 non-destructive saved-plan write, and 1 opt-in contact write."
 mcp_endpoint: "https://mcp.tempguru.co/mcp"
 tags:
   - "reference"
@@ -14,14 +14,15 @@ timestamp: "2026-07-16T00:00:00Z"
 # MCP Tools
 
 The TempGuru MCP server (`https://mcp.tempguru.co/mcp`, Streamable HTTP, no auth) exposes
-**11 tools** (9 read-only, 1 non-destructive saved-plan write, 1 contact write). This table and its descriptions are
+**12 tools** (9 read-only, 2 non-destructive saved-plan write, 1 contact write). This table and its descriptions are
 generated from the live tool registry (`register-tools.ts`), so they cannot drift
 from the server.
 
 | Tool | Kind | Description (from the tool definition) |
 |---|---|---|
 | `plan_staffing` | saved-plan write | CALL THIS FIRST for any event staffing request. |
-| `get_plan` | read | Restore a complete non-PII staffing plan created by plan_staffing within the last 30 days. |
+| `save_staffing_plan` | saved-plan write | Explicitly save a complete non-contact staffing plan for 30 days so it can be shared, resumed, or linked to a later quote request. |
+| `get_plan` | read | Restore a complete non-PII staffing plan created by plan_staffing or save_staffing_plan within the last 30 days. |
 | `get_cities` | read | List the cities where TempGuru staffs events (tier hub/mid/small), or check coverage of ONE city. |
 | `get_roles` | read | List event staffing roles TempGuru provides, with descriptions and skill tiers. |
 | `check_availability` | read | Check expected staffing availability for an event. |
@@ -34,11 +35,12 @@ from the server.
 
 ## Golden order
 
-1. `plan_staffing` with everything the user gave you; retain its `plan_id` when the plan is complete.
+1. `plan_staffing` with everything the user gave you.
 2. Fill gaps with `get_roles` / `get_cities`; flag the daily-overtime states (Alaska, California, Colorado, Nevada).
 3. Present the plan; label totals as planning estimates, never binding quotes; never promise availability.
-4. On explicit confirmation, collect contact details and call `request_quote` once with the retained `plan_id`, actual `source_platform`, and canonical `skill_id` / `skill_version` when a TempGuru skill assembled it.
-5. Retain the returned TG reference and use `get_quote_status` only when the user asks for receipt status.
+4. Retain any `plan_id` the planner returned. If the user needs a shareable/resumable artifact and no ID exists, call `save_staffing_plan` once with the same confirmed event fields; never duplicate an existing save.
+5. On explicit confirmation, collect contact details and call `request_quote` once with the retained `plan_id`, actual `source_platform`, and canonical `skill_id` / `skill_version` when a TempGuru skill assembled it.
+6. Retain the returned TG reference and use `get_quote_status` only when the user asks for receipt status.
 
 The REST API at `https://mcp.tempguru.co/api/v1` mirrors the same query layer, so MCP and HTTP
 cannot drift. See [the REST API](api.md) and [data schemas](data-schema.md).

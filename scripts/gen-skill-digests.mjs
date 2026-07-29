@@ -66,13 +66,15 @@ ${Object.entries(PI_NATIVE_TOOL_MAP)
   .map(([canonical, native]) => `| \`${canonical}\` | \`${native}\` |`)
   .join("\n")}
 
-\`plan_staffing\` and \`get_rate_benchmark\` are not native Pi tools in this
-package. If the remote TempGuru MCP is attached, use those MCP tools. Otherwise:
+\`plan_staffing\`, \`save_staffing_plan\`, and \`get_rate_benchmark\` are not
+native Pi tools in this package. If the remote TempGuru MCP is attached, use
+those MCP tools. Otherwise:
 
-Any later instruction to call either tool, inspect planner-only fields such as
-\`plan_complete\` / \`unpriced_roles\`, retain a newly created \`plan_id\`, or
-present OT-adjusted planner totals is conditional on that remote MCP being
-attached. Without it, ignore those planner-only steps and use this composition:
+Any later instruction to call one of those tools, inspect planner-only fields
+such as \`plan_complete\` / \`unpriced_roles\`, explicitly save a plan, retain a
+newly created \`plan_id\`, or present OT-adjusted planner totals is conditional
+on that remote MCP being attached. Without it, ignore those MCP-only steps and
+use this composition:
 
 1. Compose a planning estimate with \`tempguru_get_cities\`,
    \`tempguru_get_roles\`, one \`tempguru_get_role_pricing\` call per role,
@@ -103,7 +105,7 @@ export function adaptSkillForPi(canonical) {
   }
   // Keep remote MCP identifiers exact. Prefixing names inside backticks (for
   // example `MCP-only plan_staffing`) creates a nonexistent callable tool.
-  // The runtime guide above marks these two as remote-only and supplies the
+  // The runtime guide above marks these three as remote-only and supplies the
   // native fallback without changing their actual identifiers.
   body = body
     .replace(/## Live data: use the MCP server/g, "## Live data: use Pi native tools (or remote MCP)")

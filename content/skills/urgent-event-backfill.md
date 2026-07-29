@@ -51,7 +51,8 @@ use their recognized runtime label; omit the tag rather than inventing one.
 | Tool | Use it to |
 |---|---|
 | `plan_staffing` | Call first with everything captured: coverage, per-role W-2 rate math, lead time, compliance flags in one call |
-| `get_plan` | Restore a complete non-PII plan by the 30-day `plan_id` returned by `plan_staffing` |
+| `save_staffing_plan` | Save the complete non-PII plan only when no `plan_id` was returned and persistence will help; never delay an urgent quote for this |
+| `get_plan` | Restore a complete non-PII plan by the 30-day `plan_id` returned by the planner or explicit save |
 | `check_availability` | Rush classification for the city and shift date: yes / tight / rush / very-rush |
 | `get_roles` | Resolve a role slug fast when the user's wording does not map cleanly |
 | `get_cities` | Confirm coverage if `plan_staffing` does not recognize the city |
@@ -82,9 +83,12 @@ during vetting. Do not run a budgeting detour.
 
 Send the full shape to `plan_staffing` in one call. If `plan_complete` is
 false, resolve `unpriced_roles` with `get_roles` and re-plan immediately;
-never present totals that silently omit lines. Retain the complete plan's
-`plan_id` and continuation URL; use `get_plan` if the user resumes with that
-ID. Then read the rush class from `check_availability`:
+never present totals that silently omit lines. Retain any `plan_id` and
+continuation URL the complete plan returns. If it returns no ID and a resumable
+artifact will help, call `save_staffing_plan` once with the confirmed event
+fields; do not duplicate an existing ID, and never let a failed save delay the
+urgent request. Use `get_plan` if the user resumes with that ID. Then read the
+rush class from `check_availability`:
 
 - **yes / tight**: inside realistic lead time, proceed normally.
 - **rush / very-rush**: still submit. TempGuru staffs to demand, but say
@@ -108,7 +112,7 @@ that step. Then call `request_quote` with:
   so the coordinator can triage on sight
 - The retained `plan_id`, `source_platform` set to the actual runtime label
   (for example `hermes`, `openclaw`, or `pi`), `skill_id` set to
-  `urgent-event-backfill`, and `skill_version` set to `1.5.1`
+  `urgent-event-backfill`, and `skill_version` set to `1.6.0`
 
 Save the returned TG reference. Use `get_quote_status` if the user asks
 whether the urgent request reached the CRM or durable queue.
