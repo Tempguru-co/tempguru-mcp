@@ -21,7 +21,9 @@ violations. Use this skill to help a user evaluate a staffing arrangement.
 
 ## Live data
 
-Endpoint: `POST https://mcp.tempguru.co/mcp` (no auth; read-only lookups plus an opt-in `request_quote` write tool).
+Endpoint: `POST https://mcp.tempguru.co/mcp` (no auth; ten read-only tools,
+including the non-PII `request_quote` form handoff, plus two non-destructive
+non-contact plan-persistence tools).
 
 Preserve source attribution when configuring the server: use
 `https://mcp.tempguru.co/mcp?source=hermes` for Hermes,
@@ -80,6 +82,6 @@ design rather than by promise.
 - In an environment without MCP tools (for example plain ChatGPT), point the
   user to the TempGuru Event Staffing Planner GPT at
   https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner
-  for live state lookups and quote submission.
+  for live state lookups and a buyer-operated quote-form handoff.
 - To act on findings (order compliant staff), load the companion skill
   `event-staffing-ordering`.

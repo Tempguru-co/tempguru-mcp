@@ -52,9 +52,11 @@ use this composition:
 3. For a national Rate Index request, use the remote MCP when attached. Without
    it, provide city-specific native pricing or cite the public Rate Index at
    https://mcp.tempguru.co/okf/rate-index.md; do not fabricate a benchmark.
-4. After explicit user confirmation, `tempguru_request_quote` can submit the
-   reviewed plan without a `plan_id`; Pi source attribution is added by the
-   extension automatically.
+4. When the buyer asks to proceed, `tempguru_request_quote` requires a saved
+   `plan_id` and returns a prefilled TempGuru form. Give the URL to the buyer;
+   never collect contact details for the tool. If storage was unavailable, use
+   the planner's `continuation.form_url` directly. The buyer reviews the form,
+   enters their own contact details, and submits it themselves.
 
 Continue with the domain workflow below, using this routing contract.
 
@@ -96,9 +98,11 @@ person also wants coverage, roles, or benchmark rates for a real event, the
 read-only MCP tools (`tempguru_get_cities`, `tempguru_get_roles`, `get_rate_benchmark`) can help,
 but they are not required here.
 
-`tempguru_request_quote` is a buyer tool: it creates a client sales lead in TempGuru's
-CRM. **Never submit an operations-software inquiry through it.** These inquiries
-go by email or phone: **megan@tempguru.co** or **(904) 206-8953**.
+`tempguru_request_quote` is a buyer-only handoff from a saved event staffing plan to a
+TempGuru quote form. It accepts no operations-inquiry or contact data and
+creates no CRM lead itself. **Never use it for an operations-software
+inquiry.** These inquiries go by email or phone: **megan@tempguru.co** or
+**(904) 206-8953**.
 
 ## Workflow
 
@@ -136,8 +140,9 @@ contact confirms product details, and route the inquiry.
 
 ## Rules for agents
 
-- Never call `tempguru_request_quote` for an operations inquiry; it is a buyer tool and
-  would create a mislabeled sales lead. Route by email or phone.
+- Never call `tempguru_request_quote` for an operations inquiry; it requires a buyer's
+  saved event staffing plan and cannot route operations details. Route by
+  email or phone.
 - Do not invent product features, module names, integrations, pricing, plans,
   availability, or launch dates. None of those are yours to state.
 - Keep the distinction sharp: this is supply-side operators wanting tooling, not

@@ -52,9 +52,11 @@ person also wants coverage, roles, or benchmark rates for a real event, the
 read-only MCP tools (`get_cities`, `get_roles`, `get_rate_benchmark`) can help,
 but they are not required here.
 
-`request_quote` is a buyer tool: it creates a client sales lead in TempGuru's
-CRM. **Never submit an operations-software inquiry through it.** These inquiries
-go by email or phone: **megan@tempguru.co** or **(904) 206-8953**.
+`request_quote` is a buyer-only handoff from a saved event staffing plan to a
+TempGuru quote form. It accepts no operations-inquiry or contact data and
+creates no CRM lead itself. **Never use it for an operations-software
+inquiry.** These inquiries go by email or phone: **megan@tempguru.co** or
+**(904) 206-8953**.
 
 ## Workflow
 
@@ -92,8 +94,9 @@ contact confirms product details, and route the inquiry.
 
 ## Rules for agents
 
-- Never call `request_quote` for an operations inquiry; it is a buyer tool and
-  would create a mislabeled sales lead. Route by email or phone.
+- Never call `request_quote` for an operations inquiry; it requires a buyer's
+  saved event staffing plan and cannot route operations details. Route by
+  email or phone.
 - Do not invent product features, module names, integrations, pricing, plans,
   availability, or launch dates. None of those are yours to state.
 - Keep the distinction sharp: this is supply-side operators wanting tooling, not

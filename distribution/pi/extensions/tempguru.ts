@@ -2,12 +2,12 @@
 //
 // Pi installs skills (Markdown) and extensions (native tools) from this
 // package; skills alone cannot call an API, so this extension gives Pi real
-// tools against TempGuru's hosted REST mirror (the same data and write path
-// as the MCP server at https://mcp.tempguru.co/mcp). No auth, no API key.
+// tools against TempGuru's hosted REST mirror (the same public data as the MCP
+// server at https://mcp.tempguru.co/mcp). No auth, no API key.
 //
 // Attribution: every call carries ?source=pi so TempGuru can see Pi-driven
-// usage. request_quote is the ONE write tool: it is opt-in and must only be
-// called after the user explicitly confirms sending their contact details.
+// usage. request_quote is a read-only non-PII handoff: it restores a saved plan
+// and returns a prefilled form the buyer personally submits.
 //
 // Generated from the tempguru-mcp repo (distribution/pi). The full
 // plan_staffing planner is MCP-only; these tools cover the granular REST
@@ -18,6 +18,19 @@ import { Type } from "typebox";
 const BASE = "https://mcp.tempguru.co";
 const SOURCE = "source=pi";
 const MAX_TEXT = 48_000; // stay under Pi's ~50KB tool-output budget
+const QUOTE_SKILL_IDS = [
+  "event-staffing-ordering",
+  "event-staffing-compliance",
+  "staffing-plan-from-event-brief",
+  "urgent-event-backfill",
+  "staffing-agency-partner-growth",
+  "multi-city-activation-planner",
+  "event-staffing-procurement",
+  "tempguru-pro-operations",
+] as const;
+const QUOTE_SKILL_ID_SET = new Set<string>(QUOTE_SKILL_IDS);
+const QUOTE_SKILL_VERSION_PATTERN =
+  /^[0-9]{1,4}\.[0-9]{1,4}\.[0-9]{1,4}(?:-[0-9A-Za-z.-]{1,24})?(?:\+[0-9A-Za-z.-]{1,24})?$/;
 
 async function call(
   method: "GET" | "POST",
@@ -49,12 +62,6 @@ async function call(
   }
   return { content: [{ type: "text" as const, text: capped }], details: { status: res.status } };
 }
-
-const RoleLine = Type.Object({
-  role: Type.String({ description: "Role slug or name, e.g. 'brand-ambassadors' (see tempguru_get_roles)" }),
-  headcount: Type.Integer({ minimum: 1, maximum: 10_000 }),
-  shifts: Type.Optional(Type.String({ description: "e.g. '2 shifts x 8h'" })),
-});
 
 export default function (pi: any) {
   pi.registerTool({
@@ -163,7 +170,8 @@ export default function (pi: any) {
   pi.registerTool({
     name: "tempguru_quote_status",
     label: "TempGuru: Quote Status",
-    description: "Check whether a TG-XXXXXX quote reference was received or durably queued.",
+    description:
+      "Check a TG-XXXXXX reference returned after the buyer personally submits the TempGuru website form, including historical references.",
     parameters: Type.Object({
       reference: Type.String({ description: "e.g. TG-A2B3C4" }),
     }),
@@ -174,44 +182,85 @@ export default function (pi: any) {
 
   pi.registerTool({
     name: "tempguru_request_quote",
-    label: "TempGuru: Request Quote (write)",
+    label: "TempGuru: Prepare Quote Form",
     description:
-      "Submit a staffing request to TempGuru's CRM or durable intake queue; a human coordinator replies with a binding quote within one business day. THE ONLY WRITE TOOL: call it LAST, once, and only after the user explicitly confirms sending their contact details. Not a reservation; no payment until the user approves the quote. On error, fall back to https://tempguru.co/get-staffing or megan@tempguru.co / (904) 206-8953.",
+      "Restore a saved non-PII staffing plan and return a prefilled TempGuru form for the buyer to personally review and submit. This tool never accepts or transmits contact details and does not create a lead or TG reference. Requires the plan_id returned by plan_staffing or save_staffing_plan. If storage was unavailable, give the buyer the plan's continuation.form_url directly.",
     parameters: Type.Object({
-      contact_name: Type.String(),
-      contact_email: Type.String(),
-      contact_phone: Type.Optional(Type.String()),
-      company: Type.String(),
-      event_name: Type.String(),
-      event_type: Type.String(),
-      city: Type.String(),
-      event_dates: Type.String(),
-      venue: Type.Optional(Type.String()),
-      attendees: Type.Optional(Type.Integer({ minimum: 1 })),
-      roles: Type.Array(RoleLine, { minItems: 1, maxItems: 50 }),
-      locations: Type.Optional(
-        Type.Array(
-          Type.Object({
-            city: Type.String(),
-            venue: Type.Optional(Type.String()),
-            event_dates: Type.Optional(Type.String()),
-            roles: Type.Optional(Type.Array(RoleLine, { maxItems: 50 })),
-          }),
-          { maxItems: 50, description: "Additional cities for a multi-city program (one consolidated quote)" },
-        ),
-      ),
-      budget_range: Type.Optional(Type.String()),
-      attire: Type.Optional(Type.String()),
-      special_requirements: Type.Optional(Type.String()),
-      plan_id: Type.Optional(Type.String({ description: "Include when the plan came from a saved plan_id" })),
-      skill_id: Type.Optional(Type.String({ description: "Canonical TempGuru skill that assembled this request" })),
-      skill_version: Type.Optional(Type.String()),
+      plan_id: Type.String({
+        minLength: 12,
+        maxLength: 12,
+        pattern: "^[A-HJ-NP-Z2-9]{12}$",
+        description: "Saved non-PII plan reference",
+      }),
+      skill_id: Type.Optional(Type.Union(
+        QUOTE_SKILL_IDS.map((skillId) => Type.Literal(skillId)),
+        { description: "Canonical TempGuru skill that assembled this plan" },
+      )),
+      skill_version: Type.Optional(Type.String({
+        maxLength: 40,
+        pattern: QUOTE_SKILL_VERSION_PATTERN.source,
+        description: "SemVer version of the canonical TempGuru skill, e.g. 1.7.0",
+      })),
     }),
     async execute(_id: string, p: any, signal: AbortSignal) {
-      return call("POST", "/api/v1/quote-requests", signal, undefined, {
-        ...p,
-        source_platform: "pi",
-      });
+      const result = await call(
+        "GET",
+        `/api/v1/plans/${encodeURIComponent(String(p.plan_id).toUpperCase())}`,
+        signal,
+      );
+      const raw = result.content[0]?.text ?? "{}";
+      let plan: any;
+      try {
+        plan = JSON.parse(raw);
+      } catch {
+        return result;
+      }
+      if (!plan?.plan_found || !plan?.continuation?.form_url) {
+        return {
+          content: [{
+            type: "text" as const,
+            text: JSON.stringify({
+              handoff_ready: false,
+              buyer_submission_required: true,
+              plan_found: false,
+              plan_id: String(p.plan_id).toUpperCase(),
+              message: "That saved plan was not found or has expired. Re-run the staffing plan.",
+            }, null, 2),
+          }],
+          details: result.details,
+        };
+      }
+      const formUrl = new URL(plan.continuation.form_url);
+      formUrl.searchParams.set("utm_campaign", "quote-handoff");
+      formUrl.searchParams.set("source_platform", "pi");
+      const skillId =
+        typeof p.skill_id === "string" && QUOTE_SKILL_ID_SET.has(p.skill_id)
+          ? p.skill_id
+          : undefined;
+      const skillVersion =
+        typeof p.skill_version === "string" &&
+        QUOTE_SKILL_VERSION_PATTERN.test(p.skill_version)
+          ? p.skill_version
+          : undefined;
+      if (skillId) formUrl.searchParams.set("skill_id", skillId);
+      if (skillId && skillVersion) {
+        formUrl.searchParams.set("skill_version", skillVersion);
+      }
+      return {
+        content: [{
+          type: "text" as const,
+          text: JSON.stringify({
+            handoff_ready: true,
+            buyer_submission_required: true,
+            plan_found: true,
+            plan_id: String(p.plan_id).toUpperCase(),
+            form_url: formUrl.toString(),
+            message:
+              "Give the buyer this prefilled TempGuru form. The buyer enters and submits their own contact details.",
+          }, null, 2),
+        }],
+        details: result.details,
+      };
     },
   });
 }

@@ -9,8 +9,9 @@ plus the required per-skill test.
 To sync: copy SKILL.md to optional-skills/productivity/event-staffing/SKILL.md
 and the test to tests/skills/test_event_staffing_skill.py on the PR branch in
 the kissmyabs32/hermes-agent fork, then push. Derived from the canonical
-content/skills/event-staffing-ordering.md; re-derive (and bump version) when
-the canonical skill changes. Version 1.0.4 adds the attributed Hermes endpoint,
-the current 12-tool Phase A inventory, conditional explicit-save guidance, and
-quote-source fields; re-sync both files to
+content/skills/event-staffing-ordering.md; re-derive when the canonical skill
+changes. The current package documents the attributed Hermes endpoint, the
+12-tool inventory (10 read-only, 2 non-contact persistence writes),
+conditional explicit-save guidance, and the non-PII buyer form handoff; re-sync
+both files to
 PR #39150 before requesting another sweeper review.

@@ -64,8 +64,10 @@ GET /admin (server component) ─────────► getMetrics() ──
 
 Telemetry and lifecycle writes are awaited only up to a short cap and fail open.
 If Upstash is absent or slow, lookup tools still work; a complete plan simply
-has no resumable `plan_id`, and quote capture retains its existing CRM/fallback
-behavior.
+has no resumable `plan_id`, so the agent gives the buyer the planner's
+`continuation.form_url` directly. MCP `request_quote` is a read-only, non-PII
+handoff and never reaches the CRM. Buyer form submissions continue through the
+REST quote endpoint and retain its CRM/fallback behavior.
 
 ---
 
@@ -83,7 +85,7 @@ carries a **90-day TTL**. Non-daily operational keys list their retention below.
 | `status:{date}` | HASH | `success`/`error` → count |
 | `channels:{date}` | HASH | `mcp`/`rest` invocation count |
 | `sources:{date}` | HASH | allowlisted controlled-source tag → count |
-| `funnel:{date}` | HASH | `channel:event` → plan/quote lifecycle count |
+| `funnel:{date}` | HASH | `channel:event` → plan, buyer-handoff, and buyer-submission lifecycle count (for example `mcp:quote_handoffs` vs `rest:quotes_submitted`) |
 | `source-platforms:{date}` | HASH | allowlisted source platform → successful new quote leads |
 | `source-skills:{date}` | HASH | canonical TempGuru skill slug → successful new quote leads |
 | `queries:cities:{date}` | ZSET | city slug, score = invocation count |
@@ -151,7 +153,8 @@ Top right: 1d / 7d / 30d / 90d. URL is `?days=N`. Maximum window is 90 days (mat
 - **Daily volume chart**, bar per day in window
 - **By tool**, invocation count per tool, sorted desc with %-bars
 - **By UA class**, same breakdown for clients (most strategically useful, Claude vs Cursor vs Qwen vs probes vs crawlers)
-- **Quote leads by platform and canonical skill**, which runtime and workflow produced each successful new lead
+- **Buyer form handoffs**, how often MCP prepared a form without creating a lead
+- **Buyer-submitted quote leads by platform and canonical skill**, which runtime and workflow produced each successful new REST lead
 - **Top cities / roles / states**, top 20 each, demand signal from queries
 - **By country**, Vercel edge geolocation
 - **Recent invocations**, last 50 events with timestamps, tool, UA class, country, status, and canonical catalog dimensions
@@ -176,7 +179,7 @@ Set via Vercel project settings (Production + Preview).
 | `KV_REST_API_READ_ONLY_TOKEN` | Upstash integration (auto-set) | Read-only token (unused but populated) |
 | `KV_URL` | Upstash integration (auto-set) | Redis protocol URL (unused by current code) |
 | `ADMIN_PASSWORD` | Manual | Dashboard login password |
-| `NOTION_API_KEY` | Manual | CRM write integration for `request_quote` (legacy `Notion_API_Key` casing is also read) |
+| `NOTION_API_KEY` | Manual | CRM write integration for buyer-submitted REST `POST /api/v1/quote-requests` requests (legacy `Notion_API_Key` casing is also read) |
 | `PLAN_LINK_SECRET` | Manual, optional | HMAC-SHA256 key for signed 30-day plan handoff links; `sig`/`exp` are omitted when unset |
 | `LEAD_WEBHOOK_URL` | Manual, optional | First-party, time-capped notification target for new quote requests |
 | `CRON_SECRET` | Manual | Random 16+ character bearer secret Vercel sends to the protected lead-queue drain route |
@@ -251,6 +254,6 @@ Upstash free tier is 10,000 commands/day. Each MCP tool invocation writes ~8 com
 | `other` bucket growing | Unclassified client | Inspect Vercel logs for raw UA strings; add regex to `classify-ua.ts` |
 | Redirect loop on /admin | Stale browser cookie | Clear cookies for mcp.tempguru.co OR open in incognito |
 | `git push` to `main` doesn't deploy | Vercel GitHub App can't see the repo (common after a repo transfer to a new org). `vercel git connect` may say "already connected", the project link is fine; the problem is the **GitHub App's repo access**. The app is installed on the org but the repo isn't in its **"Only select repositories"** list, so GitHub never sends push webhooks. | GitHub → org **Settings → Installations → Vercel → Configure** → add the repo to the selected list (or "All repositories") → Save. Verify with a test push: a new deploy should appear in `vercel ls` within ~30s. (Resolved 2026-06-06 for tempguru-mcp after the kissmyabs32→tempguru-co transfer.) |
-| `request_quote` returns "NOTION_API_KEY not configured" | Env var casing mismatch | Vercel var is `Notion_API_Key`; code reads `NOTION_API_KEY` first then falls back to `Notion_API_Key`. If both absent, add `NOTION_API_KEY` (Production+Preview) + redeploy. |
-| `request_quote` returns a `ByteString` TypeError | Notion API key value contains a non-ASCII char (e.g. an em dash from smart-typography on paste) | Re-enter the raw integration token (`ntn_…`/`secret_…`, pure ASCII, no surrounding text) in Vercel. Code now rejects non-ASCII keys with a clear message. |
-| `request_quote` returns Notion 404 "Could not find database" | `DB_ID` set to the **data_source_id** instead of the **database_id**, OR integration not shared with the DB | `DB_ID` in `src/lib/notion/create-lead.ts` must be the database_id (`2f87d2b7-68c5-818d-93ae-f835c7b478f2`), NOT the data_source_id (`…620bde`). Also share the integration with the DB: Notion DB → ••• → Connections → add the integration. |
+| REST `POST /api/v1/quote-requests` returns "NOTION_API_KEY not configured" | Env var casing mismatch | Vercel var is `Notion_API_Key`; code reads `NOTION_API_KEY` first then falls back to `Notion_API_Key`. If both absent, add `NOTION_API_KEY` (Production+Preview) + redeploy. MCP `request_quote` does not use this credential. |
+| REST quote submission returns a `ByteString` TypeError | Notion API key value contains a non-ASCII char (e.g. an em dash from smart-typography on paste) | Re-enter the raw integration token (`ntn_…`/`secret_…`, pure ASCII, no surrounding text) in Vercel. Code now rejects non-ASCII keys with a clear message. |
+| REST quote submission returns Notion 404 "Could not find database" | `DB_ID` set to the **data_source_id** instead of the **database_id**, OR integration not shared with the DB | `DB_ID` in `src/lib/notion/create-lead.ts` must be the database_id (`2f87d2b7-68c5-818d-93ae-f835c7b478f2`), NOT the data_source_id (`…620bde`). Also share the integration with the DB: Notion DB → ••• → Connections → add the integration. |

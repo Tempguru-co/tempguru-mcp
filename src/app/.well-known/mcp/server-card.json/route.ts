@@ -19,7 +19,7 @@ const SERVER_CARD = {
     title: "TempGuru Event Staffing",
     version: pkg.version,
     description:
-      "Dual-era Model Context Protocol server for TempGuru event staffing data across 345 US/Canada markets. Twelve tools: nine read-only lookups, the non-destructive plan_staffing planner, an explicit non-destructive save_staffing_plan write, and one opt-in request_quote contact submission. Also ships 8 skill resources and two guided prompts.",
+      "Dual-era Model Context Protocol server for TempGuru event staffing data across 345 US/Canada markets. Twelve tools: ten read-only tools including a non-PII request_quote buyer handoff, the non-destructive plan_staffing planner, and an explicit non-destructive save_staffing_plan write. Also ships 8 skill resources and two guided prompts.",
     websiteUrl: "https://tempguru.co",
   },
   transport: {
@@ -53,7 +53,7 @@ const SERVER_CARD = {
       "Call plan_staffing first with the event city, date, roles, and headcount.",
       "If a complete plan already includes plan_id, retain it and do not call save_staffing_plan; the planner already saved the non-PII snapshot.",
       "Call save_staffing_plan only for a complete plan that has no plan_id and needs a durable 30-day artifact; the server recomputes rates and totals from bounded event inputs before saving.",
-      "Only after the user explicitly confirms, call request_quote and include plan_id when one is available.",
+      "When the buyer asks to proceed, call request_quote with the saved plan_id and give them its form_url; the buyer enters and submits their own contact details.",
     ],
   },
   tools: [
@@ -110,12 +110,12 @@ const SERVER_CARD = {
     {
       name: "get_quote_status",
       description:
-        "Check whether a TG quote reference was received by the CRM or durably queued.",
+        "Check a TG reference returned after a buyer-submitted website form, including historical references.",
     },
     {
       name: "request_quote",
       description:
-        "Submit a structured staffing request to TempGuru's pipeline. A coordinator reviews and responds with a quote within one business day. Not a reservation; does not guarantee pricing or availability.",
+        "Restore a saved non-PII plan and return a prefilled TempGuru buyer form. Read-only: never accepts contact data or creates a lead; the buyer personally submits the form.",
     },
   ],
   authentication: { required: false },

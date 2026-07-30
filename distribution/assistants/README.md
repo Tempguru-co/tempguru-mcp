@@ -16,7 +16,7 @@ packaging and store listings, not engineering.
 
 | File | What it is |
 |---|---|
-| [system-prompt.md](./system-prompt.md) | **Canonical instructions** (6.1k chars, fits every platform). Single source of truth. |
+| [system-prompt.md](./system-prompt.md) | **Canonical instructions** (kept within platform character limits). Single source of truth. |
 | [system-prompt.zh-CN.md](./system-prompt.zh-CN.md) | Chinese canonical, framed for 赴美参展 exhibitors |
 | [build-knowledge.mjs](./build-knowledge.mjs) | Generates `knowledge/` from `content/mcp-data/`, never hand-edit knowledge files |
 | [build-manifests.mjs](./build-manifests.mjs) | Generates the Copilot manifests from the canonical prompt |
@@ -29,6 +29,7 @@ packaging and store listings, not engineering.
 | [china-platforms.md](./china-platforms.md) | Yuanqi, Baidu AgentBuilder, Kimi, Zhipu, Bailian, DeepSeek strategy |
 | [mistral-le-chat.md](./mistral-le-chat.md) | Le Chat agent + Europe positioning |
 | [other-platforms.md](./other-platforms.md) | Poe, Perplexity Spaces, Meta AI Studio (WhatsApp/India), HuggingChat |
+| [../anthropic-directory-update.md](../anthropic-directory-update.md) | Paste-ready Anthropic Connectors Directory resubmission update with the exact live tool, prompt, resource, privacy, and allowed-link contract |
 
 ## Status tracker
 
@@ -37,19 +38,19 @@ included for the full picture.)
 
 | Surface | Type | Status |
 |---|---|---|
-| Official MCP Registry (`co.tempguru/event-staffing`) | MCP | ✅ live — v1.5.0 (approved 2026-07-10; auto-published 2026-07-15); source v1.6.0 is a pending minor release with MCP 2026-07-28 dual-era transport and explicit saved-plan write |
+| Official MCP Registry (`co.tempguru/event-staffing`) | MCP | 🟡 repository `1.7.0` candidate; verify the published Registry version after release |
 | Smithery, Glama | MCP | ✅ live |
 | ModelScope MCP 广场 | MCP | ✅ live |
 | Docker MCP Registry | MCP | 🟡 PR #3902 awaiting review |
 | APIs.guru | OpenAPI | 🟡 issue #2610 in review queue |
 | Postman collection | REST | ✅ imported (re-import after city fix) |
 | Mistral connector directory | MCP | 🟡 outreach drafted, Megan to send via contact form |
-| Anthropic Connectors Directory (claude.ai) | MCP | 🟡 submitted, awaiting review (2026-06-09), do not re-submit |
-| npm CLI (`tempguru-mcp`), GHCR image | dev | 🟡 npm `1.5.0` is live; source `1.6.0` is ready to publish with dual-era MCP transport and the 12-tool contract (Trusted Publishing / OIDC via `publish-npm.yml`) |
-| Hermes agent catalog (NousResearch) | Agent Skill | 🟡 PR #39150 open — sweeper fixes pushed (`distribution/assistants/hermes/`), awaiting re-review |
-| Pi (`tempguru-pi` npm package) | Agent Skill + native tools | 🟡 npm `1.5.0` is live; source `1.6.0` is ready to publish with Pi-adapted tool names and planner/save/Rate Index fallback composition (8 skills + 9 REST-backed tools, `?source=pi` attribution) |
-| OpenClaw / ClawHub | Agent Skill | ✅ live 2026-07-15 — all 8 skills published (owner `kissmyabs32`): `tempguru-event-staffing-ordering`, `tempguru-event-staffing-compliance`, `tempguru-staffing-plan-from-event-brief`, `tempguru-urgent-event-backfill`, `tempguru-staffing-agency-partner-growth`, `tempguru-multi-city-activation-planner`, `tempguru-event-staffing-procurement`, `tempguru-pro-operations`. 2 no-prefix duplicates merged→redirected. Verify: `GET clawhub.ai/api/v1/skills/<slug>` |
-| **ChatGPT Custom GPT** | this kit | ✅ LIVE 2026-06-09, https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner (planner + read actions + in-chat quote submission via the live `submitQuoteRequest` action) |
+| Anthropic Connectors Directory (claude.ai) | MCP | 🟠 changes requested; paste-ready `read_write` inventory and buyer-form handoff reply are in `distribution/anthropic-directory-update.md` |
+| npm CLI (`tempguru-mcp`), GHCR image | dev | 🟡 repository `1.7.0` candidate; publish with Trusted Publishing/OIDC after merge and verify the exact version |
+| Hermes agent catalog (NousResearch) | Agent Skill | ✅ update completed by maintainer; keep `distribution/assistants/hermes/` synchronized for the `1.7.0` handoff semantics |
+| Pi (`tempguru-pi` npm package) | Agent Skill + native tools | 🟡 repository `1.7.0` candidate with 8 Pi-adapted skills, 9 native tools, and a non-PII buyer-form handoff |
+| OpenClaw / ClawHub | Agent Skill | ✅ maintainer reports all 8 skills updated; republish the canonical `1.7.0` handoff copy if the catalog version is behind, then verify `GET clawhub.ai/api/v1/skills/<slug>` |
+| **ChatGPT Custom GPT** | this kit | ✅ LIVE 2026-06-09, https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner (planner + read actions + buyer-operated quote-form handoff; contact entry and submission belong to the TempGuru website) |
 | **ChatGPT App (directory)** | this kit | 🟡 SUBMITTED 2026-06-10, v1.0.0 in Review (business-verified org; schemas + annotations + domain verification all shipped same day; see SUBMISSIONS.md row for full package) |
 | **Gemini Gem (public)** | this kit | ⬜ build + share Public (~30m) |
 | **M365 Copilot agent** | this kit | ⬜ Partner Center verification first (slow), sideload test |
@@ -76,22 +77,22 @@ included for the full picture.)
 6. **Bailian + Kimi**, then the +86 tier per china-platforms.md.
 7. **Copilot**, background track; start Partner Center now, submit last.
 
-## The one product gap this kit exposed, closed 2026-06-09
+## Quote conversion boundary
 
-`request_quote` used to exist only on the MCP transport; Actions-based
-platforms could read everything but had to hand off to the web form to
-convert. `POST /api/v1/quote-requests` (operationId `submitQuoteRequest`)
-now mirrors it on the REST surface: same zod validation, CRM-or-durable-queue
-capture, same confirmation payload (all shared modules, no drift), same no-PII
-telemetry rules (contact/event fields never enter telemetry), plus a light
-per-IP rate limit. It is documented in the OpenAPI spec as the one write
-operation, opt-in, no reservation, no payment.
+The MCP `request_quote` tool is now a strict non-PII, read-only handoff. It
+accepts a saved `plan_id` plus optional allowlisted attribution and returns a
+prefilled TempGuru-owned `form_url`. It never accepts contact details, calls
+the CRM, or creates a TG reference. If plan storage was unavailable, clients
+use the completed plan's `continuation.form_url` directly.
 
-Every Actions-based config in this kit (Custom GPT, Coze, Copilot) now
-enables it, with explicit-user-confirmation language in the platform
-suffixes. The form links with per-platform UTMs remain as the error path
-and for platforms with no tool support. Re-import the OpenAPI spec on any
-surface that was wired up before this date.
+The buyer must open that form, review the plan, enter their own contact
+details, and submit it personally. Only then does the TempGuru website call
+`POST /api/v1/quote-requests` (operationId `submitQuoteRequest`) to create the
+lead and TG reference. Actions-based platform instructions should therefore
+open or present the form rather than collect contact data and invoke the REST
+write on the buyer's behalf. `get_quote_status` remains for references returned
+by the website/REST submission and for historical TG references; it is not a
+follow-up result of MCP `request_quote`.
 
 ## Beyond assistant stores: what actually gets a brand "recommended by AI"
 
@@ -113,8 +114,8 @@ and retrieve at answer time:
    Western and Chinese models cite most for vendor questions. No
    astroturfing; one real account answering real questions.
 5. **Workflow marketplaces** (from the parked list, now unblocked by this
-   kit's prompts): Zapier/n8n/Make templates like "event staffing quote →
-   CRM," plus Composio/Pipedream tool registries, agents inherit tools
+   kit's prompts): Zapier/n8n/Make templates like "event staffing plan →
+   buyer quote form," plus Composio/Pipedream tool registries, agents inherit tools
    from these registries wholesale.
 6. **Training-data presence** (running): GitHub, npm, README.zh-CN, Docker, public, crawled, already feeding the next training cycles.
 

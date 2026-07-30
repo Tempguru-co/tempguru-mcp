@@ -1,25 +1,30 @@
 # TempGuru MCP and agent-tools privacy addendum (draft)
 
-_Last updated: 2026-07-16. Repository source for an MCP-specific addendum to
+_Last updated: 2026-07-29. Repository source for an MCP-specific addendum to
 TempGuru's comprehensive [Privacy Policy](https://tempguru.co/privacy-policy).
 This draft does not replace that policy. It requires privacy/legal review before
 it is incorporated at the canonical `/privacy-policy` URL or linked from a
 marketplace listing._
 
 TempGuru (Temporary Assistance Guru, Inc.) publishes an MCP server
-(`https://mcp.tempguru.co/mcp`) and a REST mirror that let AI agents plan,
-price, and request event staffing across US and Canadian markets. This addendum
-documents the data flows specific to those public agent tools.
+(`https://mcp.tempguru.co/mcp`) and a REST surface that let AI agents plan and
+price event staffing across US and Canadian markets, then hand a buyer to a
+TempGuru-owned form. This addendum documents the data flows specific to those
+public agent tools and distinguishes the MCP handoff from the buyer's later
+website submission.
 
 ## Read operations and operational metadata
 
-Nine lookup tools (`get_plan`, `get_cities`, `get_roles`,
+Ten tools (`get_plan`, `get_cities`, `get_roles`,
 `check_availability`, `get_role_pricing`, `get_compliance_by_state`,
-`get_policies`, `get_rate_benchmark`, and `get_quote_status`) are read-only.
-`plan_staffing` is non-destructive, but a complete plan may create the 30-day
-non-contact snapshot described below. These tools' business inputs are limited
-to planning and catalog fields such as city, event date, role, headcount, state,
-plan ID, and quote reference.
+`get_policies`, `get_rate_benchmark`, `get_quote_status`, and `request_quote`)
+are read-only. `request_quote` requires a saved non-PII `plan_id`, accepts only
+optional allowlisted platform/skill attribution, and returns a prefilled
+TempGuru-owned form link. `plan_staffing` and `save_staffing_plan` are
+non-destructive non-contact writes because they may create the 30-day plan
+snapshot described below. These tools' business inputs are limited to planning
+and catalog fields such as city, event date, role, headcount, state, plan ID,
+quote reference, and controlled attribution.
 
 As with any hosted service, infrastructure receives network metadata such as
 an IP address and user-agent while processing a request. The application does
@@ -48,39 +53,50 @@ roles, headcount, computed rate ranges, channel, and controlled source tag. It
 does not store contact details or the user's free-text description.
 
 Quote-status stubs retain a TG reference and limited received/queued status
-metadata for up to 90 days. They do not contain the buyer's contact details.
+metadata for up to 90 days. Those references come from buyer-submitted
+website/REST requests or historical REST requests, not from MCP
+`request_quote`. The stubs do not contain the buyer's contact details.
 
-## `request_quote` collects personal information
+## MCP `request_quote` does not collect personal information
 
-`request_quote` is the only consequential/contact write tool. It should be
-called only after the user explicitly confirms sending their details to
-TempGuru. It can collect:
+`request_quote` is a read-only, idempotent handoff tool. After a buyer confirms
+a saved plan, the agent may send:
 
-- contact name, email address, and optional phone number;
-- company or organization name;
-- event name, type, venue, city/cities, and dates;
-- roles, headcount, shifts, attire, budget, compliance, and other event notes;
-- controlled platform/skill attribution and a saved `plan_id`, when supplied.
+- the saved 12-character non-PII `plan_id` (required); and
+- optional allowlisted `source_platform`, `skill_id`, and `skill_version`
+  attribution.
 
-The primary destination is TempGuru's CRM (currently Notion) so a coordinator
-can prepare and deliver a quote. If that write is unavailable, the full retry
-record can be stored in a durable Redis fallback queue for up to 90 days and
-replayed to the CRM. When configured, the same lead payload can also be sent to
-TempGuru's notification processor through `LEAD_WEBHOOK_URL` so staff can be
-alerted. Hosting, storage, CRM, and notification providers process this data on
-TempGuru's behalf; the main Privacy Policy and its subprocessor section must be
-updated to reflect the providers actually deployed.
+The tool restores the allowlisted saved plan and returns a `form_url` on
+`https://mcp.tempguru.co`. It does not accept, fetch, log, or transmit a name,
+email address, phone number, company, or other contact details. It does not
+write to TempGuru's CRM or fallback queue, send a lead notification, or create
+a TG quote reference. If plan storage was unavailable and no `plan_id` exists,
+the agent uses the `continuation.form_url` returned with the completed plan
+directly; the same no-contact boundary applies.
 
-Quote-request fields are not written to product telemetry or analytics. The
-tools collect no payment information, and a submission is not a reservation,
-contract, or payment.
+## Buyer-operated website and REST submission
+
+The buyer must personally open the returned form, review and edit the plan,
+enter their own contact details, and press submit. Only then does the website
+call `POST /api/v1/quote-requests`. That separate browser/REST request may
+collect contact and event fields needed for coordinator follow-up, create a CRM
+lead or durable retry record, and return a TG reference. It is governed by the
+main Privacy Policy and the website's disclosures and consent controls; it is
+not performed by the MCP connector.
+
+Buyer-submitted quote-request fields are not written to MCP product telemetry
+or analytics. Neither the MCP handoff nor the website form collects payment
+information, reserves staff, creates a contract, or guarantees pricing or
+availability.
 
 ## Retention summary
 
-- CRM lead records: retained under the customer/operational-record rules in the
-  main Privacy Policy and applicable legal requirements.
-- Full-PII fallback queue records: up to 90 days, expiring independently even
-  if a queue index is stale.
+- CRM lead records created by the buyer's website/REST submission: retained
+  under the customer/operational-record rules in the main Privacy Policy and
+  applicable legal requirements.
+- Full-PII fallback queue records created by the buyer's website/REST
+  submission: up to 90 days, expiring independently even if a queue index is
+  stale.
 - Saved non-contact plan snapshots: about 30 days.
 - Limited quote-status stubs: up to 90 days.
 - Application telemetry: daily keys up to 90 days; recent-event ring capped at
@@ -92,9 +108,11 @@ contract, or payment.
 
 ## Choices and privacy contact
 
-Before `request_quote`, the user should be shown the contact and event fields
-that will be sent and asked for explicit confirmation. If they do not consent,
-the agent must not call the write tool; the read tools remain available.
+Before `request_quote`, the buyer should review and confirm the non-PII staffing
+plan. The agent must not ask for contact details for the MCP call. After the
+handoff, the buyer decides whether to open the form and must personally review,
+enter contact details, and submit. Declining the form does not affect access to
+the planning and lookup tools.
 
 Privacy-rights requests should go to **privacy@tempguru.co** or the Privacy
 Officer channels in the main Privacy Policy. Sales contact details may still be
@@ -107,7 +125,8 @@ used for quote follow-up, but are not the canonical privacy-rights channel.
 2. Amend the comprehensive `/privacy-policy`; do not publish this as a competing
    standalone replacement at `/privacy`.
 3. Update the policy's subprocessor and retention tables for the providers and
-   MCP queue/status data actually in use.
+   website/REST queue/status data actually in use; do not describe MCP
+   `request_quote` as sending contact data.
 4. Point MCP/App marketplace privacy links to the amended canonical policy.
 5. Add age-based pruning for the recent-event ring and active-day index, or
    preserve the count/date-only disclosure above instead of claiming a blanket

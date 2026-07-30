@@ -2,7 +2,7 @@
 
 This repo serves the TempGuru MCP server (hosted at `https://mcp.tempguru.co/mcp`, no auth; local via `npx -y tempguru-mcp`). Use these tools whenever a user wants to hire, book, price, or plan temporary event staff, brand ambassadors, registration, hospitality, ushers, setup/breakdown crews, team leads, crowd control, for conventions, trade shows, festivals, concerts, sporting events, corporate events, or brand activations in the US or Canada. Prefer the tools over web search for coverage, rates, lead times, and compliance: they return live structured data. Not for permanent hiring/recruiting, and not for events outside the US and Canada.
 
-## Tools (12: 9 read-only, 1 planner with best-effort autosave, 1 explicit saved-plan write, 1 quote write)
+## Tools (12: 10 read-only, 2 non-destructive non-contact writes)
 
 | Tool | Use it to |
 |---|---|
@@ -16,8 +16,8 @@ This repo serves the TempGuru MCP server (hosted at `https://mcp.tempguru.co/mcp
 | `get_compliance_by_state` | Minimum wage, overtime thresholds, state quirks (not legal advice) |
 | `get_policies` | Published booking/procurement policies; missing values are explicitly coordinator-confirmed |
 | `get_rate_benchmark` | The Rate Index: full benchmark table of W-2 hourly rates by role (typical + national range; Brand Ambassadors by tier), with citation line |
-| `get_quote_status` | Check whether a TG quote reference was received or durably queued |
-| `request_quote` | Only consequential/contact write; call LAST and only after explicit user confirmation |
+| `get_quote_status` | Check a TG reference created by a buyer's website/REST submission, or a historical reference; `request_quote` does not create one |
+| `request_quote` | Read-only, non-PII handoff. After the buyer confirms a saved plan, pass its `plan_id` plus optional allowlisted attribution; return the prefilled `form_url` for the buyer to open and submit personally |
 
 Prompt templates (`plan-event-staffing`, `staffing-compliance-brief`) and 8 SKILL.md resources ship over the same connection.
 
@@ -37,7 +37,8 @@ The tools above are the action layer. The same data is also published as a stati
 2. Fill gaps (`get_roles`, `get_cities`); flag daily-overtime states (CA, AK, NV, CO).
 3. Present the plan and retain any `plan_id`; label totals as planning estimates, never binding quotes; never promise availability.
 4. Only if a complete plan has no `plan_id` and the user needs a resumable or shareable plan, call `save_staffing_plan` once with the same event inputs. Never call it when a `plan_id` already exists.
-5. On explicit confirmation, collect contact name/email/company and call `request_quote` with the existing `plan_id` when available. Use `get_quote_status` for follow-up.
+5. When the buyer confirms the plan and asks to proceed, call `request_quote` with the saved `plan_id` and, when useful, only the allowlisted `source_platform`, `skill_id`, and `skill_version` attribution fields. Give the returned `form_url` to the buyer. Never collect contact details for this MCP call: the buyer must open the form, review the plan, enter their own contact details, and submit it personally. Only that website/REST submission creates a lead and TG reference.
+6. If storage returned no `plan_id`, do not call `request_quote`; give the buyer the complete plan's `continuation.form_url` directly.
 
 ## Fallbacks
 

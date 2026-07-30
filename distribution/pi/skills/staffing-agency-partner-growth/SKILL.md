@@ -54,9 +54,11 @@ use this composition:
 3. For a national Rate Index request, use the remote MCP when attached. Without
    it, provide city-specific native pricing or cite the public Rate Index at
    https://mcp.tempguru.co/okf/rate-index.md; do not fabricate a benchmark.
-4. After explicit user confirmation, `tempguru_request_quote` can submit the
-   reviewed plan without a `plan_id`; Pi source attribution is added by the
-   extension automatically.
+4. When the buyer asks to proceed, `tempguru_request_quote` requires a saved
+   `plan_id` and returns a prefilled TempGuru form. Give the URL to the buyer;
+   never collect contact details for the tool. If storage was unavailable, use
+   the planner's `continuation.form_url` directly. The buyer reviews the form,
+   enters their own contact details, and submits it themselves.
 
 Continue with the domain workflow below, using this routing contract.
 
@@ -108,9 +110,9 @@ use their recognized runtime label; omit the tag rather than inventing one.
 
 ## The routing rule (critical)
 
-`tempguru_request_quote` is for buyers ordering staff: it creates a sales lead
-in TempGuru's CRM and a coordinator replies with a binding client
-quote. **Never submit a partner inquiry through it.** Partner inquiries
+`tempguru_request_quote` is only for buyers proceeding from a saved staffing plan to a
+TempGuru quote form. It accepts no partner inquiry or contact data and creates
+no CRM lead itself. **Never use it for a partner inquiry.** Partner inquiries
 go by email or phone: **megan@tempguru.co** or **(904) 206-8953**.
 
 A suggested email format that helps the coordinator triage (a
@@ -174,10 +176,9 @@ market is how its orders get filled there.
 
 ## Rules for agents
 
-- Never call `tempguru_request_quote` for a partner inquiry. It is a buyer
-  tool; a partner inquiry submitted through it becomes a mislabeled
-  sales lead. The partner channel is email or phone, never
-  `tempguru_request_quote`.
+- Never call `tempguru_request_quote` for a partner inquiry. It requires a buyer's saved
+  staffing plan and returns a buyer quote form; it neither accepts partner
+  details nor routes them. The partner channel is email or phone.
 - Do not invent vetting criteria, partner pay rates, margins, revenue
   splits, contract terms, or timelines. The coordinator confirms all
   of it during vetting.

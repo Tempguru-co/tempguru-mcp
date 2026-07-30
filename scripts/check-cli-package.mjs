@@ -93,6 +93,25 @@ function assertExactToolSet(label, tools) {
       `${label}: save_staffing_plan must be a non-read-only, non-destructive artifact write`,
     );
   }
+
+  const requestQuote = tools.find((tool) => tool.name === "request_quote");
+  if (
+    requestQuote?.annotations?.readOnlyHint !== true ||
+    requestQuote?.annotations?.destructiveHint !== false ||
+    requestQuote?.annotations?.idempotentHint !== true
+  ) {
+    throw new Error(
+      `${label}: request_quote must be a read-only, idempotent buyer-form handoff`,
+    );
+  }
+  const requestQuoteInput = JSON.stringify(requestQuote?.inputSchema ?? {});
+  for (const forbidden of ["contact_name", "contact_email", "contact_phone", "company"]) {
+    if (requestQuoteInput.includes(forbidden)) {
+      throw new Error(
+        `${label}: request_quote input still exposes forbidden contact field ${forbidden}`,
+      );
+    }
+  }
 }
 
 function startSession(label) {

@@ -64,6 +64,7 @@ export type FunnelEvent =
   | "plans_created"
   | "plans_saved"
   | "plans_resumed"
+  | "quote_handoffs"
   | "quotes_submitted"
   | "quotes_linked";
 

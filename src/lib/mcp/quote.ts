@@ -1,15 +1,11 @@
-// Shared request_quote contract, zod input schema + confirmation payloads.
+// Buyer-submitted REST quote contract, zod input schema + receipt payloads.
 //
-// Both write surfaces consume this:
-//   - src/lib/mcp/register-tools.ts             MCP tool `request_quote` (HTTP + stdio)
-//   - src/app/api/v1/quote-requests/route.ts    REST mirror `POST /api/v1/quote-requests`
-//
-// Keeping the schema and the confirmation shapes here guarantees the REST
-// endpoint and the MCP tool validate identically and return byte-identical
-// payloads, the same single-source-of-truth promise queries.ts makes for
-// the read-only surfaces. Edit the schema here and both surfaces (plus the
-// MCP tool's advertised JSON schema) move together; the OpenAPI spec in
-// src/lib/api/openapi.ts mirrors it by hand and must be kept in sync.
+// This schema is consumed by POST /api/v1/quote-requests after a buyer enters
+// and submits their own contact details on the TempGuru form. It is
+// intentionally separate from the authless MCP `request_quote` tool, whose
+// strict non-PII schema lives in quote-handoff.ts. The OpenAPI spec in
+// src/lib/api/openapi.ts mirrors this REST schema by hand and must stay in
+// sync.
 
 import { z } from "zod";
 import { PLAN_ID_PATTERN } from "./plan-store";
@@ -32,8 +28,14 @@ export const QUOTE_SKILL_IDS = [
 
 export type QuoteSkillId = (typeof QUOTE_SKILL_IDS)[number];
 
+// Keep attribution machine-readable and non-identifying. In particular, a
+// public caller must not be able to smuggle an email address or free text into
+// a URL, CRM property, or log field under the name "skill_version".
+export const QUOTE_SKILL_VERSION_PATTERN =
+  /^[0-9]{1,4}\.[0-9]{1,4}\.[0-9]{1,4}(?:-[0-9A-Za-z.-]{1,24})?(?:\+[0-9A-Za-z.-]{1,24})?$/;
+
 // Raw shape (not z.object) because McpServer.registerTool takes a ZodRawShape.
-// The REST route validates with RequestQuoteSchema below, same shape object.
+// The REST route validates with RequestQuoteSchema below.
 //
 // Required text fields are trimmed and must be non-empty, and the staffing
 // plan needs at least one role, a lead with blank contact/event fields or
@@ -98,6 +100,10 @@ export const REQUEST_QUOTE_INPUT = {
     .trim()
     .min(1)
     .max(40)
+    .regex(
+      QUOTE_SKILL_VERSION_PATTERN,
+      "skill_version must be a SemVer value such as 1.7.0",
+    )
     .optional()
     .describe("Optional version of the TempGuru staffing skill used to assemble this request"),
   skill_id: z
@@ -121,8 +127,8 @@ export type RequestQuoteInput = z.infer<typeof RequestQuoteSchema>;
 
 // ─── Confirmation payloads ────────────────────────────────────────────────
 //
-// The exact objects both surfaces return. The REST route serializes them
-// directly; the MCP tool wraps them in a text content block.
+// The REST route serializes these objects directly for the buyer-facing form
+// and approved REST integrations.
 
 export function quoteSubmittedPayload(
   contactEmail: string,

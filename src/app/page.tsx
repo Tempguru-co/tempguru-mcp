@@ -100,11 +100,11 @@ export default function Home() {
     },
     {
       name: "get_quote_status",
-      desc: "Check whether a TG quote request was received by the CRM or durably queued.",
+      desc: "Check a TG reference returned after the buyer submits the website form, including historical references.",
     },
     {
       name: "request_quote",
-      desc: "Submit a structured staffing request to TempGuru's CRM or durable intake queue for human review. Opt-in write tool; not a reservation or contract.",
+      desc: "Restore a saved non-PII plan and return a prefilled TempGuru form the buyer personally submits. Read-only; never accepts contact details or creates a lead.",
     },
   ];
 
@@ -151,10 +151,10 @@ export default function Home() {
       </h1>
       <p style={{ color: "#9ab0cc", fontSize: 16, marginBottom: 32 }}>
         Model Context Protocol server and public REST API for TempGuru
-        event staffing data. Twelve tools: nine read-only lookups, a
+        event staffing data. Twelve tools: ten read-only tools, including a
+        non-PII buyer handoff, plus a
         non-destructive planner that may save a 30-day non-PII snapshot, an
-        explicit non-destructive save tool, and one opt-in request_quote contact
-        submission.
+        explicit non-destructive save tool.
       </p>
 
       <section style={sectionStyle}>
@@ -188,9 +188,11 @@ export default function Home() {
             totals before saving.
           </li>
           <li>
-            Only after the user explicitly confirms, call{" "}
-            <code style={codeNameStyle}>request_quote</code> and include the{" "}
-            <code style={codeNameStyle}>plan_id</code> when available.
+            When the buyer asks to proceed, call{" "}
+            <code style={codeNameStyle}>request_quote</code> with the saved{" "}
+            <code style={codeNameStyle}>plan_id</code>, then give the buyer its{" "}
+            <code style={codeNameStyle}>form_url</code>. The buyer enters and
+            submits their own contact details on that form.
           </li>
         </ol>
       </section>

@@ -1,7 +1,7 @@
 ---
 type: "Workflow"
 title: "Quote Submission"
-description: "How to submit a staffing plan as a quote request and what happens next."
+description: "How the MCP prepares a non-PII buyer handoff and what happens after the buyer submits the form."
 primary_tool: "request_quote"
 tags:
   - "workflow"
@@ -13,27 +13,29 @@ timestamp: "2026-07-16T00:00:00Z"
 
 # Quote Submission
 
-`request_quote` is the only **contact/consequential write** tool.
-`plan_staffing` may still save during the compatibility release, and
-`save_staffing_plan` is the explicit non-contact artifact write; neither
-stores contact details. Call
-`request_quote` **last**, and only after the user's explicit confirmation.
+`request_quote` is a **read-only, non-PII buyer handoff**. It accepts a saved
+`plan_id` plus optional allowlisted `source_platform`, `skill_id`, and
+`skill_version` attribution. It never accepts a name, email, phone, company,
+or other contact details, and it does not create a CRM lead or TG reference.
 
-## Collect
+`plan_staffing` may save a 30-day non-PII plan during the compatibility
+release, and `save_staffing_plan` is the explicit non-contact artifact write.
+The overall connector is therefore read/write even though `request_quote`
+itself is read-only.
 
-- Contact name, email, company
-- Event name, city, dates
-- Roles, headcount, and exact shifts
-- Special requirements
-- The completed plan's `plan_id`, when available
-- The actual agent runtime in `source_platform`; when a canonical skill assembled the request, its closed-enum `skill_id` and matching `skill_version`
+## Handoff
 
-## What happens
+1. Review the completed plan with the buyer and retain its `plan_id`.
+2. When the buyer asks to proceed, call `request_quote` with that ID and any allowlisted attribution.
+3. Give the buyer the returned `form_url`. If storage was unavailable, use the complete plan's `continuation.form_url` directly.
+4. The buyer opens the prefilled TempGuru form, reviews the event plan, enters their own contact details, and submits it themselves.
 
-1. The request is submitted to TempGuru's CRM or durable fallback intake and a `TG-XXXXXX` reference is returned. Retain it.
+## What happens after buyer submission
+
+1. The website sends the buyer-submitted request to TempGuru's CRM or durable fallback intake and returns a `TG-XXXXXX` reference. Retain it.
 2. A human coordinator replies with a **binding quote within one business day**.
-3. **No payment** until the user approves the quote. A submitted request is **not** a reservation or a contract.
-4. Do not poll automatically. If the user asks whether the request arrived, call `get_quote_status` with the retained TG reference; received/queued status is not a booking confirmation.
+3. **No payment** until the buyer approves the quote. A submitted request is **not** a reservation or a contract.
+4. Do not poll automatically. If the buyer asks whether the request arrived, call `get_quote_status` with the TG reference returned by the website; received/queued status is not a booking confirmation.
 
 ## Cancellation and rescheduling
 

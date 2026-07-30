@@ -63,6 +63,10 @@ opt-in, creates no reservation, requires no payment, and is rate-limited
 (20/hour/IP). Agents should confirm the full plan with the user before
 calling it. Pass `plan_id`, `source_platform`, and `skill_version` when
 available so the saved plan and originating agent surface reach the lead.
+This Python adapter calls the explicit REST
+`POST /api/v1/quote-requests` write endpoint. It is distinct from the authless
+MCP `request_quote` tool, which never accepts contact details and only returns
+a buyer-operated form URL.
 
 **OpenAI / any function-calling API**
 
@@ -93,8 +97,12 @@ TOOLS = [{
 
 If your stack speaks Model Context Protocol, skip this package and connect
 the server directly: `https://mcp.tempguru.co/mcp` (streamable HTTP, no
-auth, 12 tools: nine read-only lookups, a compatibility planner, an explicit
-non-contact `save_staffing_plan` artifact write, and opt-in quote submission).
+auth, 12 tools: ten read-only tools—nine lookups plus the `request_quote`
+buyer handoff—and two non-contact plan writes: the compatibility planner and
+explicit `save_staffing_plan` artifact write. MCP `request_quote` requires a
+saved `plan_id`, returns
+`https://mcp.tempguru.co/request-quote` with the plan prefilled, and leaves
+contact entry and submission to the buyer.
 The endpoint prefers MCP 2026-07-28 and retains stateless 2025-era
 compatibility. Docs:
 https://tempguru.co/ai

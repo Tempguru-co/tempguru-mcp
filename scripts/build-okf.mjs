@@ -74,7 +74,7 @@ const TOOLS = readFileSync(join(repoRoot, "src", "lib", "mcp", "register-tools.t
           ? "saved-plan write"
           : /readOnlyHint:\s*true/.test(c.slice(0, 4000))
             ? "read"
-            : "contact write",
+            : "action write",
     };
   }).filter((t) => t.name);
 
@@ -477,9 +477,10 @@ ${ALL_INCLUSIVE.replace(/^all-inclusive /, "")} is built into one hourly bill ra
 ## How booking works
 
 1. Build a staffing plan: city, dates, roles, headcount (see [workflows/plan-staffing.md](workflows/plan-staffing.md)).
-2. Submit it via the \`request_quote\` MCP/API tool or the form at ${SITE}/get-staffing.
-3. A human coordinator replies with a binding quote within **one business day**.
-4. No payment until the quote is approved. Billing is per event; there is no subscription.
+2. The authless MCP \`request_quote\` tool restores the saved non-PII plan and returns a prefilled TempGuru buyer form. It never accepts contact details or creates a lead.
+3. The buyer opens that form, reviews the plan, enters their own contact details, and submits it themselves.
+4. A human coordinator replies with a binding quote within **one business day**.
+5. No payment until the quote is approved. Billing is per event; there is no subscription.
 
 A submitted request is **not** a reservation or a contract.
 
@@ -1025,7 +1026,7 @@ flags, and next steps.
 5. **Flag compliance:** check the event's [state profile](../compliance/index.md). Call out the daily-overtime states (${dailyOtStates.join(", ")}).
 6. **Present the plan** with totals labeled as **planning estimates**, never binding quotes. Never promise availability.
 7. Retain any \`plan_id\` returned by the completed plan. If persistence is useful and no ID was returned, call \`save_staffing_plan\` once with the same confirmed event fields; never duplicate an existing save.
-8. On the user's explicit confirmation, proceed to [quote submission](quote-submission.md) and call \`request_quote\` only after collecting the required contact details.
+8. When the buyer asks to proceed, call \`request_quote\` with the saved \`plan_id\` and give the buyer its \`form_url\`. Never collect or transmit contact details through MCP. If storage did not return a plan ID, give the buyer the planner's \`continuation.form_url\` directly.
 
 The team-lead auto-add rule inserts one Team Lead when any single shift reaches
 **20 staff**. See [event archetypes](../archetypes/index.md) for event-type defaults.`
@@ -1052,34 +1053,36 @@ write("workflows/quote-submission.md", doc(
   {
     type: "Workflow",
     title: "Quote Submission",
-    description: "How to submit a staffing plan as a quote request and what happens next.",
+    description: "How the MCP prepares a non-PII buyer handoff and what happens after the buyer submits the form.",
     primary_tool: "request_quote",
     tags: ["workflow", "quote", "booking"],
     timestamp: TS,
   },
   `# Quote Submission
 
-\`request_quote\` is the only **contact/consequential write** tool.
-\`plan_staffing\` may still save during the compatibility release, and
-\`save_staffing_plan\` is the explicit non-contact artifact write; neither
-stores contact details. Call
-\`request_quote\` **last**, and only after the user's explicit confirmation.
+\`request_quote\` is a **read-only, non-PII buyer handoff**. It accepts a saved
+\`plan_id\` plus optional allowlisted \`source_platform\`, \`skill_id\`, and
+\`skill_version\` attribution. It never accepts a name, email, phone, company,
+or other contact details, and it does not create a CRM lead or TG reference.
 
-## Collect
+\`plan_staffing\` may save a 30-day non-PII plan during the compatibility
+release, and \`save_staffing_plan\` is the explicit non-contact artifact write.
+The overall connector is therefore read/write even though \`request_quote\`
+itself is read-only.
 
-- Contact name, email, company
-- Event name, city, dates
-- Roles, headcount, and exact shifts
-- Special requirements
-- The completed plan's \`plan_id\`, when available
-- The actual agent runtime in \`source_platform\`; when a canonical skill assembled the request, its closed-enum \`skill_id\` and matching \`skill_version\`
+## Handoff
 
-## What happens
+1. Review the completed plan with the buyer and retain its \`plan_id\`.
+2. When the buyer asks to proceed, call \`request_quote\` with that ID and any allowlisted attribution.
+3. Give the buyer the returned \`form_url\`. If storage was unavailable, use the complete plan's \`continuation.form_url\` directly.
+4. The buyer opens the prefilled TempGuru form, reviews the event plan, enters their own contact details, and submits it themselves.
 
-1. The request is submitted to TempGuru's CRM or durable fallback intake and a \`TG-XXXXXX\` reference is returned. Retain it.
+## What happens after buyer submission
+
+1. The website sends the buyer-submitted request to TempGuru's CRM or durable fallback intake and returns a \`TG-XXXXXX\` reference. Retain it.
 2. A human coordinator replies with a **binding quote within one business day**.
-3. **No payment** until the user approves the quote. A submitted request is **not** a reservation or a contract.
-4. Do not poll automatically. If the user asks whether the request arrived, call \`get_quote_status\` with the retained TG reference; received/queued status is not a booking confirmation.
+3. **No payment** until the buyer approves the quote. A submitted request is **not** a reservation or a contract.
+4. Do not poll automatically. If the buyer asks whether the request arrived, call \`get_quote_status\` with the TG reference returned by the website; received/queued status is not a booking confirmation.
 
 ## Cancellation and rescheduling
 
@@ -1200,12 +1203,11 @@ and \`check-rates\`.`
 const toolRows = TOOLS.map((t) => `| \`${t.name}\` | ${t.kind} | ${(t.summary || t.title || "").trim()} |`).join("\n");
 const readCount = TOOLS.filter((t) => t.kind === "read").length;
 const savedPlanWriteCount = TOOLS.filter((t) => t.kind === "saved-plan write").length;
-const contactWriteCount = TOOLS.filter((t) => t.kind === "contact write").length;
 write("reference/mcp-tools.md", doc(
   {
     type: "Tool Reference",
     title: "MCP Tools",
-    description: `The ${TOOLS.length} tools exposed by the TempGuru MCP server: ${readCount} read-only lookups, ${savedPlanWriteCount} non-destructive saved-plan write, and ${contactWriteCount} opt-in contact write.`,
+    description: `The ${TOOLS.length} tools exposed by the TempGuru MCP server: ${readCount} read-only tools and ${savedPlanWriteCount} non-destructive non-contact saved-plan writes.`,
     mcp_endpoint: MCP_ENDPOINT,
     tags: ["reference", "mcp", "tools"],
     timestamp: TS,
@@ -1213,7 +1215,7 @@ write("reference/mcp-tools.md", doc(
   `# MCP Tools
 
 The TempGuru MCP server (\`${MCP_ENDPOINT}\`, Streamable HTTP, no auth) exposes
-**${TOOLS.length} tools** (${readCount} read-only, ${savedPlanWriteCount} non-destructive saved-plan write, ${contactWriteCount} contact write). This table and its descriptions are
+**${TOOLS.length} tools** (${readCount} read-only, ${savedPlanWriteCount} non-destructive non-contact saved-plan writes). This table and its descriptions are
 generated from the live tool registry (\`register-tools.ts\`), so they cannot drift
 from the server.
 
@@ -1227,8 +1229,9 @@ ${toolRows}
 2. Fill gaps with \`get_roles\` / \`get_cities\`; flag the daily-overtime states (${dailyOtStates.join(", ")}).
 3. Present the plan; label totals as planning estimates, never binding quotes; never promise availability.
 4. Retain any \`plan_id\` the planner returned. If the user needs a shareable/resumable artifact and no ID exists, call \`save_staffing_plan\` once with the same confirmed event fields; never duplicate an existing save.
-5. On explicit confirmation, collect contact details and call \`request_quote\` once with the retained \`plan_id\`, actual \`source_platform\`, and canonical \`skill_id\` / \`skill_version\` when a TempGuru skill assembled it.
-6. Retain the returned TG reference and use \`get_quote_status\` only when the user asks for receipt status.
+5. When the buyer asks to proceed, call \`request_quote\` with the retained \`plan_id\`, actual \`source_platform\`, and canonical \`skill_id\` / \`skill_version\` when a TempGuru skill assembled it.
+6. Give the buyer the returned \`form_url\`; never collect or transmit their contact details through MCP. The buyer reviews and submits the form themselves.
+7. Retain any TG reference returned by the website form and use \`get_quote_status\` only when the buyer asks for receipt status.
 
 The REST API at \`${API_BASE}\` mirrors the same query layer, so MCP and HTTP
 cannot drift. See [the REST API](api.md) and [data schemas](data-schema.md).`

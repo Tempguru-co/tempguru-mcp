@@ -1,13 +1,15 @@
 {
   "$schema": "https://context7.com/schema/context7.json",
   "projectTitle": "TempGuru Event Staffing MCP",
-  "description": "MCP server for W-2 compliant event staffing across 345 US and Canadian markets. Twelve tools: plan_staffing (planner with best-effort non-destructive 30-day non-PII persistence), save_staffing_plan (explicit non-contact save), get_plan, get_cities, get_roles, check_availability, get_role_pricing, get_compliance_by_state, get_policies, get_rate_benchmark, get_quote_status (nine read-only lookups), and request_quote (opt-in contact submission).",
+  "description": "MCP server for W-2 compliant event staffing across 345 US and Canadian markets. Twelve tools: plan_staffing and save_staffing_plan are non-destructive non-contact persistence writes; get_plan, get_cities, get_roles, check_availability, get_role_pricing, get_compliance_by_state, get_policies, get_rate_benchmark, get_quote_status, and request_quote are read-only. request_quote turns a saved non-PII plan_id into a prefilled buyer-operated form URL and never accepts contact details or creates a lead or quote reference.",
   "folders": ["content/skills"],
   "excludeFolders": ["src", "public", ".next", "node_modules"],
   "excludeFiles": ["package-lock.json", "tsconfig.json", "next.config.ts", "smithery-config.schema.json"],
   "rules": [
-    "Phase A has twelve tools: nine read-only lookups, best-effort non-destructive persistence in plan_staffing, the explicit non-contact save_staffing_plan write, and the opt-in request_quote contact write; no auth required, endpoint is https://mcp.tempguru.co/mcp",
+    "The connector has twelve tools: ten read-only tools, including the non-PII request_quote form handoff, plus best-effort non-destructive persistence in plan_staffing and the explicit non-contact save_staffing_plan write; no auth required, endpoint is https://mcp.tempguru.co/mcp",
     "Retain any plan_id returned by plan_staffing; call save_staffing_plan once only when a complete plan has no plan_id and the user needs a resumable or shareable plan, never to duplicate an existing save",
+    "After the buyer confirms a saved plan, call request_quote with plan_id and optional allowlisted attribution, give the returned form_url to the buyer, and state that the buyer must personally review, enter contact details, and submit; if no plan_id exists, use continuation.form_url directly",
+    "request_quote never collects or transmits contact data and never creates a CRM lead or TG reference; get_quote_status is only for references created by a buyer's website/REST submission or for historical references",
     "Rate ranges from get_role_pricing are planning estimates, not binding quotes",
     "check_availability returns lead-time guidance, not a reservation",
     "All workers placed are W-2 employees, never recommend 1099 gig workers as equivalent",

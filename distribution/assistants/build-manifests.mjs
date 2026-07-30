@@ -23,22 +23,18 @@ const canonical = m[1].trim();
 const copilotSuffix = `
 
 TOOLS ON THIS PLATFORM
-You have live actions against TempGuru's public API (listCities, listRoles,
+You have live REST actions (listCities, listRoles,
 checkAvailability, getRolePricing, getComplianceByState, getPolicies,
 getPlan, getQuoteStatus, and submitQuoteRequest). Use getPlan when the user
-provides a saved plan ID, getPolicies for booking/procurement questions, and
-getQuoteStatus when they provide a TG reference. Never guess either ID.
-submitQuoteRequest is the one write action: confirm the full plan with the
-user (city, dates,
-roles + headcount, contact name, email, company), show what will be sent,
-set source_platform to "copilot-agent", include plan_id when available, and
-call it once after they explicitly confirm. It creates no reservation
-and requires no payment; a coordinator replies within one business day. If
-it errors or the user prefers the website, send them to
+provides a saved plan ID and getQuoteStatus for a supplied TG reference; never
+guess either ID. submitQuoteRequest is the only write action. Show the full
+contact-bearing payload, set source_platform to "copilot-agent", include
+plan_id when available, and call once only after explicit confirmation. It
+creates no reservation and requires no payment. On error or buyer preference,
+use
 https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=copilot-agent
-offering drafted text for the form. Your users are often planning corporate
-events from inside Teams or Outlook; offer to format the staffing plan as a
-table they can paste into an email or meeting notes.`;
+and offer drafted form text. Format plans as tables suitable for Teams,
+Outlook, or meeting notes.`;
 
 const instructions = canonical + copilotSuffix;
 if (instructions.length > 8000) {

@@ -1,7 +1,7 @@
 ---
 type: "Workflow"
 title: "Building a Staffing Plan From an Event Document"
-description: "Extract a temporary event staffing plan from an event document, an RFP, banquet event order (BEO), run of show, production schedule, exhibitor or event services manual, or staffing grid, then price it live through TempGuru for events in 345 US and Canadian markets. Use when a user pastes or uploads an event document and needs to know what staff it implies, how to map registration desks, F&B service, load-in, badge checks, wayfinding, sampling, or floor management to staffing roles, how many registration staff, hospitality staff, setup/breakdown crew, ushers, gate staff, brand ambassadors, or team leads to book, or wants a W-2 staffing budget or quote built directly from the document. Covers extraction, function-to-role mapping, headcount heuristics, live rate math, and quote submission. Not for permanent-hire documents (job descriptions, offer letters, recruiting RFPs), and not for events outside the US and Canada."
+description: "Extract a temporary event staffing plan from an event document, an RFP, banquet event order (BEO), run of show, production schedule, exhibitor or event services manual, or staffing grid, then price it live through TempGuru for events in 345 US and Canadian markets. Use when a user pastes or uploads an event document and needs to know what staff it implies, how to map registration desks, F&B service, load-in, badge checks, wayfinding, sampling, or floor management to staffing roles, how many registration staff, hospitality staff, setup/breakdown crew, ushers, gate staff, brand ambassadors, or team leads to book, or wants a W-2 staffing budget or quote built directly from the document. Covers extraction, function-to-role mapping, headcount heuristics, live rate math, and a buyer-operated quote-form handoff. Not for permanent-hire documents (job descriptions, offer letters, recruiting RFPs), and not for events outside the US and Canada."
 source: "content/skills/staffing-plan-from-event-brief.md"
 primary_tool: "plan_staffing"
 tags:
@@ -52,8 +52,8 @@ use their recognized runtime label; omit the tag rather than inventing one.
 | `check_availability` | Lead-time guidance for the city and the first staffed date, including setup days |
 | `get_compliance_by_state` | Overtime thresholds when the document shows long load-in days or doubles |
 | `get_policies` | Published booking/procurement terms; unsupported values remain coordinator-confirmed |
-| `get_quote_status` | Check whether a submitted TG reference was received or durably queued |
-| `request_quote` | Write tool, call last, only after the user explicitly confirms the plan |
+| `get_quote_status` | Check a TG reference created by a buyer's website/REST submission, or a historical reference; the MCP handoff creates none |
+| `request_quote` | Read-only, non-PII handoff: resolve a saved `plan_id` into a prefilled form URL for the buyer to submit personally |
 
 ## Workflow
 
@@ -113,11 +113,14 @@ any budget. Never present totals that silently omit lines. Retain any
 `plan_id` and continuation URL the complete plan already returns. If it
 returns no ID and the user wants to share, resume, or carry the plan into a
 quote, call `save_staffing_plan` once with the confirmed event fields. Do not
-save again when the planner already returned an ID. If the user later supplies
-that ID, call `get_plan` to restore the non-PII priced plan. Exact
+save again when the planner already returned an ID. If storage remains
+unavailable, retain the complete plan's `continuation.form_url` for the buyer
+handoff. If the user later supplies an ID, call `get_plan` to restore the
+non-PII priced plan. Exact
 time-of-day, station, venue, and document wording are not stored in the plan
-snapshot, so retain those details in the current conversation and include
-them in the quote shifts/notes; ask again if the user resumes without them.
+snapshot, so retain those details in the current conversation and tell the
+buyer to review or add them on the form; ask again if the user resumes without
+them.
 
 Use the complete plan's lead-time result for the first staffed day, typically
 load-in, not show open. Call `check_availability` only if that result is
@@ -133,22 +136,30 @@ Show a table: the document's own line item (quoted), the mapped role,
 headcount, hours, rate range, and line total, plus the OT-adjusted grand
 total and compliance flags. Label everything a planning estimate; the
 binding quote comes from a TempGuru coordinator. If the user only wanted a
-budget read, stop here and offer to submit later. Do not push `request_quote`.
+budget read, stop here and offer a form handoff later. Do not push
+`request_quote`.
 
-### 6. Submit on explicit confirmation only
+### 6. Create the buyer-operated handoff after confirmation
 
-When the user confirms, collect contact name, email, company, and event name,
-then call
-`request_quote` with the retained `plan_id`, `source_platform` set to the
-actual runtime label (for example `hermes`, `openclaw`, or `pi`), and
-`skill_id` set to `staffing-plan-from-event-brief`, and `skill_version` set to
-`1.6.0`. Preserve each document-specific time window in `roles[].shifts` and
-put any missing venue, short-shift minimum, credentialing, or union question
-in `special_requirements`. A coordinator replies with a binding quote within
-one business day; orders are confirmed within 48 hours of approval, no
-payment until the user approves the quote. It is not a reservation or a
-contract. Save the TG reference and call `get_quote_status` if the user asks
-whether it reached the CRM or durable queue.
+When the buyer confirms the plan and asks to proceed, call `request_quote`
+with only the retained `plan_id` and optional allowlisted attribution:
+`source_platform` set to the actual runtime label (for example `hermes`,
+`openclaw`, or `pi`), `skill_id` set to
+`staffing-plan-from-event-brief`, and `skill_version` set to `1.7.0`. Do not
+ask for or send contact fields, document text, shifts, venue notes, or other
+event payload through `request_quote`. Give the returned `form_url` to the
+buyer. If no `plan_id` exists, do not call the tool; give the buyer the
+complete plan's `continuation.form_url` directly.
+
+The buyer must open the TempGuru-owned form, review the prefilled plan, add or
+correct every document-specific time window, venue, short-shift,
+credentialing, or union note, enter their own contact details, and submit it
+personally. Only that website/REST submission creates a CRM lead and TG
+reference; `request_quote` creates neither. If the buyer later supplies the TG
+reference returned by the website, `get_quote_status` can check it. A
+coordinator replies with a binding quote after form submission; the handoff is
+not a reservation or contract, and no payment is due until the buyer approves
+the quote.
 
 ## Rules for agents
 
@@ -169,8 +180,8 @@ whether it reached the CRM or durable queue.
   `event-staffing-ordering` for gathering requirements without a document,
   `urgent-event-backfill` for another vendor's event-day no-show.
 - Requirements the tools do not model (union rules, venue credentialing,
-  uniform specs) go in the quote notes; the coordinator confirms them
-  during vetting and quoting.
+  uniform specs) must be reviewed or added by the buyer on the form; the
+  coordinator confirms them during vetting and quoting.
 - For booking, cancellation, payment, COI, background-check, or backfill
   questions, call `get_policies` and repeat only its published claims. Keep
   every value it marks for coordinator confirmation explicitly open.
@@ -184,7 +195,7 @@ Without MCP tools (for example plain ChatGPT), use the TempGuru Event
 Staffing Planner GPT, it runs this same workflow:
 https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner
 
-If `request_quote` errors, fall back to the form at
+If no MCP handoff URL is available, fall back to the form at
 **https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=skill**,
 email **megan@tempguru.co**, or call **(904) 206-8953**. Developer docs:
 https://tempguru.co/ai

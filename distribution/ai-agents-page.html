@@ -78,7 +78,7 @@
 
   <h2>MCP Tools</h2>
 
-  <p>Twelve tools: nine read-only lookups, a non-destructive <code>plan_staffing</code> planner with best-effort 30-day non-PII autosave, an explicit non-contact <code>save_staffing_plan</code> write, and one opt-in contact write. No authentication required. In Phase A, start with <code>plan_staffing</code> and retain any returned <code>plan_id</code>. Call <code>save_staffing_plan</code> once only when a complete plan has no ID and persistence is needed; never duplicate an existing save. Call <code>request_quote</code> only after the user confirms the plan and consents to submission.</p>
+  <p>Twelve tools: ten read-only operations (including the non-PII <code>request_quote</code> buyer-form handoff), a non-destructive <code>plan_staffing</code> planner with best-effort 30-day non-PII autosave, and an explicit non-contact <code>save_staffing_plan</code> write. No authentication required. In Phase A, start with <code>plan_staffing</code> and retain any returned <code>plan_id</code>. Call <code>save_staffing_plan</code> once only when a complete plan has no ID and persistence is needed; never duplicate an existing save. When the buyer asks to proceed, call <code>request_quote</code> with the saved plan ID and give the returned form URL to the buyer.</p>
 
   <div class="tg-tools">
 
@@ -138,8 +138,8 @@
     </div>
 
     <div class="tg-tool">
-      <div class="tg-tool-name">request_quote <span class="tg-tool-badge">write · opt-in</span></div>
-      <p>Submit a structured staffing request to TempGuru's CRM or durable intake queue. A human coordinator reviews and responds within one business day. Not a reservation, no payment until the user approves the quote. Requires: contact name/email, company, event name/type/city/dates, and roles with headcount.</p>
+      <div class="tg-tool-name">request_quote <span class="tg-tool-badge">read-only · non-PII</span></div>
+      <p>Resolve a saved non-PII <code>plan_id</code> into a prefilled TempGuru-owned form. This tool accepts no contact details, never writes to the CRM, and creates no TG reference. The buyer opens the URL, reviews the plan, enters their own contact information, and submits the form personally.</p>
     </div>
 
   </div>
@@ -148,7 +148,7 @@
 
   <h2>Knowledge Bundle (Open Knowledge Format)</h2>
 
-  <p>The MCP tools and REST API are the <strong>action layer</strong>, how an agent plans, prices, checks compliance, and submits a quote. The same data is also published as a <strong>knowledge layer</strong>: a static <a href="https://github.com/GoogleCloudPlatform/knowledge-catalog">Open Knowledge Format</a> (OKF v0.1) bundle that agents and Google Cloud Knowledge Catalog can read or ingest directly, no scraping. It is generated from the same source data as the live tools, so the two layers never drift.</p>
+  <p>The MCP tools and REST API are the <strong>action layer</strong>: MCP plans, prices, checks compliance, and prepares a buyer-form handoff; the distinct buyer-operated REST submission creates a quote request. The same data is also published as a <strong>knowledge layer</strong>: a static <a href="https://github.com/GoogleCloudPlatform/knowledge-catalog">Open Knowledge Format</a> (OKF v0.1) bundle that agents and Google Cloud Knowledge Catalog can read or ingest directly, no scraping. It is generated from the same source data as the live tools, so the two layers never drift.</p>
 
   <table class="tg-table">
     <thead>
@@ -257,8 +257,8 @@ cd tempguru-mcp
 
   <p class="tg-label">Pi</p>
   <div class="tg-code">pi install npm:tempguru-pi
-// npm 1.5.0 is live. Publish/verify source 1.6.0 for Pi-adapted skill routing;
-// until then, attach the remote MCP for dependable end-to-end execution.</div>
+// Repository release candidate: 1.7.0. Verify the npm version before installing.
+// temguru_request_quote returns the buyer-operated form and sends no contact data.</div>
 
   <p class="tg-label">Codex</p>
   <div class="tg-code">codex mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=openai-codex"
@@ -295,8 +295,8 @@ cd tempguru-mcp
         <td>Only when a complete plan has no <code>plan_id</code> and the user needs a resumable or shareable plan, call <code>save_staffing_plan</code> once with the same event inputs. Never call it when an ID already exists.</td>
       </tr>
       <tr>
-        <td>5. Submit</td>
-        <td>With user consent, call <code>request_quote</code> with contact info, the finalized plan, and the existing <code>plan_id</code> when available. Response within one business day; order confirmation within 48 hours.</td>
+        <td>5. Buyer handoff</td>
+        <td>When the buyer asks to proceed, call <code>request_quote</code> with only the saved <code>plan_id</code> and optional allowlisted attribution. Give the returned <code>form_url</code> to the buyer. The buyer reviews the plan, enters their own contact details, and submits the form personally; only that website/REST submission creates a lead and TG reference.</td>
       </tr>
     </tbody>
   </table>
@@ -318,7 +318,7 @@ cd tempguru-mcp
 
   <h2>Security &amp; Privacy</h2>
 
-  <p>All lookup tools are unauthenticated and return public data. <code>plan_staffing</code> and <code>save_staffing_plan</code> persist only allowlisted, non-contact plan fields; Phase A agents must not call the explicit save when the planner already returned a <code>plan_id</code>. The <code>request_quote</code> tool sends user-confirmed contact and event information to TempGuru's CRM or its durable fallback queue and configured notification processor; those fields are never written to product telemetry. Skills are plain markdown with no executable code. See TempGuru's privacy policy for retention and processor details.</p>
+  <p>All ten read-only tools are unauthenticated. <code>plan_staffing</code> and <code>save_staffing_plan</code> persist only allowlisted, non-contact plan fields; Phase A agents must not call the explicit save when the planner already returned a <code>plan_id</code>. MCP <code>request_quote</code> accepts only a saved plan ID and bounded attribution, and returns a TempGuru form URL; it never accepts or transmits contact data and never creates a lead or reference. Contact details reach TempGuru only after the buyer enters them and presses submit on the website form. Skills are plain markdown with no executable code. See TempGuru's privacy policy for retention and processor details.</p>
 
   <hr>
 

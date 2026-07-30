@@ -267,7 +267,14 @@ for (const [name, schema, payload] of [
   ["get_policies", outputSchemas.GET_POLICIES_SCHEMA, { status: "policies", policy_found: true }],
   ["get_quote_status", outputSchemas.GET_QUOTE_STATUS_SCHEMA, { quote_found: true, reference: "x", message: "x", follow_up: "x" }],
   ["get_rate_benchmark", outputSchemas.RATE_BENCHMARK_SCHEMA, {}],
-  ["request_quote", outputSchemas.REQUEST_QUOTE_SCHEMA, { submitted: true, message: "x" }],
+  ["request_quote", outputSchemas.REQUEST_QUOTE_HANDOFF_SCHEMA, {
+    handoff_ready: true,
+    buyer_submission_required: true,
+    plan_found: true,
+    plan_id: "ABCDEFGH2345",
+    message: "x",
+    next_steps: [],
+  }],
 ]) {
   check(`${name} output schema rejects an incomplete branch`, !schema.safeParse(payload).success);
 }
@@ -324,7 +331,7 @@ check("partial plan: unpriced_roles retains the dropped headcount",
 check("partial plan: totals basis declares the exclusion",
   partial.estimated_total_range.basis.includes("EXCLUDES"));
 check("partial plan: next_steps blocks quoting first",
-  partial.next_steps[0].includes("Do NOT submit"));
+  partial.next_steps[0].includes("Do NOT prepare"));
 const complete = buildStaffingPlan({ city: "Chicago", roles: [{ role: "registration-staff", headcount: 2 }] });
 check("complete plan: plan_complete is true", complete.status === "plan" && complete.plan_complete === true);
 check("US plan compliance retains wage source and dataset freshness",
@@ -337,6 +344,7 @@ check("US plan compliance retains wage source and dataset freshness",
 const {
   PLAN_TTL_SECONDS,
   buildPlanContinuation,
+  canRestorePlanLink,
   persistCompletePlan,
   querySavedPlan,
   rolesMateriallyDiffer,
@@ -402,12 +410,45 @@ check("plan handoff HMAC rejects tampered id, expiry, signature, and wrong secre
     && !verifyPlanLinkSignature("ABCDEFGH2345", signedExp + 1, signedSig, "unit-test-secret", 1_001)
     && !verifyPlanLinkSignature("ABCDEFGH2345", signedExp, "0".repeat(64), "unit-test-secret", 1_001)
     && !verifyPlanLinkSignature("ABCDEFGH2345", signedExp, signedSig, "wrong-secret", 1_001));
+check("signed plan links cannot be downgraded by deleting sig and exp",
+  canRestorePlanLink("ABCDEFGH2345", {
+    signatureParametersPresent: false,
+    secret: "unit-test-secret",
+    nowSeconds: 1_001,
+  }) === false);
+check("signed plan links restore only with both valid parameters",
+  canRestorePlanLink("ABCDEFGH2345", {
+    signature: signedSig,
+    rawExpiry: String(signedExp),
+    signatureParametersPresent: true,
+    secret: "unit-test-secret",
+    nowSeconds: 1_001,
+  }) === true
+    && canRestorePlanLink("ABCDEFGH2345", {
+      signature: signedSig,
+      signatureParametersPresent: true,
+      secret: "unit-test-secret",
+      nowSeconds: 1_001,
+    }) === false);
 const unsignedUrl = new URL(buildPlanContinuation(safeSnapshot, "ABCDEFGH2345", {
   secret: "",
   nowSeconds: 1_000,
 }).form_url);
 check("plan handoff omits signature fields when PLAN_LINK_SECRET is unset",
   !unsignedUrl.searchParams.has("sig") && !unsignedUrl.searchParams.has("exp"));
+check("unsigned plan links work only when signing is disabled and no signature params appear",
+  canRestorePlanLink("ABCDEFGH2345", {
+    signatureParametersPresent: false,
+    secret: "",
+    nowSeconds: 1_001,
+  }) === true
+    && canRestorePlanLink("ABCDEFGH2345", {
+      signature: signedSig,
+      rawExpiry: String(signedExp),
+      signatureParametersPresent: true,
+      secret: "",
+      nowSeconds: 1_001,
+    }) === false);
 check("plan handoff carries compact human-prefill params",
   signedUrl.searchParams.get("city") === "Chicago"
     && signedUrl.searchParams.get("roles") === "brand-ambassadors:5"
@@ -553,7 +594,7 @@ check("save_staffing_plan saved outcome carries the portable artifact metadata",
       === new Date(fixedSaveNow.getTime() + PLAN_TTL_SECONDS * 1000).toISOString()
     && explicitSaved.resource_uri
       === `https://mcp.tempguru.co/api/v1/plans/${explicitSaved.plan_id}`
-    && explicitSaved.quote_readiness === "needs_contact"
+    && explicitSaved.quote_readiness === "buyer_submission_required"
     && explicitSaved.next_actions.includes("request_quote")
     && restoredExplicit?.plan_found === true
     && restoredExplicit.snapshot.source === "openclaw",
@@ -611,13 +652,13 @@ check("save_staffing_plan returns rate_limited without touching persistence",
   explicitLimited.status === "rate_limited"
     && explicitLimited.retry_after_seconds === 90
     && limitedPersistCalls === 0
-    && explicitLimited.continuation.form_url.includes("tempguru.co/get-staffing")
+    && explicitLimited.continuation.form_url.includes("mcp.tempguru.co/request-quote")
     && outputSchemas.SAVE_STAFFING_PLAN_SCHEMA.safeParse(explicitLimited).success,
   JSON.stringify(explicitLimited));
 
 const unavailableContinuation = {
   form_url:
-    "https://tempguru.co/get-staffing?city=Chicago&utm_source=ai-agent&utm_medium=mcp",
+    "https://mcp.tempguru.co/request-quote?city=Chicago&utm_source=ai-agent&utm_medium=mcp",
   note: "Storage unavailable.",
 };
 const explicitUnavailable = await saveStaffingPlan(
@@ -687,7 +728,7 @@ check("parseEventStart: '2 shifts July 20-21, 2026' is July 20, not July 2",
 check("parseEventStart: impossible ISO date (2026-02-31) is not silently rolled over",
   parseEventStart("2026-02-31") === null, `got ${parseEventStart("2026-02-31")?.toISOString()?.slice(0, 10)}`);
 
-// ── request_quote schema caps ──
+// ── REST buyer-submitted quote schema caps ──
 const { RequestQuoteSchema } = await load("src/lib/mcp/quote.ts");
 const base = {
   contact_name: "Jane Doe", contact_email: "jane@corp.com", company: "Corp",
@@ -711,6 +752,12 @@ check("quote schema accepts bounded attribution + plan_id",
   }).success);
 check("quote schema rejects arbitrary skill attribution",
   !RequestQuoteSchema.safeParse({ ...base, skill_id: "made-up-skill" }).success);
+check("quote schema rejects email-shaped skill version attribution",
+  !RequestQuoteSchema.safeParse({
+    ...base,
+    skill_id: "event-staffing-ordering",
+    skill_version: "megan@example.com",
+  }).success);
 // Additive capture fields (venue / attendees / multi-city locations[]); required
 // fields stay required (additive-only change).
 check("quote schema accepts venue + attendees + multi-city locations[]",
@@ -723,11 +770,92 @@ check("quote schema still requires company (additive change did not relax it)",
 check("quote schema caps locations[] at 50",
   !RequestQuoteSchema.safeParse({ ...base, locations: Array.from({ length: 51 }, () => ({ city: "Dallas" })) }).success);
 
+// ── MCP request_quote is a strict non-PII buyer handoff ──
+const {
+  RequestQuoteHandoffSchema,
+  prepareQuoteHandoff,
+} = await load("src/lib/mcp/quote-handoff.ts");
+const handoffInput = {
+  plan_id: "ABCDEFGH2345",
+  source_platform: "claude-ai",
+  skill_id: "event-staffing-ordering",
+  skill_version: "1.7.0",
+};
+check("MCP quote handoff accepts only plan reference + bounded attribution",
+  RequestQuoteHandoffSchema.safeParse(handoffInput).success);
+check("MCP quote handoff rejects email-shaped skill attribution",
+  !RequestQuoteHandoffSchema.safeParse({
+    ...handoffInput,
+    skill_version: "megan@example.com",
+  }).success
+    && !RequestQuoteHandoffSchema.safeParse({
+      ...handoffInput,
+      skill_id: "megan@example.com",
+    }).success);
+check("MCP quote handoff accepts bounded prerelease SemVer attribution",
+  RequestQuoteHandoffSchema.safeParse({
+    ...handoffInput,
+    skill_version: "1.7.0-rc.1+build.2",
+  }).success);
+check("MCP quote handoff strictly rejects legacy contact fields",
+  !RequestQuoteHandoffSchema.safeParse({
+    ...handoffInput,
+    contact_name: "Jane Doe",
+    contact_email: "jane@example.com",
+    company: "Example Corp",
+  }).success);
+check("MCP quote handoff requires a saved plan_id",
+  !RequestQuoteHandoffSchema.safeParse({
+    source_platform: "claude-ai",
+  }).success);
+
+const readyHandoff = await prepareQuoteHandoff(handoffInput, {
+  queryPlan: async (planId) => ({
+    plan_found: true,
+    plan_id: planId,
+    snapshot: safeSnapshot,
+    continuation: buildPlanContinuation(safeSnapshot, planId, { secret: "" }),
+    message: "restored",
+    next_steps: [],
+  }),
+});
+const readyHandoffUrl = readyHandoff.handoff_ready
+  ? new URL(readyHandoff.form_url)
+  : null;
+check("MCP quote handoff returns a prefilled buyer-operated form without submitting",
+  readyHandoff.handoff_ready === true
+    && readyHandoff.buyer_submission_required === true
+    && readyHandoff.plan_found === true
+    && readyHandoffUrl?.origin === "https://mcp.tempguru.co"
+    && readyHandoffUrl?.pathname === "/request-quote"
+    && readyHandoffUrl?.searchParams.get("plan") === handoffInput.plan_id
+    && readyHandoffUrl?.searchParams.get("source_platform") === "claude-ai"
+    && readyHandoffUrl?.searchParams.get("skill_id") === "event-staffing-ordering"
+    && !JSON.stringify(readyHandoff).includes("jane@example.com"),
+  JSON.stringify(readyHandoff));
+check("MCP quote handoff output matches its structured schema",
+  outputSchemas.REQUEST_QUOTE_HANDOFF_SCHEMA.safeParse(readyHandoff).success);
+
+const missingHandoff = await prepareQuoteHandoff(handoffInput, {
+  queryPlan: async (planId) => ({
+    plan_found: false,
+    plan_id: planId,
+    message: "missing",
+    next_steps: [],
+  }),
+});
+check("MCP quote handoff fails safely when the plan expired",
+  missingHandoff.handoff_ready === false
+    && missingHandoff.plan_found === false
+    && !("form_url" in missingHandoff)
+    && outputSchemas.REQUEST_QUOTE_HANDOFF_SCHEMA.safeParse(missingHandoff).success);
+
 const { normalizeControlledSource, normalizeSourcePlatform } = await load(
   "src/lib/telemetry/source-tags.ts",
 );
 check("source tags canonicalize underscore aliases and retain known agent runtimes",
   normalizeControlledSource("custom_gpt") === "custom-gpt"
+    && normalizeControlledSource("mcp-handoff") === "mcp-handoff"
     && normalizeSourcePlatform("openai-codex") === "openai-codex"
     && normalizeSourcePlatform("qwen-ecosystem") === "qwen-ecosystem"
     && normalizeSourcePlatform("alice@example.com") === "other");
@@ -931,6 +1059,16 @@ await telemetryHarness.track({
   channel: "mcp",
   userAgent: "unit-test",
   ipCountry: "US",
+  funnelEvents: ["quote_handoffs"],
+  sourcePlatform: "openclaw",
+  sourceSkill: "urgent-event-backfill",
+});
+await telemetryHarness.track({
+  tool: "request_quote",
+  status: "success",
+  channel: "rest",
+  userAgent: "unit-test",
+  ipCountry: "US",
   funnelEvents: ["quotes_submitted"],
   sourcePlatform: "openclaw",
   sourceSkill: "urgent-event-backfill",
@@ -941,10 +1079,12 @@ const [skillAttribution, platformAttribution, funnelAttribution] = await Promise
   telemetryHarness.redisExec((redis) => redis.get(`source-platforms:${telemetryDate}`)),
   telemetryHarness.redisExec((redis) => redis.get(`funnel:${telemetryDate}`)),
 ]);
-check("successful quote telemetry atomically attributes platform, skill, and funnel",
+check("handoff telemetry stays separate from buyer-submitted lead attribution",
   skillAttribution?.["urgent-event-backfill"] === 1
     && platformAttribution?.openclaw === 1
-    && funnelAttribution?.["mcp:quotes_submitted"] === 1,
+    && funnelAttribution?.["mcp:quote_handoffs"] === 1
+    && funnelAttribution?.["rest:quotes_submitted"] === 1
+    && !("mcp:quotes_submitted" in (funnelAttribution ?? {})),
   JSON.stringify({ skillAttribution, platformAttribution, funnelAttribution }));
 const savedPlanSource = { source: "pi" };
 check("lead source precedence is explicit platform, current runtime, then saved plan",

@@ -1,6 +1,6 @@
 # TempGuru MCP（中文）
 
-> 双时代 MCP 服务器，覆盖美国和加拿大 345 个城市，共 12 个工具：九个只读查询工具、一个可能自动保存 30 天非联系信息方案快照且不具破坏性的规划工具、一个显式的非联系信息保存工具，以及一个可选的 `request_quote` 联系信息提交工具。
+> 双时代 MCP 服务器，覆盖美国和加拿大 345 个城市，共 12 个工具：十个只读工具（包括不接收个人信息的 `request_quote` 报价表单交接工具），以及两个不具破坏性、仅保存非联系信息方案的写入工具 `plan_staffing` 与 `save_staffing_plan`。
 
 **服务端点：** `https://mcp.tempguru.co/mcp` （双时代 HTTP，首选 MCP 2026-07-28，并兼容 2025 时代协议，无需身份验证）
 **注册项：** [`co.tempguru/event-staffing`](https://registry.modelcontextprotocol.io/v0/servers/co.tempguru/event-staffing)
@@ -32,23 +32,23 @@ TempGuru 是一家总部位于美国佛罗里达州杰克逊维尔海滩（Jacks
 | `get_compliance_by_state` | 美国州级用工合规摘要（最低工资、加班规则、各州特殊条款）。**不构成法律意见**。 |
 | `get_policies` | 已发布的预订与采购政策；未确认的值会明确要求协调员确认。 |
 | `get_rate_benchmark` | TempGuru 活动用工费率指数：按岗位列出的完整 W-2 费率基准表（典型值 + 全国区间；品牌大使按市场分级），附方法论与引用说明。 |
-| `get_quote_status` | 查询 TG 报价编号是否已由 CRM 接收或进入持久队列。 |
-| `request_quote` | 将结构化的人员配备请求（联系人 + 活动 + 岗位）提交到 TempGuru 的 CRM，由人工审核。可选的写入工具；不构成预订或合同。 |
+| `get_quote_status` | 查询买家亲自提交 TempGuru 网站表单后获得的 TG 报价编号（也可用于历史编号）。 |
+| `request_quote` | 使用已保存的非个人信息 `plan_id` 准备预填的 TempGuru 报价表单链接。只读；不接收或传输联系人信息，不创建 CRM 记录或 TG 编号。买家必须亲自打开、审核并提交表单。 |
 
-九个查询工具为只读（`readOnlyHint: true`）。`plan_staffing` 与 `save_staffing_plan` 都是不具破坏性、不提交联系信息的写入工具，并如实标注 `readOnlyHint: false`：Phase A 中规划器保留尽力自动保存，而显式保存工具会先重新计算方案，再创建 30 天非联系信息快照。`request_quote` 是独立的可选联系信息提交，也是唯一会创建联系记录的业务写入工具。服务器另提供 8 个技能资源和两个引导式提示模板（`plan-event-staffing`、`staffing-compliance-brief`）。
+十个工具为只读（`readOnlyHint: true`），其中包括 `request_quote` 的非个人信息表单交接。`plan_staffing` 与 `save_staffing_plan` 都是不具破坏性、不提交联系信息的写入工具，并如实标注 `readOnlyHint: false`：Phase A 中规划器保留尽力自动保存，而显式保存工具会先重新计算方案，再创建 30 天非联系信息快照。因此连接器整体能力仍为 `read_write`。服务器另提供 8 个技能资源和两个引导式提示模板（`plan-event-staffing`、`staffing-compliance-brief`）。
 
 ### Phase A 规划与保存流程
 
 1. 首先使用活动城市、日期、岗位和人数调用 `plan_staffing`。
 2. 如果完整方案已包含 `plan_id`，请保留该编号，**不要调用 `save_staffing_plan`**；规划器已保存快照。
 3. 仅当完整方案没有 `plan_id`，且确实需要可恢复或可分享的持久方案时，才使用同一组已确认活动输入调用一次 `save_staffing_plan`。
-4. 只有在用户明确确认提交报价后，才调用 `request_quote`，并在有编号时传入现有 `plan_id`。
+4. 当买家要求继续时，使用已保存的 `plan_id` 调用 `request_quote`，把返回的 `form_url` 交给买家。不要在对话中为了 MCP 调用收集姓名、邮箱、电话或公司；只有买家亲自在 TempGuru 表单中输入并提交这些信息后，才会创建业务线索。
 
 ---
 
 ## 知识层（开放知识格式 OKF）
 
-上述工具是**行动层**，负责规划、定价、合规检查与提交报价。同样的数据还以**知识层**形式发布：一个静态的[开放知识格式](https://github.com/GoogleCloudPlatform/knowledge-catalog)（OKF v0.1）知识包，AI 智能体和 Google Cloud Knowledge Catalog 可直接读取或导入，而无需抓取网页。
+上述工具是**行动层**，负责规划、定价、合规检查与准备由买家亲自提交的报价表单。同样的数据还以**知识层**形式发布：一个静态的[开放知识格式](https://github.com/GoogleCloudPlatform/knowledge-catalog)（OKF v0.1）知识包，AI 智能体和 Google Cloud Knowledge Catalog 可直接读取或导入，而无需抓取网页。
 
 | 资源 | 地址 |
 |---|---|
@@ -96,7 +96,7 @@ claude plugin install tempguru@tempguru-mcp
 
 **OpenClaw**，技能与 MCP 工具也需要分别安装。先克隆本仓库并按 [llms-install.md](./llms-install.md) 中的 8 条 `openclaw skills install ./tempguru-mcp/skills/...` 命令安装技能；再执行 `openclaw mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=openclaw" --transport streamable-http`，最后用 `openclaw mcp doctor tempguru --probe` 验证。
 
-**Pi**：npm `tempguru-pi@1.5.0` 已上线，包含 8 个技能和 9 个带 `?source=pi` 归因的原生 REST 工具。本仓库已准备 `1.6.0`，让每个已安装技能使用真实的 `tempguru_*` 工具名，并加入安全的规划器、显式保存及 Rate Index 回退路径。在 `1.6.0` 发布并验证前，请连接远程 MCP，以确保端到端技能执行可靠。完整说明见 [llms-install.md](./llms-install.md)。
+**Pi**：本仓库的 `1.7.0` 源码包含 8 个技能和 9 个带 `?source=pi` 归因的原生工具；`tempguru_request_quote` 只使用已保存的 `plan_id` 返回买家报价表单，不接收联系人信息。完整的规划器、显式保存及 Rate Index 仍通过远程 MCP 提供。实际发布状态请以 npm 和发布追踪表为准；完整说明见 [llms-install.md](./llms-install.md)。
 
 **Codex**，先执行 `codex mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=openai-codex"`；然后请 Codex 使用 `$skill-installer` 安装 `Tempguru-co/tempguru-mcp/skills` 下的 8 个技能。技能会在下一轮对话中可用。
 
@@ -130,7 +130,7 @@ mcp_manager.add_server({
 
 | 客户端 / 智能体运行时 | 状态 | 备注 |
 |---|---|---|
-| Claude.ai（网页版） | ✅ 已验证 | 12 个工具（9 个只读 + 规划工具 + 显式非联系信息保存 + `request_quote`） |
+| Claude.ai（网页版） | ✅ 已验证 | 12 个工具（10 个只读，包括 `request_quote` 表单交接 + 2 个非联系信息方案写入） |
 | Claude Desktop | ✅ 兼容 | 标准远程 MCP 配置 |
 | Claude Code | ✅ 已验证 | 工具可通过插件或直接添加加载 |
 | Claude for Work / Cowork | ✅ 兼容 | 与 Claude.ai 使用同一连接器框架 |
@@ -139,7 +139,7 @@ mcp_manager.add_server({
 | Windsurf | ✅ 兼容 | Streamable HTTP 传输 |
 | Hermes Agent | ✅ 已验证 | 原生远程 HTTP MCP，技能通过 well-known 目录单独发现 |
 | OpenClaw | ✅ 兼容 | 原生 `openclaw mcp add`，并包含顶层 `skills/` 包 |
-| Pi | 🟡 次版本待发布 | npm `1.5.0` 已上线；发布并验证 `1.6.0` 后可获得适配 Pi 工具名的 8 个技能 + 9 个原生工具，以及仅通过远程 MCP 提供的规划、保存和 Rate Index 路径 |
+| Pi | 🟡 以发布追踪表为准 | `1.7.0` 源码包含适配 Pi 工具名的 8 个技能 + 九项原生工具（全部只读）；规划、保存和 Rate Index 路径仍通过远程 MCP 提供 |
 | OpenAI Agents SDK | ✅ 兼容 | 通过 MCP 客户端使用上述 URL |
 | ChatGPT（Codex / 支持 MCP 的自定义 GPT） | ✅ 兼容 | 同 OpenAI Agents SDK |
 | Qwen-Agent / DashScope / ModelScope | ✅ 兼容 | Qwen-Agent 的 `MCPManager` 可直接接受 streamable-HTTP URL |
@@ -162,7 +162,7 @@ mcp_manager.add_server({
 - **根域发现：** `tempguru.co` 的 `.well-known/*`、`robots.txt`、`llms.txt`、`llms-full.txt` 由两个 Cloudflare worker 提供，分别通过 `npm run build:worker` 和 `npm run build:llms-worker` 从规范源生成（输出在 `cloudflare/`）
 - **漂移门禁：** `npm run check:submissions`（CI）与 `npm run check-rates` 确保注册/目录文件与费率数据同规范源保持一致
 
-每个工具同时提供 REST 接口镜像，位于 `mcp.tempguru.co/api/v1/*`，OpenAPI 3.1 规范见 `/openapi.json`，RFC 9727 api-catalog 见 `/.well-known/api-catalog`。其中也包括写入工具：`POST /api/v1/quote-requests`（operationId 为 `submitQuoteRequest`）通过同一套共享模块复用 MCP 工具的校验 schema、CRM 写入与确认响应，并因其为无需认证的公开写入而附加了按 IP 的轻量限流。与 MCP 工具一样，它为可选调用，不创建预订，也无需付款。
+公开数据也通过 `mcp.tempguru.co/api/v1/*` 的 REST 接口提供，OpenAPI 3.1 规范见 `/openapi.json`，RFC 9727 api-catalog 见 `/.well-known/api-catalog`。需要特别区分两条报价路径：MCP 的只读 `request_quote` 只接受已保存的 `plan_id` 与受限归因字段，并返回 `https://mcp.tempguru.co/request-quote` 下的买家表单；它不会创建线索。REST 的 `POST /api/v1/quote-requests`（operationId 为 `submitQuoteRequest`）则是由网站表单或明确集成调用的直接写入接口，会验证联系人与活动字段、写入 CRM 或持久队列，并因其为无需认证的公开写入而附加按 IP 的轻量限流。两条路径都不创建预订，也无需付款。
 
 ### 遥测与管理仪表板
 
@@ -175,7 +175,7 @@ mcp_manager.add_server({
 
 **不收集任何个人身份信息(PII)。** 遥测仅包含:工具名称、客户端类别桶(Claude / Cursor / 通义千问 / Glama 探针 / 百度蜘蛛 等)、成功/失败状态、国家代码,以及参数 slug(城市/岗位/州，这些都是公开的目录数据)。不存储原始 IP、不存储请求或响应内容、不存储用户内容。
 
-此外，`request_quote` 会将用户明确提供的联系人与活动信息（姓名、邮箱、公司、活动详情）提交到 TempGuru 的 CRM；当 CRM 暂时不可用时，记录可进入最多保留 90 天的持久重试队列，并可发送给已配置的通知处理器，以便协调员跟进。这些字段绝不写入遥测层；仪表板只统计工具名称、城市与成功/失败结果。
+MCP 的 `request_quote` 不接收或传输个人信息，只记录匿名的表单交接漏斗事件。只有买家亲自提交网站表单（或明确调用 REST `POST /api/v1/quote-requests` 的集成）时，联系人与活动信息才会进入 TempGuru 的 CRM；CRM 暂时不可用时，记录可进入最多保留 90 天的持久重试队列，并可发送给已配置的通知处理器，以便协调员跟进。这些字段绝不写入遥测层；仪表板将表单交接与买家实际提交分开统计。
 
 完整运维文档(架构、分类器、故障模式、成本上限)见 `OPERATIONS.md`。遥测写入会在请求内等待，但有 1 秒硬上限；Upstash 故障或超时不会使 MCP 响应失败。
 
@@ -189,7 +189,7 @@ mcp_manager.add_server({
 
 ### AI 智能体能直接通过此 MCP 预定活动人员吗?
 
-可以提交请求，但不是预订。`request_quote` 工具会将结构化的人员配备方案，连同用户提供的联系人和活动信息，提交到 TempGuru 的 CRM 或持久接收队列，协调员将在一个工作日内回复报价。它不会预留人员、不保证价格或可用性，也不构成合同；在用户确认报价之前无需付款。九个查询工具为只读；`plan_staffing` 与按条件调用的 `save_staffing_plan` 仅具有上述不含联系信息的方案快照副作用。请保留规划器返回的 `plan_id`，绝不重复保存。
+不能由智能体直接预订或代替买家传输联系人信息。MCP 的 `request_quote` 使用已保存的 `plan_id` 返回预填表单链接；买家必须亲自打开链接、审核方案、填写联系人信息并提交。只有该提交才会创建业务线索和 TG 编号，协调员随后在一个工作日内回复报价。它不会预留人员、不保证价格或可用性，也不构成合同；在买家批准报价之前无需付款。十个工具为只读；`plan_staffing` 与按条件调用的 `save_staffing_plan` 仅具有上述不含联系信息的方案快照副作用。请保留规划器返回的 `plan_id`，绝不重复保存。
 
 ### TempGuru 是零工平台或 1099 市场吗?
 

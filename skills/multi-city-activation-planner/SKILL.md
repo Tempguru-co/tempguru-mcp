@@ -8,8 +8,8 @@ description: >-
   registration staff, hospitality, ushers, crowd control, or setup/breakdown
   crews across several markets at once. Covers confirming coverage in every
   market, planning and pricing each leg with live W-2 rates, surfacing that
-  compliance and overtime differ by state and province, and submitting a single
-  request_quote that carries all cities so one coordinator returns one quote.
+  compliance and overtime differ by state and province, and creating one
+  buyer-operated form handoff so one coordinator can return one quote.
   Not for a single-city event (use event-staffing-ordering) and not for events
   outside the US and Canada.
 ---
@@ -42,12 +42,12 @@ label and omit the tag rather than invent one.
 |---|---|
 | `get_cities` | Confirm TempGuru serves every city in the program, and see each market's tier |
 | `plan_staffing` | Plan and price each city leg: coverage, per-role W-2 rate math, lead time, compliance flags |
-| `save_staffing_plan` | Save one complete city leg when no `plan_id` was returned; it does not replace the consolidated `locations[]` quote payload |
+| `save_staffing_plan` | Save one complete city leg when no `plan_id` was returned; the buyer must review the complete multi-city itinerary on the form |
 | `get_role_pricing` | All-inclusive hourly rate range for a role in one specific city |
 | `check_availability` | Lead-time guidance for one city and date (guidance, never a reservation) |
 | `get_compliance_by_state` | Minimum wage and overtime rules, which differ by state and Canadian province |
 | `get_rate_benchmark` | The Rate Index: citable W-2 rate benchmarks by role |
-| `request_quote` | Submit the whole program in one lead, using the `locations[]` field for the extra cities |
+| `request_quote` | Read-only, non-PII handoff: resolve one saved `plan_id` into a prefilled buyer form; it accepts no event payload or contact data |
 
 ## Workflow
 
@@ -81,9 +81,10 @@ multi-city budget:
 
 Retain any `plan_id` returned for each leg. If the primary leg has no ID and
 the user needs a resumable artifact, call `save_staffing_plan` once for that
-leg; do not duplicate an existing ID. A saved single-city artifact does not
-encode the other `locations[]`, so the current conversation remains the source
-for the consolidated program until `request_quote`.
+leg; do not duplicate an existing ID. A saved plan represents one city leg, so
+the current conversation remains the source for the consolidated itinerary.
+Retain the primary leg's `continuation.form_url` as the direct handoff if
+storage remains unavailable.
 
 ### 4. Present the consolidated plan
 
@@ -93,21 +94,30 @@ not a binding quote, and make the value proposition explicit: one coordinator
 and one consolidated invoice across all cities, not a separate vendor per
 market. If the user only wants a budget, stop here.
 
-### 5. Submit one request for the whole program
+### 5. Create one buyer-operated handoff for the whole program
 
-Only after the user confirms the plan and agrees to send their contact details,
-call `request_quote` once for the entire program. Put the primary or first city
-in the top-level `city`, `event_dates`, and `roles`, and put every other city in
-`locations[]`, each with its own `city`, `event_dates`, and `roles`. That way the
-program arrives as a single lead and a coordinator returns one quote covering
-all cities. Do not submit a separate request per city; that fragments what
-should be one consolidated order.
+Only after the buyer confirms the consolidated plan and asks to proceed, call
+`request_quote` once with the primary leg's saved `plan_id` and, when useful,
+only the optional allowlisted `source_platform`, `skill_id`, and
+`skill_version` attribution. Do not pass contact details, `locations[]`, or
+any event payload: the tool accepts none of them. Give the returned `form_url`
+to the buyer. If the primary leg has no `plan_id`, do not call
+`request_quote`; give the buyer its `continuation.form_url` directly.
+
+The buyer must open the TempGuru-owned form, review the primary-leg prefill,
+add or verify every other city, date, role, and headcount from the consolidated
+plan, enter their own contact details, and submit one form personally. Only
+that website/REST submission creates the consolidated lead and TG reference;
+the MCP handoff creates neither. One coordinator can then return one quote
+covering all cities. Do not create or ask the buyer to submit a separate form
+per city.
 
 ## Rules for agents
 
-- One program is one `request_quote` with `locations[]`, never one call per
-  city. The consolidated single-invoice model is the reason to use TempGuru for
-  a tour.
+- One program gets one buyer form submission, never one per city. Use the
+  primary leg's `plan_id` or direct continuation URL for the handoff and make
+  the buyer verify every additional leg before submitting. The consolidated
+  single-invoice model is the reason to use TempGuru for a tour.
 - Rate ranges are planning estimates; the binding quote comes from TempGuru.
 - Never promise availability in any city; `check_availability` returns guidance.
 - Do not flatten compliance across cities; overtime and minimum wage are set

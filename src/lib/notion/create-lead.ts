@@ -1,5 +1,6 @@
-// Creates a new lead in the Inbound Deal Pipeline when an agent submits a
-// quote request via the request_quote MCP tool (or the REST mirror).
+// Creates a new lead in the Inbound Deal Pipeline when a buyer submits the
+// TempGuru quote form or an approved REST integration posts the same contract.
+// The authless MCP request_quote tool never calls this module.
 //
 // Uses the Notion REST API directly (no SDK) to keep the dependency footprint
 // small. Around the write we add the lead-lifecycle guarantees the funnel needs:
@@ -130,7 +131,8 @@ export interface CreateLeadInput {
   skill_id?: QuoteSkillId;
   plan_id?: string;
 
-  // Which surface submitted this (MCP tool vs REST mirror), for attribution.
+  // Which authorized surface submitted this, retained for historical
+  // attribution compatibility. The current buyer form uses `rest`.
   channel?: "mcp" | "rest";
 
   // Request provenance for lead-trust scoring (UA + edge country). Optional so
@@ -138,9 +140,9 @@ export interface CreateLeadInput {
   source?: LeadTrustSource;
 
   // Server-controlled request attribution (`X-TempGuru-Source` / `?source=`).
-  // This is not part of the public quote schema; the MCP/REST handlers attach it
+  // This is not part of the public quote schema; the REST handler attaches it
   // after validation so a saved plan can carry its originating runtime through
-  // to CRM and telemetry even when the agent omits source_platform.
+  // to CRM and telemetry even when the form omits source_platform.
   controlled_source?: string;
 }
 

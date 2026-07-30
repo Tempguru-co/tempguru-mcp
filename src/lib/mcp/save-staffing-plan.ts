@@ -125,7 +125,7 @@ export type SaveStaffingPlanResult =
       expires_at: string;
       resource_uri: string;
       continuation: PlanContinuation;
-      quote_readiness: "needs_contact";
+      quote_readiness: "buyer_submission_required";
       message: string;
       next_actions: Array<"share" | "revise" | "request_quote">;
     }
@@ -140,17 +140,13 @@ export type SaveStaffingPlanResult =
       retry_after_seconds: number;
       continuation: PlanContinuation;
       message: string;
-      next_actions: Array<
-        "retry_save" | "continue_on_website" | "request_quote_without_plan_id"
-      >;
+      next_actions: Array<"retry_save" | "continue_on_website">;
     }
   | {
       status: "storage_unavailable";
       continuation: PlanContinuation;
       message: string;
-      next_actions: Array<
-        "retry_save" | "continue_on_website" | "request_quote_without_plan_id"
-      >;
+      next_actions: Array<"retry_save" | "continue_on_website">;
     };
 
 const defaultCheckRateLimit = (ip: string) =>
@@ -250,7 +246,6 @@ export async function saveStaffingPlan(
       next_actions: [
         "retry_save",
         "continue_on_website",
-        "request_quote_without_plan_id",
       ],
     };
   }
@@ -279,7 +274,6 @@ export async function saveStaffingPlan(
       next_actions: [
         "retry_save",
         "continue_on_website",
-        "request_quote_without_plan_id",
       ],
     };
   }
@@ -297,9 +291,9 @@ export async function saveStaffingPlan(
     resource_uri:
       `https://mcp.tempguru.co/api/v1/plans/${decoration.plan_id}`,
     continuation: decoration.continuation,
-    quote_readiness: "needs_contact",
+    quote_readiness: "buyer_submission_required",
     message:
-      "The complete non-PII staffing plan is saved for 30 days and can be shared, resumed, or linked to a quote request.",
+      "The complete non-PII staffing plan is saved for 30 days and can be shared, resumed, or used to create a buyer-operated quote-form handoff.",
     next_actions: ["share", "revise", "request_quote"],
   };
 }
