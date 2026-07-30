@@ -191,12 +191,48 @@ export function verifyPlanLinkSignature(
   return expected.length === actual.length && timingSafeEqual(expected, actual);
 }
 
+/**
+ * Decide whether a browser handoff may restore a saved plan. When signing is
+ * configured, both signature parameters are mandatory; deleting them must
+ * never downgrade the link to unsigned access. When signing is disabled,
+ * reject stray signature parameters instead of implying they were verified.
+ */
+export function canRestorePlanLink(
+  id: string,
+  options: {
+    signature?: string;
+    rawExpiry?: string;
+    signatureParametersPresent: boolean;
+    secret: string;
+    nowSeconds?: number;
+  },
+): boolean {
+  if (!options.secret) return !options.signatureParametersPresent;
+  if (!options.signatureParametersPresent) return false;
+  if (!options.signature || !options.rawExpiry || !/^\d{1,10}$/.test(options.rawExpiry)) {
+    return false;
+  }
+  const expiry = Number(options.rawExpiry);
+  if (!Number.isSafeInteger(expiry)) return false;
+  return verifyPlanLinkSignature(
+    id,
+    expiry,
+    options.signature,
+    options.secret,
+    options.nowSeconds,
+  );
+}
+
 export function buildPlanContinuation(
   snapshot: PlanSnapshot,
   planId?: string,
   options: { secret?: string; nowSeconds?: number } = {},
 ): PlanContinuation {
-  const url = new URL("https://tempguru.co/get-staffing");
+  // The MCP-owned review form consumes these bounded non-PII fields, then asks
+  // the buyer to enter and submit their own contact details. Keeping this page
+  // on the same deployment as the saved-plan store makes the prefill contract
+  // testable and prevents an authless agent from acting as the submitter.
+  const url = new URL("https://mcp.tempguru.co/request-quote");
   if (planId) url.searchParams.set("plan", planId);
 
   const secret = options.secret ?? process.env.PLAN_LINK_SECRET?.trim();
@@ -230,8 +266,8 @@ export function buildPlanContinuation(
   return {
     form_url: url.toString(),
     note: planId
-      ? `This non-PII plan is saved for 30 days. Resume it with get_plan using plan_id ${planId}, or continue on the prefilled website form.`
-      : "Plan storage was unavailable, so there is no resumable plan_id. The website URL still carries the city, date, and compact role/headcount prefill.",
+      ? `This non-PII plan is saved for 30 days. Resume it with get_plan using plan_id ${planId}, or let the buyer continue on the prefilled TempGuru review form.`
+      : "Plan storage was unavailable, so there is no resumable plan_id. The buyer review URL still carries the city, date, and compact role/headcount prefill.",
   };
 }
 
@@ -338,7 +374,7 @@ export async function querySavedPlan(
         "That plan was not found or has expired. Saved plans are retained for 30 days; re-run plan_staffing and save the complete plan when needed.",
       next_steps: [
         "Call plan_staffing again with the event city, date, roles, and headcount, then call save_staffing_plan only if no plan_id was returned and persistence is needed.",
-        "If a quote was already submitted, use get_quote_status with the TG reference instead.",
+        "If the buyer already submitted the website form, use get_quote_status with the TG reference returned by that form.",
       ],
     };
   }
@@ -347,10 +383,11 @@ export async function querySavedPlan(
     plan_id: normalized,
     snapshot,
     continuation: buildPlanContinuation(snapshot, normalized),
-    message: "Saved staffing plan restored. Review it with the user before submitting or changing the quote request.",
+    message: "Saved staffing plan restored. Review it with the user before creating the buyer-operated quote handoff.",
     next_steps: [
       "Confirm the restored roles, headcount, dates, and planning estimate with the user.",
-      "After explicit confirmation, call request_quote and include this plan_id.",
+      "When the buyer asks to proceed, call request_quote with this plan_id and give them the returned form_url.",
+      "The buyer must enter and submit their own contact details on the TempGuru form.",
     ],
   };
 }

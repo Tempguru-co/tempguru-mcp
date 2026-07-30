@@ -62,7 +62,7 @@ function assertPhaseAContract(label, descriptor) {
     throw new Error(`${label}: expected a 12-tool description, got ${description}`);
   }
   for (const fragment of [
-    "nine read-only lookups",
+    "ten read-only",
     "plan_staffing",
     "save_staffing_plan",
     "request_quote",
@@ -111,7 +111,7 @@ function assertPhaseAContract(label, descriptor) {
     !/do not call save_staffing_plan/i.test(instructions) ||
     !/no plan_id/i.test(instructions) ||
     !instructions.includes("request_quote") ||
-    !/explicitly confirms/i.test(instructions)
+    !/buyer|form_url/i.test(instructions)
   ) {
     throw new Error(`${label}: staged Phase A workflow metadata is incomplete`);
   }

@@ -27,11 +27,16 @@ const ROLE_NAMES = roles.map((role) => role.name).join(", ");
 const SKILL_GUIDANCE =
   `- Canonical Agent Skills (${SKILLS.length}): ${SKILLS.join(", ")}\n` +
   `- Install the skills and attributed MCP action layer: ${REPO}#connect`;
+const GPT_GUIDANCE =
+  "- ChatGPT users without MCP: the TempGuru Event Staffing Planner GPT can use the REST submitQuoteRequest Action after explicit confirmation. " +
+  "That contact-bearing REST Action is separate from MCP request_quote, which only returns a buyer-operated form: " +
+  "https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner";
 const MCP_GUIDANCE =
   "- MCP Server (no auth, dual-era HTTP; preferred MCP 2026-07-28 with 2025-era compatibility): https://mcp.tempguru.co/mcp, " +
-  "12 tools (nine read-only lookups, a compatibility planner that may save a 30-day non-PII snapshot, an explicit non-contact save_staffing_plan artifact write, and one opt-in request_quote contact write): " +
+  "12 tools (ten read-only tools including a non-PII request_quote buyer handoff, a compatibility planner that may save a 30-day non-PII snapshot, and an explicit non-contact save_staffing_plan artifact write): " +
   "plan_staffing (call first; retain plan_id when returned), save_staffing_plan (only when a complete plan has no plan_id and the user needs persistence; never duplicate the planner's save), " +
-  "get_plan, get_cities, get_roles, check_availability, get_role_pricing, get_compliance_by_state, get_policies, get_rate_benchmark, get_quote_status, request_quote";
+  "get_plan, get_cities, get_roles, check_availability, get_role_pricing, get_compliance_by_state, get_policies, get_rate_benchmark, get_quote_status, " +
+  "request_quote (read-only: restores a saved plan and returns a prefilled form that the buyer personally submits; never send contact details through MCP)";
 
 const EM = "—"; // em-dash
 const OKF =
@@ -57,6 +62,7 @@ function fix(s, full) {
   s = s
     .replace(/^- Canonical Agent Skills \(\d+\):[^\n]*\n?/gm, "")
     .replace(/^- Install the skills and attributed MCP action layer:[^\n]*\n?/gm, "")
+    .replace(/^- ChatGPT users without MCP:[^\n]*\n?/gm, "")
     .replace(/\n{3,}/g, "\n\n");
   // Replace the whole MCP inventory bullet instead of depending on its prior
   // wording/count. The Squarespace source has evolved from five -> eight tools,
@@ -96,15 +102,17 @@ function fix(s, full) {
     /^- \*\*Staff roles:\*\*[^\n]+$/m,
     `- **Staff roles:** ${ROLE_NAMES}`,
   );
-  // tell non-MCP agents about the GPT path and that quotes submit in-chat
-  if (!s.includes("ChatGPT users without MCP: the TempGuru Event Staffing Planner GPT")) {
-    s = s
-      .split(`- Reference repo: ${REPO}`)
-      .join(
-        `- Reference repo: ${REPO}\n` +
-          "- ChatGPT users without MCP: the TempGuru Event Staffing Planner GPT runs the same plan-to-quote workflow and submits the request in-chat (request_quote / submitQuoteRequest): https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner",
-      );
-  }
+  s = s.replace(
+    /^- "I want a quote \/ to book staff" ->[^\n]*$/gm,
+    '- "I want a quote / to book staff" -> use request_quote (MCP) for a buyer-form handoff, the Planner GPT REST Action, the contact form, or book a call with Megan',
+  );
+  s = s.replace(
+    /^- When a user wants to actually book or quote,[^\n]*$/gm,
+    "- When a user wants to actually book or quote, route them to request_quote (MCP) for a buyer-form handoff, the Planner GPT REST Action, the contact form, or a call with Megan; do not invent pricing.",
+  );
+  // Tell non-MCP agents about the GPT path while keeping its explicitly
+  // confirmed REST Action distinct from the authless MCP buyer handoff.
+  s = s.replace(`- Reference repo: ${REPO}`, `- Reference repo: ${REPO}\n${GPT_GUIDANCE}`);
   if (!s.includes(`Canonical Agent Skills (${SKILLS.length})`)) {
     s = s.replace(`- Reference repo: ${REPO}`, `- Reference repo: ${REPO}\n${SKILL_GUIDANCE}`);
   }
@@ -181,8 +189,12 @@ for (const [path, body] of Object.entries(FILES)) {
   if ((body.match(/^- Install the skills and attributed MCP action layer:/gm) ?? []).length !== 1) {
     errs.push(`${path}: expected exactly one canonical skill-install line`);
   }
-  if ((body.match(/ChatGPT users without MCP: the TempGuru Event Staffing Planner GPT/g) ?? []).length > 1)
-    errs.push(`${path}: Planner GPT guidance duplicated`);
+  if ((body.match(/ChatGPT users without MCP: the TempGuru Event Staffing Planner GPT/g) ?? []).length !== 1)
+    errs.push(`${path}: expected exactly one Planner GPT guidance line`);
+  if (!body.includes(GPT_GUIDANCE))
+    errs.push(`${path}: Planner GPT guidance does not distinguish the REST write from the MCP buyer handoff`);
+  if (body.includes("request_quote / submitQuoteRequest"))
+    errs.push(`${path}: stale MCP/REST quote-submission equivalence remains`);
 }
 if (errs.length) {
   console.error("Validation failed (live content may differ from expected anchors):");

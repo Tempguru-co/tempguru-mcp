@@ -116,17 +116,17 @@ try {
   const pureReadTools = toolNames.filter(
     (name) =>
       name !== "plan_staffing" &&
-      name !== "save_staffing_plan" &&
-      name !== "request_quote",
+      name !== "save_staffing_plan",
   );
   check(
-    "tool annotations distinguish lookups, compatibility persistence, explicit save, and quote submission",
+    "tool annotations distinguish ten reads from two non-destructive non-PII writes",
     pureReadTools.every((name) => toolByName.get(name)?.annotations?.readOnlyHint === true) &&
       toolByName.get("plan_staffing")?.annotations?.readOnlyHint === false &&
       toolByName.get("plan_staffing")?.annotations?.destructiveHint === false &&
       toolByName.get("save_staffing_plan")?.annotations?.readOnlyHint === false &&
       toolByName.get("save_staffing_plan")?.annotations?.destructiveHint === false &&
-      toolByName.get("request_quote")?.annotations?.readOnlyHint === false,
+      toolByName.get("request_quote")?.annotations?.readOnlyHint === true &&
+      toolByName.get("request_quote")?.annotations?.idempotentHint === true,
     JSON.stringify(
       Object.fromEntries(
         toolNames.map((name) => [name, toolByName.get(name)?.annotations]),
@@ -164,20 +164,21 @@ try {
       const quoted = planId
         ? await rpc("tools/call", {
             name: "request_quote",
-            arguments: { ...c.arguments.quote, plan_id: planId },
+            arguments: {
+              plan_id: planId,
+              source_platform: "openclaw",
+              skill_id: "event-staffing-ordering",
+              skill_version: "1.7.0",
+            },
           })
         : null;
-      const reference = quoted?.result?.structuredContent?.reference;
-      const status = reference
-        ? await rpc("tools/call", {
-            name: "get_quote_status",
-            arguments: { reference },
-          })
-        : null;
-      const text = JSON.stringify({ plan, savedPlan, restored, quoted, status });
+      const text = JSON.stringify({ plan, savedPlan, restored, quoted });
       const missing = c.expect.filter((marker) => !text.includes(marker));
-      if (quoted?.result?.structuredContent?.plan_linked !== true) {
-        missing.push("plan_linked:true");
+      if (
+        quoted?.result?.structuredContent?.handoff_ready !== true ||
+        quoted?.result?.structuredContent?.buyer_submission_required !== true
+      ) {
+        missing.push("buyer handoff");
       }
       check(c.name, missing.length === 0, missing.length ? `missing: ${missing.join(" | ")}` : "");
       continue;

@@ -1,7 +1,7 @@
 ---
 type: "Tool Reference"
 title: "MCP Tools"
-description: "The 12 tools exposed by the TempGuru MCP server: 9 read-only lookups, 2 non-destructive saved-plan write, and 1 opt-in contact write."
+description: "The 12 tools exposed by the TempGuru MCP server: 10 read-only tools and 2 non-destructive non-contact saved-plan writes."
 mcp_endpoint: "https://mcp.tempguru.co/mcp"
 tags:
   - "reference"
@@ -14,7 +14,7 @@ timestamp: "2026-07-16T00:00:00Z"
 # MCP Tools
 
 The TempGuru MCP server (`https://mcp.tempguru.co/mcp`, Streamable HTTP, no auth) exposes
-**12 tools** (9 read-only, 2 non-destructive saved-plan write, 1 contact write). This table and its descriptions are
+**12 tools** (10 read-only, 2 non-destructive non-contact saved-plan writes). This table and its descriptions are
 generated from the live tool registry (`register-tools.ts`), so they cannot drift
 from the server.
 
@@ -30,7 +30,7 @@ from the server.
 | `get_compliance_by_state` | read | Get the event staffing compliance summary for a US state. |
 | `get_policies` | read | Get TempGuru's published booking and procurement policies: minimum hours, cancellation/rescheduling, no-show backfill, COIs/additional insured, payment/invoicing, background checks, order confirmation, and quote response. |
 | `get_rate_benchmark` | read | Get Rate Benchmark (Rate Index) |
-| `request_quote` | contact write | Submit a staffing request to TempGuru. |
+| `request_quote` | read | Create a safe buyer handoff for a TempGuru staffing quote. |
 | `get_quote_status` | read | Check whether a TempGuru quote request reference was received by the CRM or durably queued. |
 
 ## Golden order
@@ -39,8 +39,9 @@ from the server.
 2. Fill gaps with `get_roles` / `get_cities`; flag the daily-overtime states (Alaska, California, Colorado, Nevada).
 3. Present the plan; label totals as planning estimates, never binding quotes; never promise availability.
 4. Retain any `plan_id` the planner returned. If the user needs a shareable/resumable artifact and no ID exists, call `save_staffing_plan` once with the same confirmed event fields; never duplicate an existing save.
-5. On explicit confirmation, collect contact details and call `request_quote` once with the retained `plan_id`, actual `source_platform`, and canonical `skill_id` / `skill_version` when a TempGuru skill assembled it.
-6. Retain the returned TG reference and use `get_quote_status` only when the user asks for receipt status.
+5. When the buyer asks to proceed, call `request_quote` with the retained `plan_id`, actual `source_platform`, and canonical `skill_id` / `skill_version` when a TempGuru skill assembled it.
+6. Give the buyer the returned `form_url`; never collect or transmit their contact details through MCP. The buyer reviews and submits the form themselves.
+7. Retain any TG reference returned by the website form and use `get_quote_status` only when the buyer asks for receipt status.
 
 The REST API at `https://mcp.tempguru.co/api/v1` mirrors the same query layer, so MCP and HTTP
 cannot drift. See [the REST API](api.md) and [data schemas](data-schema.md).

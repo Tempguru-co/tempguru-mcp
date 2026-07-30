@@ -1,34 +1,54 @@
-# Release runbook
+# TempGuru MCP 1.7.0 release runbook
 
-Use this runbook to release a version already prepared in this repository.
-Source files that say `1.6.0` are a release candidate until every required
-publication and production check below succeeds.
+Use this runbook for the Anthropic-directory compliance release prepared in
+this repository. Version `1.6.0` is already live and immutable; do not try to
+overwrite or republish it. The release candidate in this branch is `1.7.0`.
 
-This runbook covers the MCP web service, npm CLI, official MCP Registry, Pi
-package, GHCR image, apex discovery, and external skill catalogs. It does not
-cover or authorize changes to TempGuru's city pages.
+The safety boundary introduced in `1.7.0` is:
 
-## Release boundaries
+- Authless MCP `request_quote` is a strict, read-only, idempotent handoff.
+- It accepts a saved non-PII `plan_id` and optional bounded attribution only.
+- It returns a prefilled form on `https://mcp.tempguru.co`.
+- It does not accept contact fields, create a CRM lead, or return a TG quote
+  reference.
+- The buyer personally opens the form, reviews the plan, enters their own
+  contact details, and submits it. Only that website/REST submission creates a
+  lead and TG reference.
 
-| Surface | Trigger | Result |
+The connector is still classified `read_write` because `plan_staffing` may
+best-effort save a non-contact plan and `save_staffing_plan` explicitly saves
+one. Those are the only two non-read-only tools.
+
+This runbook covers Vercel, npm, the official MCP Registry, the Pi npm package,
+Cloudflare discovery, GHCR, the Anthropic Connectors Directory, Hermes, and
+ClawHub. It does not cover or authorize TempGuru city-page changes.
+
+## Release surfaces
+
+| Surface | Trigger | Expected result |
 |---|---|---|
-| Vercel production | Merge/push to `main` | Deploys `mcp.tempguru.co` |
+| Vercel production | Merge/push to `main` | Deploys `mcp.tempguru.co`, including `/request-quote` |
 | GHCR `latest` and `sha-*` | Merge/push to `main` | Publishes `ghcr.io/tempguru-co/event-staffing` |
-| MCP Registry initial check | `server.json` version change on `main` | Defers cleanly until the matching npm CLI exists |
-| npm CLI | Manual `publish-npm.yml` with an exact version | Publishes `tempguru-mcp`; then re-dispatches the Registry workflow |
-| Pi npm package | Manual `publish-pi.yml` with an exact version | Publishes `tempguru-pi` independently |
-| GHCR semver tags | Push `vX.Y.Z` | Publishes `X.Y.Z` and `X.Y` image tags |
+| MCP Registry initial check | `server.json` version change on `main` | Defers until the matching npm CLI exists |
+| npm CLI | Manual `publish-npm.yml` with `1.7.0` | Publishes `tempguru-mcp`, then re-dispatches the Registry workflow |
+| Pi npm package | Manual `publish-pi.yml` with `1.7.0` | Publishes `tempguru-pi` independently |
+| GHCR semver tags | Push `v1.7.0` | Publishes image tags `1.7.0` and `1.7` |
 | Apex Cloudflare discovery | Manual | Deploys the two committed worker files |
-| Hermes and ClawHub catalogs | Manual | Refreshes third-party skill copies |
+| Anthropic directory | Manual portal update and email reply | Requests re-review under `tempguru-event-staffing` |
+| Hermes and ClawHub | Manual | Refreshes third-party skill catalog copies |
 
-Cloudflare and the external catalogs do not deploy from GitHub Actions.
+Cloudflare, Anthropic, Hermes, and ClawHub do not deploy from this repository's
+GitHub Actions. Do not mark any surface published until its own verification
+succeeds.
 
-## One-time prerequisites
+## Prerequisites
 
-1. Confirm the Vercel GitHub App can access
+1. Use Node `22` or newer to build the Next.js repository. The root
+   application engine is `>=22`; the independently packaged stdio CLI keeps
+   its tested `>=20` runtime floor, and the publishing workflows use Node 24.
+2. Confirm the Vercel GitHub App can access
    `Tempguru-co/tempguru-mcp` and that `main` deploys to Production.
-2. In npm package settings for `tempguru-mcp`, configure the Trusted Publisher
-   identity exactly as:
+3. Configure npm Trusted Publishing for `tempguru-mcp`:
 
    - Organization: `Tempguru-co`
    - Repository: `tempguru-mcp`
@@ -36,32 +56,65 @@ Cloudflare and the external catalogs do not deploy from GitHub Actions.
    - Environment: `Production`
    - Allowed action: `npm publish`
 
-3. Configure the existing `tempguru-pi` npm package the same way, except use
-   workflow filename `publish-pi.yml`. Because this workflow is introduced by
-   the `1.6.0` release, merge it to the default branch before configuring the
-   Pi trusted publisher if npm does not yet accept that filename.
-4. In GitHub, add the Ed25519 private key as an environment secret:
-   **Settings → Environments → Production → Environment secrets →
-   `MCP_PRIVATE_KEY`**. A repository-level secret with the same name is not the
-   documented release configuration.
-   Restrict that environment to the `main` branch. If you add a required
-   reviewer, expect the npm and Registry jobs to pause for that approval.
-5. Confirm the GHCR package is public and the release operator can merge,
-   dispatch Actions, push tags, edit both Cloudflare workers, update Hermes PR
-   #39150, and publish the TempGuru ClawHub skills.
-6. Protect the `v*` tag namespace with a GitHub repository ruleset so only
-   release maintainers can create or update release tags. The Docker workflow
-   also rejects a tag whose version does not equal `package.json`.
+4. Configure the existing `tempguru-pi` package the same way, using workflow
+   filename `publish-pi.yml`.
+5. Store the Ed25519 private key as the GitHub environment secret
+   `Production` → `MCP_PRIVATE_KEY`. Restrict that environment to `main`.
+6. Confirm the GHCR package is public and the release operator can merge,
+   dispatch Actions, push tags, deploy both Cloudflare workers, edit the
+   Anthropic directory submission, update Hermes PR #39150, and publish the
+   TempGuru ClawHub skills.
+7. Protect the `v*` tag namespace so only release maintainers can create or
+   update release tags.
 
-The npm workflows use OIDC. Do not create or use a long-lived npm token for a
-normal release.
+The npm workflows use OIDC. Do not use a long-lived npm token or run
+`npm publish` locally for a normal release.
 
-## 1. Validate the candidate
+## 1. Verify versions and generate artifacts
 
 Run from the repository root on the release branch:
 
 ```bash
+node --version
+node -p 'require("./package.json").version'
+node -p 'require("./package-lock.json").version'
+node -p 'require("./package-lock.json").packages[""].version'
+node -p 'require("./cli/package.json").version'
+node -p 'require("./distribution/pi/package.json").version'
+node -p 'require("./server.json").version'
+node -p 'require("./server.json").packages[0].version'
+node -p 'require("./gemini-extension.json").version'
+node -p 'require("./plugins/tempguru/.claude-plugin/plugin.json").version'
+node -p 'require("./.claude-plugin/marketplace.json").plugins[0].version'
+```
+
+The repository build Node major must be at least 22. Every version printed
+above must be `1.7.0`.
+
+Install from the lockfile and regenerate every committed release artifact:
+
+```bash
 npm ci
+npm run sync:postman
+npm run build:okf
+npm run build:worker
+npm run build:llms-worker -- --from-committed
+npm run build:cli
+git diff --check
+git status --short
+```
+
+Review all generated changes before committing them. The release commit must
+contain the source, skill copies and digests, OKF bundle, discovery documents,
+OpenAPI/schema artifacts, Cloudflare workers, CLI bundle, manifests, tests, and
+documentation intended for `1.7.0`. Do not include unrelated city-page work or
+duplicate local files.
+
+## 2. Run the release gates
+
+Run the same core gates used by the publishing workflows:
+
+```bash
 npm run typecheck
 npm run test:unit
 npm run build:stdio
@@ -78,131 +131,143 @@ npm pack --dry-run --json ./distribution/pi
 git diff --check
 ```
 
-The build and worker commands regenerate committed artifacts. Review and commit
-those outputs; do not leave generated drift for the release workflows to
-discover.
-
-Version `1.6.0` intentionally drops the EOL Node 18 runtime and requires Node
-20 or newer. This is a runtime-compatibility break even though the requested
-release number is a minor version, so call it out prominently in the GitHub and
-npm release notes. CI exercises the packaged CLI on Node 20.
-
-For an MCP CLI release, these values must all equal the intended version:
+After committing the generated artifacts, rerun:
 
 ```bash
-node -p 'require("./package.json").version'
-node -p 'require("./package-lock.json").version'
-node -p 'require("./cli/package.json").version'
-node -p 'require("./server.json").version'
+git status --short
+git diff --exit-code
 ```
 
-The Pi package is independently versioned. For a Pi `1.6.0` release, also
-confirm:
+The tracked worktree must remain unchanged. Before release, specifically
+confirm the tests prove that:
+
+- MCP `request_quote` has `readOnlyHint: true`,
+  `destructiveHint: false`, and `idempotentHint: true`.
+- Its strict input schema rejects `contact_name`, `contact_email`,
+  `contact_phone`, `company`, and other undeclared fields.
+- A valid saved plan returns a TempGuru-owned `form_url`.
+- MCP handoff telemetry is distinct from website/REST `quotes_submitted`.
+- The buyer form is the component that posts contact details to
+  `/api/v1/quote-requests`.
+- The 12-tool, 2-prompt, and 8-resource inventories are exact.
+
+Do not proceed if any safety assertion fails.
+
+## 3. Merge and verify the production deployment
+
+Push the release branch, open a pull request to `main`, wait for every required
+check, and merge after review. Do not publish packages or tag a branch commit
+before the exact source has merged.
+
+After merge, record the merge SHA:
 
 ```bash
-node -p 'require("./distribution/pi/package.json").version'
+git fetch origin
+git rev-parse origin/main
 ```
 
-Review `git status --short`. The release commit must include the source,
-generated artifacts, manifests, workflows, and documentation intended for the
-release, with no unrelated city-page work.
+Confirm:
 
-## 2. Merge to `main`
+1. Vercel deployed that `main` commit to Production.
+2. `check-submissions` and the repository verification workflow passed.
+3. `Publish Docker image` succeeded for `main`, producing `latest` and the
+   matching `sha-*` tag.
+4. The push-triggered MCP Registry workflow either found the version already
+   published or deferred pending npm. A defer before npm publication is
+   expected.
+5. `https://mcp.tempguru.co/request-quote` loads. Opening the page does not
+   submit a lead.
 
-Push the release branch, open a pull request to `main`, and wait for every
-required check. Merge only after review.
+The pre-`1.7.0` server may still expose the old direct-submission behavior
+until Vercel finishes. Do not update the Anthropic listing or reply to the
+review thread until the production deployment and live canary both pass.
 
-After the merge, confirm:
+## 4. Publish `tempguru-mcp@1.7.0`
 
-1. Vercel creates a new Production deployment from the `main` commit.
-2. `check-submissions` and `verify` pass.
-3. `Publish Docker image` succeeds for `main`, producing `latest` and a
-   `sha-*` tag.
-4. The push-triggered Registry job either reports the version already
-   published or cleanly defers pending npm. A defer before the npm step is
-   expected and is not a failed release.
-
-Do not tag a branch commit or publish a package before its exact source has
-merged to `main`.
-
-## 3. Publish the MCP CLI
-
-In GitHub Actions, choose **Publish MCP CLI to npm**, select the `main` branch,
-enter the exact committed version, and run the workflow. For `1.6.0`, the
-equivalent GitHub CLI command is:
+In GitHub Actions, choose **Publish MCP CLI to npm**, select `main`, enter
+`1.7.0`, and run the workflow. The equivalent command is:
 
 ```bash
 gh workflow run publish-npm.yml \
   --repo Tempguru-co/tempguru-mcp \
   --ref main \
-  -f version=1.6.0
+  -f version=1.7.0
 ```
 
-The workflow reruns the full release gates, verifies that the root package,
-CLI, `server.json`, and requested version match, inspects the package tarball,
-publishes `tempguru-mcp`, and dispatches `publish-registry.yml`.
+The workflow reruns the release gates, verifies the root, CLI, and Registry
+versions, inspects the tarball, publishes `tempguru-mcp`, and dispatches
+`publish-registry.yml`.
 
-Wait for both workflows, then verify:
+Wait for both workflows. Then verify npm and the Registry:
 
 ```bash
-npm view tempguru-mcp@1.6.0 version
+npm --cache /tmp/tempguru-release-cache view tempguru-mcp@1.7.0 version
 curl -fsS \
   'https://registry.modelcontextprotocol.io/v0/servers?search=co.tempguru/event-staffing&version=latest' \
   | jq -r '.servers[0].server.version'
 ```
 
-Both commands must return `1.6.0`. If npm succeeds but the Registry dispatch
-fails, run `publish-registry.yml` manually from `main`. Do not try to republish
-an MCP Registry version that already exists.
+Both commands must return `1.7.0`. Registry propagation can lag npm briefly.
+If npm succeeds but the Registry dispatch fails, run
+`publish-registry.yml` manually from `main`:
 
-## 4. Publish the Pi package
+```bash
+gh workflow run publish-registry.yml \
+  --repo Tempguru-co/tempguru-mcp \
+  --ref main
+```
+
+Never retry by publishing `1.6.0`, and never attempt to overwrite an existing
+npm or MCP Registry version. Use a new patch version for a forward fix.
+
+## 5. Publish `tempguru-pi@1.7.0`
 
 In GitHub Actions, choose **Publish Pi package to npm**, select `main`, enter
-the Pi version, and run it:
+`1.7.0`, and run:
 
 ```bash
 gh workflow run publish-pi.yml \
   --repo Tempguru-co/tempguru-mcp \
   --ref main \
-  -f version=1.6.0
+  -f version=1.7.0
 ```
-
-This workflow verifies the independently versioned Pi manifest, exact package
-identity, generated skills, and tarball before its OIDC publish. Do not replace
-it with a local `npm publish`.
 
 Verify:
 
 ```bash
-npm view tempguru-pi@1.6.0 version
+npm --cache /tmp/tempguru-release-cache view tempguru-pi@1.7.0 version
 ```
 
-Then install `npm:tempguru-pi` in a clean Pi session, restart Pi, and confirm:
+Install `npm:tempguru-pi` in a clean Pi session, restart Pi, and confirm:
 
 - `/skills` lists all eight TempGuru skills.
-- The tool list contains `tempguru_get_cities` through
-  `tempguru_request_quote`.
-- A read-only lookup succeeds.
-- `tempguru_request_quote` still requires explicit confirmation; do not submit
-  a real test lead.
+- The native tool list contains all nine tools from
+  `tempguru_get_cities` through `tempguru_request_quote`.
+- A read-only coverage or pricing lookup succeeds.
+- `tempguru_request_quote` accepts a saved plan reference and bounded
+  attribution, exposes no contact fields, and returns a buyer form link.
+- Calling the handoff does not create a lead or TG reference. Do not submit the
+  returned form with fake personal information.
 
-## 5. Deploy apex discovery to Cloudflare
+The full `plan_staffing`, `save_staffing_plan`, and `get_rate_benchmark`
+operations remain available through the remote MCP rather than the native Pi
+adapter.
 
-Vercel does not serve the `tempguru.co` apex discovery routes. After the new
-Vercel deployment is healthy, deploy these committed files manually:
+## 6. Deploy apex discovery to Cloudflare
 
-1. Paste the **entire** `cloudflare/worker.js` file into the Cloudflare worker
-   bound to the apex `.well-known/*` and `robots.txt` routes; deploy it.
-2. Paste the **entire** `cloudflare/llms-worker.js` file into the worker bound
-   to `llms.txt` and `llms-full.txt`; deploy it.
-3. Record the prior deployment IDs so either worker can be rolled back
-   independently.
+Vercel does not serve discovery routes at the `tempguru.co` apex. After the
+Vercel deployment is healthy, deploy the committed worker artifacts:
 
-Never paste a fragment, prose, or a diff into the Worker editor. Do not
-regenerate content inside Cloudflare; the committed files are the release
-artifacts.
+1. Record the current deployment ID for each worker.
+2. Paste the entire `cloudflare/worker.js` file into the worker bound to the
+   apex `.well-known/*` and `robots.txt` routes, then deploy.
+3. Paste the entire `cloudflare/llms-worker.js` file into the worker bound to
+   `llms.txt` and `llms-full.txt`, then deploy.
 
-Run the live canary only after Vercel and both workers are deployed:
+Do not paste a fragment, prose, or a diff into the Cloudflare editor. The
+committed files are the release artifacts.
+
+After Vercel and both workers are deployed, run the live canary:
 
 ```bash
 gh workflow run check-live-discovery.yml \
@@ -210,65 +275,191 @@ gh workflow run check-live-discovery.yml \
   --ref main
 ```
 
-The same canary can be run locally with `npm run check:live-discovery`. It
-checks both origins, all eight skill artifacts and digests, the 12-tool
-dual-era contract, and the hosted discovery files.
+The same canary can be run locally:
 
-## 6. Tag the release and verify GHCR
+```bash
+npm run check:live-discovery
+```
 
-After npm, Pi, Registry, Vercel, and Cloudflare verify, tag the merge commit:
+It must validate both origins, all eight skill artifacts and digests, the
+12-tool modern/legacy MCP contract, OKF, server cards, and llms inventories.
+
+Also verify the deployed version and buyer-form origin:
+
+```bash
+curl -fsS https://mcp.tempguru.co/api/v1/health | jq
+curl -fsS https://mcp.tempguru.co/.well-known/mcp/server-card.json \
+  | jq '{version: .serverInfo.version, tools: [.tools[].name]}'
+curl -fsSI https://mcp.tempguru.co/request-quote
+```
+
+The health and server card must report `1.7.0`; the server card must list 12
+tools; and the form must resolve on `mcp.tempguru.co`.
+
+## 7. Tag `v1.7.0` and verify GHCR
+
+After npm, Pi, Registry, Vercel, Cloudflare, and the live canary verify, tag
+the exact merge commit:
 
 ```bash
 git fetch origin
 git switch main
 git pull --ff-only
-git tag -a v1.6.0 -m "TempGuru MCP v1.6.0"
-git push origin v1.6.0
+git tag -a v1.7.0 -m "TempGuru MCP v1.7.0"
+git push origin v1.7.0
 ```
 
-The tag starts `docker.yml`, which publishes GHCR tags `1.6.0` and `1.6`.
-Verify the immutable versioned image:
+The tag starts `docker.yml`, which publishes GHCR tags `1.7.0` and `1.7`.
+Verify the immutable image:
 
 ```bash
 docker buildx imagetools inspect \
-  ghcr.io/tempguru-co/event-staffing:1.6.0
+  ghcr.io/tempguru-co/event-staffing:1.7.0
 ```
 
-Creating a GitHub Release from the verified tag is optional. Create it as a
-draft first:
+Create a draft GitHub Release:
 
 ```bash
-gh release create v1.6.0 \
+gh release create v1.7.0 \
   --repo Tempguru-co/tempguru-mcp \
-  --title "TempGuru MCP v1.6.0" \
+  --title "TempGuru MCP v1.7.0" \
   --draft \
   --generate-notes
 ```
 
-Before publishing the draft, add a prominent compatibility note that the CLI
-now requires Node 20+ and no longer supports Node 18.
+The release notes must call out:
 
-## 7. Refresh the external skill catalogs
+- Node 22+ is required to build/deploy the repository; the packaged
+  `tempguru-mcp` stdio CLI remains tested on Node 20+.
+- MCP `request_quote` is now a read-only, non-PII buyer-form handoff.
+- Only a buyer's website/REST form submission creates a lead and TG reference.
+- The connector inventory is 12 tools, 2 prompts, and 8 resources.
 
-These are catalog updates, not changes to either live VPS agent runtime.
+Publish the draft only after the closeout checklist is complete.
+
+## 8. Update the Anthropic Connectors Directory
+
+Use
+`distribution/anthropic-directory-update.md` as the paste-ready source. Make
+the portal listing match the deployed `1.7.0` server exactly.
+
+### Listing fields
+
+| Field | Required value |
+|---|---|
+| Name | `TempGuru Event Staffing` |
+| Slug | `tempguru-event-staffing` |
+| Server URL | `https://mcp.tempguru.co/mcp` |
+| Authentication | None |
+| Capability | `read_write` |
+| Tool count | 12 |
+| Prompt count | 2 |
+| Resource count | 8 |
+| Allowed link origin | `https://mcp.tempguru.co` |
+
+Enter the allowed link value as an HTTPS origin, not a path or wildcard. It
+covers the `/request-quote` URL returned by the handoff.
+
+### Exact tool inventory
+
+| Tool | Directory side-effect declaration |
+|---|---|
+| `plan_staffing` | Non-destructive write; may save a 30-day non-PII plan |
+| `save_staffing_plan` | Non-destructive write; explicitly saves a non-PII plan |
+| `get_plan` | Read-only |
+| `get_cities` | Read-only |
+| `get_roles` | Read-only |
+| `check_availability` | Read-only |
+| `get_role_pricing` | Read-only |
+| `get_compliance_by_state` | Read-only |
+| `get_policies` | Read-only |
+| `get_rate_benchmark` | Read-only |
+| `request_quote` | Read-only and idempotent; returns buyer form, no PII or lead |
+| `get_quote_status` | Read-only; checks buyer-created or historical TG references |
+
+This is 10 read-only tools and 2 non-destructive, non-contact persistence
+writes. Do not describe `request_quote` as a write.
+
+### Exact prompt inventory
+
+- `plan-event-staffing`
+- `staffing-compliance-brief`
+
+### Exact resource inventory
+
+- `https://tempguru.co/.well-known/skills/event-staffing-ordering/SKILL.md`
+- `https://tempguru.co/.well-known/skills/event-staffing-compliance/SKILL.md`
+- `https://tempguru.co/.well-known/skills/staffing-plan-from-event-brief/SKILL.md`
+- `https://tempguru.co/.well-known/skills/urgent-event-backfill/SKILL.md`
+- `https://tempguru.co/.well-known/skills/staffing-agency-partner-growth/SKILL.md`
+- `https://tempguru.co/.well-known/skills/multi-city-activation-planner/SKILL.md`
+- `https://tempguru.co/.well-known/skills/event-staffing-procurement/SKILL.md`
+- `https://tempguru.co/.well-known/skills/tempguru-pro-operations/SKILL.md`
+
+Do not leave the old declaration of five tools, zero prompts, zero resources,
+or `read_only` in any portal field.
+
+### Reviewer-safe test
+
+The reviewer can:
+
+1. Call `plan_staffing` with a future event, valid city, and role/headcount.
+2. Retain its `plan_id`, or call `save_staffing_plan` once if no ID was
+   returned.
+3. Call `request_quote` with that saved ID.
+4. Confirm that the output is a `form_url`, not a lead receipt or TG reference.
+5. Inspect the form without entering contact details or submitting it.
+
+### Reply to Anthropic
+
+Reply on the original review thread only after the portal update, production
+deployment, and live canary are verified. Use the concise reply in
+`distribution/anthropic-directory-update.md`. The reply must state:
+
+- The listing is now `read_write` with 12 tools, 2 prompts, and 8 resources.
+- `request_quote` accepts no contact fields and creates no lead.
+- It returns a form on `https://mcp.tempguru.co` that the buyer personally
+  submits.
+- Only the website/REST submission creates the CRM lead and TG reference.
+- The requested live slug remains `tempguru-event-staffing`.
+
+Request re-review; do not claim approval or publication until Anthropic
+confirms it.
+
+## 9. Refresh external skill catalogs
+
+Catalog copies must teach the same buyer-operated handoff as the live server.
+These updates do not change the Hermes or legacy OpenClaw runtime deployments.
 
 ### Hermes
 
-Sync the two committed Hermes submission files to the existing fork branch:
+Sync the two committed submission files to the existing fork branch:
 
 | Repository source | PR #39150 target |
 |---|---|
 | `distribution/assistants/hermes/SKILL.md` | `optional-skills/productivity/event-staffing/SKILL.md` |
 | `distribution/assistants/hermes/test_event_staffing_skill.py` | `tests/skills/test_event_staffing_skill.py` |
 
-Push the fork branch and request another review on NousResearch/hermes-agent
-PR #39150. Do not modify or restart the separate Hermes content agent on the
-Hostinger VPS.
+On the Hermes fork branch:
+
+```bash
+git diff --check
+pytest tests/skills/test_event_staffing_skill.py
+git status --short
+```
+
+Commit and push those two files, then request another review on
+NousResearch/hermes-agent PR #39150. Preserve the Hermes catalog's own skill
+versioning convention; do not force the MCP package version into that metadata
+unless the catalog requires it. Do not claim the PR is merged until the
+upstream repository shows it.
+
+Do not modify or restart the separate Hermes content agent on the Hostinger
+VPS.
 
 ### ClawHub
 
-Republish the five canonical skills changed for `1.6.0` through the existing
-`kissmyabs32` ClawHub publisher account:
+Republish the five canonical skills whose quote workflow changed:
 
 - `tempguru-event-staffing-ordering`
 - `tempguru-staffing-plan-from-event-brief`
@@ -276,42 +467,76 @@ Republish the five canonical skills changed for `1.6.0` through the existing
 - `tempguru-multi-city-activation-planner`
 - `tempguru-event-staffing-procurement`
 
-Use each matching `skills/<canonical-slug>/SKILL.md` from the tagged commit.
-Verify each resulting listing at
-`https://clawhub.ai/api/v1/skills/<published-slug>`.
+Use each matching `skills/<canonical-slug>/SKILL.md` from the tagged `v1.7.0`
+commit. ClawHub versions are immutable: publish the new `1.7.0` skill version
+and never retry `1.6.0`.
 
-**Do not SSH to or change the legacy OpenClaw VPS container at
+This repository does not contain a generic ClawHub publication command. Use
+the already authenticated `kissmyabs32` publisher workflow. If the local shell
+function `publish_all` is used, inspect it with `type publish_all`, run its dry
+run first, and verify that it targets only the five skills above at `1.7.0`
+before enabling writes.
+
+Verify each listing:
+
+```bash
+curl -fsS https://clawhub.ai/api/v1/skills/tempguru-event-staffing-ordering | jq
+curl -fsS https://clawhub.ai/api/v1/skills/tempguru-staffing-plan-from-event-brief | jq
+curl -fsS https://clawhub.ai/api/v1/skills/tempguru-urgent-event-backfill | jq
+curl -fsS https://clawhub.ai/api/v1/skills/tempguru-multi-city-activation-planner | jq
+curl -fsS https://clawhub.ai/api/v1/skills/tempguru-event-staffing-procurement | jq
+```
+
+Confirm each listing reflects the non-PII handoff and tells the buyer to submit
+the TempGuru form personally. Record the actual published versions; do not
+infer success from a local command alone.
+
+Do not SSH to or change the legacy OpenClaw VPS container at
 `/docker/openclaw-y5yb/`. Do not edit `openclaw.json`, restart
-`openclaw-gateway`, or touch its sibling agents.** ClawHub publication is an
-independent catalog operation.
+`openclaw-gateway`, or touch sibling agents. ClawHub is an independent catalog.
 
-## 8. Close the release
+## 10. Close the release
 
-Do not mark a version live in status trackers until all applicable checks are
-true:
+Do not mark `1.7.0` complete until every applicable item is verified:
 
-- Vercel Production serves the merge commit.
-- `tempguru-mcp@1.6.0` and `tempguru-pi@1.6.0` resolve from npm.
-- MCP Registry reports `1.6.0`.
+- Vercel Production serves the merge commit and `/request-quote`.
+- `tempguru-mcp@1.7.0` resolves from npm.
+- `tempguru-pi@1.7.0` resolves from npm.
+- The official MCP Registry reports `1.7.0`.
 - Both Cloudflare worker deployments are live.
 - `check-live-discovery.yml` passes.
-- GHCR exposes `latest`, `1.6.0`, `1.6`, and the expected `sha-*` image.
+- GHCR exposes `latest`, `1.7.0`, `1.7`, and the expected `sha-*` image.
+- The Anthropic portal says `read_write` and lists all 12 tools, 2 prompts, 8
+  resources, and allowed origin `https://mcp.tempguru.co`.
+- The Anthropic review reply has been sent, with directory status still
+  recorded as pending until Anthropic responds.
 - Hermes PR #39150 contains the current files and has been re-submitted for
-  review.
-- The five changed ClawHub artifacts have been republished and verified.
+  review, if that catalog refresh applies.
+- The five changed ClawHub skills report their new versions and current
+  buyer-operated handoff instructions.
+- The GitHub Release notes accurately distinguish the repository's Node 22+
+  build floor from the CLI's Node 20+ runtime floor and describe the non-PII
+  handoff.
 
-Then update the distribution status tracker and release notes with the actual
-publication results. At minimum, remove or replace the pre-release `1.5.0`
-claims in `README.md`, `README.zh-CN.md`, `llms-install.md`,
-`distribution/assistants/README.md`, `distribution/ai-agents-page.html`, and
-`distribution/ai-agents-page.zh-CN.html`. Keep pending third-party reviews
-labeled pending.
+Update the distribution status tracker with observed results and dates. Keep
+pending third-party reviews labeled pending.
 
 ## Rollback and forward-fix
 
-- **Vercel:** use the Vercel deployment rollback/promote controls.
-- **Cloudflare:** roll back each worker from its Deployments tab.
-- **npm and MCP Registry:** published versions are immutable. Prefer a
-  forward-fix release such as `1.6.1`; do not overwrite or republish `1.6.0`.
-- **GHCR:** preserve the versioned tag. A corrective `main` deployment can move
-  `latest`; publish a new semantic version for a permanent fix.
+- **Before Anthropic re-review:** if the live handoff or form fails, stop. Do
+  not update the portal or send the reply.
+- **Vercel:** use Vercel rollback/promote controls. Be aware that rolling back
+  to the `1.6.0` server also restores the old direct MCP lead-submission
+  behavior; keep the Anthropic listing pending or disabled until the approved
+  `1.7.x` safety boundary is live again.
+- **Cloudflare:** roll back each worker independently from its Deployments tab.
+- **Anthropic:** keep the portal declaration aligned with the server actually
+  deployed. If the safe handoff is unavailable, tell the reviewer and pause
+  re-review rather than leaving an inaccurate listing.
+- **npm and MCP Registry:** versions are immutable. Publish a forward fix such
+  as `1.7.1`; never overwrite `1.7.0` or `1.6.0`.
+- **GHCR:** preserve versioned tags. A corrective `main` deployment may move
+  `latest`; use a new semantic version for a permanent fix.
+- **Hermes and ClawHub:** correct catalog content with a new commit/version and
+  record the actual upstream state. Do not change live VPS runtimes as a
+  catalog rollback.

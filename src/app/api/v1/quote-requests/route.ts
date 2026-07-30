@@ -1,11 +1,11 @@
-// POST /api/v1/quote-requests, REST mirror of the MCP `request_quote` tool.
+// POST /api/v1/quote-requests, buyer-operated quote submission endpoint.
 //
-// The one write operation on the public REST surface. Exists so OpenAPI-based
-// agent platforms (ChatGPT Custom GPT Actions, Coze plugins, Copilot API
-// plugins) can submit staffing inquiries natively instead of falling back to
-// the web form. Validation (shared zod schema), CRM write (createLead), and
-// confirmation payloads are byte-identical to the MCP tool, all three live
-// in shared modules (src/lib/mcp/quote.ts, src/lib/notion/create-lead.ts).
+// The public MCP connector deliberately does not accept contact details or
+// create a lead. Its read-only `request_quote` tool returns the TempGuru-owned
+// form at /request-quote; the buyer enters their own details there and this
+// REST endpoint performs the write. The endpoint also remains available to
+// explicitly configured OpenAPI integrations that implement equivalent
+// consent and confirmation controls.
 //
 // Privacy contract (README / OPERATIONS.md): contact and event details go
 // ONLY to the Notion CRM. Telemetry records tool name, city slug, UA class,
@@ -14,7 +14,7 @@
 //
 // Abuse posture (public, no-auth write):
 //   - JSON body capped at 64 KB
-//   - zod validation incl. email format (same schema as the MCP tool)
+//   - zod validation including email format
 //   - light per-IP fixed-window rate limit, fail-open (src/lib/api/rate-limit.ts)
 
 import {
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
     return jsonWriteError({ code: "invalid_param", message: "Request body must be valid JSON." });
   }
 
-  // ── Validate, the exact schema the MCP tool advertises ────────────────
+  // ── Validate the buyer-submitted REST payload ─────────────────────────
   const parsed = RequestQuoteSchema.safeParse(body);
   if (!parsed.success) {
     const issue = parsed.error.issues[0];
@@ -131,8 +131,8 @@ export async function POST(request: Request) {
   });
 
   if (!result.success) {
-    // Upstream CRM failure (Notion down / unconfigured), same payload the
-    // MCP tool returns, surfaced as 502 so agents know to use the fallback.
+    // Upstream CRM failure (Notion down / unconfigured), surfaced as 502 so
+    // the form or an approved REST integrator can offer the fallback.
     // The reference survives the failure so a follow-up email can cite it.
     return jsonWrite(quoteFailedPayload(result.error, result.reference), 502);
   }

@@ -22,8 +22,7 @@ import {
   queryPolicies,
   type CityTier,
 } from "./queries";
-import { createLead } from "../notion/create-lead";
-import { checkQuoteRateLimit, checkReadRateLimit } from "../api/rate-limit";
+import { checkReadRateLimit } from "../api/rate-limit";
 import { currentContext } from "../telemetry/context";
 import { buildStaffingPlan } from "./plan-staffing";
 import {
@@ -33,19 +32,18 @@ import {
 import { persistCompletePlan, querySavedPlan, PLAN_ID_PATTERN } from "./plan-store";
 import { queryQuoteStatus, QUOTE_REFERENCE_PATTERN } from "./quote-status";
 import { buildRateBenchmark } from "./rate-benchmark";
+import { type QuoteSkillId } from "./quote";
 import {
-  REQUEST_QUOTE_INPUT,
-  quoteSubmittedPayload,
-  quoteFailedPayload,
-  type QuoteSkillId,
-} from "./quote";
+  prepareQuoteHandoff,
+  RequestQuoteHandoffSchema,
+} from "./quote-handoff";
 import {
   GET_CITIES_SCHEMA,
   GET_ROLES_OUTPUT,
   CHECK_AVAILABILITY_SCHEMA,
   GET_ROLE_PRICING_SCHEMA,
   GET_COMPLIANCE_SCHEMA,
-  REQUEST_QUOTE_SCHEMA,
+  REQUEST_QUOTE_HANDOFF_SCHEMA,
   PLAN_STAFFING_SCHEMA,
   RATE_BENCHMARK_SCHEMA,
   GET_PLAN_SCHEMA,
@@ -72,9 +70,10 @@ export const SERVER_INSTRUCTIONS =
   "get_roles / get_cities; use get_policies for booking terms; flag daily-overtime states (CA, AK, NV, CO). (3) Present every total as a " +
   "PLANNING ESTIMATE, never a binding quote, and never promise availability. (4) Retain the plan_id when plan_staffing returns one. " +
   "Only if a complete plan has no plan_id and the user needs a resumable or shareable plan, call save_staffing_plan once with the same confirmed event inputs; never call it when a plan_id already exists. " +
-  "(5) Only after the user explicitly confirms quote submission, collect their contact name, email, company, event name, type, and dates, then call request_quote with the existing plan_id when available. " +
-  "A coordinator replies with a binding quote within one business day; no payment until the " +
-  "user approves. All rates are all-inclusive W-2 bill rates (worker pay, payroll taxes, workers' comp, " +
+  "(5) When the buyer asks to proceed, call request_quote with the saved plan_id. It returns a prefilled TempGuru form URL and never accepts or transmits contact details. " +
+  "Give that URL to the buyer; the buyer must review the plan, enter their own contact details, and submit the form themselves. Only that buyer submission creates a lead and TG reference. " +
+  "A coordinator replies with a binding quote within one business day; no payment until the buyer approves. " +
+  "All rates are all-inclusive W-2 bill rates (worker pay, payroll taxes, workers' comp, " +
   "general liability, coordinator support); Brand Ambassadors floor at $40/hour. Compliance data is " +
   "operational guidance, not legal advice. If the tools are unavailable, direct the user to " +
   "https://tempguru.co/get-staffing, megan@tempguru.co, or (904) 206-8953.";
@@ -113,7 +112,7 @@ const SKILL_RESOURCE_META: Record<SkillSlug, { title: string; description: strin
   "event-staffing-ordering": {
     title: "Event Staffing Ordering, Skill",
     description:
-      "Single-purpose skill for AI agents helping users order temporary event staff (brand ambassadors, registration, hospitality, setup/breakdown, and more) through TempGuru. Walks through requirement gathering, live coverage/rate/compliance lookups via this MCP, and request submission. Use when a user wants to hire, book, or budget event staff.",
+      "Single-purpose skill for AI agents helping users order temporary event staff (brand ambassadors, registration, hospitality, setup/breakdown, and more) through TempGuru. Walks through requirement gathering, live coverage/rate/compliance lookups via this MCP, and a buyer-operated prefilled quote form. Use when a user wants to hire, book, or budget event staff.",
   },
   "event-staffing-compliance": {
     title: "Event Staffing Compliance, Skill",
@@ -123,12 +122,12 @@ const SKILL_RESOURCE_META: Record<SkillSlug, { title: string; description: strin
   "staffing-plan-from-event-brief": {
     title: "Staffing Plan From Event Brief, Skill",
     description:
-      "Skill for AI agents extracting a complete staffing plan from an event document: an RFP, BEO (banquet event order), run of show, exhibitor or event services manual, or production schedule. Maps the document's functions to TempGuru's role catalog, estimates headcount, prices the plan with live W-2 rates via this MCP, and submits for a human-reviewed quote after user confirmation.",
+      "Skill for AI agents extracting a complete staffing plan from an event document: an RFP, BEO (banquet event order), run of show, exhibitor or event services manual, or production schedule. Maps the document's functions to TempGuru's role catalog, estimates headcount, prices the plan with live W-2 rates via this MCP, and creates a prefilled buyer-operated handoff for a human-reviewed quote.",
   },
   "urgent-event-backfill": {
     title: "Urgent Event Backfill, Skill",
     description:
-      "Skill for AI agents handling same-week and day-of event staffing emergencies: no-shows, vendor cancellations, events starting within about 72 hours. Fast single-pass intake, honest rush lead-time guidance via this MCP (never a promise of availability), immediate quote submission plus a direct phone path to TempGuru.",
+      "Skill for AI agents handling same-week and day-of event staffing emergencies: no-shows, vendor cancellations, events starting within about 72 hours. Fast single-pass planning, honest rush lead-time guidance via this MCP (never a promise of availability), a prefilled buyer submission form, and a direct phone path to TempGuru.",
   },
   "staffing-agency-partner-growth": {
     title: "Staffing Agency Partner Growth, Skill",
@@ -138,12 +137,12 @@ const SKILL_RESOURCE_META: Record<SkillSlug, { title: string; description: strin
   "multi-city-activation-planner": {
     title: "Multi-City Activation Planner, Skill",
     description:
-      "Skill for AI agents planning and pricing a multi-city event staffing program (a tour, roadshow, sampling tour, festival circuit, or national activation) as one consolidated order. Confirms coverage in every market, plans and prices each city leg with live W-2 rates, surfaces that overtime and minimum wage differ by state and province, and submits a single request_quote carrying all cities via the locations[] field so one coordinator returns one quote.",
+      "Skill for AI agents planning and pricing a multi-city event staffing program (a tour, roadshow, sampling tour, festival circuit, or national activation) as one consolidated order. Confirms coverage in every market, plans and prices each city leg with live W-2 rates, surfaces that overtime and minimum wage differ by state and province, and hands the buyer a TempGuru form to personally submit for one coordinated quote.",
   },
   "event-staffing-procurement": {
     title: "Event Staffing Procurement, Skill",
     description:
-      "Skill for AI agents answering event staffing procurement and vendor-onboarding questions (COI, W-9, insurance and workers' comp posture, cancellation and payment terms, MSAs, approved-vendor setup) from TempGuru's published policies via this MCP, explicit when a value is coordinator-confirmed rather than published, then bridging a real event into a priced staffing plan and quote. Not legal advice.",
+      "Skill for AI agents answering event staffing procurement and vendor-onboarding questions (COI, W-9, insurance and workers' comp posture, cancellation and payment terms, MSAs, approved-vendor setup) from TempGuru's published policies via this MCP, explicit when a value is coordinator-confirmed rather than published, then bridging a real event into a priced staffing plan and buyer-operated quote handoff. Not legal advice.",
   },
   "tempguru-pro-operations": {
     title: "TempGuru Pro Operations, Skill",
@@ -298,7 +297,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
         "Explicitly save a complete non-contact staffing plan for 30 days so it can be shared, resumed, or linked to a later quote request. " +
         "Use only when plan_staffing returned plan_complete:true without a plan_id and the user needs persistence. Never call this tool when plan_staffing already returned a plan_id. " +
         "Provide the same confirmed city, date, event type, attendees, roles, headcount, hours, and days; the server recomputes rates, totals, lead time, and compliance before saving and does not accept caller-supplied pricing or totals. This does not reserve staff, submit contact details, or request a quote. " +
-        "<hints>Branch on status: saved is the only outcome with a durable plan_id; plan_incomplete requires revising the inputs; rate_limited and storage_unavailable can continue to request_quote without a plan_id after user confirmation.</hints>",
+        "<hints>Branch on status: saved is the only outcome with a durable plan_id; plan_incomplete requires revising the inputs; for rate_limited or storage_unavailable, give the buyer continuation.form_url directly because request_quote requires a saved plan_id.</hints>",
       inputSchema: SaveStaffingPlanInputSchema,
       outputSchema: SAVE_STAFFING_PLAN_SCHEMA,
       annotations: {
@@ -630,84 +629,39 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
 
   // ─── request_quote ────────────────────────────────────────────────────
   //
-  // Write tool. Submits a structured staffing plan to TempGuru's Inbound Deal
-  // Pipeline in Notion. Without NOTION_API_KEY configured (e.g. a sandboxed
-  // Docker/Glama build), createLead returns a clean error and the tool reports
-  // the failure gracefully, it never throws, so the server stays up.
-  //
-  // Schema and confirmation payloads live in ./quote, shared with the REST
-  // mirror at POST /api/v1/quote-requests so the two surfaces cannot drift.
+  // Authless, non-PII handoff tool. It restores an existing saved plan and
+  // returns the TempGuru-owned buyer form. It never accepts contact fields and
+  // never calls the CRM; the human buyer enters and submits their own details
+  // on the form. The REST quote endpoint remains the browser form's submission
+  // target and is intentionally a separate contract.
   server.registerTool(
     "request_quote",
     {
       title: "Request Quote",
       description:
-        "Submit a staffing request to TempGuru. Use this LAST, after building the plan (plan_staffing or the read tools) and after the user explicitly confirms quote submission. If plan_staffing returned a plan_id, use it directly; call save_staffing_plan first only when no plan_id exists and the user needs persistence. Creates a structured intake in TempGuru's CRM or durable fallback queue so a human coordinator can review it and respond with a binding quote within one business day. Not a reservation; does not guarantee pricing or availability; no payment until the user approves the quote. " +
-        "DO NOT call speculatively or without user confirmation, this writes a real lead. " +
-        "<examples>request_quote(contact_name='Jane Doe', contact_email='jane@acme.com', company='Acme', event_name='Acme at HIMSS', event_type='trade-show', city='Chicago', event_dates='Aug 14-15, 2026', roles=[{role:'registration-staff', headcount:6}])</examples> " +
-        "<hints>Include plan_id when available. When a canonical TempGuru skill assembled the request, include its skill_id, skill_version, and the actual source_platform so the lead can be resumed and attributed. If this tool errors, fall back to https://tempguru.co/get-staffing or megan@tempguru.co / (904) 206-8953.</hints>",
-      inputSchema: z.object(REQUEST_QUOTE_INPUT),
-      outputSchema: REQUEST_QUOTE_SCHEMA,
+        "Create a safe buyer handoff for a TempGuru staffing quote. Use after the buyer has reviewed the plan and asks to proceed. Requires the saved non-PII plan_id returned by plan_staffing or save_staffing_plan and returns a prefilled TempGuru-owned review form. This tool does NOT accept or transmit a name, email, phone, company, or other contact details; it does NOT create a CRM lead or quote reference. The buyer must open the returned form_url, review the plan, enter their own contact details, and submit it themselves. Only that buyer submission creates the lead. Not a reservation; does not guarantee pricing or availability; no payment until the buyer approves a human-issued quote. " +
+        "<examples>request_quote(plan_id='ABCDEFGH2345', source_platform='claude-ai', skill_id='event-staffing-ordering', skill_version='1.7.0')</examples> " +
+        "<hints>If plan_staffing returned a complete continuation.form_url but storage did not return a plan_id, give that URL to the buyer directly instead of calling this tool. Never ask for contact details for an MCP call. If the plan expired, re-run plan_staffing. For urgent help, use megan@tempguru.co or (904) 206-8953.</hints>",
+      inputSchema: RequestQuoteHandoffSchema,
+      outputSchema: REQUEST_QUOTE_HANDOFF_SCHEMA,
       annotations: {
-        title: "Request Quote",
-        readOnlyHint: false,
+        title: "Prepare Quote Form",
+        readOnlyHint: true,
         destructiveHint: false,
-        idempotentHint: false,
+        idempotentHint: true,
         openWorldHint: false,
       },
     },
     async (input) => {
-      // Caller provenance for lead-trust scoring (request-scoped UA + edge
-      // country). currentContext() returns empty defaults under stdio, which
-      // the scorer treats as an unrecognized source (medium, not blocked).
-      const ctx = currentContext();
-
-      // Same per-IP limiter the REST mirror uses (fails open with no IP, e.g.
-      // stdio). Without this, the MCP transport was the unthrottled way to
-      // spam the one public write tool.
-      const verdict = await checkQuoteRateLimit(ctx.ip);
-      if (!verdict.allowed) {
-        await track({ tool: "request_quote", status: "error", city: input.city });
-        return structuredResult(
-          quoteFailedPayload(
-            `Rate limited: too many quote submissions from this source. Retry after ${verdict.retryAfterSeconds}s, or use the form at https://tempguru.co/get-staffing.`,
-          ),
-        );
-      }
-
-      const result = await createLead({
-        ...input,
-        channel: "mcp",
-        source: { userAgent: ctx.userAgent, ipCountry: ctx.ipCountry },
-        controlled_source: ctx.source,
-      });
-      const funnelEvents: FunnelEvent[] =
-        result.success && !result.deduped
-          ? ["quotes_submitted", ...(result.plan_linked ? (["quotes_linked"] as const) : [])]
-          : [];
+      const result = await prepareQuoteHandoff(input);
       await track({
         tool: "request_quote",
-        status: result.success ? "success" : "error",
-        city: input.city,
-        funnelEvents,
-        sourcePlatform:
-          result.success && funnelEvents.length ? result.source_platform : undefined,
-        sourceSkill: result.success && funnelEvents.length ? result.skill_id : undefined,
+        status: result.handoff_ready ? "success" : "error",
+        funnelEvents: result.handoff_ready ? ["quote_handoffs"] : undefined,
+        sourcePlatform: input.source_platform,
+        sourceSkill: input.skill_id,
       });
-
-      if (!result.success) {
-        return structuredResult(quoteFailedPayload(result.error, result.reference));
-      }
-
-      return structuredResult(
-        quoteSubmittedPayload(
-          input.contact_email,
-          result.deal_name,
-          result.reference,
-          result.captured,
-          result.plan_linked,
-        ),
-      );
+      return structuredResult(result);
     },
   );
 
@@ -717,7 +671,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     {
       title: "Get Quote Request Status",
       description:
-        "Check whether a TempGuru quote request reference was received by the CRM or durably queued. Use when a buyer asks what happened after request_quote or returns in a new conversation. " +
+        "Check whether a TempGuru quote request reference was received by the CRM or durably queued. Use only after the buyer personally submitted a TempGuru website form and received a TG reference, or for a historical reference. The authless MCP request_quote handoff does not create a reference. " +
         "This v1 status stub reports received/queued only; it does not yet expose quote_sent or won. " +
         "<examples>get_quote_status(reference='TG-ABC234')</examples> " +
         "<hints>Status records are retained for 90 days. A not-found result does not prove the CRM lead is absent; follow up with the reference at megan@tempguru.co.</hints>",
@@ -728,7 +682,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
           .toUpperCase()
           .max(9)
           .regex(QUOTE_REFERENCE_PATTERN)
-          .describe("TG reference returned by request_quote, e.g. TG-ABC234."),
+          .describe("TG reference returned after the buyer submits the TempGuru website form, e.g. TG-ABC234."),
       }),
       outputSchema: GET_QUOTE_STATUS_SCHEMA,
       annotations: {
@@ -825,7 +779,8 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
               "Fill gaps with get_roles or get_cities if needed. Present the plan with the estimated total clearly " +
               "labeled a planning estimate and flag any compliance notes. Retain plan_id if plan_staffing returned one; " +
               "only call save_staffing_plan when the complete plan has no plan_id and I need it saved or shared, and never save it twice. Ask me to confirm the plan. " +
-              "Only after I explicitly confirm quote submission, collect my contact details (name, email, company) and submit with request_quote using the existing plan_id when available. " +
+              "When I ask to proceed, call request_quote with the saved plan_id and give me its form_url. Do not ask me for contact details in chat or send any through MCP. " +
+              "I will review the prefilled TempGuru form, enter my own contact details, and submit it myself. Only my form submission creates the lead and TG reference. " +
               "A TempGuru coordinator replies with a binding quote within one business day; no payment until I approve.",
           },
         },

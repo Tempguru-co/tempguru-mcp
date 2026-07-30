@@ -52,8 +52,9 @@ export type PlanStaffingInput = {
 // Neutral, factual fallback. Deliberately no cross-platform (ChatGPT GPT)
 // steering in tool output; platform-specific fallbacks live in the docs/skills.
 const FALLBACK_LADDER = [
-  "If the user confirms this plan, call request_quote with their contact details (name, email, company) plus the event and roles below.",
-  "If request_quote is unavailable or fails, direct the user to https://tempguru.co/get-staffing, megan@tempguru.co, or (904) 206-8953.",
+  "When the buyer asks to proceed, call request_quote with the saved plan_id and give them its prefilled form_url. Never collect or transmit contact details through MCP.",
+  "If no plan_id was saved, give the buyer continuation.form_url directly. The buyer reviews the plan, enters their own contact details, and submits the TempGuru form themselves.",
+  "For direct or urgent help, use megan@tempguru.co or (904) 206-8953.",
 ];
 
 function isPricing(d: unknown): d is RolePricingData {
@@ -440,11 +441,11 @@ export function buildStaffingPlan(input: PlanStaffingInput) {
       ...(planComplete
         ? []
         : [
-            "Do NOT submit request_quote from this partial plan: resolve the unpriced_roles (each carries a did-you-mean suggestion; get_roles lists exact names), then call plan_staffing again for complete totals.",
+            "Do NOT prepare a request_quote handoff from this partial plan: resolve the unpriced_roles (each carries a did-you-mean suggestion; get_roles lists exact names), then call plan_staffing again for complete totals.",
           ]),
       "Present this plan to the user: roles, headcount, the estimated total range (label it a planning estimate), the lead-time read, and any staffing notes.",
       ...FALLBACK_LADDER,
-      "A human coordinator replies with a binding quote within one business day. No payment until the user approves the quote.",
+      "After the buyer submits the TempGuru form themselves, a human coordinator replies with a binding quote within one business day. No payment until the buyer approves the quote.",
     ],
   };
 }

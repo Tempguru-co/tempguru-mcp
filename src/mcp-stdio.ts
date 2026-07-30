@@ -8,12 +8,12 @@
 // locally-run server. The official stdio entry accepts both 2025-era
 // initialize handshakes and 2026-07-28 per-request envelope clients.
 //
-// Boots with no configuration: nine lookup tools serve static data or clean
-// not-found variants; plan_staffing's Phase A non-destructive saved-plan side
-// effect and the explicit non-contact save_staffing_plan write both fail open
-// without storage; request_quote returns a clean error if NOTION_API_KEY is
-// unset (e.g. a credential-less Docker build), so the server never crashes on
-// startup.
+// Boots with no configuration: ten read-only tools serve static data, saved
+// plan reads, or a non-PII buyer handoff; plan_staffing's Phase A
+// non-destructive saved-plan side effect and the explicit non-contact
+// save_staffing_plan write both fail open without storage. request_quote never
+// needs CRM credentials because the human-facing form performs the eventual
+// buyer-authorized submission.
 //
 // IMPORTANT: stdout is the MCP protocol channel, nothing may write to it except
 // the transport. All diagnostics go to stderr.

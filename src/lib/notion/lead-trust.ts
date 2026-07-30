@@ -1,11 +1,11 @@
-// Lead authenticity scoring for the request_quote write path.
+// Lead authenticity scoring for the buyer-operated REST quote-submission path.
 //
-// request_quote is a no-auth public MCP write tool: any caller (a real buyer's
-// agent, a directory probe, a scanner) can submit a "lead" with any data. This
-// module scores each submission from cheap, single-request signals so the CRM
-// record carries a trust level plus the specific reasons, and the downstream
-// enrichment (Frodo) can VERIFY rather than auto-promote anything that isn't
-// clearly real.
+// The buyer-facing REST quote endpoint is public/no-auth: a form buyer or an
+// explicitly configured REST integration can submit a lead. MCP request_quote
+// never calls this path. This module scores each REST submission from cheap,
+// single-request signals so the CRM record carries a trust level plus the
+// specific reasons, and the downstream enrichment (Frodo) can VERIFY rather
+// than auto-promote anything that isn't clearly real.
 //
 // Design rules (learned the hard way on a real near-miss):
 //   - NEVER blocks a write. It only annotates, so a real-but-unusual lead is

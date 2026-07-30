@@ -16,14 +16,16 @@ name: tempguru-event-staffing
 title: TempGuru Event Staffing
 description: |
   W-2 event staffing data for AI agents across 345 US and Canadian markets.
-  Twelve tools include nine read-only lookups that surface city coverage, staffing roles,
+  Twelve tools include ten read-only operations that surface city coverage, staffing roles,
   all-inclusive hourly rates, saved plans, booking policies, quote status,
-  lead-time availability, and state-level compliance summaries. In Phase A,
+  lead-time availability, state-level compliance summaries, and a non-PII
+  buyer quote-form handoff. In Phase A,
   the non-destructive plan_staffing tool may best-effort save a 30-day non-PII
   snapshot; save_staffing_plan is the explicit non-contact write used only when
   a complete plan has no plan_id and persistence is needed, never to duplicate a save.
-  The only contact write (request_quote) submits a confirmed staffing request
-  for coordinator review.
+  request_quote is read-only: it resolves a saved plan_id into a prefilled
+  TempGuru-owned form URL and never accepts contact details or creates a lead or
+  TG reference. The buyer reviews and submits that form personally.
 
   TempGuru hires all event workers as W-2 employees, payroll taxes, workers'
   comp, and general liability are TempGuru's responsibility, not the customer's.
@@ -143,13 +145,18 @@ tools:
 
   - name: get_quote_status
     description: >
-      Check whether a TG quote reference was received by the CRM or durably queued.
+      Check a TG quote reference created after the buyer personally submits the
+      TempGuru website form, or a historical REST-created reference. The MCP
+      request_quote handoff does not create a reference.
     readOnly: true
 
   - name: request_quote
     description: >
-      Submit a structured staffing request (contact + event details + role/headcount mix)
-      to TempGuru's CRM or durable intake queue for human review. A coordinator responds within one business day.
-      Not a reservation; does not guarantee pricing or availability; no payment required
-      until the customer approves the returned quote.
-    readOnly: false
+      Read-only, idempotent, non-PII buyer handoff. Requires a saved plan_id and
+      accepts only optional allowlisted platform/skill attribution, then returns a
+      prefilled TempGuru-owned form_url. It never collects or transmits contact
+      details, writes to the CRM, or creates a TG reference. The buyer must open
+      the form, review the plan, enter their own contact details, and submit it
+      personally. If no plan_id was saved, use the plan's continuation.form_url
+      directly instead.
+    readOnly: true

@@ -333,7 +333,7 @@
     "expect": [
       "plan_complete",
       "unpriced_roles",
-      "Do NOT submit"
+      "Do NOT prepare"
     ]
   },
   {
@@ -439,11 +439,11 @@
       "\"schema_version\":\"1.0\"",
       "\"plan_id\"",
       "\"resource_uri\"",
-      "\"quote_readiness\":\"needs_contact\""
+      "\"quote_readiness\":\"buyer_submission_required\""
     ]
   },
   {
-    "name": "plan_id round-trip restores the plan, links request_quote, and exposes queued status",
+    "name": "plan_id round-trip restores the plan and creates a buyer-operated quote handoff",
     "workflow": "plan_quote_roundtrip",
     "arguments": {
       "plan": {
@@ -458,33 +458,16 @@
             "days": 2
           }
         ]
-      },
-      "quote": {
-        "contact_name": "Eval Buyer",
-        "contact_email": "buyer@example.com",
-        "company": "Eval Company",
-        "event_name": "Eval Expo",
-        "event_type": "trade-show",
-        "city": "Chicago",
-        "event_dates": "March 10, 2027",
-        "roles": [
-          {
-            "role": "registration-staff",
-            "headcount": 6,
-            "shifts": "2 days x 8h"
-          }
-        ],
-        "source_platform": "openclaw",
-        "skill_version": "1.5.0"
       }
     },
     "expect": [
       "plan_id",
       "plan_found",
-      "submitted",
-      "plan_linked",
-      "quote_found",
-      "queued"
+      "handoff_ready",
+      "buyer_submission_required",
+      "form_url",
+      "request-quote",
+      "source_platform"
     ]
   }
 ]

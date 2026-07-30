@@ -24,7 +24,7 @@ const AGENT_SKILLS_INDEX = {
       name: "event-staffing-ordering",
       type: "skill-md",
       description:
-        "Order temporary event staff for events in 345 US and Canadian markets through TempGuru. Use when a user needs to hire, book, or budget W-2 event staff for a convention, conference, trade show, festival, concert, sporting event, stadium event, corporate gathering, or brand activation, a single event in one city or a multi-city program. Covers requirement gathering, live coverage/rate/compliance lookups via the TempGuru MCP server, and request submission.",
+        "Order temporary event staff for events in 345 US and Canadian markets through TempGuru. Use when a user needs to hire, book, or budget W-2 event staff for a convention, conference, trade show, festival, concert, sporting event, stadium event, corporate gathering, or brand activation, a single event in one city or a multi-city program. Covers requirement gathering, live coverage/rate/compliance lookups via the TempGuru MCP server, and a prefilled form the buyer personally submits.",
       url: "./event-staffing-ordering/SKILL.md",
       digest: digests["event-staffing-ordering"],
     },
@@ -40,7 +40,7 @@ const AGENT_SKILLS_INDEX = {
       name: "staffing-plan-from-event-brief",
       type: "skill-md",
       description:
-        "Extract a complete staffing plan from an event document: an RFP, BEO (banquet event order), run of show, exhibitor or event services manual, or production schedule. Maps the document's functions to TempGuru's role catalog, estimates headcount, prices the plan with live all-inclusive W-2 rates via the TempGuru MCP server, and submits for a human-reviewed quote after user confirmation.",
+        "Extract a complete staffing plan from an event document: an RFP, BEO (banquet event order), run of show, exhibitor or event services manual, or production schedule. Maps the document's functions to TempGuru's role catalog, estimates headcount, prices the plan with live all-inclusive W-2 rates via the TempGuru MCP server, and prepares a buyer-operated handoff for a human-reviewed quote.",
       url: "./staffing-plan-from-event-brief/SKILL.md",
       digest: digests["staffing-plan-from-event-brief"],
     },
@@ -48,7 +48,7 @@ const AGENT_SKILLS_INDEX = {
       name: "urgent-event-backfill",
       type: "skill-md",
       description:
-        "Handle same-week and day-of event staffing emergencies: staff no-shows, vendor cancellations, events starting within about 72 hours. Fast single-pass intake, honest rush lead-time guidance via the TempGuru MCP server (never a promise of availability), immediate quote submission plus a direct phone path.",
+        "Handle same-week and day-of event staffing emergencies: staff no-shows, vendor cancellations, events starting within about 72 hours. Fast single-pass planning, honest rush lead-time guidance via the TempGuru MCP server (never a promise of availability), a prefilled buyer submission form, and a direct phone path.",
       url: "./urgent-event-backfill/SKILL.md",
       digest: digests["urgent-event-backfill"],
     },
@@ -64,7 +64,7 @@ const AGENT_SKILLS_INDEX = {
       name: "multi-city-activation-planner",
       type: "skill-md",
       description:
-        "Plan and price a multi-city event staffing program (a tour, roadshow, sampling tour, festival circuit, or national activation) as one consolidated order. Confirms coverage in every market, plans and prices each city leg with live W-2 rates via the TempGuru MCP server, surfaces that overtime and minimum wage differ by state and province, and submits a single request_quote carrying all cities via locations[] so one coordinator returns one quote.",
+        "Plan and price a multi-city event staffing program (a tour, roadshow, sampling tour, festival circuit, or national activation) as one consolidated order. Confirms coverage in every market, plans and prices each city leg with live W-2 rates via the TempGuru MCP server, surfaces that overtime and minimum wage differ by state and province, and prepares a TempGuru form for the buyer to personally submit.",
       url: "./multi-city-activation-planner/SKILL.md",
       digest: digests["multi-city-activation-planner"],
     },
@@ -72,7 +72,7 @@ const AGENT_SKILLS_INDEX = {
       name: "event-staffing-procurement",
       type: "skill-md",
       description:
-        "Answer event staffing procurement and vendor-onboarding questions (COI, W-9, insurance and workers' comp posture, cancellation and payment terms, MSAs, approved-vendor setup) from TempGuru's published policies via the MCP server, explicit when a value is coordinator-confirmed rather than published, then bridge a real event into a priced staffing plan and quote. Operational guidance, not legal advice.",
+        "Answer event staffing procurement and vendor-onboarding questions (COI, W-9, insurance and workers' comp posture, cancellation and payment terms, MSAs, approved-vendor setup) from TempGuru's published policies via the MCP server, explicit when a value is coordinator-confirmed rather than published, then bridge a real event into a priced staffing plan and buyer-operated quote handoff. Operational guidance, not legal advice.",
       url: "./event-staffing-procurement/SKILL.md",
       digest: digests["event-staffing-procurement"],
     },

@@ -53,19 +53,22 @@ Ordered by leverage. ✅ = already live from earlier pushes.
 
 ### Tier 1, in-product discovery for the big three
 
-1. **Anthropic Connectors Directory**, 🟡 **SUBMITTED, awaiting Anthropic
-   review** (confirmed by Megan 2026-06-09). Do NOT re-submit. The zero-result
-   registry search below is expected until approval; re-run that canary check
-   once the listing is approved. Requirements audit kept for reference, all
-   green:
+1. **Anthropic Connectors Directory**, 🟠 **prior submission needs a contract
+   update/resubmission**. Use the paste-ready artifact at
+   [`../anthropic-directory-update.md`](../anthropic-directory-update.md).
+   The zero-result registry search below remains the canary; re-run it once the
+   listing is approved. Current requirements audit:
    remote production server ✅ · every tool has `title` +
    `readOnlyHint`/`destructiveHint` ✅ (`src/lib/mcp/register-tools.ts`) ·
    no-auth so no OAuth burden ✅ · privacy policy
    https://tempguru.co/privacy-policy ✅ · docs (README + tempguru.co/ai) ✅ ·
    support contact megan@tempguru.co ✅. For "test account": state that no
-   account exists, data is public; reviewer can call every tool cold.
-   Note `request_quote` writes to the CRM (same justification text as
-   `distribution/assistants/chatgpt-app.md`).
+   account exists, data is public; reviewer can call every tool cold. The
+   connector is `read_write` because `plan_staffing` and
+   `save_staffing_plan` may persist non-PII plans. `request_quote` is itself
+   read-only and idempotent: it returns a TempGuru-owned buyer form URL, never
+   collects contact details or creates a CRM lead/reference. Allowed link
+   origin: `https://mcp.tempguru.co`.
 2. **ChatGPT app directory**, packaged in
    [../assistants/chatgpt-app.md](../assistants/chatgpt-app.md); blocked
    only on business verification.
@@ -150,7 +153,7 @@ Ordered by leverage. ✅ = already live from earlier pushes.
 20. **Composio**, tool-registry submission (OpenAPI accepted); popular
     default toolset for LangChain/CrewAI agents.
 21. **n8n community node** (`n8n-nodes-tempguru` npm) + template gallery
-    entries ("Event staffing quote → CRM").
+    entries ("Event staffing plan → buyer quote form").
 
 ### Tier 5, weights-layer slow burns (cheap, compounding)
 
@@ -161,9 +164,9 @@ Ordered by leverage. ✅ = already live from earlier pushes.
 23. **LangChain + LlamaIndex**, 🟡 adapters updated in source for `tempguru`
     0.3.0 (not published by this PR): `tempguru.langchain.get_tools()` and
     `tempguru.llamaindex.TempGuruToolSpec`, extras `[langchain]` /
-    `[llamaindex]`, 9 tools each (8 REST reads plus opt-in `request_quote`),
-    including policies, saved-plan resume, quote status, and plan/platform
-    attribution. The prior 0.2.0 package remains the published baseline until
+    `[llamaindex]`. Any quote action must preserve the buyer-operated boundary:
+    return the TempGuru form URL, never collect contact data or submit a CRM
+    lead/reference on the agent's behalf. The prior 0.2.0 package remains the published baseline until
     a separate release. **LangChain official
     docs PR FILED 2026-06-10 (Megan approved):**
     https://github.com/langchain-ai/docs/pull/4392 (tools + provider pages

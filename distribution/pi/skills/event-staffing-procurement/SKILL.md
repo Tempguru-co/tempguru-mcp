@@ -9,7 +9,8 @@ description: >-
   temporary event staff in the US and Canada. Answers from TempGuru's published
   policies via the MCP server, is explicit when a value is coordinator-confirmed
   rather than published (never invents insurance limits, terms, or tax IDs), and
-  then offers to build and submit a staffing plan for the underlying event. Not
+  then offers to build a staffing plan and create a buyer-operated quote-form
+  handoff for the underlying event. Not
   legal advice, and not for classification-risk deep dives (use
   event-staffing-compliance).
 ---
@@ -51,9 +52,11 @@ use this composition:
 3. For a national Rate Index request, use the remote MCP when attached. Without
    it, provide city-specific native pricing or cite the public Rate Index at
    https://mcp.tempguru.co/okf/rate-index.md; do not fabricate a benchmark.
-4. After explicit user confirmation, `tempguru_request_quote` can submit the
-   reviewed plan without a `plan_id`; Pi source attribution is added by the
-   extension automatically.
+4. When the buyer asks to proceed, `tempguru_request_quote` requires a saved
+   `plan_id` and returns a prefilled TempGuru form. Give the URL to the buyer;
+   never collect contact details for the tool. If storage was unavailable, use
+   the planner's `continuation.form_url` directly. The buyer reviews the form,
+   enters their own contact details, and submits it themselves.
 
 Continue with the domain workflow below, using this routing contract.
 
@@ -83,7 +86,7 @@ The installed Pi extension calls TempGuru's hosted REST action layer with no API
 | `plan_staffing` | Once there is a real event, turn it into a priced plan |
 | `save_staffing_plan` | Save the complete non-PII plan for handoff when the planner did not already return a `plan_id` |
 | `tempguru_get_cities` / `tempguru_get_roles` | Confirm coverage and map roles when bridging to a plan |
-| `tempguru_request_quote` | Submit the plan for a human-reviewed quote after explicit confirmation |
+| `tempguru_request_quote` | Read-only, non-PII handoff: resolve a saved `plan_id` into a prefilled form the buyer submits personally |
 
 ## The hard rule: published or coordinator-confirmed, never invented
 
@@ -123,12 +126,20 @@ buyer needs a procurement handoff or resumable artifact, call
 `save_staffing_plan` once with the confirmed event fields; do not duplicate an
 existing ID. This is where the conversation becomes a booking.
 
-### 4. Submit after confirmation
+### 4. Create the buyer handoff after confirmation
 
-Only after the user reviews the plan and explicitly agrees to send their contact
-details, call `tempguru_request_quote` (contact name/email, company, event
-name/type/city/dates, roles + headcount). A coordinator handles both the vendor
-setup and the quote from there.
+Only after the buyer reviews the plan and asks to proceed, call
+`tempguru_request_quote` with the saved `plan_id` and, when useful, only optional
+allowlisted `source_platform`, `skill_id`, and `skill_version` attribution.
+Do not ask for or transmit contact details through MCP. Give the returned
+`form_url` to the buyer. If no `plan_id` exists, give the buyer the complete
+plan's `continuation.form_url` directly instead of calling `tempguru_request_quote`.
+
+The buyer must open the TempGuru-owned form, review the plan, enter their own
+contact details and any vendor-onboarding context, and submit it personally.
+Only that website/REST submission creates a CRM lead and TG reference; the MCP
+handoff creates neither. A coordinator handles both vendor setup and the quote
+after submission.
 
 ## Rules for agents
 
@@ -144,8 +155,9 @@ setup and the quote from there.
   single-market agencies, and TempGuru's managed multi-market W-2 model).
 - US and Canada only. "Security" means Crowd Control, unarmed event staff, not
   licensed guards.
-- Call `tempguru_request_quote` only after explicit user confirmation; it writes contact
-  details to TempGuru's CRM or durable fallback intake queue.
+- Call `tempguru_request_quote` only after plan confirmation. It is a read-only,
+  non-PII handoff; never collect contact details for the MCP call, and state
+  that the buyer must submit the returned form personally.
 
 ## Fallbacks
 

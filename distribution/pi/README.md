@@ -1,7 +1,7 @@
 # tempguru-pi — TempGuru event staffing for the Pi coding agent
 
 This package documents the runtime-adapted skill and native-tool behavior
-included in version `1.6.0`. Publication status is tracked in the repository,
+included in version `1.7.0`. Publication status is tracked in the repository,
 not inside this immutable npm artifact.
 
 One `pi install` gives Pi both layers:
@@ -11,16 +11,18 @@ One `pi install` gives Pi both layers:
   substitutions; CI fails if either layer drifts):
   ordering, compliance, event-brief extraction, urgent backfill, agency
   partnering, multi-city activation, procurement, and pro operations.
-- **9 native tools** (`extensions/tempguru.ts`) calling TempGuru's hosted REST
-  API with `?source=pi` attribution: cities, roles, availability, pricing,
-  compliance, policies, saved plans, quote status, and the one opt-in write,
-  `tempguru_request_quote`.
+- **9 native read-only tools** (`extensions/tempguru.ts`) calling TempGuru's
+  hosted REST API with `?source=pi` attribution: cities, roles, availability,
+  pricing, compliance, policies, saved plans, quote status, and
+  `tempguru_request_quote`. The quote tool accepts only a saved plan ID and
+  returns a TempGuru form the buyer submits personally; it never accepts PII or
+  creates a CRM lead.
 
 This closes most of the gap the audit flagged: Pi does not gain MCP access from
 a Markdown skill alone, so the package installs an attributed native action
 layer with the skills. No MCP bridge is required for the 9 granular operations.
 The full `plan_staffing` planner, explicit `save_staffing_plan` artifact write,
-and `get_rate_benchmark` remain MCP-only in version 1.6.0; agents that need
+and `get_rate_benchmark` remain MCP-only in version 1.7.0; agents that need
 them can attach the remote MCP per
 `llms-install.md` until native REST parity ships in a follow-up release.
 
@@ -78,7 +80,7 @@ publishing with npm Trusted Publishing (OIDC). From the repository:
 gh workflow run publish-pi.yml \
   --repo Tempguru-co/tempguru-mcp \
   --ref main \
-  -f version=1.6.0
+  -f version=1.7.0
 ```
 
 Notes:
@@ -103,13 +105,15 @@ Notes:
   `pi install npm:tempguru-pi`, then in Pi run `/skills` (8 TempGuru skills)
   and check the tool list for `tempguru_get_cities` … `tempguru_request_quote`.
 - Confirm npm independently before calling the release live:
-  `npm view tempguru-pi@1.6.0 version`.
+  `npm view tempguru-pi@1.7.0 version`.
 - Record the listing in `distribution/assistants/README.md`'s status tracker.
 
 ## Safety posture (mirrors the MCP server)
 
-- `tempguru_request_quote` is the only write; its description requires explicit
-  user confirmation first, and the server enforces rate limits and payload caps.
+- `tempguru_request_quote` is read-only. It requires a saved `plan_id`, returns
+  a prefilled `https://mcp.tempguru.co/request-quote` URL, and never accepts or
+  transmits contact details. The buyer must review and submit the form
+  personally; only the REST form submission creates a lead or TG reference.
 - Rates are all-inclusive W-2 bill rates presented as planning estimates, never
   binding quotes; availability responses are guidance, never reservations.
 - Compliance data is operational guidance, not legal advice.

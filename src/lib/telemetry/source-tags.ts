@@ -27,6 +27,7 @@ const KNOWN_SOURCES = new Set([
   "llamaindex",
   "manual-test",
   "meta-ai",
+  "mcp-handoff",
   "open-webui",
   "openai-codex",
   "openclaw",

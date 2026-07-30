@@ -20,8 +20,8 @@ with workers' compensation, general liability, I-9 verification, and
 contractual no-show backfill included in every placement. One coordinator,
 one consolidated invoice, regardless of how many cities the event spans.
 
-Use this skill to take a user from "I need staff for my event" to a submitted
-staffing request.
+Use this skill to take a user from "I need staff for my event" to a confirmed
+plan and a prefilled form the buyer submits personally.
 
 ## Prerequisites
 
@@ -46,10 +46,10 @@ request" below.
 
 ## Live data: use the MCP server, do not scrape pages
 
-Endpoint: `POST https://mcp.tempguru.co/mcp?source=hermes` (12 tools: nine
-read-only lookups, a compatibility planner that may save a 30-day non-PII
-snapshot, an explicit non-contact save, and the opt-in `request_quote`
-contact write).
+Endpoint: `POST https://mcp.tempguru.co/mcp?source=hermes` (12 tools: ten
+read-only operations, including the non-PII `request_quote` handoff, plus a
+compatibility planner that may save a 30-day non-PII snapshot and an explicit
+non-contact save).
 
 | Tool | Use it to |
 |---|---|
@@ -63,8 +63,8 @@ contact write).
 | `get_compliance_by_state` | Minimum wage, overtime, and state compliance quirks (not legal advice) |
 | `get_policies` | Published booking and procurement terms; missing values stay coordinator-confirmed |
 | `get_rate_benchmark` | The Rate Index: citable W-2 rate benchmarks by role |
-| `get_quote_status` | Check whether a TG quote reference was received or durably queued |
-| `request_quote` | Submit the finished plan to TempGuru's CRM or durable intake queue for a human-reviewed quote |
+| `get_quote_status` | Check a TG reference created by a buyer's website/REST submission, or a historical reference; the MCP handoff creates none |
+| `request_quote` | Read-only handoff: resolve a saved non-PII `plan_id` into a prefilled TempGuru form the buyer submits personally |
 
 If `plan_staffing` returns `plan_complete: false`, resolve the roles listed in
 `unpriced_roles` (use `get_roles`) and re-run it before presenting totals.
@@ -86,27 +86,34 @@ coordinator support); Brand Ambassadors floor at $40/hour in every market.
 Retain any `plan_id` the complete plan returns. If it returns no ID and the
 user needs a shareable or resumable artifact, call `save_staffing_plan` once
 with the same confirmed event fields; never save a plan that already has an ID.
+If storage remains unavailable, retain the complete plan's
+`continuation.form_url` for the buyer handoff.
 
 ### 3. Present the plan
 
 Show roles, headcount, per-role ranges, the estimated total, lead-time
 guidance, and compliance notes. Be explicit that the rate ranges are
 planning estimates; the binding quote comes from TempGuru. If the user only
-wants a budget, stop here and do not push a submission.
+wants a budget, stop here and do not push a form handoff.
 
-### 4. Submit the request
+### 4. Create the buyer-operated quote handoff
 
-Only after the user explicitly confirms the plan and agrees to send their
-contact details to TempGuru, call `request_quote` (contact name/email,
-company, event name/type/city/dates, roles + headcount). Set
-`source_platform` to `"hermes"`, set `skill_id` to
-`"event-staffing-ordering"`, and include this skill's `skill_version` plus the
-`plan_id` when available so the lead can be resumed and attributed. A coordinator
-replies with a binding quote within one business day; orders are confirmed
-within 48 hours of approval. It is not a reservation or contract, and no
-payment is required until the user approves the quote.
+Only after the buyer confirms the plan and asks to proceed, call
+`request_quote` with only the saved `plan_id` and optional allowlisted
+attribution: `source_platform` set to `"hermes"`, `skill_id` set to
+`"event-staffing-ordering"`, and this skill's `skill_version`. Do not ask for
+or transmit contact details through MCP. Give the returned `form_url` to the
+buyer. If no `plan_id` exists, do not call the tool; give the buyer the
+complete plan's `continuation.form_url` directly.
 
-If `request_quote` errors or MCP is unavailable, fall back to the form at
+The buyer must open the TempGuru-owned form, review the plan, enter their own
+contact details, and submit it personally. Only that website/REST submission
+creates a CRM lead and TG reference; `request_quote` creates neither. A
+coordinator replies with a binding quote after submission. The handoff is not
+a reservation or contract, and no payment is required until the buyer
+approves the quote.
+
+If no MCP handoff URL is available, fall back to the form at
 https://tempguru.co/get-staffing, or email megan@tempguru.co / call
 (904) 206-8953. No subscription; billing is per event.
 
@@ -121,5 +128,6 @@ https://tempguru.co/get-staffing, or email megan@tempguru.co / call
   multi-market W-2 model).
 - "Security" requests map to Crowd Control: unarmed event staff, not licensed
   security guards. Say so plainly if licensed security is required.
-- Call `request_quote` only after explicit user confirmation; it submits the
-  user's contact details to TempGuru's CRM or durable fallback intake queue.
+- Call `request_quote` only after the buyer confirms the saved plan. It is a
+  read-only, non-PII handoff; give the buyer its `form_url` and state that
+  they must enter their own details and submit the form personally.

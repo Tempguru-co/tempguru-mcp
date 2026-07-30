@@ -50,8 +50,9 @@ vetting.
 ## Live data: use the MCP server
 
 Endpoint: `POST https://mcp.tempguru.co/mcp` (streamable HTTP, no
-auth). Three read-only tools are useful here. The one write tool,
-`request_quote`, is not: see the routing rule below.
+auth). Three read-only catalog tools are useful here. The planning persistence
+tools and the buyer-only `request_quote` form handoff are not: see the routing
+rule below.
 
 Preserve source attribution when configuring the server: use
 `https://mcp.tempguru.co/mcp?source=hermes` for Hermes,
@@ -66,9 +67,9 @@ use their recognized runtime label; omit the tag rather than inventing one.
 
 ## The routing rule (critical)
 
-`request_quote` is for buyers ordering staff: it creates a sales lead
-in TempGuru's CRM and a coordinator replies with a binding client
-quote. **Never submit a partner inquiry through it.** Partner inquiries
+`request_quote` is only for buyers proceeding from a saved staffing plan to a
+TempGuru quote form. It accepts no partner inquiry or contact data and creates
+no CRM lead itself. **Never use it for a partner inquiry.** Partner inquiries
 go by email or phone: **megan@tempguru.co** or **(904) 206-8953**.
 
 A suggested email format that helps the coordinator triage (a
@@ -132,10 +133,9 @@ market is how its orders get filled there.
 
 ## Rules for agents
 
-- Never call `request_quote` for a partner inquiry. It is a buyer
-  tool; a partner inquiry submitted through it becomes a mislabeled
-  sales lead. The partner channel is email or phone, never
-  `request_quote`.
+- Never call `request_quote` for a partner inquiry. It requires a buyer's saved
+  staffing plan and returns a buyer quote form; it neither accepts partner
+  details nor routes them. The partner channel is email or phone.
 - Do not invent vetting criteria, partner pay rates, margins, revenue
   splits, contract terms, or timelines. The coordinator confirms all
   of it during vetting.

@@ -34,10 +34,18 @@ const TIER_COUNTS = CITIES_DATA.cities.reduce(
   { hub: 0, mid: 0, small: 0 },
 );
 const REGISTER_TOOLS_SOURCE = read("src/lib/mcp/register-tools.ts");
+const QUOTE_HANDOFF_SOURCE = read("src/lib/mcp/quote-handoff.ts");
 const TOOLS = [
   ...new Set(
     [...REGISTER_TOOLS_SOURCE.matchAll(
       /server\.registerTool\(\s*"([a-z_]+)"/g,
+    )].map((match) => match[1]),
+  ),
+];
+const PROMPTS = [
+  ...new Set(
+    [...REGISTER_TOOLS_SOURCE.matchAll(
+      /server\.registerPrompt\(\s*"([a-z0-9-]+)"/g,
     )].map((match) => match[1]),
   ),
 ];
@@ -510,6 +518,69 @@ if (!/"plan_staffing"[\s\S]*?readOnlyHint:\s*false[\s\S]*?destructiveHint:\s*fal
 if (!/"save_staffing_plan"[\s\S]*?readOnlyHint:\s*false[\s\S]*?destructiveHint:\s*false/.test(REGISTER_TOOLS_SOURCE)) {
   errors.push("src/lib/mcp/register-tools.ts: save_staffing_plan must advertise a non-read-only, non-destructive artifact write");
 }
+if (!/"request_quote"[\s\S]*?readOnlyHint:\s*true[\s\S]*?destructiveHint:\s*false[\s\S]*?idempotentHint:\s*true/.test(REGISTER_TOOLS_SOURCE)) {
+  errors.push("src/lib/mcp/register-tools.ts: request_quote must advertise a read-only, non-destructive, idempotent buyer handoff");
+}
+for (const forbidden of ["contact_name", "contact_email", "contact_phone", "company"]) {
+  if (QUOTE_HANDOFF_SOURCE.includes(`${forbidden}:`)) {
+    errors.push(`src/lib/mcp/quote-handoff.ts: authless MCP input exposes forbidden contact field ${forbidden}`);
+  }
+}
+if (
+  !QUOTE_HANDOFF_SOURCE.includes("QUOTE_SKILL_VERSION_PATTERN") ||
+  !read("distribution/pi/extensions/tempguru.ts").includes(
+    "QUOTE_SKILL_VERSION_PATTERN.test",
+  ) ||
+  !read("distribution/pi/extensions/tempguru.ts").includes(
+    "QUOTE_SKILL_ID_SET.has",
+  )
+) {
+  errors.push("MCP/Pi quote handoff attribution must reject free text before constructing buyer URLs");
+}
+if (
+  REGISTER_TOOLS_SOURCE.includes("createLead(") ||
+  REGISTER_TOOLS_SOURCE.includes("quoteSubmittedPayload(")
+) {
+  errors.push("src/lib/mcp/register-tools.ts: MCP registry must not invoke the CRM/contact submission path");
+}
+
+// Anthropic's directory entry is maintained in their portal, so keep a
+// paste-ready checked-in mirror and fail the release if the live surface
+// changes without an accompanying listing update.
+{
+  const path = "distribution/anthropic-directory-update.md";
+  const body = read(path);
+  for (const fragment of [
+    "`tempguru-event-staffing`",
+    "`read_write`",
+    `${TOOLS.length} tools`,
+    `${PROMPTS.length} prompts`,
+    `${SKILLS.length} resources`,
+    "https://mcp.tempguru.co/mcp",
+    "https://mcp.tempguru.co",
+    "buyer must personally",
+  ]) {
+    if (!body.toLowerCase().includes(fragment.toLowerCase())) {
+      errors.push(`${path}: Anthropic listing mirror missing ${fragment}`);
+    }
+  }
+  for (const tool of TOOLS) {
+    if (!body.includes(`\`${tool}\``)) {
+      errors.push(`${path}: Anthropic listing mirror missing tool ${tool}`);
+    }
+  }
+  for (const prompt of PROMPTS) {
+    if (!body.includes(`\`${prompt}\``)) {
+      errors.push(`${path}: Anthropic listing mirror missing prompt ${prompt}`);
+    }
+  }
+  for (const skill of SKILLS) {
+    const uri = `https://tempguru.co/.well-known/skills/${skill}/SKILL.md`;
+    if (!body.includes(uri)) {
+      errors.push(`${path}: Anthropic listing mirror missing resource ${uri}`);
+    }
+  }
+}
 for (const p of [
   "README.md",
   "README.zh-CN.md",
@@ -524,14 +595,33 @@ for (const p of [
   "distribution/ai-agents-page.zh-CN.html",
 ]) {
   const body = read(p);
-  if (/\b(?:ten|10) read-only\b/i.test(body) || /(?:十个|10\s*个)只读/.test(body)) {
-    errors.push(`${p}: stale claim that plan_staffing is read-only`);
+  if (/\bnine read-only\b/i.test(body) || /(?:九个|9\s*个)只读/.test(body)) {
+    errors.push(`${p}: stale nine-read-only count; request_quote is now a tenth read-only handoff`);
   }
   if (!body.includes("plan_staffing") || !/(?:non-destructive|不具破坏性|非联系信息|saved-plan write)/i.test(body)) {
     errors.push(`${p}: saved-plan planner side effect is not disclosed`);
   }
   if (!body.includes("save_staffing_plan")) {
     errors.push(`${p}: explicit saved-plan tool is missing`);
+  }
+}
+for (const [path, buyerMarker] of [
+  ["distribution/assistants/system-prompt.md", "buyer-operated"],
+  ["distribution/assistants/system-prompt.zh-CN.md", "买方本人"],
+]) {
+  const body = read(path);
+  if (
+    !body.includes("request_quote") ||
+    !body.includes("submitQuoteRequest") ||
+    !body.includes(buyerMarker)
+  ) {
+    errors.push(`${path}: must distinguish the MCP buyer handoff from the contact-bearing REST Action`);
+  }
+  if (
+    /same CRM destination, same confirmation payload as the MCP tool/i.test(body) ||
+    /有 request_quote 工具时直接调用/.test(body)
+  ) {
+    errors.push(`${path}: stale direct MCP quote-submission instructions remain`);
   }
 }
 
@@ -758,6 +848,21 @@ if (!read("scripts/build-llms-worker.mjs").includes('process.argv.includes("--fr
 }
 if (llmsWorker.includes("tempguru-agent-skills")) {
   errors.push("cloudflare/llms-worker.js: points agents at the stale two-skill repository");
+}
+if (
+  llmsWorker.includes("request_quote / submitQuoteRequest") ||
+  llmsWorker.includes("request_quote is a no-auth public MCP write tool")
+) {
+  errors.push("cloudflare/llms-worker.js: conflates the read-only MCP buyer handoff with the contact-bearing REST write");
+}
+for (const fragment of [
+  "REST submitQuoteRequest Action after explicit confirmation",
+  "MCP request_quote, which only returns a buyer-operated form",
+  'request_quote (MCP) for a buyer-form handoff',
+]) {
+  if (!llmsWorker.includes(fragment)) {
+    errors.push(`cloudflare/llms-worker.js: missing MCP/REST quote-boundary guidance: ${fragment}`);
+  }
 }
 for (const fragment of [
   "https://github.com/Tempguru-co/tempguru-mcp",

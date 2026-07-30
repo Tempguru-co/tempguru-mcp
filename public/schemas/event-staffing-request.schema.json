@@ -186,7 +186,8 @@
       "description": "Optional version of the TempGuru staffing skill used to assemble this request",
       "type": "string",
       "minLength": 1,
-      "maxLength": 40
+      "maxLength": 40,
+      "pattern": "^[0-9]{1,4}\\.[0-9]{1,4}\\.[0-9]{1,4}(?:-[0-9A-Za-z.-]{1,24})?(?:\\+[0-9A-Za-z.-]{1,24})?$"
     },
     "skill_id": {
       "description": "Optional canonical TempGuru skill slug that assembled this request",
@@ -222,5 +223,5 @@
   "additionalProperties": false,
   "$id": "https://tempguru.co/schemas/event-staffing-request.schema.json",
   "title": "TempGuru Event Staffing Quote Request",
-  "description": "The exact public contract accepted by the TempGuru request_quote MCP tool and POST /api/v1/quote-requests REST mirror."
+  "description": "The exact public contract accepted by the buyer-operated POST /api/v1/quote-requests endpoint. Authless MCP request_quote accepts only a saved non-PII plan reference and returns a form link."
 }

@@ -22,8 +22,8 @@ United States or Canada.
 | `get_compliance_by_state` | Minimum wage, overtime thresholds, and state quirks |
 | `get_policies` | Published booking/procurement policies and coordinator-confirmed gaps |
 | `get_rate_benchmark` | Citable Rate Index: W-2 rate benchmarks by role (typical + national range; Brand Ambassadors by tier) |
-| `get_quote_status` | Check whether a quote reference was received or durably queued |
-| `request_quote` | Submit a confirmed staffing plan to TempGuru's CRM or durable intake queue (opt-in write) |
+| `get_quote_status` | Check a TG reference created by a buyer's website/REST submission, or a historical reference; `request_quote` does not create one |
+| `request_quote` | Read-only, non-PII handoff. Resolve a saved `plan_id` into a prefilled TempGuru form for the buyer to open and submit personally |
 
 ## Workflow
 
@@ -38,12 +38,14 @@ United States or Canada.
    `get_compliance_by_state` only for unresolved details or follow-ups.
 5. Present the OT-adjusted total range as a planning estimate and surface any
    policy/compliance items that still require coordinator confirmation.
-6. On the user's explicit confirmation, call `request_quote` with contact +
-   event details, the existing `plan_id` when available,
-   `source_platform: "gemini-cli"`, and the canonical
-   `skill_id` plus `skill_version: "1.6.0"`. Save the TG reference and use `get_quote_status` for
-   receipt questions. A coordinator replies with a binding quote within one
-   business day; orders confirm within 48 hours.
+6. When the buyer confirms the plan and asks to proceed, call `request_quote`
+   with the saved `plan_id`, `source_platform: "gemini-cli"`, and the canonical
+   `skill_id` plus `skill_version: "1.7.0"`. Give the returned `form_url` to
+   the buyer. Do not ask for or transmit contact details through MCP: the buyer
+   must open the form, review the plan, enter their own contact details, and
+   submit it personally. Only that website/REST submission creates a lead and
+   TG reference. If no `plan_id` was saved, give the buyer the complete plan's
+   `continuation.form_url` directly instead of calling `request_quote`.
 
 ## Rules
 
@@ -58,7 +60,8 @@ United States or Canada.
 - Workers are W-2 employees, never 1099 contractors, that is the point.
   Explain misclassification/joint-employer risk by arrangement type, never
   by naming competitors.
-- If `request_quote` fails, fall back to
+- If `request_quote` cannot resolve a saved plan, re-plan or use the complete
+  plan's `continuation.form_url`. If MCP is unavailable, fall back to
   https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=gemini-cli
   or megan@tempguru.co or (904) 206-8953.
 

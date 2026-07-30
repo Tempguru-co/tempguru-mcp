@@ -18,11 +18,11 @@
 //   - get_policies                published booking/procurement terms
 //   - get_rate_benchmark          citable W-2 Rate Index benchmark
 //   - get_quote_status            received/queued quote status by TG reference
-//   - request_quote              submit a staffing plan → Notion Inbound Deal Pipeline
+//   - request_quote              return a prefilled buyer-operated quote form
 //
 // plan_staffing retains its Phase A non-destructive saved-plan side effect for
 // compatibility. save_staffing_plan is the explicit non-contact saved-plan
-// write; request_quote is the separate opt-in contact submission.
+// write; request_quote is read-only and never accepts or transmits contact data.
 //
 // Transport: official dual-era HTTP entry (2025 initialize/streamable HTTP
 // plus the 2026-07-28 per-request envelope protocol).
@@ -144,7 +144,7 @@ async function withAcceptNormalization(request: Request): Promise<Response> {
   const ctx = {
     userAgent: request.headers.get("user-agent") ?? "",
     ipCountry: request.headers.get("x-vercel-ip-country") ?? "",
-    // Client IP for the request_quote rate limiter (hashed there, never stored
+    // Client IP for bounded public read/save/status rate limits (never stored
     // raw). Vercel sets x-forwarded-for with the real client first.
     ip:
       (request.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() ||

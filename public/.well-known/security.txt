@@ -1,6 +1,7 @@
-# TempGuru security contact (RFC 9116). request_quote accepts contact PII with
-# no auth, so this gives scanners and enterprise allowlist reviewers a real
-# contact. Refresh the Expires date periodically.
+# TempGuru security contact (RFC 9116). The authless MCP request_quote tool
+# accepts only a saved non-PII plan ID and returns a buyer-operated form; it
+# never accepts or transmits contact details. Refresh the Expires date
+# periodically.
 Contact: mailto:megan@tempguru.co
 Contact: https://tempguru.co/get-staffing
 Expires: 2027-07-01T00:00:00.000Z

@@ -2,9 +2,9 @@
   "openapi": "3.1.0",
   "info": {
     "title": "TempGuru Public Data API",
-    "version": "1.6.0",
+    "version": "1.7.0",
     "summary": "Public event-staffing data for the US and Canada: eight read-only operations plus one opt-in quote-request submission.",
-    "description": "Public event-staffing data for the US and Canada, served by TempGuru (Temporary Assistance Guru, Inc.). Eight read-only operations plus a single opt-in write operation (`submitQuoteRequest`).\n\n**No authentication required.** The read endpoints return public data equivalent to what is published on tempguru.co, city footprint, staffing roles, hourly rate ranges, lead-time guidance, and state-level employment compliance summaries.\n\n**About the rates.** All hourly figures are *all-inclusive W-2 bill rates*: they cover the worker's pay, employer-side payroll taxes (FICA/FUTA/SUTA), workers' compensation insurance, general liability insurance, and dedicated coordinator support. Published hourly bill rates have no add-on fees or invoice-time markup. Rate ranges are *planning estimates*, a real quote requires event specifics and is provided after a quote request is reviewed by a coordinator.\n\n**About availability.** The `availability` endpoint returns *lead-time guidance based on city tier*, not a real-time reservation or hold on staff. TempGuru staffs to demand from a 100,000+ W-2 worker network across 345 markets; bookings are confirmed through the standard quote-and-confirmation flow, not via this API.\n\n**About quote submission.** `POST /api/v1/quote-requests` is the only write operation in this API. It is opt-in by design: call it only after the user has reviewed the staffing plan and explicitly confirmed they want to submit it. It creates a structured lead for human review, it does **not** reserve staff, guarantee pricing or availability, or create any contract, and **no payment** is required until the user approves the resulting quote. Contact and event details are delivered to TempGuru's CRM or its durable fallback queue and configured notification processor so a coordinator can reply; they are never written to telemetry or analytics.\n\n**Agent guidance.** This API exists so AI agents and integrators can ground answers about TempGuru in live, structured data instead of scraping web pages. Combine it with the MCP server at `https://mcp.tempguru.co/mcp` if your agent stack speaks Model Context Protocol, the two surfaces expose the same data and the same quote-submission operation through different transports.",
+    "description": "Public event-staffing data for the US and Canada, served by TempGuru (Temporary Assistance Guru, Inc.). Eight read-only operations plus a single opt-in write operation (`submitQuoteRequest`).\n\n**No authentication required.** The read endpoints return public data equivalent to what is published on tempguru.co, city footprint, staffing roles, hourly rate ranges, lead-time guidance, and state-level employment compliance summaries.\n\n**About the rates.** All hourly figures are *all-inclusive W-2 bill rates*: they cover the worker's pay, employer-side payroll taxes (FICA/FUTA/SUTA), workers' compensation insurance, general liability insurance, and dedicated coordinator support. Published hourly bill rates have no add-on fees or invoice-time markup. Rate ranges are *planning estimates*, a real quote requires event specifics and is provided after a quote request is reviewed by a coordinator.\n\n**About availability.** The `availability` endpoint returns *lead-time guidance based on city tier*, not a real-time reservation or hold on staff. TempGuru staffs to demand from a 100,000+ W-2 worker network across 345 markets; bookings are confirmed through the standard quote-and-confirmation flow, not via this API.\n\n**About quote submission.** `POST /api/v1/quote-requests` is the only write operation in this API. It is opt-in by design: call it only after the user has reviewed the staffing plan and explicitly confirmed they want to submit it. It creates a structured lead for human review, it does **not** reserve staff, guarantee pricing or availability, or create any contract, and **no payment** is required until the user approves the resulting quote. Contact and event details are delivered to TempGuru's CRM or its durable fallback queue and configured notification processor so a coordinator can reply; they are never written to telemetry or analytics.\n\n**Agent guidance.** This API exists so AI agents and integrators can ground answers about TempGuru in live, structured data instead of scraping web pages. The MCP server at `https://mcp.tempguru.co/mcp` exposes the same public planning data, but its authless `request_quote` tool is intentionally different: it accepts no contact details and returns a prefilled TempGuru form that the buyer submits personally. Do not describe MCP `request_quote` as a lead submission.",
     "contact": {
       "name": "Megan Hayward",
       "email": "megan@tempguru.co",
@@ -1524,7 +1524,7 @@
         }
       },
       "QuoteRequestInput": {
-        "description": "A confirmed staffing plan plus the contact details a coordinator needs to reply. Mirrors the MCP `request_quote` tool's input schema exactly.",
+        "description": "A buyer-submitted staffing plan plus the contact details a coordinator needs to reply. This REST write schema is intentionally separate from the authless MCP request_quote handoff, which accepts no contact details.",
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
         "properties": {
@@ -1712,7 +1712,8 @@
             "description": "Optional version of the TempGuru staffing skill used to assemble this request",
             "type": "string",
             "minLength": 1,
-            "maxLength": 40
+            "maxLength": 40,
+            "pattern": "^[0-9]{1,4}\\.[0-9]{1,4}\\.[0-9]{1,4}(?:-[0-9A-Za-z.-]{1,24})?(?:\\+[0-9A-Za-z.-]{1,24})?$"
           },
           "skill_id": {
             "description": "Optional canonical TempGuru skill slug that assembled this request",

@@ -507,7 +507,6 @@ const SAVE_PLAN_NEXT_ACTION = z.enum([
   "plan_again",
   "retry_save",
   "continue_on_website",
-  "request_quote_without_plan_id",
 ]);
 
 export const SAVE_STAFFING_PLAN_OUTPUT = {
@@ -538,9 +537,9 @@ export const SAVE_STAFFING_PLAN_OUTPUT = {
     .describe("Public no-store REST URI that restores the saved artifact."),
   continuation: SAVE_PLAN_CONTINUATION.optional(),
   quote_readiness: z
-    .literal("needs_contact")
+    .literal("buyer_submission_required")
     .optional()
-    .describe("The plan is complete; contact details are still required before request_quote."),
+    .describe("The buyer must open the handoff form and personally submit their contact details."),
   plan_status: z
     .enum(["plan", "needs_roles", "roles_not_found", "city_not_found"])
     .optional()
@@ -748,27 +747,45 @@ export const RATE_BENCHMARK_SCHEMA = z.object(RATE_BENCHMARK_OUTPUT).superRefine
   }
 });
 
-// ─── request_quote (submitted / graceful failure) ────────────────────────
+// ─── request_quote (authless buyer handoff; never submits contact data) ───
 
-export const REQUEST_QUOTE_OUTPUT = {
-  submitted: z
+export const REQUEST_QUOTE_HANDOFF_OUTPUT = {
+  handoff_ready: z
     .boolean()
-    .describe("true = lead created in TempGuru's CRM (or durably queued); false = submission failed (see error)."),
-  plan_linked: z
+    .describe("true when the saved plan resolved and a prefilled buyer form URL was created."),
+  buyer_submission_required: z
+    .literal(true)
+    .describe("Always true. The buyer, not the agent, must enter contact details and submit the form."),
+  plan_found: z
     .boolean()
+    .describe("Whether the supplied non-PII plan_id resolved before expiry."),
+  plan_id: z.string().regex(/^[A-HJ-NP-Z2-9]{12}$/),
+  form_url: z
+    .string()
+    .url()
     .optional()
-    .describe("true when the supplied plan_id resolved and its saved snapshot was attached to the lead."),
-  deal_name: z.string().optional().describe("CRM deal name, present when submitted."),
-  reference: z.string().optional().describe("Short reference code the buyer can quote when following up."),
-  message: z.string().describe("Human-readable outcome to relay to the user."),
-  next_steps: z.array(z.string()).optional().describe("Present when submitted."),
-  error: z.string().optional().describe("Present when submission failed."),
+    .describe("Prefilled TempGuru-owned review form. Present only when handoff_ready is true."),
+  message: z.string().describe("Human-readable outcome to relay to the buyer."),
+  next_steps: z.array(z.string()).describe("Safe next actions; no agent-side contact collection."),
 };
 
-export const REQUEST_QUOTE_SCHEMA = z.object(REQUEST_QUOTE_OUTPUT).superRefine((value, ctx) => {
-  if (value.submitted) {
-    requireFields(value, ctx, "submitted", ["plan_linked", "deal_name", "reference", "next_steps"]);
-  } else {
-    requireFields(value, ctx, "failed", ["error"]);
-  }
-});
+export const REQUEST_QUOTE_HANDOFF_SCHEMA = z
+  .object(REQUEST_QUOTE_HANDOFF_OUTPUT)
+  .superRefine((value, ctx) => {
+    if (value.handoff_ready) {
+      requireFields(value, ctx, "handoff_ready", ["form_url"]);
+      if (!value.plan_found) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["plan_found"],
+          message: "handoff_ready requires plan_found:true",
+        });
+      }
+    } else if (value.plan_found) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["handoff_ready"],
+        message: "plan_found:true requires handoff_ready:true",
+      });
+    }
+  });

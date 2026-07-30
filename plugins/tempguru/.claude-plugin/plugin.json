@@ -1,7 +1,7 @@
 {
   "name": "tempguru",
-  "version": "1.6.0",
-  "description": "W-2 event staffing tools: plan_staffing planner, live rates and coverage for 345 US/CA markets, state compliance summaries, and human-reviewed quote requests via TempGuru's MCP server. 8 skills: ordering, compliance, event-brief extraction, urgent backfill, agency partnering, multi-city activation, procurement, and pro operations.",
+  "version": "1.7.0",
+  "description": "W-2 event staffing tools: live planning, rates and coverage for 345 US/CA markets, compliance summaries, and a non-PII buyer quote-form handoff via TempGuru's MCP server. 8 skills: ordering, compliance, event-brief extraction, urgent backfill, agency partnering, multi-city activation, procurement, and pro operations.",
   "author": { "name": "TempGuru (Temporary Assistance Guru, Inc.)", "email": "megan@tempguru.co" },
   "homepage": "https://tempguru.co/ai",
   "repository": "https://github.com/Tempguru-co/tempguru-mcp",

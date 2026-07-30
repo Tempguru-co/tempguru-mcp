@@ -80,7 +80,7 @@ const skillsIndex = {
 const agentCard = {
   name: "TempGuru Event Staffing",
   description:
-    "W-2 compliant temporary event staffing for conventions, trade shows, festivals, concerts, sporting events, and brand activations across 345 US and Canadian markets. Checks city coverage, role pricing, lead times, and state compliance. Accepts structured staffing quote requests that route to a human coordinator.",
+    "W-2 compliant temporary event staffing for conventions, trade shows, festivals, concerts, sporting events, and brand activations across 345 US and Canadian markets. Checks city coverage, role pricing, lead times, and state compliance. Prepares a non-PII plan handoff for a buyer to personally submit to a human coordinator.",
   url: "https://mcp.tempguru.co/mcp",
   version: pkg.version,
   provider: { organization: "Temporary Assistance Guru, Inc.", url: "https://tempguru.co" },
@@ -90,7 +90,7 @@ const agentCard = {
       id: "event-staffing-ordering",
       name: "Event Staffing Order",
       description:
-        "Order W-2 compliant temporary event staff for conventions, trade shows, festivals, concerts, sporting events, and brand activations in 345 US and Canadian markets. Checks city coverage, role pricing, availability, and state compliance, then submits a structured quote request.",
+        "Order W-2 compliant temporary event staff for conventions, trade shows, festivals, concerts, sporting events, and brand activations in 345 US and Canadian markets. Checks city coverage, role pricing, availability, and state compliance, then prepares a prefilled form the buyer personally submits.",
       tags: ["event-staffing", "trade-show", "brand-ambassador", "w2", "staffing", "registration"],
       examples: [
         "I need 4 brand ambassadors for a trade show in Austin June 15-17",
@@ -114,7 +114,7 @@ const agentCard = {
       id: "staffing-plan-from-event-brief",
       name: "Staffing Plan From Event Brief",
       description:
-        "Extract a complete staffing plan from an event document (RFP, BEO, run of show, exhibitor manual, production schedule): map functions to roles, estimate headcount, price with live W-2 rates, and submit for a human-reviewed quote.",
+        "Extract a complete staffing plan from an event document (RFP, BEO, run of show, exhibitor manual, production schedule): map functions to roles, estimate headcount, price with live W-2 rates, and prepare a buyer-operated handoff for a human-reviewed quote.",
       tags: ["event-staffing", "rfp", "beo", "run-of-show", "event-planning", "staffing-plan"],
       examples: [
         "Here's the BEO for our gala, how many staff do we need and what will it cost?",
@@ -125,7 +125,7 @@ const agentCard = {
       id: "urgent-event-backfill",
       name: "Urgent Event Backfill",
       description:
-        "Same-week and day-of staffing emergencies: no-shows, vendor cancellations, events within 72 hours. Honest rush lead-time guidance, immediate quote submission, and a direct phone path. Never promises availability.",
+        "Same-week and day-of staffing emergencies: no-shows, vendor cancellations, events within 72 hours. Honest rush lead-time guidance, a prefilled buyer submission form, and a direct phone path. Never promises availability.",
       tags: ["event-staffing", "urgent", "backfill", "no-show", "last-minute", "rush"],
       examples: [
         "Our staffing vendor cancelled and the event is Saturday",
@@ -147,7 +147,7 @@ const agentCard = {
       id: "multi-city-activation-planner",
       name: "Multi-City Activation Planner",
       description:
-        "Plan and price a multi-city event staffing program (tour, roadshow, sampling tour, festival circuit, national activation) as one consolidated order. Confirms coverage per market, prices each leg with live W-2 rates, surfaces state and provincial overtime differences, and submits one quote covering all cities.",
+        "Plan and price a multi-city event staffing program (tour, roadshow, sampling tour, festival circuit, national activation) as one consolidated order. Confirms coverage per market, prices each leg with live W-2 rates, surfaces state and provincial overtime differences, and prepares a buyer-operated quote handoff.",
       tags: ["event-staffing", "multi-city", "tour", "roadshow", "activation", "w2"],
       examples: [
         "Plan staffing for a 6-city product roadshow next quarter",
@@ -158,7 +158,7 @@ const agentCard = {
       id: "event-staffing-procurement",
       name: "Event Staffing Procurement",
       description:
-        "Answer event staffing procurement and vendor-onboarding questions (COI, W-9, insurance and workers' comp posture, cancellation and payment terms, MSAs, approved-vendor setup) from published policy, explicit when a value is coordinator-confirmed, then bridge a real event into a priced quote.",
+        "Answer event staffing procurement and vendor-onboarding questions (COI, W-9, insurance and workers' comp posture, cancellation and payment terms, MSAs, approved-vendor setup) from published policy, explicit when a value is coordinator-confirmed, then bridge a real event into a priced plan and buyer-operated quote handoff.",
       tags: ["event-staffing", "procurement", "vendor-onboarding", "coi", "insurance", "w2"],
       examples: [
         "Can you send a COI naming our venue as additional insured?",

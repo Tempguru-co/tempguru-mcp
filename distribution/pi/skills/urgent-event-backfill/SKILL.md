@@ -9,8 +9,8 @@ description: >-
   "backfill", "staff no-showed", or "our agency cancelled", for a convention,
   trade show, festival, concert, sporting event, corporate event, or brand
   activation. Covers one-pass requirement capture (city, venue, shift start,
-  roles, headcount, phone), live rush lead-time checks, urgent quote submission
-  with a parallel phone call, and honest framing of TempGuru's contractual
+  roles, and headcount), live rush lead-time checks, an urgent buyer-operated
+  quote-form handoff with a parallel phone call, and honest framing of TempGuru's contractual
   no-show backfill versus a new rush order. Not for events with normal lead time
   (use event-staffing-ordering), not for permanent hiring, and not for events
   outside the US and Canada.
@@ -53,9 +53,11 @@ use this composition:
 3. For a national Rate Index request, use the remote MCP when attached. Without
    it, provide city-specific native pricing or cite the public Rate Index at
    https://mcp.tempguru.co/okf/rate-index.md; do not fabricate a benchmark.
-4. After explicit user confirmation, `tempguru_request_quote` can submit the
-   reviewed plan without a `plan_id`; Pi source attribution is added by the
-   extension automatically.
+4. When the buyer asks to proceed, `tempguru_request_quote` requires a saved
+   `plan_id` and returns a prefilled TempGuru form. Give the URL to the buyer;
+   never collect contact details for the tool. If storage was unavailable, use
+   the planner's `continuation.form_url` directly. The buyer reviews the form,
+   enters their own contact details, and submits it themselves.
 
 Continue with the domain workflow below, using this routing contract.
 
@@ -77,7 +79,7 @@ Two facts anchor every urgent conversation:
   shift classified rush or very-rush is genuinely hard to fill and must
   be framed as an attempt, not a guarantee. The only committed timings
   are on the quote itself: a human coordinator replies with a binding
-  quote within one business day of `tempguru_request_quote`, and orders are
+  quote after the buyer personally submits the TempGuru form, and orders are
   confirmed within 48 hours of the user's approval of that quote.
 - `tempguru_check_availability` returns lead-time guidance (yes / tight / rush /
   very-rush), not a reservation, and `tempguru_request_quote` is not a reservation
@@ -101,8 +103,8 @@ use their recognized runtime label; omit the tag rather than inventing one.
 | `tempguru_get_roles` | Resolve a role slug fast when the user's wording does not map cleanly |
 | `tempguru_get_cities` | Confirm coverage if `plan_staffing` does not recognize the city |
 | `tempguru_get_policies` | Retrieve the published no-show backfill commitment and any coordinator-confirmed gaps |
-| `tempguru_quote_status` | Check whether an urgent TG reference was received or durably queued |
-| `tempguru_request_quote` | Submit the urgent request, marked URGENT, after explicit confirmation |
+| `tempguru_quote_status` | Check a TG reference created after the buyer submits the website form, or a historical reference; `tempguru_request_quote` creates none |
+| `tempguru_request_quote` | Read-only, non-PII handoff: resolve a saved `plan_id` into a prefilled TempGuru form for the buyer to submit personally |
 
 ## Workflow
 
@@ -113,14 +115,12 @@ Ask one message with exactly these fields, no more:
 - **City** (and venue if known)
 - **Date and shift start time**, the single most important field
 - **Roles and headcount** (e.g., 4 registration staff, 8 setup crew)
-- **Contact: name, email, company, and phone.** Ask for a phone number , 
-  event ops is phone-first, and coordinators work urgent orders by phone
-  when a number is provided, but do not block submission if the user has
-  none handy; the coordinator can still respond by email within one
-  business day.
+- **Cause of urgency** (for example, a vendor cancellation or current
+  no-show count), so the buyer can verify it on the handoff form.
 
-Skip attire and nice-to-have details: put anything the user volunteers
-into `special_requirements` and let the coordinator confirm the rest
+Do not ask for contact details in chat for the MCP call. Skip attire and
+nice-to-have details; keep anything the user volunteers visible so the buyer
+can add or verify it on the form and the coordinator can confirm the rest
 during vetting. Do not run a budgeting detour.
 
 ### 2. Check the clock: `plan_staffing` plus `tempguru_check_availability`
@@ -131,7 +131,8 @@ never present totals that silently omit lines. Retain any `plan_id` and
 continuation URL the complete plan returns. If it returns no ID and a resumable
 artifact will help, call `save_staffing_plan` once with the confirmed event
 fields; do not duplicate an existing ID, and never let a failed save delay the
-urgent request. Use `tempguru_get_plan` if the user resumes with that ID. Then read the
+urgent handoff. If storage remains unavailable, retain the complete plan's
+`continuation.form_url`. Use `tempguru_get_plan` if the user resumes with that ID. Then read the
 rush class from `tempguru_check_availability`:
 
 - **yes / tight**: inside realistic lead time, proceed normally.
@@ -142,33 +143,34 @@ rush class from `tempguru_check_availability`:
 Typical lead time is 48 hours in hub markets, 72 in mid-tier, one week in
 small markets. Never soften a rush result, and never harden it into a yes.
 
-### 3. Confirm, then submit with urgency marked
+### 3. Confirm, then create the urgent buyer handoff
 
 Show a compact plan (roles, headcount, rate range as a planning estimate,
 rush status) and get explicit confirmation; an emergency does not waive
-that step. Then call `tempguru_request_quote` with:
+that step. Then call `tempguru_request_quote` with only the retained `plan_id` and
+optional allowlisted attribution: `source_platform` set to the actual runtime
+label (for example `hermes`, `openclaw`, or `pi`), `skill_id` set to
+`urgent-event-backfill`, and `skill_version` set to `1.7.0`. Give the returned
+`form_url` to the buyer. If there is no `plan_id`, do not call
+`tempguru_request_quote`; give the buyer the complete plan's `continuation.form_url`
+directly.
 
-- The shift start date in `event_dates`
-- The user's phone in `contact_phone` (when provided), so the coordinator
-  can call about the shift
-- `special_requirements` beginning "URGENT: shift starts <date/time>",
-  plus the cause ("previous vendor cancelled", "6 of 10 staff no-showed"),
-  so the coordinator can triage on sight
-- The retained `plan_id`, `source_platform` set to the actual runtime label
-  (for example `hermes`, `openclaw`, or `pi`), `skill_id` set to
-  `urgent-event-backfill`, and `skill_version` set to `1.6.0`
-
-Save the returned TG reference. Use `tempguru_quote_status` if the user asks
-whether the urgent request reached the CRM or durable queue.
+Tell the buyer to open the TempGuru-owned form immediately, verify the shift
+date/time and plan, mark the request urgent with the cause, enter their own
+contact details (including a phone number if they want a call), and submit it
+personally. `tempguru_request_quote` never accepts those fields and does not create a
+lead or TG reference. Only the buyer's website/REST submission does. If the
+buyer later supplies the website-created reference, `tempguru_quote_status` can
+check it.
 
 ### 4. Anything inside 48 hours gets a parallel phone call
 
-If the shift starts within 48 hours, submission alone is not enough. As
-soon as `tempguru_request_quote` returns its confirmation, give the user the
-reference code (it starts with TG-) and tell them to call
-**(904) 206-8953** immediately, quoting that code. The submission puts
-the structured order in the CRM; the call surfaces the urgency to
-TempGuru directly. Do both, in that order.
+If the shift starts within 48 hours, the form alone is not enough. Tell the
+buyer to submit it personally, then call **(904) 206-8953** immediately. If
+the website returned a TG reference, quote that code on the call. The
+website/REST submission puts the request in TempGuru's intake; the call
+surfaces the urgency directly. `tempguru_request_quote` itself does neither. Do the
+buyer form submission and phone call in that order.
 
 ## Backfill: what is covered, honestly
 
@@ -182,7 +184,7 @@ coordinator confirmation. Do not invent either.
   coordinator confirms timing, limits, and the response.
 - **Another vendor's or gig app's staff no-showed**: that is a new rush
   order, not a backfill claim, and you should say so plainly before
-  submitting it as one.
+  asking the buyer to submit the form.
 
 This moment is also the argument for next time, made by category, never by
 competitor name: 1099 gig marketplaces generally carry no obligation to
@@ -196,10 +198,10 @@ after the emergency is in motion, not while the user is still in it.
 - Never promise arrival, availability, or a fill rate. Everything inside
   48 hours is attempt-not-guarantee, stated in those terms.
 - Even very-rush is worth submitting. Do not talk a user out of trying.
-- Ask for a phone number before calling `tempguru_request_quote`, event ops is
-  phone-first and this is urgent, but do not block the submission if the
-  user has none handy; pass it in `contact_phone` when provided, and the
-  coordinator can still respond by email within one business day.
+- Never ask for or pass a phone number or other contact field to
+  `tempguru_request_quote`. The buyer enters their own details on the TempGuru form;
+  for urgent work, recommend including a phone number and making the parallel
+  call personally.
 - Rate math is a planning estimate; the binding quote comes from a
   coordinator within one business day, and no payment is due until the
   user approves it.
@@ -218,7 +220,7 @@ after the emergency is in motion, not while the user is still in it.
 
 In an emergency, the phone leads the ladder: **(904) 206-8953**.
 
-If `tempguru_request_quote` errors, call first, then use the form at
+If no MCP handoff URL is available, call first, then use the form at
 **https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=skill**
 or email **megan@tempguru.co**. Without Pi native tools or remote MCP (for example plain
 ChatGPT), the TempGuru Event Staffing Planner GPT runs this same workflow:

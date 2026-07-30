@@ -9,7 +9,7 @@ TempGuru publishes its event-staffing knowledge as an Open Knowledge Format (OKF
 TempGuru exposes two layers, and they work together:
 
 - **Knowledge layer (OKF bundle):** what TempGuru's roles, rates, market coverage, compliance, and workflows mean. This is what you import into Knowledge Catalog.
-- **Action layer (MCP server and REST API):** how an agent acts. After it understands the domain from the bundle, it calls live tools to plan staffing, price roles, check state compliance, and submit a quote.
+- **Action layer (MCP server and REST API):** how an agent acts. After it understands the domain from the bundle, it calls live tools to plan staffing, price roles, check state compliance, and prepare a quote form the buyer submits personally.
 
 Read the knowledge layer to understand. Call the action layer to act.
 
@@ -41,12 +41,23 @@ Out of scope: permanent or direct hiring, and events outside the United States a
 
 ## Quote action safety
 
-`request_quote` (and the REST `POST /api/v1/quote-requests`) is the only consequential/contact write. The MCP planner may separately save a 30-day non-PII plan snapshot. Quote submission is opt-in by design:
+Keep the MCP handoff and the REST submission distinct:
 
-- Call it only after the user has reviewed the plan and explicitly confirmed.
-- It creates a structured lead for human review. It does not reserve staff, guarantee pricing or availability, or create a contract.
-- No payment is required until the user approves the quote a coordinator returns, normally within one business day.
-- Contact and event details go to TempGuru's CRM or its durable fallback queue and configured notification processor. They are never written to telemetry or analytics.
+- MCP exposes 12 tools: ten read-only tools (including `request_quote`) and two
+  non-destructive, non-contact saved-plan writes (`plan_staffing` and
+  `save_staffing_plan`). The connector is therefore declared `read_write`.
+- Authless MCP `request_quote` accepts only a saved non-PII `plan_id` plus
+  allowlisted source attribution. It returns a prefilled
+  `https://mcp.tempguru.co/request-quote` URL. It never accepts contact
+  details, creates a CRM lead, or returns a TG reference.
+- Give that URL to the buyer. The buyer reviews the plan, enters their own
+  contact details, and submits the form personally. Only that buyer action
+  calls the consequential REST `POST /api/v1/quote-requests` write.
+- A submitted request creates a structured lead for human review, not a staff
+  reservation, guaranteed price or availability, contract, or payment.
+- Buyer-submitted contact and event details go to TempGuru's CRM or durable
+  fallback queue and configured notification processor. They are never written
+  to telemetry or analytics.
 
 ## Rates and freshness
 

@@ -108,8 +108,12 @@ function Dashboard({ m }: { m: DashboardMetrics }) {
   const plansCreated = funnelTotal("plans_created");
   const plansSaved = funnelTotal("plans_saved");
   const plansResumed = funnelTotal("plans_resumed");
+  const quoteHandoffs = funnelTotal("quote_handoffs");
   const quotesSubmitted = funnelTotal("quotes_submitted");
   const quotesLinked = funnelTotal("quotes_linked");
+  const handoffLeadRate = quoteHandoffs
+    ? `${((quotesSubmitted / quoteHandoffs) * 100).toFixed(1)}%`
+    : "0.0%";
   const linkedRate = quotesSubmitted
     ? `${((quotesLinked / quotesSubmitted) * 100).toFixed(1)}%`
     : "0.0%";
@@ -141,13 +145,19 @@ function Dashboard({ m }: { m: DashboardMetrics }) {
           <Stat label="Complete plans" value={plansCreated.toLocaleString()} />
           <Stat label="Explicit saves" value={plansSaved.toLocaleString()} />
           <Stat label="Plans resumed" value={plansResumed.toLocaleString()} />
-          <Stat label="New quote leads" value={quotesSubmitted.toLocaleString()} />
+          <Stat label="Buyer handoffs" value={quoteHandoffs.toLocaleString()} />
+          <Stat
+            label="Buyer-submitted leads"
+            value={quotesSubmitted.toLocaleString()}
+            sub={handoffLeadRate}
+          />
           <Stat label="Quotes linked" value={quotesLinked.toLocaleString()} sub={linkedRate} />
         </div>
         <p style={{ color: "#94a8c4", fontSize: 12, margin: "12px 0 0" }}>
-          Explicit saves count successful <code>save_staffing_plan</code> calls. Linked rate is
-          resolved-plan quotes ÷ successful new quote leads. Plans and quotes are window totals,
-          not a cohort conversion rate.
+          A handoff is a prefilled form URL, not a lead. The lead percentage is
+          buyer-submitted leads ÷ handoffs in this window; direct REST submissions
+          may also be included, so it is directional rather than a cohort rate.
+          Linked rate is resolved-plan quotes ÷ successful new quote leads.
         </p>
         <div style={{ marginTop: 12 }}>
           <KeyValueTable

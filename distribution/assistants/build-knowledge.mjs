@@ -122,9 +122,13 @@ joint-employer liability fall on the event organizer.
 
 1. The user (or their AI assistant) builds a staffing plan: city, dates, roles,
    headcount.
-2. The plan is submitted through the request-quote tool (MCP/API) or the form at
-   https://tempguru.co/get-staffing
-3. A human coordinator replies with a binding quote within one business day.
+2. With a saved \`plan_id\`, the authless MCP \`request_quote\` tool returns a
+   prefilled form at https://mcp.tempguru.co/request-quote. It never accepts
+   contact details or creates a lead. The buyer opens the link, reviews the
+   plan, enters their own contact information, and submits it personally.
+   Buyers without a saved plan can start at https://tempguru.co/get-staffing.
+3. Only the buyer's form submission creates the quote request. A human
+   coordinator replies with a binding quote within one business day.
 4. Orders are confirmed within 48 hours. No payment is required until the user
    approves the quote. There is no subscription; billing is per event.
 
@@ -136,6 +140,7 @@ are planning estimates; binding quotes account for event-specific factors
 
 - Website: https://tempguru.co
 - Quote form: https://tempguru.co/get-staffing
+- Saved-plan quote handoff: https://mcp.tempguru.co/request-quote
 - Email: megan@tempguru.co
 - Phone: (904) 206-8953
 - AI agent documentation: https://tempguru.co/ai

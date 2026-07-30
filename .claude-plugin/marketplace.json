@@ -10,8 +10,8 @@
     {
       "name": "tempguru",
       "source": "./plugins/tempguru",
-      "description": "W-2 event staffing for AI agents: plan_staffing planner, live rates and coverage for 345 US/CA markets, state compliance, and human-reviewed quote requests. Adds the remote MCP, 8 skills, and a /staff-event command.",
-      "version": "1.6.0",
+      "description": "W-2 event staffing for AI agents: live planning, rates, coverage, compliance, and a non-PII buyer quote-form handoff. Adds the remote MCP, 8 skills, and a /staff-event command.",
+      "version": "1.7.0",
       "author": { "name": "TempGuru" },
       "keywords": ["event-staffing", "staffing", "mcp", "brand-ambassadors", "w2"]
     }

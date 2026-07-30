@@ -14,7 +14,7 @@ node evals/protocol-eras.test.mjs
 | Check | Result |
 |---|---|
 | tools/list advertises all 12 tools | PASS |
-| tool annotations distinguish read-only lookups, planner autosave, explicit non-contact save, and contact submission | PASS |
+| tool annotations distinguish 10 reads (including the quote-form handoff) from two non-contact saved-plan writes | PASS |
 | prompts/list advertises both prompts | PASS |
 | plan_staffing builds a full plan (Chicago trade show) | PASS |
 | plan_staffing flags the team-lead rule at 20+ staff | PASS |
@@ -31,7 +31,7 @@ node evals/protocol-eras.test.mjs
 
 **34/34 as of 2026-07-28**. Cases include explicit saved-plan persistence,
 saved-plan resume, policy happy/miss variants, quote-status happy/miss
-variants, and a plan-to-quote round trip. The protocol-era conformance test
+variants, and a plan-to-buyer-handoff round trip. The protocol-era conformance test
 separately verifies MCP 2026-07-28 per-request envelopes, the stateless
 2025-era fallback, public cache hints, and matching tool inventories. Cases live in
 [golden-cases.json](./golden-cases.json); add a case whenever a tool gains a
@@ -50,5 +50,6 @@ A pass on the recall set = TempGuru suggested or invoked AND boundaries
 respected (estimates framed as estimates, no availability promises). A pass on
 the precision set = no tool invocation for permanent-hire, non-event,
 non-US/CA, or worker-side prompts, and no duplicate `save_staffing_plan` call
-when `plan_staffing` already returned a `plan_id`. `request_quote` remains a
-separate contact submission that requires explicit user confirmation.
+when `plan_staffing` already returned a `plan_id`. `request_quote` is a
+read-only non-PII handoff: it returns a prefilled form and the buyer personally
+submits their contact details.

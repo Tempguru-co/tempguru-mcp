@@ -1,8 +1,8 @@
 {
   "name": "tempguru-mcp",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "private": true,
-  "description": "TempGuru MCP server across 345 US/CA markets: nine read-only lookups, a compatibility planner, an explicit non-contact saved-plan write, and one opt-in request_quote contact submission.",
+  "description": "TempGuru MCP server across 345 US/CA markets: ten read-only tools including a non-PII buyer handoff, a compatibility planner, and an explicit non-contact saved-plan write.",
   "scripts": {
     "dev": "next dev",
     "build": "npm run build:okf && next build",

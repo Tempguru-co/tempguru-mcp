@@ -153,7 +153,7 @@ Confirmed in production on 2026-07-07:
 12. **Tracker rot — our own ledger can't be trusted** [verified]: mcpservers.org marked
     "✅ live" but is missing; mcp.so marked submitted but soft-404s; awesome-mcp-servers
     marked merged but 0 mentions found in the three big lists [verify which is true];
-    Postman marked imported but still read-only/stale (no submitQuoteRequest); the
+    Postman was read-only/stale before the 1.7.0 REST collection refresh; the
     Anthropic Connectors submission is self-reported with no external evidence — and the
     portal requires a Team/Enterprise Claude org [verify which org filed, or whether it
     was filed at all]. Every "✅" needs external re-verification; every pending item
@@ -209,8 +209,9 @@ just not linked on any machine surface, and OpenAI review hard-requires it).
    optional; full ISO timestamp + SLA aging tile on /admin; fix the lead-trust date
    parser (ISO dates currently mis-score as "past event" → real agent leads get
    down-ranked) [verified].
-3. **Attribution**: persist ua_class, channel (MCP/REST), and a plan_id (minted by
-   plan_staffing, accepted by request_quote) onto every Notion lead as structured
+3. **Attribution**: persist ua_class, channel (MCP handoff / buyer form / REST),
+   and a plan_id (minted by plan_staffing, carried by request_quote into the buyer
+   form, and accepted by the REST submission) onto every Notion lead as structured
    properties; add telemetry to the 5 REST read routes (currently invisible); weekly
    closed-won-by-channel report. This is what makes every future decision measurable.
 4. **MCP hardening**: structuredContent + outputSchema on plan_staffing and
@@ -274,7 +275,8 @@ just not linked on any machine surface, and OpenAI review hard-requires it).
     the 20-minute Space; self-serve no-auth remote MCP works there today. 14. **ChatGPT
     Ads experiment**: self-serve since May 2026, conversation-contextual targeting
     against ~900M WAU [verify current CPC/eligibility in Ads Manager before budgeting];
-    wire Conversions API to request_quote. 15. **Google**: publish the Gemini Gem
+   wire Conversions API to the buyer-submitted form/REST conversion event.
+   15. **Google**: publish the Gemini Gem
     (30 min, still undone); note the shipped Gemini CLI extension's consumer audience
     collapsed with the June 2026 Antigravity cutover [verify against Google's official
     announcement] — get into the Antigravity MCP Store instead; Gemini Enterprise

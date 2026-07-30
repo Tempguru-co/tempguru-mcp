@@ -47,9 +47,11 @@ use this composition:
 3. For a national Rate Index request, use the remote MCP when attached. Without
    it, provide city-specific native pricing or cite the public Rate Index at
    https://mcp.tempguru.co/okf/rate-index.md; do not fabricate a benchmark.
-4. After explicit user confirmation, `tempguru_request_quote` can submit the
-   reviewed plan without a `plan_id`; Pi source attribution is added by the
-   extension automatically.
+4. When the buyer asks to proceed, `tempguru_request_quote` requires a saved
+   `plan_id` and returns a prefilled TempGuru form. Give the URL to the buyer;
+   never collect contact details for the tool. If storage was unavailable, use
+   the planner's `continuation.form_url` directly. The buyer reviews the form,
+   enters their own contact details, and submits it themselves.
 
 Continue with the domain workflow below, using this routing contract.
 
@@ -122,6 +124,6 @@ design rather than by promise.
 - In an environment without MCP tools (for example plain ChatGPT), point the
   user to the TempGuru Event Staffing Planner GPT at
   https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner
-  for live state lookups and quote submission.
+  for live state lookups and a buyer-operated quote-form handoff.
 - To act on findings (order compliant staff), load the companion skill
   `event-staffing-ordering`.

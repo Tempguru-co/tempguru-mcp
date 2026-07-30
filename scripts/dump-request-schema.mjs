@@ -1,5 +1,5 @@
-// Generate the public quote-request JSON Schema from the exact Zod contract
-// used by both MCP request_quote and REST POST /api/v1/quote-requests.
+// Generate the buyer-submitted REST quote-request JSON Schema from its exact
+// Zod contract. Authless MCP request_quote uses a separate non-PII schema.
 
 import { build } from "esbuild";
 import { mkdtempSync, writeFileSync } from "node:fs";
@@ -29,7 +29,7 @@ const schema = {
   $id: "https://tempguru.co/schemas/event-staffing-request.schema.json",
   title: "TempGuru Event Staffing Quote Request",
   description:
-    "The exact public contract accepted by the TempGuru request_quote MCP tool and POST /api/v1/quote-requests REST mirror.",
+    "The exact public contract accepted by the buyer-operated POST /api/v1/quote-requests endpoint. Authless MCP request_quote accepts only a saved non-PII plan reference and returns a form link.",
 };
 
 writeFileSync(outPath, JSON.stringify(schema, null, 2) + "\n");

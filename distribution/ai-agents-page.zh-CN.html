@@ -78,7 +78,7 @@
 
   <h2>MCP 工具</h2>
 
-  <p>共十二个工具：九个只读查询工具、一个可尽力自动保存 30 天非联系信息快照且不具破坏性的 <code>plan_staffing</code> 规划工具、一个显式的非联系信息写入工具 <code>save_staffing_plan</code>，以及一个可选的联系信息写入工具。Phase A（阶段 A）中，请先调用 <code>plan_staffing</code> 并保留其返回的任何 <code>plan_id</code>。仅当完整方案没有编号且确需恢复或分享时，调用一次 <code>save_staffing_plan</code>；已有编号时绝不重复保存。仅在用户确认方案并同意提交后调用 <code>request_quote</code>。</p>
+  <p>共十二个工具：十个只读工具（其中 <code>request_quote</code> 是不含个人联系信息的买家表单交接工具）、一个可尽力自动保存 30 天非联系信息快照且不具破坏性的 <code>plan_staffing</code> 规划工具，以及一个显式的非联系信息写入工具 <code>save_staffing_plan</code>。Phase A（阶段 A）中，请先调用 <code>plan_staffing</code> 并保留其返回的任何 <code>plan_id</code>。仅当完整方案没有编号且确需恢复或分享时，调用一次 <code>save_staffing_plan</code>；已有编号时绝不重复保存。买家要求继续时，仅以已保存的方案编号调用 <code>request_quote</code>，再将返回的表单地址交给买家。</p>
 
   <div class="tg-tools">
 
@@ -138,8 +138,8 @@
     </div>
 
     <div class="tg-tool">
-      <div class="tg-tool-name">request_quote <span class="tg-tool-badge">写入 | 可选</span></div>
-      <p>向 TempGuru 的 CRM 提交结构化的人员配置请求。人工协调员将在一个工作日内审核并回复。不构成预订，在用户确认报价前无需付款。需提供：联系人姓名/邮箱、公司、活动名称/类型/城市/日期，以及各岗位人数。</p>
+      <div class="tg-tool-name">request_quote <span class="tg-tool-badge">只读 | 不含个人信息</span></div>
+      <p>把已保存且不含联系信息的 <code>plan_id</code> 转换为 TempGuru 自有的预填表单。该工具不接受联系人信息、不写入 CRM，也不创建 TG 编号。买家本人打开链接、核对方案、填写自己的联系信息并提交表单。</p>
     </div>
 
   </div>
@@ -148,7 +148,7 @@
 
   <h2>知识包（开放知识格式 OKF）</h2>
 
-  <p>MCP 工具与 REST API 是<strong>行动层</strong>，即智能体如何规划、定价、检查合规并提交报价。同样的数据还以<strong>知识层</strong>形式发布：一个静态的 <a href="https://github.com/GoogleCloudPlatform/knowledge-catalog">开放知识格式</a>（OKF v0.1）知识包，AI 智能体和 Google Cloud Knowledge Catalog 可直接读取或导入，无需抓取网页。知识包与实时工具来自同一份源数据，因此两层永不偏离。</p>
+  <p>MCP 工具与 REST API 是<strong>行动层</strong>：MCP 负责规划、定价、检查合规并生成买家表单交接；只有买家本人操作的独立 REST 表单提交才会创建报价请求。同样的数据还以<strong>知识层</strong>形式发布：一个静态的 <a href="https://github.com/GoogleCloudPlatform/knowledge-catalog">开放知识格式</a>（OKF v0.1）知识包，AI 智能体和 Google Cloud Knowledge Catalog 可直接读取或导入，无需抓取网页。知识包与实时工具来自同一份源数据，因此两层永不偏离。</p>
 
   <table class="tg-table">
     <thead>
@@ -261,8 +261,8 @@ hermes mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=hermes"</div>
 
   <p class="tg-label">Pi</p>
   <div class="tg-code">pi install npm:tempguru-pi
-// npm 1.5.0 已上线；请发布并验证源码 1.6.0 的 Pi 工具名适配。
-// 在此之前，请连接远程 MCP，以确保端到端执行可靠。</div>
+// 仓库候选版本为 1.7.0；安装前请核实 npm 上的实际版本。
+// tempguru_request_quote 只返回买家表单，不发送联系人信息。</div>
 
   <p class="tg-label">Codex</p>
   <div class="tg-code">codex mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=openai-codex"
@@ -299,8 +299,8 @@ hermes mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=hermes"</div>
         <td>仅当完整方案没有 <code>plan_id</code> 且用户需要可恢复或可分享的方案时，使用相同活动输入调用一次 <code>save_staffing_plan</code>。已有编号时绝不调用。</td>
       </tr>
       <tr>
-        <td>5. 提交</td>
-        <td>在用户同意后，附联系人信息、最终方案以及现有的 <code>plan_id</code>（如有）调用 <code>request_quote</code>。一个工作日内回复；48 小时内确认订单。</td>
+        <td>5. 买家交接</td>
+        <td>买家要求继续时，只用已保存的 <code>plan_id</code> 与可选白名单归因字段调用 <code>request_quote</code>，并将返回的 <code>form_url</code> 交给买家。买家本人核对方案、填写自己的联系信息并提交；只有该网站/REST 提交会创建销售线索和 TG 编号。</td>
       </tr>
     </tbody>
   </table>
@@ -322,7 +322,7 @@ hermes mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=hermes"</div>
 
   <h2>安全与隐私</h2>
 
-  <p>查询工具均无需身份验证，也不会收集联系人信息。<code>plan_staffing</code> 与 <code>save_staffing_plan</code> 仅保存经过字段白名单限制且不含联系信息的方案字段；Phase A（阶段 A）中，规划工具已返回 <code>plan_id</code> 时不得再次调用显式保存工具。报价状态记录最多保留 90 天。<code>request_quote</code> 仅在用户明确确认后，将联系信息与活动信息发送到 TempGuru 的 CRM，或在 CRM 暂时不可用时进入最多保留 90 天的持久重试队列，并可发送给已配置的通知处理器；这些字段绝不会写入产品遥测。技能资源为纯 markdown，不含可执行代码。</p>
+  <p>十个只读工具均无需身份验证。<code>plan_staffing</code> 与 <code>save_staffing_plan</code> 仅保存经过字段白名单限制且不含联系信息的方案字段；Phase A（阶段 A）中，规划工具已返回 <code>plan_id</code> 时不得再次调用显式保存工具。MCP <code>request_quote</code> 只接受已保存的方案编号和有限的归因字段，并返回 TempGuru 表单地址；它不接受或传输联系人信息，也不创建销售线索或 TG 编号。只有买家本人在网站表单中填写联系信息并点击提交后，这些信息才会发送给 TempGuru。技能资源为纯 markdown，不含可执行代码。</p>
 
   <hr>
 
