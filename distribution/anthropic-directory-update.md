@@ -28,28 +28,11 @@ Inventory summary: **12 tools, 2 prompts, 8 resources**.
 
 ### Detail-card description
 
-TempGuru helps buyers plan W-2 temporary event staffing across 345 US and
-Canadian markets. Claude can build a complete staffing plan, confirm market
-coverage, estimate all-inclusive role rates, assess lead-time guidance, surface
-state and provincial compliance considerations, retrieve booking and
-procurement policies, save or resume a non-contact plan, and prepare a
-buyer-operated quote-form handoff.
+TempGuru helps event organizers and planners build temporary W-2 staffing plans across 345 US and Canadian markets. Claude can turn an event brief into a structured plan; confirm coverage, roles, lead-time guidance, all-inclusive hourly rates, crew totals, and state or provincial compliance considerations; retrieve booking and procurement policies; save or resume a non-contact plan; and prepare a buyer-operated quote-form handoff. TempGuru supports trade shows, conferences, festivals, concerts, sporting events, corporate gatherings, brand activations, and multi-city programs across event roles. Placements use W-2 employees through vetted staffing-agency partners rather than 1099 gig workers.
 
-The connector exposes 12 tools: 10 read-only tools and 2 non-destructive,
-non-contact plan-persistence writes. It is correctly classified `read_write`
-because `plan_staffing` may best-effort save a 30-day non-PII plan and
-`save_staffing_plan` explicitly saves one. `request_quote` is itself read-only
-and idempotent. It requires a saved non-PII `plan_id`, accepts only optional
-allowlisted platform/skill attribution, and returns a prefilled TempGuru-owned
-form link. It never collects or transmits contact details and never creates a
-CRM lead or quote reference. The buyer opens the form, reviews the plan, enters
-their own contact details, and submits it personally. Only that website/REST
-submission creates the lead and TG reference.
+The connector exposes 12 tools, 2 prompts, and 8 skill resources. Ten tools are read-only. It is classified read_write because plan_staffing may save a 30-day non-PII plan and save_staffing_plan explicitly saves one. Those non-destructive writes contain bounded event-planning fields only and exclude names, email addresses, phone numbers, companies, and free-text contact details. request_quote is read-only and idempotent. It accepts a saved non-PII plan ID plus allowlisted platform and skill attribution, restores the plan, and returns a prefilled form on TempGuru's mcp.tempguru.co origin. It does not collect or transmit contact information, call the CRM, create a lead, or issue a TG reference. The buyer opens the form, reviews or edits the staffing details, enters their own contact information, and submits it. Only that separate website submission creates a lead and reference for a TempGuru coordinator.
 
-Rates are planning estimates, availability results are lead-time guidance, and
-compliance summaries are general operational information rather than legal
-advice. The connector does not reserve staff, create a contract, process
-payment, or guarantee pricing or availability.
+Rates are planning estimates, availability responses are guidance rather than reservations, and compliance summaries are operational information rather than legal advice. The connector cannot guarantee staffing, finalize pricing, create a contract, process payment, or book workers. A TempGuru coordinator confirms availability and a binding quote after the buyer submits the form.
 
 ## Primary use cases
 

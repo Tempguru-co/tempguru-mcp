@@ -550,6 +550,14 @@ if (
 {
   const path = "distribution/anthropic-directory-update.md";
   const body = read(path);
+  const detailDescription = body.match(
+    /### Detail-card description\n\n([\s\S]*?)\n\n## Primary use cases/,
+  )?.[1];
+  if (detailDescription?.length !== 2_000) {
+    errors.push(
+      `${path}: detail-card description must be exactly 2,000 characters (found ${detailDescription?.length ?? "missing"})`,
+    );
+  }
   for (const fragment of [
     "`tempguru-event-staffing`",
     "`read_write`",
