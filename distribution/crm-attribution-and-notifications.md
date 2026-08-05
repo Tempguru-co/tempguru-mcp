@@ -6,7 +6,8 @@ revenue workflows run outside this repository._
 
 ## 1. Outcomes the repository emits
 
-`request_quote` can finish in three persistence states:
+The buyer-operated `POST /api/v1/quote-requests` submission can finish in three
+persistence states:
 
 - `captured: "notion"`: the Notion CRM lead was written during the request;
 - `captured: "queued"`: the full lead was accepted into the 90-day durable
@@ -21,8 +22,15 @@ Call Notes block with:
 - `reference`, the crypto-random `TG-XXXXXX` code returned to the buyer;
 - a `LEAD TRUST` block (`high`/`medium`/`low` plus reason flags);
 - `source_platform`, `skill_id` (closed to the 8 canonical skills),
-  `skill_version`, and `plan_id` when supplied; and
+  `skill_version`, `plan_id`, and the allowlisted `utm_source`, `utm_medium`,
+  `utm_campaign`, and `utm_content` values when supplied; and
 - `SOURCE: AI Agent (MCP)` or `AI Agent (REST)`.
+
+The current Notion database has only `UTM Source` and `UTM Medium` properties.
+`UTM Source` receives the canonical source; `UTM Medium` receives the runtime
+or transport plus labeled campaign/content, skill, version, and plan tokens.
+The individual UTM fields are also retained in Call Notes and the optional
+lead webhook payload without inventing unverified Notion properties.
 
 The repository also emits non-PII funnel counters (`plans_created`,
 `plans_resumed`, `quotes_submitted`, `quotes_linked`) plus allowlisted
@@ -70,9 +78,9 @@ Notion through the repository drain before a Notion-only automation can see it.
 ## 5. Plan → won → revenue attribution (ops-side)
 
 - Carry `reference` and optional `plan_id` as join keys.
-- Promote `source_platform`, `skill_id`, `skill_version`, `plan_id`, and trust
-  level from Call Notes to verified first-class CRM properties before writing
-  them from code.
+- Promote `source_platform`, `skill_id`, `skill_version`, `plan_id`, the four
+  UTM fields, and trust level from Call Notes to verified first-class CRM
+  properties before writing them individually from code.
 - Extend the repository funnel with CRM-owned `quote_sent → won/lost → revenue`
   transitions.
 - Report platform × skill × {leads, quoted, won, revenue}, using the CRM as the

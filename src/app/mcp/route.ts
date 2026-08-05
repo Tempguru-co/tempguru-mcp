@@ -34,6 +34,8 @@ import { join } from "node:path";
 import { createTempGuruMcpServer } from "@/lib/mcp/create-server";
 import { SKILL_SLUGS, type SkillSlug } from "@/lib/mcp/register-tools";
 import { runWithContext, currentContext } from "@/lib/telemetry/context";
+import { classifyUserAgent } from "@/lib/telemetry/classify-ua";
+import { normalizeSourcePlatform } from "@/lib/telemetry/source-tags";
 import { track } from "@/lib/telemetry/track";
 
 export const runtime = "nodejs";
@@ -64,7 +66,14 @@ const handler = createMcpHandler(
       // then write to Redis. The stdio binary omits onTrack entirely.
       onTrack: async (record) => {
         const ctx = currentContext();
-        await track({ ...record, channel: "mcp", userAgent: ctx.userAgent, ipCountry: ctx.ipCountry, source: ctx.source });
+        await track({
+          ...record,
+          channel: "mcp",
+          userAgent: ctx.userAgent,
+          ipCountry: ctx.ipCountry,
+          source: ctx.source,
+          sourcePlatform: record.sourcePlatform || ctx.platform,
+        });
       },
       resources: SKILL_BODIES,
     }),
@@ -141,8 +150,10 @@ async function withAcceptNormalization(request: Request): Promise<Response> {
 
   // Bind per-request context (User-Agent + Vercel IP-country header) so
   // each tool handler can record telemetry without threading the request.
+  const userAgent = request.headers.get("user-agent") ?? "";
+  const classifiedPlatform = normalizeSourcePlatform(classifyUserAgent(userAgent));
   const ctx = {
-    userAgent: request.headers.get("user-agent") ?? "",
+    userAgent,
     ipCountry: request.headers.get("x-vercel-ip-country") ?? "",
     // Client IP for bounded public read/save/status rate limits (never stored
     // raw). Vercel sets x-forwarded-for with the real client first.
@@ -155,6 +166,10 @@ async function withAcceptNormalization(request: Request): Promise<Response> {
       request.headers.get("x-tempguru-source") ??
       new URL(request.url).searchParams.get("source") ??
       "",
+    platform:
+      classifiedPlatform && classifiedPlatform !== "other"
+        ? classifiedPlatform
+        : "",
   };
 
   return runWithContext(ctx, async () => {

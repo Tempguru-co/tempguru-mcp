@@ -22,6 +22,7 @@ import {
   quoteSubmittedPayload,
   quoteFailedPayload,
 } from "@/lib/mcp/quote";
+import { sanitizeQuoteRequestAttribution } from "@/lib/mcp/quote-attribution";
 import { createLead } from "@/lib/notion/create-lead";
 import { track } from "@/lib/telemetry/track";
 import { checkQuoteRateLimit } from "@/lib/api/rate-limit";
@@ -75,7 +76,9 @@ export async function POST(request: Request) {
   }
 
   // ── Validate the buyer-submitted REST payload ─────────────────────────
-  const parsed = RequestQuoteSchema.safeParse(body);
+  const parsed = RequestQuoteSchema.safeParse(
+    sanitizeQuoteRequestAttribution(body),
+  );
   if (!parsed.success) {
     const issue = parsed.error.issues[0];
     const field = issue.path.join(".") || undefined;

@@ -24,6 +24,7 @@ import {
 } from "./queries";
 import { checkReadRateLimit } from "../api/rate-limit";
 import { currentContext } from "../telemetry/context";
+import { normalizeRuntimeAttributionSource } from "../telemetry/source-tags";
 import { buildStaffingPlan } from "./plan-staffing";
 import {
   SaveStaffingPlanInputSchema,
@@ -259,17 +260,20 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     async (input) => {
       const plan = buildStaffingPlan(input);
       const complete = plan.status === "plan" && plan.plan_complete === true;
+      const ctx = currentContext();
+      const attributionSource =
+        normalizeRuntimeAttributionSource(ctx.source, ctx.platform) ?? undefined;
       // Persistence is rate-limited per IP: a no-auth caller looping valid
       // plans must not mint unbounded Redis keys in the instance that also
       // holds the lead queue. Fails open into "no plan_id", never a worse plan.
       const persistAllowed =
-        complete && (await checkReadRateLimit(currentContext().ip, "plan")).allowed;
+        complete && (await checkReadRateLimit(ctx.ip, "plan")).allowed;
       const decoration = persistAllowed
         ? await persistCompletePlan(
             plan,
             input.city,
             "mcp",
-            currentContext().source,
+            attributionSource,
           )
         : null;
       const result = decoration ? { ...plan, ...decoration } : plan;
@@ -310,10 +314,12 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     },
     async (input) => {
       const ctx = currentContext();
+      const attributionSource =
+        normalizeRuntimeAttributionSource(ctx.source, ctx.platform) ?? undefined;
       const result = await saveStaffingPlan(input, {
         channel: "mcp",
         ip: ctx.ip,
-        source: ctx.source,
+        source: attributionSource,
       });
       const saved = result.status === "saved";
       await track({
@@ -653,12 +659,19 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
       },
     },
     async (input) => {
-      const result = await prepareQuoteHandoff(input);
+      const ctx = currentContext();
+      const sourcePlatform =
+        input.source_platform ??
+        normalizeRuntimeAttributionSource(ctx.source, ctx.platform) ??
+        undefined;
+      const result = await prepareQuoteHandoff(
+        sourcePlatform ? { ...input, source_platform: sourcePlatform } : input,
+      );
       await track({
         tool: "request_quote",
         status: result.handoff_ready ? "success" : "error",
         funnelEvents: result.handoff_ready ? ["quote_handoffs"] : undefined,
-        sourcePlatform: input.source_platform,
+        sourcePlatform,
         sourceSkill: input.skill_id,
       });
       return structuredResult(result);

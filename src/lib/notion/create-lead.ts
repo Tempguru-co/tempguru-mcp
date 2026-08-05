@@ -39,6 +39,10 @@ import {
 import { findCity, findRole } from "../mcp/data";
 import {
   normalizeControlledSource,
+  normalizeQuoteUtmCampaign,
+  normalizeQuoteUtmContent,
+  normalizeQuoteUtmMedium,
+  normalizeQuoteUtmSource,
   normalizeSourcePlatform,
 } from "../telemetry/source-tags";
 import type { QuoteSkillId } from "../mcp/quote";
@@ -130,6 +134,10 @@ export interface CreateLeadInput {
   skill_version?: string;
   skill_id?: QuoteSkillId;
   plan_id?: string;
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
+  utm_content?: string;
 
   // Which authorized surface submitted this, retained for historical
   // attribution compatibility. The current buyer form uses `rest`.
@@ -184,6 +192,7 @@ function block(s: string | undefined): string {
 }
 
 function sanitizeInput(input: CreateLeadInput): CreateLeadInput {
+  const sourcePlatform = normalizeSourcePlatform(input.source_platform);
   return {
     ...input,
     contact_name: line(input.contact_name),
@@ -215,9 +224,14 @@ function sanitizeInput(input: CreateLeadInput): CreateLeadInput {
     attire: input.attire ? block(input.attire) : undefined,
     special_requirements: input.special_requirements ? block(input.special_requirements) : undefined,
     compliance_notes: input.compliance_notes ? block(input.compliance_notes) : undefined,
-    source_platform: input.source_platform ? line(input.source_platform) : undefined,
+    source_platform:
+      sourcePlatform && sourcePlatform !== "other" ? sourcePlatform : undefined,
     skill_version: input.skill_version ? line(input.skill_version) : undefined,
     plan_id: input.plan_id ? line(input.plan_id).toUpperCase() : undefined,
+    utm_source: normalizeQuoteUtmSource(input.utm_source) ?? undefined,
+    utm_medium: normalizeQuoteUtmMedium(input.utm_medium) ?? undefined,
+    utm_campaign: normalizeQuoteUtmCampaign(input.utm_campaign) ?? undefined,
+    utm_content: normalizeQuoteUtmContent(input.utm_content) ?? undefined,
   };
 }
 
@@ -339,6 +353,10 @@ export function resolveEffectiveSourcePlatform(
   const explicit = normalizeSourcePlatform(input.source_platform);
   if (explicit && explicit !== "other") return explicit;
 
+  const utmMedium = normalizeQuoteUtmMedium(input.utm_medium);
+  const utmPlatform = normalizeSourcePlatform(utmMedium ?? undefined);
+  if (utmPlatform && utmPlatform !== "other") return utmPlatform;
+
   const currentSource = normalizeControlledSource(input.controlled_source);
   const currentPlatform = normalizeSourcePlatform(currentSource ?? undefined);
   if (currentPlatform && currentPlatform !== "other") return currentPlatform;
@@ -383,6 +401,10 @@ function buildCallNotes(
     ...(input.skill_id ? [`skill_id=${input.skill_id}`] : []),
     ...(input.skill_version ? [`skill_version=${input.skill_version}`] : []),
     ...(input.plan_id ? [`plan_id=${input.plan_id}`] : []),
+    ...(input.utm_source ? [`utm_source=${input.utm_source}`] : []),
+    ...(input.utm_medium ? [`utm_medium=${input.utm_medium}`] : []),
+    ...(input.utm_campaign ? [`utm_campaign=${input.utm_campaign}`] : []),
+    ...(input.utm_content ? [`utm_content=${input.utm_content}`] : []),
   ];
   const lines: string[] = [
     `SOURCE: AI Agent (${input.channel === "rest" ? "REST" : "MCP"})`,
@@ -484,6 +506,10 @@ function leadSummary(input: CreateLeadInput, reference: string, trust: LeadTrust
     skill_id: input.skill_id,
     skill_version: input.skill_version,
     plan_id: input.plan_id,
+    utm_source: input.utm_source,
+    utm_medium: input.utm_medium,
+    utm_campaign: input.utm_campaign,
+    utm_content: input.utm_content,
   };
 }
 
@@ -493,7 +519,9 @@ function notionBodyFor(input: CreateLeadInput, callNotes: string): Record<string
   // attribution into Medium instead of inventing unverified Campaign/Content
   // properties that could reject the entire CRM write.
   const utmMedium = [
-    input.channel === "rest" ? "rest" : "mcp",
+    input.utm_medium ?? (input.channel === "rest" ? "rest" : "mcp"),
+    ...(input.utm_campaign ? [`campaign=${input.utm_campaign}`] : []),
+    ...(input.utm_content ? [`content=${input.utm_content}`] : []),
     ...(input.skill_id ? [`skill=${input.skill_id}`] : []),
     ...(input.skill_version ? [`skill_version=${input.skill_version}`] : []),
     ...(input.plan_id ? [`plan=${input.plan_id}`] : []),
@@ -512,7 +540,7 @@ function notionBodyFor(input: CreateLeadInput, callNotes: string): Record<string
       "Client Email":         { email: input.contact_email },
       "Call Notes":           { rich_text: richText(callNotes) },
       "Self-Reported Source": { rich_text: richText(`${input.channel === "rest" ? "AI Agent (REST)" : "AI Agent (MCP)"}${input.source_platform ? ` · ${input.source_platform}` : ""}`) },
-      "UTM Source":           { rich_text: richText(input.source_platform || "ai-agent") },
+      "UTM Source":           { rich_text: richText(input.utm_source || input.source_platform || "ai-agent") },
       "UTM Medium":           { rich_text: richText(utmMedium) },
       "Date of Entry":        { date: { start: new Date().toISOString() } },
     },
