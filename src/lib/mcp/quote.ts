@@ -9,6 +9,13 @@
 
 import { z } from "zod";
 import { PLAN_ID_PATTERN } from "./plan-store";
+import {
+  QUOTE_UTM_CAMPAIGNS,
+  QUOTE_UTM_CONTENTS,
+  QUOTE_UTM_MEDIA,
+  QUOTE_UTM_SOURCES,
+  SOURCE_PLATFORM_TAGS,
+} from "../telemetry/source-tags";
 
 /**
  * Canonical skill identifiers accepted on quote submissions. Keep this list
@@ -89,12 +96,21 @@ export const REQUEST_QUOTE_INPUT = {
   special_requirements: z.string().max(2000).optional().describe("Any special requirements: language skills, certifications, overnight shifts, etc."),
   compliance_notes: z.string().max(2000).optional().describe("Any compliance flags surfaced by get_compliance_by_state"),
   source_platform: z
-    .string()
-    .trim()
-    .min(1)
-    .max(80)
+    .enum(SOURCE_PLATFORM_TAGS)
     .optional()
     .describe("Optional agent/platform attribution, e.g. chatgpt-gpt, claude-desktop, coze"),
+  utm_source: z.enum(QUOTE_UTM_SOURCES).optional().describe(
+    "Canonical acquisition source carried by a TempGuru-generated buyer handoff URL",
+  ),
+  utm_medium: z.enum(QUOTE_UTM_MEDIA).optional().describe(
+    "Canonical agent runtime or MCP/REST medium carried by the buyer handoff URL",
+  ),
+  utm_campaign: z.enum(QUOTE_UTM_CAMPAIGNS).optional().describe(
+    "Canonical TempGuru buyer-handoff campaign",
+  ),
+  utm_content: z.enum(QUOTE_UTM_CONTENTS).optional().describe(
+    "Canonical originating MCP or REST channel for an attributed handoff",
+  ),
   skill_version: z
     .string()
     .trim()

@@ -19,6 +19,11 @@ export interface RequestContext {
   // website widget, a test script, a team demo). Set via the `X-TempGuru-Source`
   // header or a `?source=` query param. Empty for organic/unattributed traffic.
   source: string;
+  // Canonical interactive agent platform inferred from the classified request
+  // user agent. Empty for browsers, scripts, crawlers, probes, and unknown UAs.
+  // Used only to decorate a saved plan's buyer handoff when no controlled
+  // source was supplied; it is not an identity or conversation identifier.
+  platform: string;
 }
 
 const storage = new AsyncLocalStorage<RequestContext>();
@@ -28,5 +33,11 @@ export function runWithContext<T>(ctx: RequestContext, fn: () => T): T {
 }
 
 export function currentContext(): RequestContext {
-  return storage.getStore() ?? { userAgent: "", ipCountry: "", ip: "", source: "" };
+  return storage.getStore() ?? {
+    userAgent: "",
+    ipCountry: "",
+    ip: "",
+    source: "",
+    platform: "",
+  };
 }

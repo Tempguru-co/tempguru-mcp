@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, type FormEvent } from "react";
+import type { QuoteAttribution } from "@/lib/mcp/quote-attribution";
 import styles from "./request-quote.module.css";
 
 export type QuoteRolePrefill = {
@@ -15,12 +16,6 @@ export type QuoteFormInitial = {
   eventType: string;
   attendees?: number;
   roles: QuoteRolePrefill[];
-};
-
-export type QuoteAttribution = {
-  source_platform?: string;
-  skill_id?: string;
-  skill_version?: string;
 };
 
 type EditableRole = {

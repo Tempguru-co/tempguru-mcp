@@ -12,7 +12,7 @@ import {
   redisJsonStore,
   type ExpiringJsonStore,
 } from "../telemetry/expiring-json-store";
-import { normalizeControlledSource } from "../telemetry/source-tags";
+import { normalizeSourcePlatform } from "../telemetry/source-tags";
 import { parseEventStart } from "../dates/parse-event-start";
 
 export const PLAN_TTL_SECONDS = 60 * 60 * 24 * 30;
@@ -169,7 +169,7 @@ export function snapshotFromPlan(
     compliance_jurisdiction: plan.compliance?.jurisdiction ?? null,
     created_at: createdAt,
     channel,
-    source: normalizeControlledSource(source),
+    source: normalizeSourcePlatform(source),
   };
 }
 
@@ -261,7 +261,10 @@ export function buildPlanContinuation(
   const attributedSource =
     snapshot.source && snapshot.source !== "other" ? snapshot.source : null;
   url.searchParams.set("utm_medium", attributedSource ?? snapshot.channel);
-  if (attributedSource) url.searchParams.set("utm_content", snapshot.channel);
+  if (attributedSource) {
+    url.searchParams.set("source_platform", attributedSource);
+    url.searchParams.set("utm_content", snapshot.channel);
+  }
 
   return {
     form_url: url.toString(),
@@ -299,7 +302,7 @@ export async function persistCompletePlan(
       compliance_jurisdiction: plan.compliance?.jurisdiction ?? null,
       created_at: new Date().toISOString(),
       channel,
-      source: normalizeControlledSource(source),
+      source: normalizeSourcePlatform(source),
     };
   }
 

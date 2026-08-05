@@ -16,10 +16,10 @@ query parameters:
 | `dates` | Canonical `YYYY-MM-DD` event-date prefill, when the supplied date was safely parseable. |
 | `roles` | Compact comma-separated `role-slug:headcount` pairs. |
 | `utm_source` | Always `ai-agent`. |
-| `utm_medium` | Originating channel (`mcp` or `rest`). |
+| `utm_medium` | Normalized agent runtime/platform when known; otherwise the originating channel (`mcp` or `rest`). |
 | `utm_content` | Underlying channel when `utm_medium` carries a controlled runtime source. |
 | `utm_campaign` | `quote-handoff` when the URL was resolved through MCP `request_quote`. |
-| `source_platform` | Optional normalized runtime attribution added by `request_quote`. |
+| `source_platform` | Optional normalized runtime attribution inferred from the interactive MCP request or added by `request_quote`. |
 | `skill_id` | Optional allowlisted canonical TempGuru skill ID added by `request_quote`. |
 | `skill_version` | Optional bounded skill version added by `request_quote`. |
 
@@ -39,7 +39,9 @@ the agent must give the buyer the completed plan's `continuation.form_url`
 directly instead of calling `request_quote`.
 
 The buyer must open the form, review and edit the plan, enter their own contact
-details, and press submit personally. The form should retain the attribution
-parameters and submit `plan_id` with its separate website REST request. Only
-that buyer-operated REST submission creates a lead and TG reference. Contact
-information must never appear in the handoff URL or saved plan.
+details, and press submit personally. The form retains the allowlisted
+`source_platform`, skill fields, and four UTM parameters and submits them with
+`plan_id` in its separate website REST request. Unknown, duplicate, overlong,
+or free-text attribution values are discarded. Only that buyer-operated REST
+submission creates a lead and TG reference. Contact information must never
+appear in the handoff URL or saved plan.
