@@ -467,7 +467,32 @@ const attributedUrl = new URL(buildPlanContinuation(
 ).form_url);
 check("plan handoff preserves controlled runtime attribution across website continuation",
   attributedUrl.searchParams.get("utm_medium") === "openclaw"
+    && attributedUrl.searchParams.get("source_platform") === "openclaw"
     && attributedUrl.searchParams.get("utm_content") === "mcp");
+const {
+  sanitizeQuoteAttributionQuery,
+  sanitizeQuoteRequestAttribution,
+} = await load(
+  "src/lib/mcp/quote-attribution.ts",
+);
+const parsedHandoffAttribution = sanitizeQuoteAttributionQuery(
+  Object.fromEntries(attributedUrl.searchParams),
+);
+check("buyer form parser preserves canonical continuation UTMs",
+  parsedHandoffAttribution.source_platform === "openclaw"
+    && parsedHandoffAttribution.utm_source === "ai-agent"
+    && parsedHandoffAttribution.utm_medium === "openclaw"
+    && parsedHandoffAttribution.utm_content === "mcp");
+const unsafeHandoffAttribution = sanitizeQuoteAttributionQuery({
+  source_platform: "attacker@example.com",
+  utm_source: "alice@example.com",
+  utm_medium: "claude-ai@example.com",
+  utm_campaign: "summer-sale",
+  utm_content: ["mcp", "rest"],
+});
+check("buyer form parser drops unknown, PII-shaped, and duplicate attribution",
+  Object.keys(unsafeHandoffAttribution).length === 0,
+  JSON.stringify(unsafeHandoffAttribution));
 const snapshotCreated = Math.floor(Date.parse(safeSnapshot.created_at) / 1000);
 const nearExpiryUrl = new URL(buildPlanContinuation(safeSnapshot, "ABCDEFGH2345", {
   secret: "unit-test-secret",
@@ -749,7 +774,39 @@ check("quote schema accepts bounded attribution + plan_id",
     skill_id: "urgent-event-backfill",
     skill_version: "1.5.0",
     plan_id: "ABCDEFGH2345",
+    utm_source: "ai-agent",
+    utm_medium: "openclaw",
+    utm_campaign: "quote-handoff",
+    utm_content: "mcp",
   }).success);
+check("quote schema rejects free-text platform and UTM attribution",
+  !RequestQuoteSchema.safeParse({ ...base, source_platform: "attacker@example.com" }).success
+    && !RequestQuoteSchema.safeParse({ ...base, utm_source: "alice@example.com" }).success
+    && !RequestQuoteSchema.safeParse({ ...base, utm_medium: "claude-ai@example.com" }).success
+    && !RequestQuoteSchema.safeParse({ ...base, utm_campaign: "summer-sale" }).success
+    && !RequestQuoteSchema.safeParse({ ...base, utm_content: "registration-staff" }).success);
+const failOpenAttribution = RequestQuoteSchema.safeParse(
+  sanitizeQuoteRequestAttribution({
+    ...base,
+    source_platform: "stale-client-runtime",
+    utm_source: "newsletter",
+    utm_medium: "spring-email",
+    utm_campaign: "spring-2026",
+    utm_content: { arbitrary: true },
+    skill_id: "retired-client-skill",
+    skill_version: "not-semver",
+  }),
+);
+check("REST quote attribution drops unknown analytics without rejecting the lead",
+  failOpenAttribution.success
+    && failOpenAttribution.data.source_platform === undefined
+    && failOpenAttribution.data.utm_source === undefined
+    && failOpenAttribution.data.utm_medium === undefined
+    && failOpenAttribution.data.utm_campaign === undefined
+    && failOpenAttribution.data.utm_content === undefined
+    && failOpenAttribution.data.skill_id === undefined
+    && failOpenAttribution.data.skill_version === undefined,
+  JSON.stringify(failOpenAttribution));
 check("quote schema rejects arbitrary skill attribution",
   !RequestQuoteSchema.safeParse({ ...base, skill_id: "made-up-skill" }).success);
 check("quote schema rejects email-shaped skill version attribution",
@@ -792,6 +849,11 @@ check("MCP quote handoff rejects email-shaped skill attribution",
       ...handoffInput,
       skill_id: "megan@example.com",
     }).success);
+check("MCP quote handoff rejects unknown or PII-shaped platform attribution",
+  !RequestQuoteHandoffSchema.safeParse({
+    ...handoffInput,
+    source_platform: "attacker@example.com",
+  }).success);
 check("MCP quote handoff accepts bounded prerelease SemVer attribution",
   RequestQuoteHandoffSchema.safeParse({
     ...handoffInput,
@@ -830,6 +892,10 @@ check("MCP quote handoff returns a prefilled buyer-operated form without submitt
     && readyHandoffUrl?.pathname === "/request-quote"
     && readyHandoffUrl?.searchParams.get("plan") === handoffInput.plan_id
     && readyHandoffUrl?.searchParams.get("source_platform") === "claude-ai"
+    && readyHandoffUrl?.searchParams.get("utm_source") === "ai-agent"
+    && readyHandoffUrl?.searchParams.get("utm_medium") === "claude-ai"
+    && readyHandoffUrl?.searchParams.get("utm_campaign") === "quote-handoff"
+    && readyHandoffUrl?.searchParams.get("utm_content") === "mcp"
     && readyHandoffUrl?.searchParams.get("skill_id") === "event-staffing-ordering"
     && !JSON.stringify(readyHandoff).includes("jane@example.com"),
   JSON.stringify(readyHandoff));
@@ -850,15 +916,27 @@ check("MCP quote handoff fails safely when the plan expired",
     && !("form_url" in missingHandoff)
     && outputSchemas.REQUEST_QUOTE_HANDOFF_SCHEMA.safeParse(missingHandoff).success);
 
-const { normalizeControlledSource, normalizeSourcePlatform } = await load(
+const {
+  normalizeControlledSource,
+  normalizeRuntimeAttributionSource,
+  normalizeSourcePlatform,
+} = await load(
   "src/lib/telemetry/source-tags.ts",
 );
+const { classifyUserAgent } = await load("src/lib/telemetry/classify-ua.ts");
 check("source tags canonicalize underscore aliases and retain known agent runtimes",
   normalizeControlledSource("custom_gpt") === "custom-gpt"
     && normalizeControlledSource("mcp-handoff") === "mcp-handoff"
     && normalizeSourcePlatform("openai-codex") === "openai-codex"
     && normalizeSourcePlatform("qwen-ecosystem") === "qwen-ecosystem"
     && normalizeSourcePlatform("alice@example.com") === "other");
+check("unknown public source tags do not suppress a classified runtime",
+  normalizeRuntimeAttributionSource("custom_gpt", "claude-ai") === "custom-gpt"
+    && normalizeRuntimeAttributionSource("attacker@example.com", "claude-ai") === "claude-ai"
+    && normalizeRuntimeAttributionSource("", "ClaudeBot") === null);
+check("interactive Claude UA yields a canonical handoff platform while crawlers do not",
+  normalizeSourcePlatform(classifyUserAgent("claude-user")) === "claude-ai"
+    && normalizeSourcePlatform(classifyUserAgent("ClaudeBot")) === "other");
 const {
   canonicalTelemetryCity,
   canonicalTelemetryCountry,
@@ -1100,6 +1178,10 @@ check("lead source precedence is explicit platform, current runtime, then saved 
       { source_platform: "attacker@example.com", controlled_source: "hermes" },
       savedPlanSource,
     ) === "hermes"
+    && queueModule.resolveEffectiveSourcePlatform(
+      { utm_medium: "claude-ai", controlled_source: "mcp-handoff" },
+      savedPlanSource,
+    ) === "claude-ai"
     && queueModule.resolveEffectiveSourcePlatform({}, savedPlanSource) === "pi");
 const queuedInput = {
   contact_name: "Queue Buyer",
@@ -1150,20 +1232,30 @@ try {
     controlled_source: "hermes",
     skill_id: "urgent-event-backfill",
     skill_version: "1.5.0",
+    utm_source: "ai-agent",
+    utm_medium: "openclaw",
+    utm_campaign: "quote-handoff",
+    utm_content: "mcp",
   });
   const replayedDuplicate = await queueModule.createLead(queuedInput);
   const healthyNotionProperties = notionBodies[1]?.properties ?? {};
   check("lead attribution reaches result, CRM fields, and notification webhook",
     healthyLead.source_platform === "openclaw"
       && healthyLead.skill_id === "urgent-event-backfill"
-      && healthyNotionProperties["UTM Source"]?.rich_text?.[0]?.text?.content === "openclaw"
+      && healthyNotionProperties["UTM Source"]?.rich_text?.[0]?.text?.content === "ai-agent"
+      && healthyNotionProperties["UTM Medium"]?.rich_text?.[0]?.text?.content
+        ?.startsWith("openclaw · campaign=quote-handoff · content=mcp")
       && healthyNotionProperties["UTM Medium"]?.rich_text?.[0]?.text?.content
         ?.includes("skill=urgent-event-backfill")
       && healthyNotionProperties["UTM Medium"]?.rich_text?.[0]?.text?.content
         ?.includes("skill_version=1.5.0")
       && webhookBodies[0]?.source_platform === "openclaw"
       && webhookBodies[0]?.skill_id === "urgent-event-backfill"
-      && webhookBodies[0]?.skill_version === "1.5.0",
+      && webhookBodies[0]?.skill_version === "1.5.0"
+      && webhookBodies[0]?.utm_source === "ai-agent"
+      && webhookBodies[0]?.utm_medium === "openclaw"
+      && webhookBodies[0]?.utm_campaign === "quote-handoff"
+      && webhookBodies[0]?.utm_content === "mcp",
     JSON.stringify({ healthyLead, healthyNotionProperties, webhook: webhookBodies[0] }));
   check("drained lead is idempotent and duplicate status advances to CRM received",
     healthyLead.success === true
@@ -1259,6 +1351,28 @@ try {
       && deadlineDrain.claimed === 0
       && afterDeadlineDrain.delivered === 1,
     JSON.stringify({ deadlineDrain, afterDeadlineDrain }));
+
+  const hostileAttributionLead = await queueModule.createLead({
+    ...queuedInput,
+    contact_email: "hostile-attribution@example.com",
+    event_name: "Hostile Attribution Expo",
+    source_platform: "attacker@example.com",
+    utm_source: "alice@example.com",
+    utm_medium: "claude-ai@example.com",
+    utm_campaign: "summer-sale",
+    utm_content: "evil-content",
+  });
+  const hostileNotionBody = notionBodies.at(-1) ?? {};
+  const hostileWebhookBody = webhookBodies.at(-1) ?? {};
+  const hostileSerialized = JSON.stringify({ hostileNotionBody, hostileWebhookBody });
+  check("CRM sanitizer drops raw platform and UTM attribution before persistence",
+    hostileAttributionLead.success === true
+      && !hostileSerialized.includes("attacker@example.com")
+      && !hostileSerialized.includes("alice@example.com")
+      && !hostileSerialized.includes("claude-ai@example.com")
+      && !hostileSerialized.includes("summer-sale")
+      && !hostileSerialized.includes("evil-content"),
+    hostileSerialized);
 } finally {
   globalThis.fetch = originalFetch;
   delete process.env.LEAD_WEBHOOK_URL;

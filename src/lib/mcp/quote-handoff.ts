@@ -17,7 +17,10 @@ import {
   QUOTE_SKILL_VERSION_PATTERN,
   type QuoteSkillId,
 } from "./quote";
-import { normalizeSourcePlatform } from "../telemetry/source-tags";
+import {
+  normalizeSourcePlatform,
+  SOURCE_PLATFORM_TAGS,
+} from "../telemetry/source-tags";
 
 export const RequestQuoteHandoffSchema = z
   .object({
@@ -31,10 +34,7 @@ export const RequestQuoteHandoffSchema = z
         "Saved non-PII plan reference returned by plan_staffing or save_staffing_plan.",
       ),
     source_platform: z
-      .string()
-      .trim()
-      .min(1)
-      .max(80)
+      .enum(SOURCE_PLATFORM_TAGS)
       .optional()
       .describe(
         "Optional agent/platform attribution, e.g. claude-ai, openclaw, or hermes.",
@@ -113,8 +113,16 @@ export async function prepareQuoteHandoff(
   url.searchParams.set("utm_campaign", "quote-handoff");
 
   const sourcePlatform = normalizeSourcePlatform(input.source_platform);
-  if (sourcePlatform) {
+  if (sourcePlatform && sourcePlatform !== "other") {
+    const continuationMedium = url.searchParams.get("utm_medium");
     url.searchParams.set("source_platform", sourcePlatform);
+    url.searchParams.set("utm_medium", sourcePlatform);
+    if (
+      !url.searchParams.has("utm_content") &&
+      (continuationMedium === "mcp" || continuationMedium === "rest")
+    ) {
+      url.searchParams.set("utm_content", continuationMedium);
+    }
   }
   if (input.skill_id) {
     url.searchParams.set("skill_id", input.skill_id);

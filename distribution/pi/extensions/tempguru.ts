@@ -231,8 +231,16 @@ export default function (pi: any) {
         };
       }
       const formUrl = new URL(plan.continuation.form_url);
+      const continuationMedium = formUrl.searchParams.get("utm_medium");
       formUrl.searchParams.set("utm_campaign", "quote-handoff");
       formUrl.searchParams.set("source_platform", "pi");
+      formUrl.searchParams.set("utm_medium", "pi");
+      if (
+        !formUrl.searchParams.has("utm_content") &&
+        (continuationMedium === "mcp" || continuationMedium === "rest")
+      ) {
+        formUrl.searchParams.set("utm_content", continuationMedium);
+      }
       const skillId =
         typeof p.skill_id === "string" && QUOTE_SKILL_ID_SET.has(p.skill_id)
           ? p.skill_id

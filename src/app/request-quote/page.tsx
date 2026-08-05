@@ -7,14 +7,8 @@ import {
   PLAN_ID_PATTERN,
   type PlanSnapshot,
 } from "@/lib/mcp/plan-store";
-import {
-  QUOTE_SKILL_IDS,
-  QUOTE_SKILL_VERSION_PATTERN,
-  type QuoteSkillId,
-} from "@/lib/mcp/quote";
-import { normalizeSourcePlatform } from "@/lib/telemetry/source-tags";
+import { sanitizeQuoteAttributionQuery } from "@/lib/mcp/quote-attribution";
 import QuoteRequestForm, {
-  type QuoteAttribution,
   type QuoteFormInitial,
   type QuoteRolePrefill,
 } from "./quote-request-form";
@@ -42,6 +36,10 @@ type RequestQuoteSearchParams = {
   source_platform?: SearchValue;
   skill_id?: SearchValue;
   skill_version?: SearchValue;
+  utm_source?: SearchValue;
+  utm_medium?: SearchValue;
+  utm_campaign?: SearchValue;
+  utm_content?: SearchValue;
 };
 
 type PlanLinkState = "restored" | "invalid" | "unavailable" | "none";
@@ -82,8 +80,6 @@ const EVENT_TYPE_LABELS: Record<string, string> = {
   "brand-activation": "Brand activation",
   other: "Other",
 };
-
-const SKILL_IDS = new Set<string>(QUOTE_SKILL_IDS);
 
 function singleValue(value: SearchValue): string | undefined {
   return typeof value === "string" ? value : undefined;
@@ -256,26 +252,6 @@ function safeSnapshot(snapshot: PlanSnapshot): SafePlanReview {
   };
 }
 
-function sanitizedAttribution(params: RequestQuoteSearchParams): QuoteAttribution {
-  const rawPlatform = boundedParam(params.source_platform, 80);
-  const sourcePlatform = normalizeSourcePlatform(rawPlatform || undefined);
-  const rawSkillId = boundedParam(params.skill_id, 80);
-  const skillId = SKILL_IDS.has(rawSkillId)
-    ? (rawSkillId as QuoteSkillId)
-    : undefined;
-  const rawSkillVersion = boundedParam(params.skill_version, 40);
-  const skillVersion =
-    skillId && QUOTE_SKILL_VERSION_PATTERN.test(rawSkillVersion)
-      ? rawSkillVersion
-      : undefined;
-
-  return {
-    ...(sourcePlatform ? { source_platform: sourcePlatform } : {}),
-    ...(skillId ? { skill_id: skillId } : {}),
-    ...(skillVersion ? { skill_version: skillVersion } : {}),
-  };
-}
-
 function formatEventType(value: string): string {
   return EVENT_TYPE_LABELS[value] ?? "Not provided";
 }
@@ -364,7 +340,7 @@ export default async function RequestQuotePage({
       ...(shifts ? { shifts } : {}),
     })),
   };
-  const attribution = sanitizedAttribution(params);
+  const attribution = sanitizeQuoteAttributionQuery(params);
   const roleOptions = ROLES.map((role) => ({
     value: role.name,
     label: role.slug,
