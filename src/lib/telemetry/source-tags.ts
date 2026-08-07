@@ -35,6 +35,7 @@ export const CONTROLLED_SOURCE_TAGS = [
   "pi",
   "poe-bot",
   "postman",
+  "prime-agent",
   "python-client",
   "skill",
   "team-demo",

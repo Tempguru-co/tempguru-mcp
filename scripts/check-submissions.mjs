@@ -206,6 +206,15 @@ if (CLI_PKG.keywords?.includes("pi-package") || Object.hasOwn(CLI_PKG, "pi")) {
 if (!PI_PKG.keywords?.includes("pi-package") || !PI_PKG.pi?.skills?.includes("./skills") || !PI_PKG.pi?.extensions?.includes("./extensions")) {
   errors.push("distribution/pi/package.json: Pi package metadata must expose adapted skills and native extensions");
 }
+if (
+  !PI_PKG.keywords?.includes("prime-agent") ||
+  !PI_PKG.keywords?.includes("agent-skills") ||
+  !PI_PKG.description?.includes("Prime Agent")
+) {
+  errors.push(
+    "distribution/pi/package.json: shared package must advertise Prime Agent and Agent Skills compatibility",
+  );
+}
 if (PI_PKG.peerDependencies?.typebox !== "*" || PI_PKG.dependencies?.typebox) {
   errors.push("distribution/pi/package.json: Pi core typebox must be an unbundled '*' peer dependency");
 }
@@ -322,6 +331,29 @@ for (const skill of SKILLS) {
 // the generated routing guide above and the extension inventory is gated here.
 {
   const piExtension = read("distribution/pi/extensions/tempguru.ts");
+  for (const fragment of [
+    "PRIME_AGENT_CODING_AGENT_DIR",
+    "process.title",
+    "source=${encodeURIComponent(runtimeSource)}",
+    '"x-tempguru-source": runtimeSource',
+    'formUrl.searchParams.set("source_platform", runtimeSource)',
+    'formUrl.searchParams.set("utm_medium", runtimeSource)',
+  ]) {
+    if (!piExtension.includes(fragment)) {
+      errors.push(
+        `distribution/pi/extensions/tempguru.ts: shared Pi/Prime attribution missing ${fragment}`,
+      );
+    }
+  }
+  if (
+    piExtension.includes('"x-tempguru-source": "pi"') ||
+    piExtension.includes('formUrl.searchParams.set("source_platform", "pi")') ||
+    piExtension.includes('formUrl.searchParams.set("utm_medium", "pi")')
+  ) {
+    errors.push(
+      "distribution/pi/extensions/tempguru.ts: Prime-compatible extension still hardcodes Pi attribution",
+    );
+  }
   const registeredPiTools = [
     ...piExtension.matchAll(/name:\s*"(tempguru_[a-z_]+)"/g),
   ].map((match) => match[1]);
@@ -351,8 +383,8 @@ for (const skill of SKILLS) {
   for (const skill of SKILLS) {
     const body = read(`distribution/pi/skills/${skill}/SKILL.md`);
     const normalizedBody = body.replace(/\s+/g, " ");
-    if (!body.includes("Pi runtime tool routing (installed package override)")) {
-      errors.push(`distribution/pi/skills/${skill}/SKILL.md: Pi runtime routing guide missing`);
+    if (!body.includes("Pi and Prime Agent runtime tool routing (installed package override)")) {
+      errors.push(`distribution/pi/skills/${skill}/SKILL.md: shared Pi/Prime runtime routing guide missing`);
     }
     for (const nativeName of expectedPiTools) {
       if (!body.includes(`\`${nativeName}\``)) {
@@ -363,7 +395,7 @@ for (const skill of SKILLS) {
       errors.push(`distribution/pi/skills/${skill}/SKILL.md: remote MCP tool identifier was renamed into a nonexistent tool`);
     }
     for (const phrase of [
-      "not native Pi tools",
+      "not native tools in this package",
       "straight-time planning estimate",
       "never invent a saved `plan_id`",
       "https://mcp.tempguru.co/okf/rate-index.md",
@@ -456,6 +488,8 @@ for (const p of [
     "source=hermes",
     "source=openai-codex",
     "pi install npm:tempguru-pi",
+    "prime-agent package install npm:tempguru-pi",
+    "source=prime-agent",
   ]) {
     if (!body.includes(fragment)) errors.push(`${p}: multi-runtime activation guidance missing ${fragment}`);
   }
@@ -922,6 +956,28 @@ for (const p of ["README.md", "llms-install.md"]) {
     if (!body.includes(`openclaw skills install ./skills/${skill} --global`)) {
       errors.push(`${p}: OpenClaw install path missing ${skill}`);
     }
+  }
+}
+for (const p of ["README.md", "llms-install.md", "distribution/pi/README.md"]) {
+  const body = read(p);
+  for (const fragment of [
+    "prime-agent package install npm:tempguru-pi",
+    "source=prime-agent",
+    "8 skills",
+    "9 native",
+  ]) {
+    if (!body.includes(fragment)) {
+      errors.push(`${p}: Prime Agent package guidance missing ${fragment}`);
+    }
+  }
+  if (!/requires OAuth\s+or\s+a bearer token/.test(body)) {
+    errors.push(`${p}: Prime Agent authless MCP limitation is not disclosed`);
+  }
+}
+
+for (const skill of SKILLS.filter((name) => name !== "tempguru-pro-operations")) {
+  if (!read(`content/skills/${skill}.md`).includes("?source=prime-agent")) {
+    errors.push(`content/skills/${skill}.md: Prime Agent attribution endpoint missing`);
   }
 }
 

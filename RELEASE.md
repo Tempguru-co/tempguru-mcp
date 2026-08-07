@@ -19,9 +19,10 @@ The connector is still classified `read_write` because `plan_staffing` may
 best-effort save a non-contact plan and `save_staffing_plan` explicitly saves
 one. Those are the only two non-read-only tools.
 
-This runbook covers Vercel, npm, the official MCP Registry, the Pi npm package,
-Cloudflare discovery, GHCR, the Anthropic Connectors Directory, Hermes, and
-ClawHub. It does not cover or authorize TempGuru city-page changes.
+This runbook covers Vercel, npm, the official MCP Registry, the shared Pi /
+Prime Agent npm package, Cloudflare discovery, GHCR, the Anthropic Connectors
+Directory, Hermes, and ClawHub. It does not cover or authorize TempGuru
+city-page changes.
 
 ## Release surfaces
 
@@ -31,7 +32,7 @@ ClawHub. It does not cover or authorize TempGuru city-page changes.
 | GHCR `latest` and `sha-*` | Merge/push to `main` | Publishes `ghcr.io/tempguru-co/event-staffing` |
 | MCP Registry initial check | `server.json` version change on `main` | Defers until the matching npm CLI exists |
 | npm CLI | Manual `publish-npm.yml` with `1.7.0` | Publishes `tempguru-mcp`, then re-dispatches the Registry workflow |
-| Pi npm package | Manual `publish-pi.yml` with `1.7.0` | Publishes `tempguru-pi` independently |
+| Pi / Prime Agent npm package | Manual `publish-pi.yml` with `1.7.0` | Publishes the shared `tempguru-pi` artifact independently |
 | GHCR semver tags | Push `v1.7.0` | Publishes image tags `1.7.0` and `1.7` |
 | Apex Cloudflare discovery | Manual | Deploys the two committed worker files |
 | Anthropic directory | Manual portal update and email reply | Requests re-review under `tempguru-event-staffing` |
@@ -220,7 +221,7 @@ gh workflow run publish-registry.yml \
 Never retry by publishing `1.6.0`, and never attempt to overwrite an existing
 npm or MCP Registry version. Use a new patch version for a forward fix.
 
-## 5. Publish `tempguru-pi@1.7.0`
+## 5. Publish the Pi / Prime Agent package, `tempguru-pi@1.7.0`
 
 In GitHub Actions, choose **Publish Pi package to npm**, select `main`, enter
 `1.7.0`, and run:
@@ -249,9 +250,28 @@ Install `npm:tempguru-pi` in a clean Pi session, restart Pi, and confirm:
 - Calling the handoff does not create a lead or TG reference. Do not submit the
   returned form with fake personal information.
 
+Then run the same published artifact through Prime Agent's package loader:
+
+```bash
+prime-agent package install npm:tempguru-pi
+prime-agent package list
+prime-agent \
+  -e npm:tempguru-pi@1.7.0 \
+  --mode json \
+  --no-session \
+  --tools tempguru_get_cities \
+  'Call tempguru_get_cities exactly once with city Austin. Return only whether Austin is covered.'
+```
+
+Confirm Prime loads all 8 skills and 9 native tools, the Austin call succeeds,
+and its API request is attributed as `prime-agent` rather than `pi`. Prime's
+stock `McpIntegration` in v0.7.0 requires OAuth or a bearer token; do not add
+TempGuru's authless MCP URL to Prime settings as a release workaround.
+
 The full `plan_staffing`, `save_staffing_plan`, and `get_rate_benchmark`
-operations remain available through the remote MCP rather than the native Pi
-adapter.
+operations remain available through a separately attached remote MCP in Pi.
+They remain unavailable in Prime until the native adapter gains parity or
+Prime supports authless MCP.
 
 ## 6. Deploy apex discovery to Cloudflare
 
@@ -502,6 +522,8 @@ Do not mark `1.7.0` complete until every applicable item is verified:
 - Vercel Production serves the merge commit and `/request-quote`.
 - `tempguru-mcp@1.7.0` resolves from npm.
 - `tempguru-pi@1.7.0` resolves from npm.
+- The published `tempguru-pi@1.7.0` loads all 8 skills and 9 native tools in
+  both Pi and Prime Agent, and Prime calls carry `source=prime-agent`.
 - The official MCP Registry reports `1.7.0`.
 - Both Cloudflare worker deployments are live.
 - `check-live-discovery.yml` passes.

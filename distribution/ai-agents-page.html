@@ -258,7 +258,13 @@ cd tempguru-mcp
   <p class="tg-label">Pi</p>
   <div class="tg-code">pi install npm:tempguru-pi
 // Repository release candidate: 1.7.0. Verify the npm version before installing.
-// temguru_request_quote returns the buyer-operated form and sends no contact data.</div>
+// tempguru_request_quote returns the buyer-operated form and sends no contact data.</div>
+
+  <p class="tg-label">Prime Agent</p>
+  <div class="tg-code">prime-agent package install npm:tempguru-pi
+prime-agent package list
+// Same 8 skills + 9 native tools; calls are attributed as source=prime-agent.
+// Prime v0.7.0 cannot attach TempGuru's authless MCP through its stock adapter.</div>
 
   <p class="tg-label">Codex</p>
   <div class="tg-code">codex mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=openai-codex"

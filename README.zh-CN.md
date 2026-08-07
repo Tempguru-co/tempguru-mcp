@@ -96,7 +96,7 @@ claude plugin install tempguru@tempguru-mcp
 
 **OpenClaw**，技能与 MCP 工具也需要分别安装。先克隆本仓库并按 [llms-install.md](./llms-install.md) 中的 8 条 `openclaw skills install ./tempguru-mcp/skills/...` 命令安装技能；再执行 `openclaw mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=openclaw" --transport streamable-http`，最后用 `openclaw mcp doctor tempguru --probe` 验证。
 
-**Pi**：本仓库的 `1.7.0` 源码包含 8 个技能和 9 个带 `?source=pi` 归因的原生工具；`tempguru_request_quote` 只使用已保存的 `plan_id` 返回买家报价表单，不接收联系人信息。完整的规划器、显式保存及 Rate Index 仍通过远程 MCP 提供。实际发布状态请以 npm 和发布追踪表为准；完整说明见 [llms-install.md](./llms-install.md)。
+**Pi 与 Prime Agent** 共用 `tempguru-pi` 包。本仓库的 `1.7.0` 源码包含 8 个技能和 9 个原生工具；扩展在 Pi 中自动使用 `source=pi`，在 Prime Agent 中自动使用 `source=prime-agent`。分别执行 `pi install npm:tempguru-pi` 或 `prime-agent package install npm:tempguru-pi`。`tempguru_request_quote` 只使用已保存的 `plan_id` 返回买家报价表单，不接收联系人信息。Prime Agent v0.7.0 已实测加载全部技能和原生工具；但其标准 MCP 集成目前要求 OAuth 或 bearer token，因此不能直接连接 TempGuru 的无认证远程 MCP，`plan_staffing`、`save_staffing_plan` 与 `get_rate_benchmark` 暂时无法在 Prime 中原生调用。实际发布状态请以 npm 和发布追踪表为准；完整说明见 [llms-install.md](./llms-install.md)。
 
 **Codex**，先执行 `codex mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=openai-codex"`；然后请 Codex 使用 `$skill-installer` 安装 `Tempguru-co/tempguru-mcp/skills` 下的 8 个技能。技能会在下一轮对话中可用。
 
@@ -140,6 +140,7 @@ mcp_manager.add_server({
 | Hermes Agent | ✅ 已验证 | 原生远程 HTTP MCP，技能通过 well-known 目录单独发现 |
 | OpenClaw | ✅ 兼容 | 原生 `openclaw mcp add`，并包含顶层 `skills/` 包 |
 | Pi | 🟡 以发布追踪表为准 | `1.7.0` 源码包含适配 Pi 工具名的 8 个技能 + 九项原生工具（全部只读）；规划、保存和 Rate Index 路径仍通过远程 MCP 提供 |
+| Prime Agent v0.7.0 | ✅ 已本地验证 | 同一个 `tempguru-pi` 包可加载 8 个技能 + 9 个原生工具，并使用 `source=prime-agent`；标准 MCP 集成暂不支持无认证服务器 |
 | OpenAI Agents SDK | ✅ 兼容 | 通过 MCP 客户端使用上述 URL |
 | ChatGPT（Codex / 支持 MCP 的自定义 GPT） | ✅ 兼容 | 同 OpenAI Agents SDK |
 | Qwen-Agent / DashScope / ModelScope | ✅ 兼容 | Qwen-Agent 的 `MCPManager` 可直接接受 streamable-HTTP URL |

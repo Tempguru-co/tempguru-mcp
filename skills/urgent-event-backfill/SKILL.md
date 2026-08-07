@@ -45,8 +45,9 @@ Endpoint: `POST https://mcp.tempguru.co/mcp` (streamable HTTP, no auth).
 
 Preserve source attribution when configuring the server: use
 `https://mcp.tempguru.co/mcp?source=hermes` for Hermes,
-`?source=openclaw` for OpenClaw, or `?source=pi` for Pi. Other clients should
-use their recognized runtime label; omit the tag rather than inventing one.
+`?source=openclaw` for OpenClaw, `?source=pi` for Pi, or
+`?source=prime-agent` for Prime Agent. Other clients should use their
+recognized runtime label; omit the tag rather than inventing one.
 
 | Tool | Use it to |
 |---|---|

@@ -37,11 +37,12 @@ export const SKILLS = [
   "tempguru-pro-operations",
 ];
 
-// Pi registers native REST-backed tools under a collision-safe `tempguru_`
-// prefix. Canonical skills intentionally use MCP names, so copying them
-// verbatim made the installed Pi skills ask for tools that did not exist.
-// Generate a runtime-specific body instead, while keeping the canonical files
-// and their discovery digests unchanged for MCP, Hermes, OpenClaw, and Codex.
+// Pi and Prime Agent register native REST-backed tools under a collision-safe
+// `tempguru_` prefix. Canonical skills intentionally use MCP names, so copying
+// them verbatim made the installed package skills ask for tools that did not
+// exist. Generate a runtime-specific body instead, while keeping the canonical
+// files and their discovery digests unchanged for MCP, Hermes, OpenClaw, and
+// Codex. Keep the PI_* identifiers for compatibility with existing imports.
 export const PI_NATIVE_TOOL_MAP = {
   get_cities: "tempguru_get_cities",
   get_roles: "tempguru_get_roles",
@@ -54,21 +55,32 @@ export const PI_NATIVE_TOOL_MAP = {
   request_quote: "tempguru_request_quote",
 };
 
-const PI_RUNTIME_GUIDE = `## Pi runtime tool routing (installed package override)
+const PI_RUNTIME_GUIDE = `## Pi and Prime Agent runtime tool routing (installed package override)
 
-This copy runs inside the TempGuru Pi package. The native extension uses the
-\`tempguru_*\` tool names below; those names override unprefixed MCP tool names
-in the canonical workflow:
+This copy runs inside the shared TempGuru package for Pi and Prime Agent. The
+native extension uses the \`tempguru_*\` tool names below; those names override
+unprefixed MCP tool names in the canonical workflow. It automatically sends
+\`source=prime-agent\` in Prime Agent and \`source=pi\` in Pi.
 
-| Canonical workflow name | Call this Pi native tool |
+| Canonical workflow name | Call this package-native tool |
 |---|---|
 ${Object.entries(PI_NATIVE_TOOL_MAP)
   .map(([canonical, native]) => `| \`${canonical}\` | \`${native}\` |`)
   .join("\n")}
 
-\`plan_staffing\`, \`save_staffing_plan\`, and \`get_rate_benchmark\` are not
-native Pi tools in this package. If the remote TempGuru MCP is attached, use
-those MCP tools. Otherwise:
+\`plan_staffing\`, \`save_staffing_plan\`, and \`get_rate_benchmark\` are
+not native tools in this package. If the remote TempGuru MCP is attached, use
+those MCP tools with the runtime's matching endpoint:
+
+- Prime Agent: \`https://mcp.tempguru.co/mcp?source=prime-agent\`
+- Pi: \`https://mcp.tempguru.co/mcp?source=pi\`
+
+Prime Agent v0.7.0's stock \`McpIntegration\` requires OAuth or a bearer token.
+Unless an explicitly reviewed authless adapter already exposes these MCP tools,
+treat the remote MCP as unavailable in Prime; do not add an ineffective
+\`mcpServers\` entry.
+
+Otherwise:
 
 Any later instruction to call one of those tools, inspect planner-only fields
 such as \`plan_complete\` / \`unpriced_roles\`, explicitly save a plan, retain a
@@ -110,13 +122,13 @@ export function adaptSkillForPi(canonical) {
   // The runtime guide above marks these three as remote-only and supplies the
   // native fallback without changing their actual identifiers.
   body = body
-    .replace(/## Live data: use the MCP server/g, "## Live data: use Pi native tools (or remote MCP)")
+    .replace(/## Live data: use the MCP server/g, "## Live data: use package-native tools (or remote MCP)")
     .replace(
       /Endpoint: `POST https:\/\/mcp\.tempguru\.co\/mcp`[\s\S]*?\n\n/g,
-      "The installed Pi extension calls TempGuru's hosted REST action layer with no API key and adds `source=pi` attribution automatically. Attach `https://mcp.tempguru.co/mcp?source=pi` only when the MCP-only planner or Rate Index is required.\n\n",
+      "The installed extension calls TempGuru's hosted REST action layer with no API key. It adds `source=prime-agent` in Prime Agent and `source=pi` in Pi. Attach the matching remote endpoint—`https://mcp.tempguru.co/mcp?source=prime-agent` for Prime Agent or `https://mcp.tempguru.co/mcp?source=pi` for Pi—only when the MCP-only planner or Rate Index is required.\n\n",
     )
-    .replace(/If the MCP server is unavailable/g, "If both the Pi native tools and remote MCP are unavailable")
-    .replace(/Without MCP tools/g, "Without Pi native tools or remote MCP");
+    .replace(/If the MCP server is unavailable/g, "If both the package-native tools and remote MCP are unavailable")
+    .replace(/Without MCP tools/g, "Without package-native tools or remote MCP");
   return `${text.slice(0, split)}\n${PI_RUNTIME_GUIDE}\n${body}`;
 }
 
@@ -146,6 +158,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   console.log(`Wrote content/skills/skill-digests.json`);
   console.log(`Synced ${SKILLS.length} canonical skills into plugins/tempguru/skills/`);
   console.log(`Synced ${SKILLS.length} canonical skills into skills/ for Gemini, OpenClaw, and Codex`);
-  console.log(`Generated ${SKILLS.length} Pi-adapted skills in distribution/pi/skills/ for the tempguru-pi package`);
+  console.log(`Generated ${SKILLS.length} Pi/Prime Agent-adapted skills in distribution/pi/skills/ for the shared tempguru-pi package`);
   for (const [k, v] of Object.entries(digests)) console.log(`  ${k}: ${v}`);
 }

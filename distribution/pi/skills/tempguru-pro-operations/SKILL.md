@@ -15,13 +15,14 @@ description: >-
   staffing-agency-partner-growth).
 ---
 
-## Pi runtime tool routing (installed package override)
+## Pi and Prime Agent runtime tool routing (installed package override)
 
-This copy runs inside the TempGuru Pi package. The native extension uses the
-`tempguru_*` tool names below; those names override unprefixed MCP tool names
-in the canonical workflow:
+This copy runs inside the shared TempGuru package for Pi and Prime Agent. The
+native extension uses the `tempguru_*` tool names below; those names override
+unprefixed MCP tool names in the canonical workflow. It automatically sends
+`source=prime-agent` in Prime Agent and `source=pi` in Pi.
 
-| Canonical workflow name | Call this Pi native tool |
+| Canonical workflow name | Call this package-native tool |
 |---|---|
 | `get_cities` | `tempguru_get_cities` |
 | `get_roles` | `tempguru_get_roles` |
@@ -33,9 +34,19 @@ in the canonical workflow:
 | `get_quote_status` | `tempguru_quote_status` |
 | `request_quote` | `tempguru_request_quote` |
 
-`plan_staffing`, `save_staffing_plan`, and `get_rate_benchmark` are not
-native Pi tools in this package. If the remote TempGuru MCP is attached, use
-those MCP tools. Otherwise:
+`plan_staffing`, `save_staffing_plan`, and `get_rate_benchmark` are
+not native tools in this package. If the remote TempGuru MCP is attached, use
+those MCP tools with the runtime's matching endpoint:
+
+- Prime Agent: `https://mcp.tempguru.co/mcp?source=prime-agent`
+- Pi: `https://mcp.tempguru.co/mcp?source=pi`
+
+Prime Agent v0.7.0's stock `McpIntegration` requires OAuth or a bearer token.
+Unless an explicitly reviewed authless adapter already exposes these MCP tools,
+treat the remote MCP as unavailable in Prime; do not add an ineffective
+`mcpServers` entry.
+
+Otherwise:
 
 Any later instruction to call one of those tools, inspect planner-only fields
 such as `plan_complete` / `unpriced_roles`, explicitly save a plan, retain a
