@@ -130,12 +130,11 @@ legacy OpenClaw VPS container.
 
 ## Pi
 
-The repository's `tempguru-pi` 1.7.0 source contains 8 skills plus 9 native
+The published `tempguru-pi` 1.7.0 package contains 8 skills plus 9 native
 read-only tools with `?source=pi` attribution. The native
 `tempguru_request_quote` tool accepts a saved plan ID and returns the
-buyer-operated form; it does not transmit contact details. Check npm and the
-repository release tracker for publication status. Attach the remote MCP for
-the full planner, saved-plan write, and Rate Index:
+buyer-operated form; it does not transmit contact details. Attach the remote
+MCP for the full planner, saved-plan write, and Rate Index:
 
 ```bash
 pi install npm:tempguru-pi
@@ -160,9 +159,9 @@ prime-agent package install npm:tempguru-pi
 prime-agent package list
 ```
 
-Runtime-specific `source=prime-agent` attribution begins in `tempguru-pi`
-1.7.0. Until npm reports that version as published, an unpinned install still
-resolves to 1.6.0: its tools work in Prime, but its calls are labeled `pi`.
+Runtime-specific `source=prime-agent` attribution begins in the published
+`tempguru-pi@1.7.0`; older pinned 1.6.0 installs still work in Prime but label
+their calls `pi`.
 
 Restart Prime Agent and verify that all 8 TempGuru skills and the 9 native
 tools from `tempguru_get_cities` through `tempguru_request_quote` load. The
