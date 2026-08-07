@@ -26,6 +26,7 @@ import { checkReadRateLimit } from "../api/rate-limit";
 import { currentContext } from "../telemetry/context";
 import { normalizeRuntimeAttributionSource } from "../telemetry/source-tags";
 import { buildStaffingPlan } from "./plan-staffing";
+import { EVENT_TYPES } from "./event-types";
 import {
   SaveStaffingPlanInputSchema,
   saveStaffingPlan,
@@ -216,18 +217,19 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     {
       title: "Plan Staffing",
       description:
-        "CALL THIS FIRST for any event staffing request. Takes the event shape (city, date, roles + headcount) and returns a complete staffing plan: coverage, per-role rate math with an estimated total range, lead-time guidance, and the state compliance flags that change the plan. " +
-        "Perfect for 'Staff my trade show in [city]', 'What would 6 registration staff for 2 days cost?', or 'Build me a staffing plan' requests. " +
-        "DO NOT use for a single fact, use get_role_pricing for one rate, check_availability for one date, get_compliance_by_state for one state. " +
-        "A complete plan may save a non-contact snapshot for 30 days and return plan_id/continuation. If no plan_id is returned and persistence is needed, use save_staffing_plan; never call save_staffing_plan when this tool already returned a plan_id. This tool never submits contact details, reserves staff, or creates a quote request. " +
-        "<examples>plan_staffing(city='Chicago', event_date='2026-08-14', event_type='trade-show', roles=[{role:'registration-staff', headcount:6, hours_per_shift:8, days:2}, {role:'team-leads', headcount:1}]) ; plan_staffing(city='Austin', attendees=300)</examples> " +
-        "<hints>Roles accept names or slugs (brand-ambassadors, registration-staff, team-leads). Omit roles to get the catalog plus a suggested mix. Totals are planning estimates, never binding quotes. Branch on the `status` field: plan | needs_roles | roles_not_found | city_not_found (the last two carry a did-you-mean suggestion to confirm with the user, not auto-apply).</hints>",
+        "CALL THIS FIRST for event staffing requests. Returns coverage, role-level W-2 rate math, estimated totals, lead-time guidance, and state compliance flags from the event's city, date, roles, and headcount. Use granular tools only for a single rate, date, or state fact. A complete plan may save a non-contact snapshot for 30 days and return plan_id plus continuation. If it returns no plan_id and the buyer needs persistence, call save_staffing_plan once; never save a plan that already has an ID. This tool never accepts or submits contact details, reserves staff, or creates a quote request. Omit roles for the catalog and a suggested mix. Treat totals as planning estimates, not quotes. Branch on status: plan, needs_roles, roles_not_found, or city_not_found; confirm suggestions rather than auto-applying them.",
       inputSchema: z.object({
         city: z.string().max(120).describe("Event city, name or slug (e.g., 'Chicago')."),
-        event_date: z.string().max(40).optional().describe("Event date, ISO YYYY-MM-DD preferred."),
+        event_date: z
+          .string()
+          .max(40)
+          .meta({ format: "date" })
+          .optional()
+          .describe("Event date as YYYY-MM-DD; legacy recognizable dates are still accepted."),
         event_type: z
           .string()
           .max(80)
+          .meta({ enum: [...EVENT_TYPES] })
           .optional()
           .describe("trade-show, conference, festival, concert, sporting-event, corporate, brand-activation, or other."),
         attendees: z.number().int().positive().max(5_000_000).optional().describe("Expected attendee count."),
@@ -461,7 +463,8 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
       inputSchema: z.object({
         date: z
           .string()
-          .describe("Event date in ISO format (YYYY-MM-DD) or any date string parseable by Date()."),
+          .meta({ format: "date" })
+          .describe("Event date as YYYY-MM-DD; legacy recognizable dates are still accepted."),
         city: z
           .string()
           .describe("City name (e.g., 'Boston') or slug (e.g., 'boston-event-staffing')."),
@@ -645,9 +648,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     {
       title: "Request Quote",
       description:
-        "Create a safe buyer handoff for a TempGuru staffing quote. Use after the buyer has reviewed the plan and asks to proceed. Requires the saved non-PII plan_id returned by plan_staffing or save_staffing_plan and returns a prefilled TempGuru-owned review form. This tool does NOT accept or transmit a name, email, phone, company, or other contact details; it does NOT create a CRM lead or quote reference. The buyer must open the returned form_url, review the plan, enter their own contact details, and submit it themselves. Only that buyer submission creates the lead. Not a reservation; does not guarantee pricing or availability; no payment until the buyer approves a human-issued quote. " +
-        "<examples>request_quote(plan_id='ABCDEFGH2345', source_platform='claude-ai', skill_id='event-staffing-ordering', skill_version='1.7.0')</examples> " +
-        "<hints>If plan_staffing returned a complete continuation.form_url but storage did not return a plan_id, give that URL to the buyer directly instead of calling this tool. Never ask for contact details for an MCP call. If the plan expired, re-run plan_staffing. For urgent help, use megan@tempguru.co or (904) 206-8953.</hints>",
+        "Use only after the buyer reviews a staffing plan and asks to proceed. Requires the saved non-PII plan_id from plan_staffing or save_staffing_plan and returns a prefilled TempGuru-owned review form. This tool never accepts or transmits names, email, phone, company, or other contact details and never creates a CRM lead or quote reference. The buyer must open form_url, review the plan, enter their own details, and submit it; only that submission creates a lead. This is not a reservation and does not guarantee pricing or availability. If a complete plan has continuation.form_url but no plan_id, give that URL directly instead. Never collect contact details for an MCP call; re-run an expired plan.",
       inputSchema: RequestQuoteHandoffSchema,
       outputSchema: REQUEST_QUOTE_HANDOFF_SCHEMA,
       annotations: {
@@ -771,7 +772,11 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
         "Build a complete event staffing plan: coverage, W-2 rate math, lead time, and compliance flags, ready to submit for a human-reviewed quote.",
       argsSchema: z.object({
         city: z.string().describe("Event city, e.g. Chicago"),
-        event_date: z.string().optional().describe("Event date, e.g. 2026-08-14"),
+        event_date: z
+          .string()
+          .meta({ format: "date" })
+          .optional()
+          .describe("Event date as YYYY-MM-DD, e.g. 2026-08-14"),
         roles: z
           .string()
           .optional()

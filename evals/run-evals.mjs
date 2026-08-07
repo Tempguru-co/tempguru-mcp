@@ -134,6 +134,49 @@ try {
     ),
   );
 
+  const canonicalEventTypes = [
+    "trade-show",
+    "conference",
+    "festival",
+    "concert",
+    "sporting-event",
+    "corporate",
+    "brand-activation",
+    "other",
+  ];
+  const planInput = toolByName.get("plan_staffing")?.inputSchema?.properties ?? {};
+  const saveInput = toolByName.get("save_staffing_plan")?.inputSchema?.properties ?? {};
+  const availabilityInput =
+    toolByName.get("check_availability")?.inputSchema?.properties ?? {};
+  check(
+    "planning tools advertise the canonical event_type enum",
+    JSON.stringify(planInput.event_type?.enum) === JSON.stringify(canonicalEventTypes) &&
+      JSON.stringify(saveInput.event_type?.enum) === JSON.stringify(canonicalEventTypes),
+    JSON.stringify({
+      plan: planInput.event_type,
+      save: saveInput.event_type,
+    }),
+  );
+  check(
+    "event-date tool inputs advertise JSON Schema date format",
+    planInput.event_date?.format === "date" &&
+      saveInput.event_date?.format === "date" &&
+      availabilityInput.date?.format === "date",
+    JSON.stringify({
+      plan: planInput.event_date,
+      save: saveInput.event_date,
+      availability: availabilityInput.date,
+    }),
+  );
+  const oversizedDescriptions = [...toolByName.values()]
+    .filter((tool) => (tool.description?.length ?? 0) > 1000)
+    .map((tool) => `${tool.name}:${tool.description.length}`);
+  check(
+    "tool descriptions stay within the 1,000-character client budget",
+    oversizedDescriptions.length === 0,
+    oversizedDescriptions.join(","),
+  );
+
   const prompts = await rpc("prompts/list", {});
   const promptNames = (prompts.result?.prompts ?? []).map((p) => p.name).sort();
   check(

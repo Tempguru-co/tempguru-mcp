@@ -437,8 +437,25 @@ export function buildOpenApiSpec() {
                 },
               },
             },
+            "403": {
+              description:
+                "The request carried a browser Origin that is not approved for quote submission.",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/Error" },
+                },
+              },
+            },
             "413": {
               description: "Request body larger than 64 KB.",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/Error" },
+                },
+              },
+            },
+            "415": {
+              description: "The request body is not encoded as application/json.",
               content: {
                 "application/json": {
                   schema: { $ref: "#/components/schemas/Error" },
@@ -540,7 +557,13 @@ export function buildOpenApiSpec() {
               properties: {
                 code: {
                   type: "string",
-                  enum: ["missing_required", "invalid_param", "not_found", "rate_limited"],
+                  enum: [
+                    "missing_required",
+                    "invalid_param",
+                    "not_found",
+                    "rate_limited",
+                    "forbidden",
+                  ],
                   description: "Machine-readable error category.",
                 },
                 message: {

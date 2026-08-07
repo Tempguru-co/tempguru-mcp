@@ -112,6 +112,48 @@ function assertExactToolSet(label, tools) {
       );
     }
   }
+
+  const canonicalEventTypes = [
+    "trade-show",
+    "conference",
+    "festival",
+    "concert",
+    "sporting-event",
+    "corporate",
+    "brand-activation",
+    "other",
+  ];
+  const planInput = tools.find((tool) => tool.name === "plan_staffing")
+    ?.inputSchema?.properties;
+  const saveInput = save?.inputSchema?.properties;
+  const availabilityInput = tools.find(
+    (tool) => tool.name === "check_availability",
+  )?.inputSchema?.properties;
+  if (
+    JSON.stringify(planInput?.event_type?.enum) !==
+      JSON.stringify(canonicalEventTypes) ||
+    JSON.stringify(saveInput?.event_type?.enum) !==
+      JSON.stringify(canonicalEventTypes)
+  ) {
+    throw new Error(`${label}: planning event_type schemas must use the canonical enum`);
+  }
+  if (
+    planInput?.event_date?.format !== "date" ||
+    saveInput?.event_date?.format !== "date" ||
+    availabilityInput?.date?.format !== "date"
+  ) {
+    throw new Error(`${label}: MCP event-date inputs must advertise format:date`);
+  }
+  const oversizedDescriptions = tools.filter(
+    (tool) => (tool.description?.length ?? 0) > 1000,
+  );
+  if (oversizedDescriptions.length) {
+    throw new Error(
+      `${label}: tool descriptions exceed 1,000 characters: ${oversizedDescriptions
+        .map((tool) => `${tool.name}:${tool.description.length}`)
+        .join(", ")}`,
+    );
+  }
 }
 
 function startSession(label) {

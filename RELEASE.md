@@ -32,7 +32,7 @@ city-page changes.
 | GHCR `latest` and `sha-*` | Merge/push to `main` | Publishes `ghcr.io/tempguru-co/event-staffing` |
 | MCP Registry initial check | `server.json` version change on `main` | Defers until the matching npm CLI exists |
 | npm CLI | Manual `publish-npm.yml` with `1.7.0` | Publishes `tempguru-mcp`, then re-dispatches the Registry workflow |
-| Pi / Prime Agent npm package | Manual `publish-pi.yml` with `1.7.0` | Publishes the shared `tempguru-pi` artifact independently |
+| Pi / Prime Agent npm package | Manual `publish-pi.yml` with `1.7.1` | Publishes the shared `tempguru-pi` artifact independently; `1.7.0` is immutable |
 | GHCR semver tags | Push `v1.7.0` | Publishes image tags `1.7.0` and `1.7` |
 | Apex Cloudflare discovery | Manual | Deploys the two committed worker files |
 | Anthropic directory | Manual portal update and email reply | Requests re-review under `tempguru-event-staffing` |
@@ -90,7 +90,8 @@ node -p 'require("./.claude-plugin/marketplace.json").plugins[0].version'
 ```
 
 The repository build Node major must be at least 22. Every version printed
-above must be `1.7.0`.
+above must be `1.7.0` except the independently versioned Pi package, which must
+be the unpublished patch `1.7.1`.
 
 Install from the lockfile and regenerate every committed release artifact:
 
@@ -221,22 +222,22 @@ gh workflow run publish-registry.yml \
 Never retry by publishing `1.6.0`, and never attempt to overwrite an existing
 npm or MCP Registry version. Use a new patch version for a forward fix.
 
-## 5. Publish the Pi / Prime Agent package, `tempguru-pi@1.7.0`
+## 5. Publish the Pi / Prime Agent package, `tempguru-pi@1.7.1`
 
 In GitHub Actions, choose **Publish Pi package to npm**, select `main`, enter
-`1.7.0`, and run:
+`1.7.1`, and run:
 
 ```bash
 gh workflow run publish-pi.yml \
   --repo Tempguru-co/tempguru-mcp \
   --ref main \
-  -f version=1.7.0
+  -f version=1.7.1
 ```
 
 Verify:
 
 ```bash
-npm --cache /tmp/tempguru-release-cache view tempguru-pi@1.7.0 version
+npm --cache /tmp/tempguru-release-cache view tempguru-pi@1.7.1 version
 ```
 
 Install `npm:tempguru-pi` in a clean Pi session, restart Pi, and confirm:
@@ -256,7 +257,7 @@ Then run the same published artifact through Prime Agent's package loader:
 prime-agent package install npm:tempguru-pi
 prime-agent package list
 prime-agent \
-  -e npm:tempguru-pi@1.7.0 \
+  -e npm:tempguru-pi@1.7.1 \
   --mode json \
   --no-session \
   --tools tempguru_get_cities \
@@ -521,8 +522,8 @@ Do not mark `1.7.0` complete until every applicable item is verified:
 
 - Vercel Production serves the merge commit and `/request-quote`.
 - `tempguru-mcp@1.7.0` resolves from npm.
-- `tempguru-pi@1.7.0` resolves from npm.
-- The published `tempguru-pi@1.7.0` loads all 8 skills and 9 native tools in
+- `tempguru-pi@1.7.1` resolves from npm.
+- The published `tempguru-pi@1.7.1` loads all 8 skills and 9 native tools in
   both Pi and Prime Agent, and Prime calls carry `source=prime-agent`.
 - The official MCP Registry reports `1.7.0`.
 - Both Cloudflare worker deployments are live.

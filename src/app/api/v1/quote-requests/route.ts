@@ -14,9 +14,12 @@
 //
 // Abuse posture (public, no-auth write):
 //   - JSON body capped at 64 KB
+//   - application/json required (blocks simple cross-origin form/text writes)
+//   - present browser Origin restricted to TempGuru-owned hosts
 //   - zod validation including email format
 //   - light per-IP fixed-window rate limit, fail-open (src/lib/api/rate-limit.ts)
 
+import { validateOriginHeader } from "@modelcontextprotocol/server";
 import {
   RequestQuoteSchema,
   quoteSubmittedPayload,
@@ -29,11 +32,35 @@ import { checkQuoteRateLimit } from "@/lib/api/rate-limit";
 import {
   jsonWriteError,
   jsonWrite,
-  jsonRateLimited,
+  jsonWriteRateLimited,
+  jsonWriteOriginRejected,
   optionsPreflightPost,
 } from "@/lib/api/responses";
+import {
+  configuredVercelOriginHostnames,
+  DEFAULT_QUOTE_ORIGIN_HOSTNAMES,
+} from "@/lib/http/security";
 
 const MAX_BODY_BYTES = 64_000;
+
+function quoteOriginRejected(request: Request): Response | undefined {
+  const result = validateOriginHeader(
+    request.headers.get("Origin"),
+    configuredVercelOriginHostnames(
+      DEFAULT_QUOTE_ORIGIN_HOSTNAMES,
+      process.env.QUOTE_ALLOWED_ORIGIN_HOSTNAMES,
+    ),
+  );
+  return result.ok ? undefined : jsonWriteOriginRejected();
+}
+
+function hasJsonContentType(request: Request): boolean {
+  const mediaType = (request.headers.get("Content-Type") ?? "")
+    .split(";", 1)[0]
+    .trim()
+    .toLowerCase();
+  return mediaType === "application/json";
+}
 
 function clientIp(request: Request): string {
   // On Vercel, x-forwarded-for is set by the platform with the real client
@@ -44,10 +71,26 @@ function clientIp(request: Request): string {
 }
 
 export async function POST(request: Request) {
+  // Reject untrusted browser origins before preflight/body parsing or any CRM
+  // work. A missing Origin remains valid for approved server integrations.
+  const originRejected = quoteOriginRejected(request);
+  if (originRejected) return originRejected;
+
+  // Requiring JSON makes the write non-simple under CORS and prevents a hostile
+  // page from bypassing preflight with text/plain while still sending JSON text.
+  if (!hasJsonContentType(request)) {
+    return jsonWriteError(
+      request,
+      { code: "invalid_param", message: "Content-Type must be application/json." },
+      { status: 415 },
+    );
+  }
+
   // ── Parse, with size cap ────────────────────────────────────────────────
   const declared = Number(request.headers.get("content-length") ?? 0);
   if (declared > MAX_BODY_BYTES) {
     return jsonWriteError(
+      request,
       { code: "invalid_param", message: `Request body too large (max ${MAX_BODY_BYTES} bytes).` },
       { status: 413 },
     );
@@ -57,12 +100,16 @@ export async function POST(request: Request) {
   try {
     raw = await request.text();
   } catch {
-    return jsonWriteError({ code: "invalid_param", message: "Could not read request body." });
+    return jsonWriteError(
+      request,
+      { code: "invalid_param", message: "Could not read request body." },
+    );
   }
   // Re-check actual size in bytes (Content-Length can lie or be absent with
   // chunked encoding, and string .length counts UTF-16 code units, not bytes).
   if (new TextEncoder().encode(raw).byteLength > MAX_BODY_BYTES) {
     return jsonWriteError(
+      request,
       { code: "invalid_param", message: `Request body too large (max ${MAX_BODY_BYTES} bytes).` },
       { status: 413 },
     );
@@ -72,7 +119,10 @@ export async function POST(request: Request) {
   try {
     body = JSON.parse(raw);
   } catch {
-    return jsonWriteError({ code: "invalid_param", message: "Request body must be valid JSON." });
+    return jsonWriteError(
+      request,
+      { code: "invalid_param", message: "Request body must be valid JSON." },
+    );
   }
 
   // ── Validate the buyer-submitted REST payload ─────────────────────────
@@ -83,18 +133,21 @@ export async function POST(request: Request) {
     const issue = parsed.error.issues[0];
     const field = issue.path.join(".") || undefined;
     const missing = issue.code === "invalid_type" && issue.message.includes("undefined");
-    return jsonWriteError({
-      code: missing ? "missing_required" : "invalid_param",
-      message: field ? `${field}: ${issue.message}` : issue.message,
-      field,
-    });
+    return jsonWriteError(
+      request,
+      {
+        code: missing ? "missing_required" : "invalid_param",
+        message: field ? `${field}: ${issue.message}` : issue.message,
+        field,
+      },
+    );
   }
   const input = parsed.data;
 
   // ── Rate limit (after validation, so malformed floods cost no Redis) ───
   const verdict = await checkQuoteRateLimit(clientIp(request));
   if (!verdict.allowed) {
-    return jsonRateLimited(verdict.retryAfterSeconds);
+    return jsonWriteRateLimited(request, verdict.retryAfterSeconds);
   }
 
   // ── CRM write, then telemetry awaited in-handler (no PII in telemetry) ─
@@ -137,10 +190,11 @@ export async function POST(request: Request) {
     // Upstream CRM failure (Notion down / unconfigured), surfaced as 502 so
     // the form or an approved REST integrator can offer the fallback.
     // The reference survives the failure so a follow-up email can cite it.
-    return jsonWrite(quoteFailedPayload(result.error, result.reference), 502);
+    return jsonWrite(request, quoteFailedPayload(result.error, result.reference), 502);
   }
 
   return jsonWrite(
+    request,
     quoteSubmittedPayload(
       input.contact_email,
       result.deal_name,
@@ -151,6 +205,8 @@ export async function POST(request: Request) {
   );
 }
 
-export async function OPTIONS() {
-  return optionsPreflightPost();
+export async function OPTIONS(request: Request) {
+  const originRejected = quoteOriginRejected(request);
+  if (originRejected) return originRejected;
+  return optionsPreflightPost(request);
 }

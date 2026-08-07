@@ -28,7 +28,10 @@
 // plus the 2026-07-28 per-request envelope protocol).
 // Public endpoint: https://mcp.tempguru.co/mcp
 
-import { createMcpHandler } from "@modelcontextprotocol/server";
+import {
+  createMcpHandler,
+  originValidationResponse,
+} from "@modelcontextprotocol/server";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { createTempGuruMcpServer } from "@/lib/mcp/create-server";
@@ -37,6 +40,12 @@ import { runWithContext, currentContext } from "@/lib/telemetry/context";
 import { classifyUserAgent } from "@/lib/telemetry/classify-ua";
 import { normalizeSourcePlatform } from "@/lib/telemetry/source-tags";
 import { track } from "@/lib/telemetry/track";
+import {
+  configuredVercelOriginHostnames,
+  DEFAULT_MCP_ORIGIN_HOSTNAMES,
+  withExactOriginCors,
+  withMachineSecurity,
+} from "@/lib/http/security";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -114,38 +123,42 @@ const handler = createMcpHandler(
 // silently failed Glama's browser-context health probe, which surfaced
 // as a generic "unhealthy" status with no diagnostic.
 //
-// Wide-open CORS is correct for this server: no auth, no sensitive
-// data, no per-client config, no credentialed requests. Allow-list any
-// origin, expose the MCP-Session-Id and Last-Event-ID headers used by
-// streamable HTTP, and apply on every response, including OPTIONS
-// preflights.
+// Browser MCP clients require CORS, while the MCP transport specification also
+// requires rejecting untrusted present Origin headers to prevent DNS-rebinding
+// attacks. The allowlist is exact-hostname based; server clients without an
+// Origin continue to work. Add owned/approved browser hosts at deploy time with
+// MCP_ALLOWED_ORIGIN_HOSTNAMES (comma-separated hostnames, no schemes/ports).
 
-const CORS_HEADERS: Record<string, string> = {
-  "access-control-allow-origin": "*",
-  "access-control-allow-methods": "GET, POST, DELETE, OPTIONS",
-  "access-control-allow-headers":
+const MCP_CORS = {
+  methods: "GET, POST, DELETE, OPTIONS",
+  allowHeaders:
     "Content-Type, Accept, MCP-Protocol-Version, Mcp-Method, Mcp-Name, Mcp-Session-Id, Last-Event-ID, Authorization, X-TempGuru-Source",
-  "access-control-expose-headers": "Mcp-Session-Id, WWW-Authenticate",
-  "access-control-max-age": "86400",
-};
+  exposeHeaders: "Mcp-Session-Id, WWW-Authenticate",
+} as const;
 
-function withCors(response: Response): Response {
-  const headers = new Headers(response.headers);
-  for (const [k, v] of Object.entries(CORS_HEADERS)) {
-    headers.set(k, v);
-  }
-  return new Response(response.body, {
-    status: response.status,
-    statusText: response.statusText,
-    headers,
-  });
+function withMcpCors(response: Response, request: Request): Response {
+  return withExactOriginCors(response, request, MCP_CORS);
 }
 
 async function withAcceptNormalization(request: Request): Promise<Response> {
-  // Short-circuit OPTIONS preflights with a CORS-only 204, no need to
-  // run them through the MCP handler.
+  // Origin validation must run before OPTIONS or any MCP parsing/handler work.
+  // A missing Origin is expected for server-to-server MCP clients and passes.
+  const originRejected = originValidationResponse(
+    request,
+    configuredVercelOriginHostnames(
+      DEFAULT_MCP_ORIGIN_HOSTNAMES,
+      process.env.MCP_ALLOWED_ORIGIN_HOSTNAMES,
+    ),
+  );
+  if (originRejected) {
+    // Never attach ACAO to a rejection. Vary remains explicit for caches.
+    return withMachineSecurity(originRejected, { varyOrigin: true });
+  }
+
+  // Short-circuit accepted OPTIONS preflights with a 204, no need to run them
+  // through the MCP handler.
   if (request.method === "OPTIONS") {
-    return withCors(new Response(null, { status: 204 }));
+    return withMcpCors(new Response(null, { status: 204 }), request);
   }
 
   // Bind per-request context (User-Agent + Vercel IP-country header) so
@@ -176,7 +189,7 @@ async function withAcceptNormalization(request: Request): Promise<Response> {
     const accept = request.headers.get("accept") ?? "";
 
     if (accept.includes("application/json") && accept.includes("text/event-stream")) {
-      return withCors(await handler.fetch(request));
+      return withMcpCors(await handler.fetch(request), request);
     }
 
     // Clone the request with a normalized Accept header. Body must be read first
@@ -196,7 +209,7 @@ async function withAcceptNormalization(request: Request): Promise<Response> {
       signal: request.signal,
     });
 
-    return withCors(await handler.fetch(normalized));
+    return withMcpCors(await handler.fetch(normalized), request);
   });
 }
 

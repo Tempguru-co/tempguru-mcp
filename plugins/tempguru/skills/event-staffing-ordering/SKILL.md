@@ -85,7 +85,10 @@ Collect before planning:
   user only has an attendee count, start from about 1 registration or
   guest-services staffer per 50-75 attendees, with a team lead standard at
   20+ staff per shift, and label the result an assumption the user can correct.
-- **Event type** (convention, conference, trade show, festival, concert, sporting event, stadium, corporate, brand activation)
+- **Event type** using the canonical value that best fits: `trade-show`,
+  `conference`, `festival`, `concert`, `sporting-event`, `corporate`,
+  `brand-activation`, or `other`. Treat conventions as `trade-show` and
+  stadium events as `sporting-event` unless the user gives a better fit.
 - **Attire/uniform requirements**
 - **Special requirements** (bilingual staff, certifications, overnight shifts)
 

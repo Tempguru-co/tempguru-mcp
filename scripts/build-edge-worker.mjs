@@ -244,6 +244,11 @@ const AGENT_FILES = {
 ${entries}
 };
 
+const STATIC_SECURITY_HEADERS = {
+  "x-content-type-options": "nosniff",
+  "content-security-policy": "default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
+};
+
 export default {
   async fetch(request) {
     const url = new URL(request.url);
@@ -251,6 +256,7 @@ export default {
     if (url.pathname === "/robots.txt") {
       return new Response(ROBOTS, {
         headers: {
+          ...STATIC_SECURITY_HEADERS,
           "content-type": "text/plain; charset=utf-8",
           "cache-control": "public, max-age=86400",
         },
@@ -261,6 +267,7 @@ export default {
     if (agentFile) {
       return new Response(agentFile.body, {
         headers: {
+          ...STATIC_SECURITY_HEADERS,
           "content-type": agentFile.type,
           "access-control-allow-origin": "*",
           "cache-control": "public, max-age=3600",
