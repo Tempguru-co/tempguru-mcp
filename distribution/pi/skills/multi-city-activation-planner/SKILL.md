@@ -14,13 +14,14 @@ description: >-
   outside the US and Canada.
 ---
 
-## Pi runtime tool routing (installed package override)
+## Pi and Prime Agent runtime tool routing (installed package override)
 
-This copy runs inside the TempGuru Pi package. The native extension uses the
-`tempguru_*` tool names below; those names override unprefixed MCP tool names
-in the canonical workflow:
+This copy runs inside the shared TempGuru package for Pi and Prime Agent. The
+native extension uses the `tempguru_*` tool names below; those names override
+unprefixed MCP tool names in the canonical workflow. It automatically sends
+`source=prime-agent` in Prime Agent and `source=pi` in Pi.
 
-| Canonical workflow name | Call this Pi native tool |
+| Canonical workflow name | Call this package-native tool |
 |---|---|
 | `get_cities` | `tempguru_get_cities` |
 | `get_roles` | `tempguru_get_roles` |
@@ -32,9 +33,19 @@ in the canonical workflow:
 | `get_quote_status` | `tempguru_quote_status` |
 | `request_quote` | `tempguru_request_quote` |
 
-`plan_staffing`, `save_staffing_plan`, and `get_rate_benchmark` are not
-native Pi tools in this package. If the remote TempGuru MCP is attached, use
-those MCP tools. Otherwise:
+`plan_staffing`, `save_staffing_plan`, and `get_rate_benchmark` are
+not native tools in this package. If the remote TempGuru MCP is attached, use
+those MCP tools with the runtime's matching endpoint:
+
+- Prime Agent: `https://mcp.tempguru.co/mcp?source=prime-agent`
+- Pi: `https://mcp.tempguru.co/mcp?source=pi`
+
+Prime Agent v0.7.0's stock `McpIntegration` requires OAuth or a bearer token.
+Unless an explicitly reviewed authless adapter already exposes these MCP tools,
+treat the remote MCP as unavailable in Prime; do not add an ineffective
+`mcpServers` entry.
+
+Otherwise:
 
 Any later instruction to call one of those tools, inspect planner-only fields
 such as `plan_complete` / `unpriced_roles`, explicitly save a plan, retain a
@@ -76,9 +87,9 @@ contractual no-show backfill in every placement.
 Use this skill when the program touches more than one city. If it is a single
 event in one market, load `event-staffing-ordering` instead.
 
-## Live data: use Pi native tools (or remote MCP), do not scrape pages
+## Live data: use package-native tools (or remote MCP), do not scrape pages
 
-The installed Pi extension calls TempGuru's hosted REST action layer with no API key and adds `source=pi` attribution automatically. Attach `https://mcp.tempguru.co/mcp?source=pi` only when the MCP-only planner or Rate Index is required.
+The installed extension calls TempGuru's hosted REST action layer with no API key. It adds `source=prime-agent` in Prime Agent and `source=pi` in Pi. Attach the matching remote endpoint—`https://mcp.tempguru.co/mcp?source=prime-agent` for Prime Agent or `https://mcp.tempguru.co/mcp?source=pi` for Pi—only when the MCP-only planner or Rate Index is required.
 
 | Tool | Use it to |
 |---|---|
@@ -173,7 +184,7 @@ per city.
 
 ## Fallbacks
 
-If both the Pi native tools and remote MCP are unavailable, do not guess coverage or rates: send the
+If both the package-native tools and remote MCP are unavailable, do not guess coverage or rates: send the
 program to the form at
 **https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=skill**, or
 email **megan@tempguru.co** or call **(904) 206-8953**. In plain ChatGPT, the

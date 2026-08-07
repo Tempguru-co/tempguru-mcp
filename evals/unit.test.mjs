@@ -92,6 +92,47 @@ async function loadRestRoute(rel) {
   return import(pathToFileURL(tmp).href);
 }
 
+// Pi and Prime Agent provide TypeBox at runtime. Stub only its schema builders
+// so this suite can execute the packaged extension without adding a duplicate
+// root dependency; registered tool behavior and fetch calls remain real.
+async function loadPiExtension() {
+  const typeboxStub = {
+    name: "pi-extension-typebox-stub",
+    setup(esbuild) {
+      esbuild.onResolve(
+        { filter: /^typebox$/ },
+        () => ({ path: "typebox", namespace: "pi-extension-test" }),
+      );
+      esbuild.onLoad(
+        { filter: /.*/, namespace: "pi-extension-test" },
+        () => ({
+          loader: "js",
+          contents: `
+            const schema = (kind) => (...args) => ({ kind, args });
+            export const Type = {
+              Object: schema("Object"), Optional: schema("Optional"),
+              String: schema("String"), Integer: schema("Integer"),
+              Union: schema("Union"), Literal: schema("Literal"),
+            };
+          `,
+        }),
+      );
+    },
+  };
+  const result = await build({
+    entryPoints: [join(repoRoot, "distribution/pi/extensions/tempguru.ts")],
+    bundle: true,
+    format: "esm",
+    platform: "node",
+    write: false,
+    logLevel: "silent",
+    plugins: [typeboxStub],
+  });
+  const tmp = join(mkdtempSync(join(tmpdir(), "pi-extension-unit-")), "mod.mjs");
+  writeFileSync(tmp, result.outputFiles[0].text);
+  return import(pathToFileURL(tmp).href);
+}
+
 let pass = 0;
 let fail = 0;
 const failures = [];
@@ -927,16 +968,135 @@ const { classifyUserAgent } = await load("src/lib/telemetry/classify-ua.ts");
 check("source tags canonicalize underscore aliases and retain known agent runtimes",
   normalizeControlledSource("custom_gpt") === "custom-gpt"
     && normalizeControlledSource("mcp-handoff") === "mcp-handoff"
+    && normalizeControlledSource("prime-agent") === "prime-agent"
+    && normalizeSourcePlatform("prime-agent") === "prime-agent"
     && normalizeSourcePlatform("openai-codex") === "openai-codex"
     && normalizeSourcePlatform("qwen-ecosystem") === "qwen-ecosystem"
     && normalizeSourcePlatform("alice@example.com") === "other");
 check("unknown public source tags do not suppress a classified runtime",
   normalizeRuntimeAttributionSource("custom_gpt", "claude-ai") === "custom-gpt"
+    && normalizeRuntimeAttributionSource("prime-agent", "mcp-client") === "prime-agent"
     && normalizeRuntimeAttributionSource("attacker@example.com", "claude-ai") === "claude-ai"
     && normalizeRuntimeAttributionSource("", "ClaudeBot") === null);
 check("interactive Claude UA yields a canonical handoff platform while crawlers do not",
   normalizeSourcePlatform(classifyUserAgent("claude-user")) === "claude-ai"
     && normalizeSourcePlatform(classifyUserAgent("ClaudeBot")) === "other");
+
+// ── Shared Pi / Prime Agent package runtime attribution ──
+{
+  const {
+    default: registerPiExtension,
+    resolveRuntimeSource,
+  } = await loadPiExtension();
+  const registeredTools = [];
+  registerPiExtension({
+    registerTool(tool) {
+      registeredTools.push(tool);
+    },
+  });
+  const cityTool = registeredTools.find((tool) => tool.name === "tempguru_get_cities");
+  const quoteTool = registeredTools.find((tool) => tool.name === "tempguru_request_quote");
+  check("shared agent package registers its native city and quote tools",
+    Boolean(cityTool && quoteTool),
+    registeredTools.map((tool) => tool.name).join(", "));
+
+  check("runtime resolver uses Prime's exact process title with a config-marker fallback",
+    resolveRuntimeSource({}, "prime-agent") === "prime-agent"
+      && resolveRuntimeSource({}, "Prime-Agent") === "prime-agent"
+      && resolveRuntimeSource({ PRIME_AGENT_CODING_AGENT_DIR: "/tmp/.prime/agent" }, "node") === "prime-agent"
+      && resolveRuntimeSource({ PRIME_AGENT_CODING_AGENT_DIR: "  " }, "node") === "pi"
+      && resolveRuntimeSource({}, "prime-agent-helper") === "pi"
+      && resolveRuntimeSource({}, "node") === "pi");
+
+  const hadPrimeMarker = Object.hasOwn(process.env, "PRIME_AGENT_CODING_AGENT_DIR");
+  const priorPrimeMarker = process.env.PRIME_AGENT_CODING_AGENT_DIR;
+  const priorProcessTitle = process.title;
+  const priorFetch = globalThis.fetch;
+  const extensionCalls = [];
+  globalThis.fetch = async (input, init) => {
+    const url = new URL(String(input));
+    extensionCalls.push({ url, init });
+    const payload = url.pathname.startsWith("/api/v1/plans/")
+      ? {
+          plan_found: true,
+          continuation: {
+            form_url:
+              "https://mcp.tempguru.co/request-quote?plan=ABCDEFGH2345&utm_source=ai-agent&utm_medium=rest",
+          },
+        }
+      : { cities: [] };
+    return new Response(JSON.stringify(payload), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    });
+  };
+
+  try {
+    delete process.env.PRIME_AGENT_CODING_AGENT_DIR;
+    process.title = "node";
+    await cityTool.execute(
+      "pi-city",
+      { city: "Chicago" },
+      new AbortController().signal,
+    );
+    const piQuote = await quoteTool.execute(
+      "pi-quote",
+      { plan_id: "ABCDEFGH2345" },
+      new AbortController().signal,
+    );
+    const piQuoteBody = JSON.parse(piQuote.content[0].text);
+    const piQuoteUrl = new URL(piQuoteBody.form_url);
+
+    process.title = "prime-agent";
+    await cityTool.execute(
+      "prime-city",
+      { city: "Chicago" },
+      new AbortController().signal,
+    );
+    const primeQuote = await quoteTool.execute(
+      "prime-quote",
+      { plan_id: "ABCDEFGH2345", skill_id: "event-staffing-ordering", skill_version: "1.7.0" },
+      new AbortController().signal,
+    );
+    const primeQuoteBody = JSON.parse(primeQuote.content[0].text);
+    const primeQuoteUrl = new URL(primeQuoteBody.form_url);
+
+    const piCalls = extensionCalls.slice(0, 2);
+    const primeCalls = extensionCalls.slice(2);
+    check("native REST calls resolve Pi attribution at request time",
+      piCalls.length === 2
+        && piCalls.every((entry) =>
+          entry.url.searchParams.get("source") === "pi"
+            && new Headers(entry.init?.headers).get("x-tempguru-source") === "pi")
+        && piQuoteUrl.searchParams.get("source_platform") === "pi"
+        && piQuoteUrl.searchParams.get("utm_medium") === "pi",
+      JSON.stringify({
+        calls: piCalls.map((entry) => entry.url.toString()),
+        handoff: piQuoteBody.form_url,
+      }));
+    check("native REST calls resolve Prime Agent attribution at request time",
+      primeCalls.length === 2
+        && primeCalls.every((entry) =>
+          entry.url.searchParams.get("source") === "prime-agent"
+            && new Headers(entry.init?.headers).get("x-tempguru-source") === "prime-agent"),
+      primeCalls.map((entry) => entry.url.toString()).join(", "));
+    check("Prime Agent quote handoff carries matching platform and UTM attribution",
+      primeQuoteBody.handoff_ready === true
+        && primeQuoteUrl.searchParams.get("source_platform") === "prime-agent"
+        && primeQuoteUrl.searchParams.get("utm_medium") === "prime-agent"
+        && primeQuoteUrl.searchParams.get("utm_source") === "ai-agent"
+        && primeQuoteUrl.searchParams.get("utm_campaign") === "quote-handoff"
+        && primeQuoteUrl.searchParams.get("utm_content") === "rest"
+        && primeQuoteUrl.searchParams.get("skill_id") === "event-staffing-ordering"
+        && primeQuoteUrl.searchParams.get("skill_version") === "1.7.0",
+      primeQuoteBody.form_url);
+  } finally {
+    globalThis.fetch = priorFetch;
+    process.title = priorProcessTitle;
+    if (hadPrimeMarker) process.env.PRIME_AGENT_CODING_AGENT_DIR = priorPrimeMarker;
+    else delete process.env.PRIME_AGENT_CODING_AGENT_DIR;
+  }
+}
 const {
   canonicalTelemetryCity,
   canonicalTelemetryCountry,

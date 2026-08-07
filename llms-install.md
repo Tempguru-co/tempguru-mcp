@@ -1,4 +1,4 @@
-# AI agent install instructions (Claude, Hermes, OpenClaw, Pi, and MCP clients)
+# AI agent install instructions (Claude, Hermes, OpenClaw, Pi, Prime Agent, and MCP clients)
 
 This file is for AI assistants installing the TempGuru Event Staffing MCP
 server on a user's behalf. No API key, no signup, no environment variables.
@@ -58,6 +58,12 @@ source from plan creation through quote submission without collecting PII:
 | Hermes | `https://mcp.tempguru.co/mcp?source=hermes` |
 | OpenClaw | `https://mcp.tempguru.co/mcp?source=openclaw` |
 | Pi | `https://mcp.tempguru.co/mcp?source=pi` |
+| Prime Agent adapter attribution | `https://mcp.tempguru.co/mcp?source=prime-agent` |
+
+The Prime row defines its canonical attribution tag. Install the native
+package described below instead of putting this authless URL in Prime's
+`mcpServers`: Prime Agent v0.7.0's stock Python MCP integration requires OAuth
+or a bearer token.
 
 ## Canonical skills (8)
 
@@ -71,7 +77,8 @@ https://mcp.tempguru.co/.well-known/agent-skills/index.json
 ```
 
 The repository also exposes the same files under top-level `skills/` for
-Claude, Gemini, OpenClaw, Pi, Codex, and other Agent Skills-compatible hosts.
+Claude, Gemini, OpenClaw, Pi, Prime Agent, Codex, and other Agent
+Skills-compatible hosts.
 
 ## Hermes Agent
 
@@ -141,6 +148,49 @@ planner, conditional `save_staffing_plan`, and `get_rate_benchmark` Rate Index
 remain MCP-only in the current native package; when a Pi deployment also has a
 trusted MCP client, attach `https://mcp.tempguru.co/mcp?source=pi` for those
 capabilities.
+
+## Prime Agent
+
+Prime Agent implements the same Agent Skills and Pi-package manifest contract,
+so install the existing package; there is no second TempGuru package or
+Prime-specific marketplace submission:
+
+```bash
+prime-agent package install npm:tempguru-pi
+prime-agent package list
+```
+
+Runtime-specific `source=prime-agent` attribution begins in `tempguru-pi`
+1.7.0. Until npm reports that version as published, an unpinned install still
+resolves to 1.6.0: its tools work in Prime, but its calls are labeled `pi`.
+
+Restart Prime Agent and verify that all 8 TempGuru skills and the 9 native
+tools from `tempguru_get_cities` through `tempguru_request_quote` load. The
+shared extension detects Prime Agent and applies `source=prime-agent` to its
+REST calls and buyer-form handoff; Pi continues to use `source=pi`.
+
+Prime Agent v0.7.0's standard `McpIntegration` requires OAuth or a bearer token,
+so merely adding TempGuru's authless MCP URL to `.prime/agent/settings.json`
+does not expose MCP tools. Do not configure that unsupported bridge. The
+package's native tools work without authentication, while `plan_staffing`,
+`save_staffing_plan`, and `get_rate_benchmark` remain unavailable in Prime
+until they are added to the native extension or Prime supports authless MCP.
+
+The `skills` CLI v1.5.22 has no direct `prime-agent` target. Its universal
+target can place an individual public skill in Prime's shared `.agents/skills`
+directory, but this is a skill-content-only fallback and does **not** install
+TempGuru's native tools:
+
+```bash
+npx skills@1.5.22 add Tempguru-co/tempguru-mcp \
+  --skill event-staffing-ordering \
+  --agent universal \
+  --copy -y
+```
+
+Use the npm package above for the working action layer. skills.sh has no manual
+publisher submission command; successful public-GitHub installs provide its
+indexing signal, without a published indexing-time guarantee.
 
 ## Codex
 

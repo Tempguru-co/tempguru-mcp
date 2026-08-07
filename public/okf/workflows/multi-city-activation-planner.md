@@ -35,8 +35,9 @@ event in one market, load `event-staffing-ordering` instead.
 Endpoint: `POST https://mcp.tempguru.co/mcp` (streamable HTTP, no auth).
 Preserve source attribution when configuring the server:
 `https://mcp.tempguru.co/mcp?source=hermes` for Hermes, `?source=openclaw` for
-OpenClaw, `?source=pi` for Pi; other clients use their recognized runtime
-label and omit the tag rather than invent one.
+OpenClaw, `?source=pi` for Pi, or `?source=prime-agent` for Prime Agent; other
+clients use their recognized runtime label and omit the tag rather than
+inventing one.
 
 | Tool | Use it to |
 |---|---|

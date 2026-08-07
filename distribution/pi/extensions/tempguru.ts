@@ -1,13 +1,14 @@
-// TempGuru event staffing tools for the Pi coding agent.
+// TempGuru event staffing tools for the Pi and Prime Agent coding agents.
 //
-// Pi installs skills (Markdown) and extensions (native tools) from this
-// package; skills alone cannot call an API, so this extension gives Pi real
-// tools against TempGuru's hosted REST mirror (the same public data as the MCP
-// server at https://mcp.tempguru.co/mcp). No auth, no API key.
+// Both runtimes install skills (Markdown) and extensions (native tools) from
+// this package; skills alone cannot call an API, so this extension gives them
+// real tools against TempGuru's hosted REST mirror (the same public data as the
+// MCP server at https://mcp.tempguru.co/mcp). No auth, no API key.
 //
-// Attribution: every call carries ?source=pi so TempGuru can see Pi-driven
-// usage. request_quote is a read-only non-PII handoff: it restores a saved plan
-// and returns a prefilled form the buyer personally submits.
+// Attribution is resolved at request time: Prime Agent v0.7.0 sets the exact
+// Node process title `prime-agent`; an explicit Prime config-directory marker
+// is retained as a fallback. request_quote is a read-only non-PII handoff: it
+// restores a saved plan and returns a prefilled form the buyer submits.
 //
 // Generated from the tempguru-mcp repo (distribution/pi). The full
 // plan_staffing planner is MCP-only; these tools cover the granular REST
@@ -16,7 +17,6 @@
 import { Type } from "typebox";
 
 const BASE = "https://mcp.tempguru.co";
-const SOURCE = "source=pi";
 const MAX_TEXT = 48_000; // stay under Pi's ~50KB tool-output budget
 const QUOTE_SKILL_IDS = [
   "event-staffing-ordering",
@@ -32,24 +32,42 @@ const QUOTE_SKILL_ID_SET = new Set<string>(QUOTE_SKILL_IDS);
 const QUOTE_SKILL_VERSION_PATTERN =
   /^[0-9]{1,4}\.[0-9]{1,4}\.[0-9]{1,4}(?:-[0-9A-Za-z.-]{1,24})?(?:\+[0-9A-Za-z.-]{1,24})?$/;
 
+export type TempGuruRuntimeSource = "pi" | "prime-agent";
+
+/** Resolve for every tool request so one shared package attributes each host
+ * runtime correctly, including long-lived processes whose environment changes
+ * between test/reload cycles. */
+export function resolveRuntimeSource(
+  env: Record<string, string | undefined> = process.env,
+  processTitle: string = process.title,
+): TempGuruRuntimeSource {
+  const hasPrimeConfigMarker =
+    typeof env.PRIME_AGENT_CODING_AGENT_DIR === "string" &&
+    env.PRIME_AGENT_CODING_AGENT_DIR.trim().length > 0;
+  return processTitle.trim().toLowerCase() === "prime-agent" || hasPrimeConfigMarker
+    ? "prime-agent"
+    : "pi";
+}
+
 async function call(
   method: "GET" | "POST",
   path: string,
   signal: AbortSignal,
   query?: Record<string, string | number | undefined>,
   body?: unknown,
+  runtimeSource: TempGuruRuntimeSource = resolveRuntimeSource(),
 ) {
   const qs = Object.entries(query ?? {})
     .filter(([, v]) => v !== undefined && v !== "")
     .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`)
     .join("&");
-  const url = `${BASE}${path}?${SOURCE}${qs ? `&${qs}` : ""}`;
+  const url = `${BASE}${path}?source=${encodeURIComponent(runtimeSource)}${qs ? `&${qs}` : ""}`;
   const res = await fetch(url, {
     method,
     signal,
     headers: {
       accept: "application/json",
-      "x-tempguru-source": "pi",
+      "x-tempguru-source": runtimeSource,
       ...(body ? { "content-type": "application/json" } : {}),
     },
     ...(body ? { body: JSON.stringify(body) } : {}),
@@ -203,10 +221,14 @@ export default function (pi: any) {
       })),
     }),
     async execute(_id: string, p: any, signal: AbortSignal) {
+      const runtimeSource = resolveRuntimeSource();
       const result = await call(
         "GET",
         `/api/v1/plans/${encodeURIComponent(String(p.plan_id).toUpperCase())}`,
         signal,
+        undefined,
+        undefined,
+        runtimeSource,
       );
       const raw = result.content[0]?.text ?? "{}";
       let plan: any;
@@ -233,8 +255,8 @@ export default function (pi: any) {
       const formUrl = new URL(plan.continuation.form_url);
       const continuationMedium = formUrl.searchParams.get("utm_medium");
       formUrl.searchParams.set("utm_campaign", "quote-handoff");
-      formUrl.searchParams.set("source_platform", "pi");
-      formUrl.searchParams.set("utm_medium", "pi");
+      formUrl.searchParams.set("source_platform", runtimeSource);
+      formUrl.searchParams.set("utm_medium", runtimeSource);
       if (
         !formUrl.searchParams.has("utm_content") &&
         (continuationMedium === "mcp" || continuationMedium === "rest")

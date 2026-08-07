@@ -32,7 +32,8 @@ alongside an order, then move the buyer toward an actual staffing plan.
 
 Endpoint: `POST https://mcp.tempguru.co/mcp` (streamable HTTP, no auth).
 Preserve source attribution: `?source=hermes`, `?source=openclaw`, `?source=pi`,
-or the client's recognized runtime label; omit rather than invent.
+`?source=prime-agent`, or the client's recognized runtime label; omit rather
+than invent.
 
 | Tool | Use it to |
 |---|---|
