@@ -141,10 +141,11 @@ active workspace.
 
 **Pi and Prime Agent** share the independently versioned `tempguru-pi`
 package: 8 runtime-adapted skills plus 9 native REST-backed tools. This
-repository prepares `1.7.0`; verify the npm version before installing. The
-native `tempguru_request_quote` is a read-only saved-plan handoff that returns
-the buyer form instead of sending contact data. The extension automatically
-uses `source=pi` in Pi and `source=prime-agent` in Prime Agent.
+repository prepares the `1.7.1` Pi patch; verify the npm version before
+installing. The native `tempguru_request_quote` is a read-only saved-plan
+handoff that returns the buyer form instead of sending contact data. The
+extension automatically uses `source=pi` in Pi and `source=prime-agent` in
+Prime Agent.
 
 ```bash
 pi install npm:tempguru-pi
@@ -197,7 +198,7 @@ turn; each directory includes Codex `agents/openai.yaml` metadata.
 | Windsurf | ✅ Compatible | Streamable HTTP transport |
 | Hermes Agent | ✅ Verified | Native remote HTTP MCP plus separate well-known skill discovery |
 | OpenClaw | ✅ Compatible | Native `openclaw mcp add`; top-level `skills/` package included |
-| Pi | 🟡 `1.7.0` candidate | 8 runtime-adapted skills + 9 native tools; `tempguru_request_quote` returns the buyer-operated form and sends no contact data |
+| Pi | 🟡 `1.7.1` candidate | 8 runtime-adapted skills + 9 native tools; `tempguru_request_quote` returns the buyer-operated form and sends no contact data |
 | Prime Agent v0.7.0 | ✅ Verified locally | Loads the same `tempguru-pi` package: 8 skills + 9 native tools with `source=prime-agent`; its stock MCP integration cannot yet attach this authless server |
 | OpenAI Agents SDK | ✅ Compatible | Use MCP client with the URL above |
 | ChatGPT (Codex / Custom GPTs with MCP) | ✅ Compatible | Same as OpenAI Agents SDK |

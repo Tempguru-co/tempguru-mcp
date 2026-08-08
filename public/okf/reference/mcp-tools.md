@@ -20,7 +20,7 @@ from the server.
 
 | Tool | Kind | Description (from the tool definition) |
 |---|---|---|
-| `plan_staffing` | saved-plan write | CALL THIS FIRST for any event staffing request. |
+| `plan_staffing` | saved-plan write | CALL THIS FIRST for event staffing requests. |
 | `save_staffing_plan` | saved-plan write | Explicitly save a complete non-contact staffing plan for 30 days so it can be shared, resumed, or linked to a later quote request. |
 | `get_plan` | read | Restore a complete non-PII staffing plan created by plan_staffing or save_staffing_plan within the last 30 days. |
 | `get_cities` | read | List the cities where TempGuru staffs events (tier hub/mid/small), or check coverage of ONE city. |
@@ -30,7 +30,7 @@ from the server.
 | `get_compliance_by_state` | read | Get the event staffing compliance summary for a US state. |
 | `get_policies` | read | Get TempGuru's published booking and procurement policies: minimum hours, cancellation/rescheduling, no-show backfill, COIs/additional insured, payment/invoicing, background checks, order confirmation, and quote response. |
 | `get_rate_benchmark` | read | Get Rate Benchmark (Rate Index) |
-| `request_quote` | read | Create a safe buyer handoff for a TempGuru staffing quote. |
+| `request_quote` | read | Use only after the buyer reviews a staffing plan and asks to proceed. |
 | `get_quote_status` | read | Check whether a TempGuru quote request reference was received by the CRM or durably queued. |
 
 ## Golden order

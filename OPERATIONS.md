@@ -183,6 +183,12 @@ Set via Vercel project settings (Production + Preview).
 | `PLAN_LINK_SECRET` | Manual, optional | HMAC-SHA256 key for signed 30-day plan handoff links; `sig`/`exp` are omitted when unset |
 | `LEAD_WEBHOOK_URL` | Manual, optional | First-party, time-capped notification target for new quote requests |
 | `CRON_SECRET` | Manual | Random 16+ character bearer secret Vercel sends to the protected lead-queue drain route |
+| `MCP_ALLOWED_ORIGIN_HOSTNAMES` | Manual, optional | Additive comma-separated exact hostnames for approved browser MCP clients; omit schemes, ports, paths, and wildcards |
+| `QUOTE_ALLOWED_ORIGIN_HOSTNAMES` | Manual, optional | Additive comma-separated exact hostnames for TempGuru-owned browser quote surfaces; server integrations without an `Origin` header need no entry |
+
+The exact current Vercel deployment, branch, and production hostnames are
+included automatically from Vercel's system variables. Do not add a
+`*.vercel.app` wildcard for previews.
 
 If `KV_REST_API_*` are unset: telemetry writes silently no-op; dashboard shows
 "storage not connected"; complete plans have a prefilled continuation but no

@@ -123,7 +123,10 @@ export default function (pi: any) {
       "Lead-time guidance for a city and event date (guidance only, never a reservation or a promise of availability).",
     parameters: Type.Object({
       city: Type.String(),
-      date: Type.String({ description: "Required event date, e.g. 2026-08-14" }),
+      date: Type.String({
+        format: "date",
+        description: "Required event date as YYYY-MM-DD, e.g. 2026-08-14",
+      }),
       role: Type.Optional(Type.String()),
       headcount: Type.Optional(Type.Integer({ minimum: 1 })),
     }),

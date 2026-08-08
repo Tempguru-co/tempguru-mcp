@@ -1,6 +1,6 @@
 {
   "name": "tempguru-pi",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "TempGuru event staffing for Pi and Prime Agent: 8 Agent Skills plus native coverage, rates, availability, compliance, policies, saved plans, and a non-PII buyer quote-form handoff across 345 US/CA markets.",
   "keywords": [
     "pi-package",

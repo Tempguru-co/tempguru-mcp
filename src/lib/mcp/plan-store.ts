@@ -14,6 +14,9 @@ import {
 } from "../telemetry/expiring-json-store";
 import { normalizeSourcePlatform } from "../telemetry/source-tags";
 import { parseEventStart } from "../dates/parse-event-start";
+import { normalizePlanEventType } from "./event-types";
+
+export { normalizePlanEventType } from "./event-types";
 
 export const PLAN_TTL_SECONDS = 60 * 60 * 24 * 30;
 export const PLAN_ID_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
@@ -96,28 +99,6 @@ export type PersistedPlanDecoration = {
   plan_id?: string;
   continuation: PlanContinuation;
 };
-
-const SAFE_EVENT_TYPES = new Set([
-  "trade-show",
-  "conference",
-  "festival",
-  "concert",
-  "sporting-event",
-  "corporate",
-  "brand-activation",
-  "other",
-]);
-
-/** Reduce a public free-string event type to the documented non-PII catalog. */
-export function normalizePlanEventType(value: string | null | undefined): string | null {
-  if (!value?.trim()) return null;
-  const normalized = value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-  return SAFE_EVENT_TYPES.has(normalized) ? normalized : "other";
-}
 
 /** Parse a recognized calendar date, then persist only its canonical ISO day. */
 export function normalizePlanEventDate(value: string | null | undefined): string | null {

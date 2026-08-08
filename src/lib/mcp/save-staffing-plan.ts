@@ -8,6 +8,7 @@
 import { z } from "zod";
 import { checkReadRateLimit, type RateLimitVerdict } from "../api/rate-limit";
 import { buildStaffingPlan } from "./plan-staffing";
+import { EVENT_TYPES } from "./event-types";
 import {
   PLAN_ID_PATTERN,
   PLAN_TTL_SECONDS,
@@ -56,13 +57,17 @@ export const SAVE_STAFFING_PLAN_INPUT = {
     .trim()
     .min(1)
     .max(40)
+    .meta({ format: "date" })
     .optional()
-    .describe("Event date, ISO YYYY-MM-DD preferred."),
+    .describe(
+      "Event date as YYYY-MM-DD; legacy recognizable dates are still accepted.",
+    ),
   event_type: z
     .string()
     .trim()
     .min(1)
     .max(80)
+    .meta({ enum: [...EVENT_TYPES] })
     .optional()
     .describe(
       "trade-show, conference, festival, concert, sporting-event, corporate, brand-activation, or other.",

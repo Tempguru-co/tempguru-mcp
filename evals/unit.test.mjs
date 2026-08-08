@@ -1117,15 +1117,234 @@ check("telemetry accepts only closed-enum TempGuru skill attribution",
   normalizeSourceSkill("urgent-event-backfill") === "urgent-event-backfill"
     && normalizeSourceSkill("made-up-skill") === null);
 
-const { optionsPreflightPost } = await load("src/lib/api/responses.ts");
-const quotePreflight = optionsPreflightPost();
-const mcpRouteSource = readFileSync(join(repoRoot, "src/app/mcp/route.ts"), "utf8");
-check("REST and MCP CORS both allow the controlled source header",
-  quotePreflight.headers.get("access-control-allow-headers")
+// ── browser-origin enforcement + response hardening ──
+const { MACHINE_RESPONSE_CSP } = await load("src/lib/http/security.ts");
+const hasMachineSecurity = (response) =>
+  response.headers.get("x-content-type-options") === "nosniff"
+  && response.headers.get("content-security-policy") === MACHINE_RESPONSE_CSP;
+const variesOnOrigin = (response) =>
+  response.headers.get("vary")
     ?.split(",")
     .map((value) => value.trim().toLowerCase())
-    .includes("x-tempguru-source") === true
-    && mcpRouteSource.includes("X-TempGuru-Source"));
+    .includes("origin") === true;
+
+const mcpRoute = await load("src/app/mcp/route.ts");
+const mcpAttackerPost = await mcpRoute.POST(new Request(
+  "https://mcp.tempguru.co/mcp",
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Origin: "https://attacker.example",
+    },
+    body: "{}",
+  },
+));
+const mcpAttackerPreflight = await mcpRoute.OPTIONS(new Request(
+  "https://mcp.tempguru.co/mcp",
+  { method: "OPTIONS", headers: { Origin: "https://attacker.example" } },
+));
+const mcpNullOriginPreflight = await mcpRoute.OPTIONS(new Request(
+  "https://mcp.tempguru.co/mcp",
+  { method: "OPTIONS", headers: { Origin: "null" } },
+));
+const mcpTrustedPreflight = await mcpRoute.OPTIONS(new Request(
+  "https://mcp.tempguru.co/mcp",
+  { method: "OPTIONS", headers: { Origin: "https://claude.ai" } },
+));
+const mcpServerPreflight = await mcpRoute.OPTIONS(new Request(
+  "https://mcp.tempguru.co/mcp",
+  { method: "OPTIONS" },
+));
+check("MCP rejects untrusted and opaque browser origins before handler work",
+  mcpAttackerPost.status === 403
+    && mcpAttackerPreflight.status === 403
+    && mcpNullOriginPreflight.status === 403
+    && mcpAttackerPost.headers.get("access-control-allow-origin") === null
+    && mcpAttackerPreflight.headers.get("access-control-allow-origin") === null
+    && hasMachineSecurity(mcpAttackerPost)
+    && hasMachineSecurity(mcpAttackerPreflight)
+    && variesOnOrigin(mcpAttackerPost));
+check("MCP echoes only a trusted browser Origin and preserves controlled attribution header",
+  mcpTrustedPreflight.status === 204
+    && mcpTrustedPreflight.headers.get("access-control-allow-origin") === "https://claude.ai"
+    && mcpTrustedPreflight.headers.get("access-control-allow-headers")
+      ?.split(",")
+      .map((value) => value.trim().toLowerCase())
+      .includes("x-tempguru-source") === true
+    && hasMachineSecurity(mcpTrustedPreflight)
+    && variesOnOrigin(mcpTrustedPreflight));
+check("MCP keeps non-browser server clients compatible without wildcard CORS",
+  mcpServerPreflight.status === 204
+    && mcpServerPreflight.headers.get("access-control-allow-origin") === null
+    && hasMachineSecurity(mcpServerPreflight)
+    && variesOnOrigin(mcpServerPreflight));
+
+const quoteRoute = await load("src/app/api/v1/quote-requests/route.ts");
+const quoteAttackerPost = await quoteRoute.POST(new Request(
+  "https://mcp.tempguru.co/api/v1/quote-requests",
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Origin: "https://attacker.example",
+    },
+    body: "{}",
+  },
+));
+const quoteTrustedInvalid = await quoteRoute.POST(new Request(
+  "https://mcp.tempguru.co/api/v1/quote-requests",
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      Origin: "https://www.tempguru.co",
+    },
+    body: "{}",
+  },
+));
+const quoteServerInvalid = await quoteRoute.POST(new Request(
+  "https://mcp.tempguru.co/api/v1/quote-requests",
+  {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: "{}",
+  },
+));
+const quoteTextPlain = await quoteRoute.POST(new Request(
+  "https://mcp.tempguru.co/api/v1/quote-requests",
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/plain",
+      Origin: "https://www.tempguru.co",
+    },
+    body: "{}",
+  },
+));
+const quoteAttackerPreflight = await quoteRoute.OPTIONS(new Request(
+  "https://mcp.tempguru.co/api/v1/quote-requests",
+  { method: "OPTIONS", headers: { Origin: "https://attacker.example" } },
+));
+const quoteTrustedPreflight = await quoteRoute.OPTIONS(new Request(
+  "https://mcp.tempguru.co/api/v1/quote-requests",
+  { method: "OPTIONS", headers: { Origin: "https://tempguru.co" } },
+));
+const quoteServerPreflight = await quoteRoute.OPTIONS(new Request(
+  "https://mcp.tempguru.co/api/v1/quote-requests",
+  { method: "OPTIONS" },
+));
+check("quote write rejects untrusted browser origins without an ACAO response",
+  quoteAttackerPost.status === 403
+    && quoteAttackerPreflight.status === 403
+    && quoteAttackerPost.headers.get("access-control-allow-origin") === null
+    && quoteAttackerPreflight.headers.get("access-control-allow-origin") === null
+    && hasMachineSecurity(quoteAttackerPost)
+    && variesOnOrigin(quoteAttackerPost));
+check("quote write requires application/json and accepts the charset form",
+  quoteTextPlain.status === 415
+    && quoteTrustedInvalid.status === 400
+    && quoteTrustedInvalid.headers.get("access-control-allow-origin")
+      === "https://www.tempguru.co"
+    && hasMachineSecurity(quoteTextPlain)
+    && hasMachineSecurity(quoteTrustedInvalid));
+check("quote write keeps approved server integrations compatible without wildcard CORS",
+  quoteServerInvalid.status === 400
+    && quoteServerInvalid.headers.get("access-control-allow-origin") === null
+    && quoteServerPreflight.status === 204
+    && quoteServerPreflight.headers.get("access-control-allow-origin") === null
+    && hasMachineSecurity(quoteServerInvalid)
+    && hasMachineSecurity(quoteServerPreflight));
+check("quote preflight echoes only a trusted Origin and controlled attribution header",
+  quoteTrustedPreflight.status === 204
+    && quoteTrustedPreflight.headers.get("access-control-allow-origin") === "https://tempguru.co"
+    && quoteTrustedPreflight.headers.get("access-control-allow-headers")
+      ?.split(",")
+      .map((value) => value.trim().toLowerCase())
+      .includes("x-tempguru-source") === true
+    && hasMachineSecurity(quoteTrustedPreflight)
+    && variesOnOrigin(quoteTrustedPreflight));
+
+const vercelOriginEnv = [
+  "VERCEL_URL",
+  "VERCEL_BRANCH_URL",
+  "VERCEL_PROJECT_PRODUCTION_URL",
+];
+const priorVercelOriginEnv = Object.fromEntries(
+  vercelOriginEnv.map((name) => [name, process.env[name]]),
+);
+try {
+  process.env.VERCEL_URL = "tempguru-mcp-preview-abc.vercel.app";
+  process.env.VERCEL_BRANCH_URL = "tempguru-mcp-git-hardening.vercel.app";
+  process.env.VERCEL_PROJECT_PRODUCTION_URL = "mcp.tempguru.co";
+
+  const quoteDeploymentPreflight = await quoteRoute.OPTIONS(new Request(
+    "https://tempguru-mcp-preview-abc.vercel.app/api/v1/quote-requests",
+    {
+      method: "OPTIONS",
+      headers: { Origin: "https://tempguru-mcp-preview-abc.vercel.app" },
+    },
+  ));
+  const mcpBranchPreflight = await mcpRoute.OPTIONS(new Request(
+    "https://tempguru-mcp-git-hardening.vercel.app/mcp",
+    {
+      method: "OPTIONS",
+      headers: { Origin: "https://tempguru-mcp-git-hardening.vercel.app" },
+    },
+  ));
+  const unrelatedPreviewPreflight = await quoteRoute.OPTIONS(new Request(
+    "https://tempguru-mcp-preview-abc.vercel.app/api/v1/quote-requests",
+    {
+      method: "OPTIONS",
+      headers: { Origin: "https://unrelated-project.vercel.app" },
+    },
+  ));
+  check("only the running Vercel deployment and branch hostnames are origin-allowed",
+    quoteDeploymentPreflight.status === 204
+      && quoteDeploymentPreflight.headers.get("access-control-allow-origin")
+        === "https://tempguru-mcp-preview-abc.vercel.app"
+      && mcpBranchPreflight.status === 204
+      && mcpBranchPreflight.headers.get("access-control-allow-origin")
+        === "https://tempguru-mcp-git-hardening.vercel.app"
+      && unrelatedPreviewPreflight.status === 403
+      && unrelatedPreviewPreflight.headers.get("access-control-allow-origin") === null);
+} finally {
+  for (const name of vercelOriginEnv) {
+    const value = priorVercelOriginEnv[name];
+    if (value === undefined) delete process.env[name];
+    else process.env[name] = value;
+  }
+}
+
+const publicResponses = await load("src/lib/api/responses.ts");
+const publicReadResponse = publicResponses.jsonOk({}, { ok: true });
+check("public read REST data remains openly reusable but gains machine security headers",
+  publicReadResponse.headers.get("access-control-allow-origin") === "*"
+    && hasMachineSecurity(publicReadResponse));
+
+const { buildOpenApiSpec } = await load("src/lib/api/openapi.ts");
+const hardenedOpenApi = buildOpenApiSpec();
+const quoteResponses = hardenedOpenApi.paths["/api/v1/quote-requests"].post.responses;
+const errorCodes = hardenedOpenApi.components.schemas.Error.properties.error
+  .properties.code.enum;
+check("OpenAPI declares quote Origin/content-type failures and forbidden errors",
+  quoteResponses["403"] !== undefined
+    && quoteResponses["415"] !== undefined
+    && errorCodes.includes("forbidden"));
+
+const apexWorker = (await load("cloudflare/worker.js")).default;
+const apexRobotResponse = await apexWorker.fetch(
+  new Request("https://tempguru.co/robots.txt"),
+);
+const apexDiscoveryResponse = await apexWorker.fetch(
+  new Request("https://tempguru.co/.well-known/mcp.json"),
+);
+const llmsWorker = (await load("cloudflare/llms-worker.js")).default;
+const llmsResponse = await llmsWorker.fetch(new Request("https://tempguru.co/llms.txt"));
+check("generated Cloudflare discovery responses carry machine security headers",
+  hasMachineSecurity(apexRobotResponse)
+    && hasMachineSecurity(apexDiscoveryResponse)
+    && hasMachineSecurity(llmsResponse));
 
 const publicRequestSchema = JSON.parse(
   readFileSync(join(repoRoot, "public/schemas/event-staffing-request.schema.json"), "utf8"),
