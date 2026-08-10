@@ -1,11 +1,11 @@
 ---
 type: "Market List"
 title: "Small Markets"
-description: "TempGuru's 192 small-tier event-staffing markets, grouped by state/province."
+description: "TempGuru's 192 configured small-tier event-staffing market entries, grouped by state/province."
 tier: "small"
 count: 192
 tags:
-  - "coverage"
+  - "market-catalog"
   - "cities"
   - "small"
 timestamp: "2026-07-16T00:00:00Z"
@@ -69,4 +69,4 @@ Tertiary markets (~192 cities), smaller metros, secondary towns
 - **British Columbia** (1): [Kelowna](https://tempguru.co/insights/kelowna-event-staffing)
 - **Ontario** (3): [Kitchener](https://tempguru.co/insights/kitchener-event-staffing), [London](https://tempguru.co/insights/london-on-event-staffing), [Thunder Bay](https://tempguru.co/insights/thunder-bay-event-staffing)
 
-See [all coverage](index.md) · [pricing for this tier](../pricing/rate-matrix.md).
+See [all configured market entries](index.md) · [pricing for this tier](../pricing/rate-matrix.md).

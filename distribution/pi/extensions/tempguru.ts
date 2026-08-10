@@ -86,9 +86,9 @@ export default function (pi: any) {
     name: "tempguru_get_cities",
     label: "TempGuru: Cities",
     description:
-      "List up to 100 US/CA markets or check one named city directly. Use city, state, or country filters to confirm coverage before planning; list responses are capped to keep tool output complete.",
+      "List up to 100 configured US/CA market entries or match one named city. Use city, state, or country filters to select a planning tier; a catalog match does not confirm order coverage, which requires a TempGuru coordinator.",
     parameters: Type.Object({
-      city: Type.Optional(Type.String({ description: "Exact city or common alias to check for coverage" })),
+      city: Type.Optional(Type.String({ description: "Exact city or common alias to match against the configured catalog" })),
       state: Type.Optional(Type.String({ description: "2-letter state/province code, e.g. TX or ON" })),
       country: Type.Optional(Type.String({ description: "US or CA" })),
       tier: Type.Optional(Type.String({ description: "hub | mid | small" })),

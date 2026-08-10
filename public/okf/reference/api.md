@@ -20,7 +20,7 @@ table is generated from the OpenAPI 3.1 spec, so it cannot drift from the served
 
 | Method & path | Summary |
 |---|---|
-| `GET /api/v1/cities` | List cities TempGuru serves |
+| `GET /api/v1/cities` | List configured market entries |
 | `GET /api/v1/roles` | List event staffing roles |
 | `GET /api/v1/availability` | Lead-time guidance for an event |
 | `GET /api/v1/pricing` | All-inclusive hourly rate range for a role in a city |

@@ -60,6 +60,14 @@ const CLI_PKG = JSON.parse(read("cli/package.json"));
 const PI_PKG = JSON.parse(read("distribution/pi/package.json"));
 const GEMINI_EXTENSION = JSON.parse(read("gemini-extension.json"));
 const PACKAGE_LOCK = JSON.parse(read("package-lock.json"));
+const OPENAPI = JSON.parse(read("content/mcp-data/openapi.json"));
+const OPENAPI_METHODS = ["get", "post", "put", "patch", "delete"];
+const OPENAPI_OPERATION_COUNT = Object.values(OPENAPI.paths ?? {}).reduce(
+  (count, pathItem) =>
+    count + OPENAPI_METHODS.filter((method) => pathItem?.[method]).length,
+  0,
+);
+const OPENAPI_SCHEMA_NAMES = Object.keys(OPENAPI.components?.schemas ?? {});
 const RATE_INDEX_META = JSON.parse(read("content/mcp-data/rate-index-meta.json"));
 const ROLE_PRICING = JSON.parse(read("content/mcp-data/role-pricing.json")).pricing;
 const ROLE_RATE_VALUES = Object.values(ROLE_PRICING).flatMap((tiers) =>
@@ -174,6 +182,34 @@ for (const [path, expectedFragments] of TIER_COUNT_SURFACES) {
     errors.push(
       `${path}: tier-count copy drifted from canonical ${TIER_COUNTS.hub}/${TIER_COUNTS.mid}/${TIER_COUNTS.small}`,
     );
+  }
+}
+
+// Both tracked openapi-to-okf examples are generated from the canonical REST
+// specification. A stale example previously remained at v1.5.0/19 schemas
+// while the live spec was v1.7.0/21, so hold the snapshots to the exact source
+// version, operation count, and schema inventory.
+for (const bundleRoot of [
+  "distribution/okf/example",
+  "distribution/okf/knowledge-catalog-contrib/openapi-to-okf/example",
+]) {
+  const log = read(`${bundleRoot}/log.md`);
+  for (const expected of [
+    `## ${OPENAPI.info.version}`,
+    `${OPENAPI_OPERATION_COUNT} operations, ${OPENAPI_SCHEMA_NAMES.length} schemas`,
+  ]) {
+    if (!log.includes(expected)) {
+      errors.push(`${bundleRoot}/log.md: generated OpenAPI snapshot is stale (${expected})`);
+    }
+  }
+  for (const schemaName of OPENAPI_SCHEMA_NAMES) {
+    const schemaSlug = schemaName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+    if (!existsSync(join(root, bundleRoot, "schemas", `${schemaSlug}.md`))) {
+      errors.push(`${bundleRoot}: missing generated schema ${schemaName}`);
+    }
   }
 }
 
@@ -324,6 +360,19 @@ for (const skill of SKILLS) {
   ) {
     errors.push(`skills/${skill}/agents/openai.yaml: missing default prompt or attributed MCP dependency`);
   }
+  if (
+    [
+      "event-staffing-ordering",
+      "multi-city-activation-planner",
+      "urgent-event-backfill",
+    ].includes(skill) &&
+    (!openAiMetadata.includes("buyer-operated") ||
+      !openAiMetadata.includes("do not submit it for me"))
+  ) {
+    errors.push(
+      `skills/${skill}/agents/openai.yaml: default prompt must preserve the buyer-operated, no-agent-submission boundary`,
+    );
+  }
 }
 
 // Pi skills and extension must agree on the exact callable native layer. A
@@ -393,6 +442,15 @@ for (const skill of SKILLS) {
     }
     if (/MCP-only\s+(?:plan_staffing|save_staffing_plan|get_rate_benchmark)/.test(body)) {
       errors.push(`distribution/pi/skills/${skill}/SKILL.md: remote MCP tool identifier was renamed into a nonexistent tool`);
+    }
+    if (body.includes("`source_platform`")) {
+      errors.push(`distribution/pi/skills/${skill}/SKILL.md: native quote tool does not accept source_platform; runtime attribution is automatic`);
+    }
+    if (
+      read(`content/skills/${skill}.md`).includes("`source_platform`") &&
+      !normalizedBody.includes("runtime source is added automatically")
+    ) {
+      errors.push(`distribution/pi/skills/${skill}/SKILL.md: automatic runtime attribution replacement is missing`);
     }
     for (const phrase of [
       "not native tools in this package",
@@ -828,7 +886,9 @@ if (!existsSync(join(root, "src/app/.well-known/agent-skills/[skill]/SKILL.md/ro
 // Checking sets
 // (not just individual substrings) catches omissions, duplicates, and stale
 // extras. The edge builder imports SKILLS directly; its generated worker must
-// still prove that both public discovery URL trees were emitted.
+// still prove that both public Agent Skills URL trees were emitted. The A2A
+// card intentionally advertises its two executable adapter skills separately;
+// it is generated from the canonical Next route rather than duplicated here.
 const registeredSkillsBlock = REGISTER_TOOLS_SOURCE.match(
   /export const SKILL_SLUGS = \[([\s\S]*?)\]\s+as const/,
 )?.[1];
@@ -860,13 +920,22 @@ if (!/SKILLS as SKILL_SLUGS/.test(edgeBuilder)) {
   errors.push("scripts/build-edge-worker.mjs: must import the canonical discovery skill list from gen-skill-digests.mjs");
 }
 const edgeWorker = read("cloudflare/worker.js");
+const a2aCardSource = read("src/lib/a2a/agent-card.ts");
 if (!edgeWorker.includes('"/.well-known/security.txt"')) {
   errors.push("cloudflare/worker.js: generated apex output omits /.well-known/security.txt (run: npm run build:worker)");
 }
-for (const name of SKILLS) {
-  if (!edgeBuilder.includes(`id: "${name}"`)) {
-    errors.push(`scripts/build-edge-worker.mjs: agent card omits ${name}`);
+if (
+  !edgeBuilder.includes("src/app/.well-known/agent-card.json/route.ts") ||
+  !edgeWorker.includes('"/.well-known/agent-card.json"')
+) {
+  errors.push("apex agent card must be generated from the canonical Next route");
+}
+for (const a2aSkill of ["event-staffing-plan", "event-staffing-lookup"]) {
+  if (!a2aCardSource.includes(`id: "${a2aSkill}"`)) {
+    errors.push(`src/lib/a2a/agent-card.ts: executable A2A card omits ${a2aSkill}`);
   }
+}
+for (const name of SKILLS) {
   for (const tree of ["agent-skills", "skills"]) {
     const path = `/.well-known/${tree}/${name}/SKILL.md`;
     if (!edgeWorker.includes(path)) {
@@ -885,8 +954,13 @@ if (!JSON.parse(read("package.json")).scripts?.["build:llms-worker"]) {
 if (!read(".github/workflows/check-submissions.yml").includes("npm run build:llms-worker -- --from-committed")) {
   errors.push(".github/workflows/check-submissions.yml: llms worker regeneration must use the committed offline snapshot in PR CI");
 }
-if (!read("scripts/build-llms-worker.mjs").includes('process.argv.includes("--from-committed")')) {
-  errors.push("scripts/build-llms-worker.mjs: deterministic --from-committed mode is missing");
+const llmsWorkerBuilder = read("scripts/build-llms-worker.mjs");
+if (
+  !llmsWorkerBuilder.includes('"--from-committed"') ||
+  !llmsWorkerBuilder.includes('readFileSync("public/llms.txt"') ||
+  !llmsWorkerBuilder.includes('readFileSync("public/llms-full.txt"')
+) {
+  errors.push("scripts/build-llms-worker.mjs: deterministic repository-only llms sources or compatibility alias are missing");
 }
 if (llmsWorker.includes("tempguru-agent-skills")) {
   errors.push("cloudflare/llms-worker.js: points agents at the stale two-skill repository");
@@ -898,9 +972,8 @@ if (
   errors.push("cloudflare/llms-worker.js: conflates the read-only MCP buyer handoff with the contact-bearing REST write");
 }
 for (const fragment of [
-  "REST submitQuoteRequest Action after explicit confirmation",
-  "MCP request_quote, which only returns a buyer-operated form",
-  'request_quote (MCP) for a buyer-form handoff',
+  "MCP request_quote only returns a buyer-operated form",
+  "REST submitQuoteRequest is a contact-bearing write and requires explicit confirmation",
 ]) {
   if (!llmsWorker.includes(fragment)) {
     errors.push(`cloudflare/llms-worker.js: missing MCP/REST quote-boundary guidance: ${fragment}`);
@@ -1162,6 +1235,9 @@ try {
   if (!ci.includes("- run: npm run test:protocol")) {
     errors.push(".github/workflows/check-submissions.yml: dual-era protocol test is missing from PR/main verification");
   }
+  if (!ci.includes("git status --porcelain --untracked-files=all -- public content skills")) {
+    errors.push(".github/workflows/check-submissions.yml: generated-artifact gate must reject untracked outputs");
+  }
   if (
     !ci.includes("cli-node-20:") ||
     !ci.includes("node-version: 20") ||
@@ -1182,6 +1258,7 @@ try {
     "npm run test:protocol",
     "npm run build",
     "npm run check:submissions",
+    "npm run check:agent-readiness",
     'test "$ROOT" = "$RELEASE_VERSION"',
     "working-directory: cli",
     "npm publish --access public",
@@ -1200,7 +1277,9 @@ try {
     "environment: Production",
     'npm install --global "npm@^11.15.0"',
     "npm run check:submissions",
+    "npm run check:agent-readiness",
     'test "$PI" = "$RELEASE_VERSION"',
+    "is already immutable on npm",
     "node scripts/gen-skill-digests.mjs",
     "git status --porcelain --untracked-files=all -- distribution/pi/skills",
     "npm pack --dry-run --json ./distribution/pi",
@@ -1209,6 +1288,23 @@ try {
   ]) {
     if (!piPublish.includes(fragment)) {
       errors.push(`.github/workflows/publish-pi.yml: release safety fragment missing: ${fragment}`);
+    }
+  }
+
+  const cloudflarePublish = read(
+    ".github/workflows/deploy-apex-agent-readiness.yml",
+  );
+  for (const fragment of [
+    "if: github.ref == 'refs/heads/main'",
+    "npm run check:agent-readiness",
+    "git diff --exit-code",
+    "git status --porcelain --untracked-files=all -- public content skills",
+    "npm run check:live-discovery",
+  ]) {
+    if (!cloudflarePublish.includes(fragment)) {
+      errors.push(
+        `.github/workflows/deploy-apex-agent-readiness.yml: release safety fragment missing: ${fragment}`,
+      );
     }
   }
 

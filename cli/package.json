@@ -2,7 +2,7 @@
   "name": "tempguru-mcp",
   "version": "1.7.0",
   "mcpName": "co.tempguru/event-staffing",
-  "description": "MCP server and CLI for W-2 event staffing: planning, rates, availability, compliance, the Rate Index, saved non-PII plans, and a buyer-operated quote-form handoff across 345 US/Canada markets.",
+  "description": "MCP server and CLI for W-2 event staffing planning against a 345-entry configured US/Canada market catalog, with tier-based lead-time guidance, coordinator-confirmed order coverage, rates, compliance, and a buyer-operated quote handoff.",
   "type": "module",
   "bin": {
     "tempguru-mcp": "index.mjs"
@@ -35,7 +35,7 @@
   ],
   "author": "TempGuru (Temporary Assistance Guru, Inc.)",
   "license": "MIT",
-  "homepage": "https://tempguru.co/ai",
+  "homepage": "https://tempguru.co/ai-agents",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Tempguru-co/tempguru-mcp.git"

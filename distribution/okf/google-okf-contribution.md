@@ -33,7 +33,7 @@ Conformance checks (the `node:test` in `test/`, run with `npm test`):
 - `okf_version: "0.1"` appears only in the bundle-root `index.md`
 - all internal links are plain relative markdown (no Obsidian `[[wiki]]` syntax)
 
-Validated against TempGuru's public event-staffing API (10 operations, 19 schemas → a clean 33-file example bundle, committed under `toolbox/openapi-to-okf/example/`). The producer faithfully emits every operation in the spec, so it renders 10 operations including the health probe, versus the 9 business endpoints the hand-built live bundle documents.
+Validated against TempGuru's public event-staffing API (10 operations, 21 schemas → a clean 35-file example bundle, committed under `toolbox/openapi-to-okf/example/`). The producer faithfully emits every operation in the spec, so it renders 10 operations including the health probe, versus the 9 business endpoints the hand-built live bundle documents.
 
 ## The sample bundle (PR #76)
 

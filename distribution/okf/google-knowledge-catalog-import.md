@@ -65,4 +65,4 @@ All hourly figures are all-inclusive W-2 bill rates: worker pay, employer payrol
 
 ## Questions
 
-megan@tempguru.co or (904) 206-8953. Developer and AI documentation: `https://tempguru.co/ai`.
+megan@tempguru.co or (904) 206-8953. Developer and AI documentation: `https://tempguru.co/ai-agents`.

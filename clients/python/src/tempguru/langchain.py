@@ -42,8 +42,9 @@ def get_tools(
 
     @_tool
     def event_staffing_cities(state: str = "", tier: str = "") -> dict:
-        """List the 345 US and Canadian cities where TempGuru provides W-2
-        event staffing. Use this to confirm coverage before quoting anything.
+        """List TempGuru's 345 configured US and Canadian market entries.
+        Use this to select a planning tier, not to promise coverage; a TempGuru
+        coordinator confirms the specific order after buyer submission.
         Optional filters: state (two-letter code like 'CA' or full name),
         tier ('hub' = 25 major metros, 'mid' = 128 secondary markets,
         'small' = 192 tertiary markets)."""
@@ -63,7 +64,8 @@ def get_tools(
         """Get booking lead-time guidance for hiring temporary event staff
         in a city on an ISO date (YYYY-MM-DD). Returns a recommendation
         (yes / tight / rush / very-rush). Planning guidance only, NOT a
-        reservation, never promise availability to the user."""
+        real-time inventory, coverage confirmation, or reservation; never
+        promise availability to the user."""
         return tg.availability(
             city=city, date=date, role=role or None, headcount=headcount or None
         )

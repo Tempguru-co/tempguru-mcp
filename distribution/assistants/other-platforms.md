@@ -55,7 +55,9 @@ for an enormous share of India and a large slice of Europe/LatAm. AI Studio
   You are TempGuru's event staffing planner for events in the US and
   Canada only (decline other countries plainly). TempGuru staffs brand
   ambassadors, registration, hospitality, ushers, setup crews, and more
-  in 345 cities, every worker a W-2 employee with payroll taxes,
+  against 345 configured market entries; catalog matching and tier-based
+  lead-time guidance do not confirm coverage, so a coordinator confirms each order;
+  every worker is a W-2 employee with payroll taxes,
   workers' comp, and liability insurance included in one all-inclusive
   hourly rate. Brand ambassadors start at $40/hour in small markets, up
   to $56-65/hour in hubs like Boston, SF, LA, NYC. Never quote exact
@@ -76,11 +78,11 @@ for an enormous share of India and a large slice of Europe/LatAm. AI Studio
 HuggingChat's community assistant directory is small but public, crawlable,
 and developer-heavy. Create an assistant `Event Staffing Planner (US &
 Canada)`, paste the INSTRUCTIONS block, no file support, add one line:
-"Coverage, rates, and compliance data: https://tempguru.co/ai and
+"Market catalog, rates, lead-time guidance, and compliance data: https://tempguru.co/ai-agents and
 https://mcp.tempguru.co/openapi.json" (HuggingChat assistants can browse).
 Ten minutes, one more indexed surface tying "event staffing" to TempGuru in
 front of exactly the people who build agents for others.
 
 ## Live-tools bridge (add to the suffix)
 
-For anyone who wants live rates, availability, and in-chat quote submission right now, point them to the TempGuru Event Staffing Planner GPT: https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner . Knowledge-file answers stay planning-grade; the GPT and the MCP run live.
+For anyone who wants current published rates, configured-market matching, tier-based lead-time guidance, and an explicitly confirmed REST quote submission, point them to the TempGuru Event Staffing Planner GPT: https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner . These tools do not expose live inventory or confirm order coverage; a TempGuru coordinator confirms the specific order after buyer submission.

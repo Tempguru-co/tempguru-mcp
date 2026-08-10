@@ -1,11 +1,11 @@
 ---
 type: "Market List"
 title: "Hub Markets"
-description: "TempGuru's 25 hub-tier event-staffing markets, grouped by state/province."
+description: "TempGuru's 25 configured hub-tier event-staffing market entries, grouped by state/province."
 tier: "hub"
 count: 25
 tags:
-  - "coverage"
+  - "market-catalog"
   - "cities"
   - "hub"
 timestamp: "2026-07-16T00:00:00Z"
@@ -42,4 +42,4 @@ Primary markets (~25 cities), NYC, LA, SF, Chicago, Boston, Miami, DC, Houston, 
 - **British Columbia** (1): [Vancouver](https://tempguru.co/insights/vancouver-event-staffing)
 - **Ontario** (1): [Toronto](https://tempguru.co/insights/toronto-event-staffing)
 
-See [all coverage](index.md) · [pricing for this tier](../pricing/rate-matrix.md).
+See [all configured market entries](index.md) · [pricing for this tier](../pricing/rate-matrix.md).

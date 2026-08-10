@@ -17,7 +17,7 @@ const JSON_LD = {
       url: "https://tempguru.co",
       logo: "https://mcp.tempguru.co/logo.svg",
       description:
-        "W-2 compliant temporary event staffing across 345 US and Canadian markets: brand ambassadors, registration, hospitality, ushers, crowd control, setup/breakdown, and team leads.",
+        "W-2 compliant temporary event staffing backed by 345 configured US and Canadian market entries, with catalog matching, tier-based lead-time guidance, and coordinator-confirmed order coverage: brand ambassadors, registration, hospitality, ushers, crowd control, setup/breakdown, and team leads.",
       areaServed: ["US", "CA"],
       sameAs: [
         "https://github.com/Tempguru-co/tempguru-mcp",
@@ -30,10 +30,10 @@ const JSON_LD = {
       "@id": "https://mcp.tempguru.co/#api",
       name: "TempGuru MCP Server & REST API",
       description:
-        "Dual-era MCP 2026-07-28 and 2025-compatible server with twelve event-staffing tools, plus a public REST API: role catalog, all-inclusive W-2 hourly rates, city coverage, lead times, state compliance, resumable non-PII plans, and an opt-in quote request.",
-      documentation: "https://tempguru.co/ai",
+        "Dual-era MCP 2026-07-28 and 2025-compatible server with twelve event-staffing tools, plus a public REST API: configured-market matching, role catalog, all-inclusive W-2 hourly rates, tier-based lead-time guidance, state compliance, resumable non-PII plans, and an opt-in quote request. A coordinator confirms each order's coverage.",
+      documentation: "https://tempguru.co/ai-agents",
       provider: { "@id": "https://tempguru.co/#org" },
-      termsOfService: "https://tempguru.co/ai",
+      termsOfService: "https://tempguru.co/ai-agents",
     },
     {
       "@type": "Service",
@@ -51,7 +51,7 @@ const JSON_LD = {
       creator: { "@id": "https://tempguru.co/#org" },
       url: "https://tempguru.co/event-staffing-rate-index",
       isAccessibleForFree: true,
-      license: "https://tempguru.co/ai",
+      license: "https://tempguru.co/ai-agents",
     },
   ],
 };
@@ -72,7 +72,7 @@ export default function Home() {
     },
     {
       name: "get_cities",
-      desc: "List all cities TempGuru serves, optionally filtered by state or tier.",
+      desc: "List configured market entries or match one city; catalog membership is not confirmed order coverage.",
     },
     {
       name: "get_roles",
@@ -271,8 +271,8 @@ export default function Home() {
             TempGuru
           </a>
           . Docs:{" "}
-          <a href="https://tempguru.co/ai" style={linkStyle}>
-            tempguru.co/ai
+          <a href="https://tempguru.co/ai-agents" style={linkStyle}>
+            tempguru.co/ai-agents
           </a>
           .
         </p>

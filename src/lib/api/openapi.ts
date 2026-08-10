@@ -25,7 +25,7 @@ export function buildOpenApiSpec() {
         "",
         "**About the rates.** All hourly figures are *all-inclusive W-2 bill rates*: they cover the worker's pay, employer-side payroll taxes (FICA/FUTA/SUTA), workers' compensation insurance, general liability insurance, and dedicated coordinator support. Published hourly bill rates have no add-on fees or invoice-time markup. Rate ranges are *planning estimates*, a real quote requires event specifics and is provided after a quote request is reviewed by a coordinator.",
         "",
-        "**About availability.** The `availability` endpoint returns *lead-time guidance based on city tier*, not a real-time reservation or hold on staff. TempGuru staffs to demand from a 100,000+ W-2 worker network across 345 markets; bookings are confirmed through the standard quote-and-confirmation flow, not via this API.",
+        "**About availability.** The `availability` endpoint returns *lead-time guidance based on city tier*, not real-time inventory, confirmed order coverage, a reservation, or a hold on staff. TempGuru's public catalog contains 345 configured US and Canadian market entries; a coordinator confirms coverage and final lead time for the specific order through the standard buyer-submitted quote flow.",
         "",
         "**About quote submission.** `POST /api/v1/quote-requests` is the only write operation in this API. It is opt-in by design: call it only after the user has reviewed the staffing plan and explicitly confirmed they want to submit it. It creates a structured lead for human review, it does **not** reserve staff, guarantee pricing or availability, or create any contract, and **no payment** is required until the user approves the resulting quote. Contact and event details are delivered to TempGuru's CRM or its durable fallback queue and configured notification processor so a coordinator can reply; they are never written to telemetry or analytics.",
         "",
@@ -38,7 +38,7 @@ export function buildOpenApiSpec() {
       },
       license: {
         name: "Public data",
-        url: "https://tempguru.co/ai",
+        url: "https://tempguru.co/ai-agents",
       },
       "x-logo": {
         url: "https://mcp.tempguru.co/logo.svg",
@@ -54,12 +54,12 @@ export function buildOpenApiSpec() {
     ],
     externalDocs: {
       description: "TempGuru AI agent documentation",
-      url: "https://tempguru.co/ai",
+      url: "https://tempguru.co/ai-agents",
     },
     tags: [
       {
         name: "Discovery",
-        description: "List cities and roles TempGuru serves.",
+        description: "List configured market entries and event staffing roles.",
       },
       {
         name: "Planning",
@@ -84,9 +84,9 @@ export function buildOpenApiSpec() {
         get: {
           operationId: "listCities",
           tags: ["Discovery"],
-          summary: "List cities TempGuru serves",
+          summary: "List configured market entries",
           description:
-            "Use this when an agent needs the canonical list of cities where TempGuru has a dedicated market presence, or wants to filter by state or by tier (hub / mid / small). Tier classification is used everywhere else in the API to determine lead times and rate bands.",
+            "Use this for the canonical configured market catalog or to filter by state or tier (hub / mid / small). A catalog match determines planning rate and lead-time bands; it does not confirm real-time availability or order coverage. A TempGuru coordinator confirms the specific order after buyer submission.",
           parameters: [
             {
               name: "state",
@@ -116,7 +116,7 @@ export function buildOpenApiSpec() {
               in: "query",
               required: false,
               schema: { type: "string" },
-              description: "Switch to a single-city coverage check instead of listing markets.",
+              description: "Switch to a single-city configured-catalog match instead of listing entries. A match is not confirmed order coverage.",
             },
             {
               name: "limit",
@@ -624,12 +624,20 @@ export function buildOpenApiSpec() {
         CitiesResponse: {
           oneOf: [
             { $ref: "#/components/schemas/CitiesListResponse" },
-            { $ref: "#/components/schemas/CityCoverageResponse" },
+            { $ref: "#/components/schemas/CityCatalogMatchResponse" },
           ],
         },
         CitiesListResponse: {
           type: "object",
-          required: ["input", "total", "returned", "tier_breakdown", "cities"],
+          required: [
+            "input",
+            "total",
+            "returned",
+            "tier_breakdown",
+            "cities",
+            "coverage_confirmation_required",
+            "catalog_qualification",
+          ],
           properties: {
             input: { type: "object", description: "Echo of the query parameters used." },
             total: { type: "integer" },
@@ -643,17 +651,33 @@ export function buildOpenApiSpec() {
               },
             },
             cities: { type: "array", items: { $ref: "#/components/schemas/City" } },
+            coverage_confirmation_required: { type: "boolean", const: true },
+            catalog_qualification: { type: "string" },
             note: { type: "string" },
           },
         },
-        CityCoverageResponse: {
+        CityCatalogMatchResponse: {
           type: "object",
-          required: ["input", "coverage_check", "requested", "covered", "city", "message"],
+          required: [
+            "input",
+            "catalog_check",
+            "requested",
+            "catalog_match",
+            "coverage_confirmation_required",
+            "catalog_qualification",
+            "city",
+            "message",
+          ],
           properties: {
             input: { type: "object", description: "Echo of the query parameters used." },
-            coverage_check: { type: "boolean", const: true },
+            catalog_check: { type: "boolean", const: true },
             requested: { type: "string" },
-            covered: { type: "boolean" },
+            catalog_match: {
+              type: "boolean",
+              description: "True only when the city resolves to a configured catalog entry; not a coverage or availability promise.",
+            },
+            coverage_confirmation_required: { type: "boolean", const: true },
+            catalog_qualification: { type: "string" },
             city: {
               oneOf: [{ $ref: "#/components/schemas/City" }, { type: "null" }],
             },
@@ -683,6 +707,8 @@ export function buildOpenApiSpec() {
           required: [
             "input",
             "city_found",
+            "catalog_match",
+            "coverage_confirmation_required",
             "city",
             "state",
             "city_tier",
@@ -697,6 +723,12 @@ export function buildOpenApiSpec() {
           properties: {
             input: { type: "object" },
             city_found: { type: "boolean", enum: [true] },
+            catalog_match: {
+              type: "boolean",
+              const: true,
+              description: "The city resolved to a configured catalog entry; this does not confirm order coverage.",
+            },
+            coverage_confirmation_required: { type: "boolean", const: true },
             city: { type: "string" },
             state: { type: "string" },
             city_tier: { type: "string", enum: ["hub", "mid", "small"] },

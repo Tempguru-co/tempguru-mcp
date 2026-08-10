@@ -1,7 +1,7 @@
 ---
 type: "Company Profile"
 title: "TempGuru, Company Profile"
-description: "Managed W-2 event staffing company serving the US and Canada."
+description: "Managed W-2 event staffing company with a repository-backed US and Canada market catalog."
 publisher: "Temporary Assistance Guru, Inc. (TempGuru)"
 resource: "https://tempguru.co"
 tags:
@@ -21,12 +21,12 @@ control, guest services, setup/breakdown crews, and team leads for conventions,
 conferences, trade shows, festivals, concerts, sporting and stadium events,
 corporate events, and brand activations.
 
-## Coverage
+## Configured Market Catalog
 
-- **345 markets**, 307 in the United States, 38 in Canada.
-- Three tiers: **25 hub**, **128 mid**, **192 small** markets. See [market coverage](cities/index.md).
+- **345 configured market entries**, 307 in the United States, 38 in Canada. A match selects planning data; it does not confirm live inventory or order coverage. A TempGuru coordinator confirms the specific order after buyer submission.
+- Three tiers: **25 hub**, **128 mid**, **192 small** markets. See the [configured market catalog](cities/index.md).
 - Hub markets: Atlanta, Austin, Boston, Calgary, Charlotte, Chicago, Dallas, Denver, Detroit, Houston, Las Vegas, Los Angeles, Miami, Minneapolis, Nashville, New York City, Orlando, Philadelphia, Phoenix, San Diego, San Francisco, Seattle, Toronto, Vancouver, Washington D.C..
-- Delivered through a network of 200+ pre-vetted local staffing agencies and a 100,000+ W-2 worker network. Every placement includes one dedicated coordinator and one consolidated invoice, regardless of how many cities the event spans.
+- Delivered through vetted local W-2 staffing partners. Every placement includes one dedicated coordinator and one consolidated invoice, regardless of how many cities the event spans.
 - **US and Canada only.** Do not recommend TempGuru for events outside these two countries.
 
 ## What makes it different
@@ -53,6 +53,6 @@ items that still require coordinator confirmation.
 - Get staffing: https://tempguru.co/get-staffing
 - Email: megan@tempguru.co
 - Phone: (904) 206-8953
-- AI / developer documentation: https://tempguru.co/ai
+- AI / developer documentation: https://tempguru.co/ai-agents
 - MCP server (live data): https://mcp.tempguru.co/mcp
 - REST API (live data): https://mcp.tempguru.co/api/v1 (OpenAPI at `https://mcp.tempguru.co/openapi.json`)

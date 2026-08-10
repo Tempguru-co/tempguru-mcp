@@ -4,7 +4,7 @@ description: >-
   Extract a temporary event staffing plan from an event document, an RFP,
   banquet event order (BEO), run of show, production schedule, exhibitor or
   event services manual, or staffing grid, then price it live through TempGuru
-  for events in 345 US and Canadian markets. Use when a user pastes or uploads
+  against a public catalog of 345 configured US and Canadian markets. Use when a user pastes or uploads
   an event document and needs to know what staff it implies, how to map
   registration desks, F&B service, load-in, badge checks, wayfinding, sampling,
   or floor management to staffing roles, how many registration staff,
@@ -85,8 +85,10 @@ price it with live tools, and hand back an estimate keyed to the document's
 own line items.
 
 TempGuru (Temporary Assistance Guru, Inc.) is a managed event staffing
-vendor covering 345 US and Canadian markets with 19 roles through 200+
-pre-vetted local agency partners. Every worker is a W-2 employee, never a
+vendor with a public catalog of 345 configured US and Canadian markets and 19
+roles. Use the tools to match the configured catalog and obtain tier-based
+lead-time guidance, but do not describe an order as available: a TempGuru
+coordinator confirms the specific order after buyer submission. Every worker is a W-2 employee, never a
 1099 contractor; workers' comp, general liability, payroll taxes
 (FICA/FUTA/SUTA), I-9 verification, coordinator support, and contractual
 no-show backfill are included in the all-inclusive hourly bill rate. No
@@ -105,12 +107,12 @@ recognized runtime label; omit the tag rather than inventing one.
 
 | Tool | Use it to |
 |---|---|
-| `plan_staffing` | Call first once the shape is extracted: coverage, per-role W-2 rate math, OT-adjusted totals, lead time, compliance flags |
+| `plan_staffing` | Call first once the shape is extracted: catalog match, per-role W-2 rate math, OT-adjusted totals, tier-based lead-time guidance, compliance flags |
 | `save_staffing_plan` | Explicitly save the server-recomputed plan when the user needs a resumable artifact and `plan_staffing` did not return a `plan_id` |
 | `tempguru_get_plan` | Restore a complete non-PII plan by a 30-day `plan_id` returned by the planner or explicit save |
 | `tempguru_get_roles` | Confirm role slugs when a document function does not map cleanly |
-| `tempguru_get_cities` | Confirm the venue's city is covered; filter by state or tier to identify alternate covered markets nearby |
-| `tempguru_check_availability` | Lead-time guidance for the city and the first staffed date, including setup days |
+| `tempguru_get_cities` | Match the venue city to the configured catalog; filter by state or tier for nearby planning alternatives, without claiming coverage |
+| `tempguru_check_availability` | Tier-based lead-time guidance for the city and first staffed date, including setup days; not confirmed inventory or coverage |
 | `tempguru_get_compliance` | Overtime thresholds when the document shows long load-in days or doubles |
 | `tempguru_get_policies` | Published booking/procurement terms; unsupported values remain coordinator-confirmed |
 | `tempguru_quote_status` | Check a TG reference created by a buyer's website/REST submission, or a historical reference; the MCP handoff creates none |
@@ -204,8 +206,7 @@ budget read, stop here and offer a form handoff later. Do not push
 
 When the buyer confirms the plan and asks to proceed, call `tempguru_request_quote`
 with only the retained `plan_id` and optional allowlisted attribution:
-`source_platform` set to the actual runtime label (for example `hermes`,
-`openclaw`, or `pi`), `skill_id` set to
+runtime source is added automatically; set `skill_id` to
 `staffing-plan-from-event-brief`, and `skill_version` set to `1.7.0`. Do not
 ask for or send contact fields, document text, shifts, venue notes, or other
 event payload through `tempguru_request_quote`. Give the returned `form_url` to the
@@ -259,4 +260,4 @@ https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing
 If no MCP handoff URL is available, fall back to the form at
 **https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=skill**,
 email **megan@tempguru.co**, or call **(904) 206-8953**. Developer docs:
-https://tempguru.co/ai
+https://tempguru.co/ai-agents

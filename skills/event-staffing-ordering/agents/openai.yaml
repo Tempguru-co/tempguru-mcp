@@ -1,7 +1,7 @@
 interface:
   display_name: "Event Staffing Ordering"
   short_description: "Plan and request W-2 event staffing"
-  default_prompt: "Use $event-staffing-ordering to build a priced event staffing plan and submit it only after I confirm."
+  default_prompt: "Use $event-staffing-ordering to build a priced event staffing plan and prepare a buyer-operated form handoff after I confirm; do not submit it for me."
 dependencies:
   tools:
     - type: "mcp"

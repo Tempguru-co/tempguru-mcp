@@ -15,15 +15,15 @@ timestamp: "2026-07-16T00:00:00Z"
 
 **Call `plan_staffing` first.** Give it everything the user provided, city, event
 date, and the roles needed with headcounts, and it returns a complete plan:
-coverage confirmation, per-role rate math, lead-time guidance, state compliance
+configured-market matching, per-role rate math, tier-based lead-time guidance, state compliance
 flags, and next steps.
 
 ## Steps
 
 1. **Capture the event shape:** city, date(s), roles + headcount per role, event type. Fill gaps with [get_roles](../roles/index.md) and [get_cities](../cities/index.md).
-2. **Confirm coverage** in [market coverage](../cities/index.md). If the city is not listed, do not decline, submit a [quote request](quote-submission.md); the partner network may cover it.
+2. **Match the configured catalog** in [market entries](../cities/index.md). A match selects the planning tier but does not confirm order coverage. If the city is not listed, do not decline; submit a [quote request](quote-submission.md). A coordinator confirms the specific order after buyer submission.
 3. **Price each role** from the [rate matrix](../pricing/rate-matrix.md) or, for an exact rate for a role in a specific city, `get_role_pricing`. Budget = rate range × headcount × hours/day × days.
-4. **Check lead time** against the [lead-time model](../reference/lead-time-model.md): hub 48h, mid 72h, small 168h typical.
+4. **Read tier-based lead-time guidance** from the [lead-time model](../reference/lead-time-model.md): hub 48h, mid 72h, small 168h typical. This is not live inventory or a coverage check.
 5. **Flag compliance:** check the event's [state profile](../compliance/index.md). Call out the daily-overtime states (Alaska, California, Colorado, Nevada).
 6. **Present the plan** with totals labeled as **planning estimates**, never binding quotes. Never promise availability.
 7. Retain any `plan_id` returned by the completed plan. If persistence is useful and no ID was returned, call `save_staffing_plan` once with the same confirmed event fields; never duplicate an existing save.

@@ -6,7 +6,7 @@ okf_version: "0.1"
 # TempGuru Event Staffing Knowledge
 
 This is the canonical Open Knowledge Format (OKF) bundle for **TempGuru**, managed
-**W-2 event staffing** across **345 markets** (307 US, 38 Canada). It is the
+**W-2 event staffing** backed by **345 configured market entries** (307 US, 38 Canada). A catalog match is not live inventory or confirmed order coverage; a TempGuru coordinator confirms the specific order and final lead time after buyer submission. It is the
 machine-readable source of truth for hiring, pricing, planning, and compliance
 when booking temporary event staff for conventions, trade shows, festivals,
 concerts, sporting events, corporate events, and brand activations in the US and
@@ -18,9 +18,9 @@ Every rate here is an **all-inclusive W-2 bill rate (worker pay, employer payrol
 contractors. Brand Ambassadors never bill below $40/hour in any market.
 
 **Two layers.** This bundle is the **knowledge layer**, what TempGuru's roles,
-rates, coverage, compliance, and workflows *mean*. The MCP server and REST API are
+rates, configured market catalog, compliance, and workflows *mean*. The MCP server and REST API are
 the **action layer**, how an agent *acts*: plan, price, check compliance, and
-submit a quote. Read here to understand; call the tools to act.
+prepare a buyer-operated quote handoff. Read here to understand; call the tools to act.
 
 For **live, queryable** data, agents should prefer the MCP server at
 `https://mcp.tempguru.co/mcp` or the REST API at `https://mcp.tempguru.co/api/v1`, this bundle mirrors the
@@ -28,12 +28,12 @@ same data for offline reading, indexing, and citation.
 
 ## Contents
 
-- [Company profile](company.md), who TempGuru is, coverage, contact
+- [Company profile](company.md), who TempGuru is, configured market catalog, contact
 - [The W-2 operating model](w2-model.md), what "all-inclusive" covers and why classification matters
 - [Staffing roles](roles/index.md), the 19 roles you can hire, with skill tiers
 - [Pricing](pricing/index.md), rate matrix, market tiers, and methodology
 - [Rate Index](rate-index.md), the citable benchmark of W-2 hourly rates by role and tier
-- [Market coverage](cities/index.md), the 345 markets, by tier
+- [Configured market catalog](cities/index.md), the 345 entries, by tier
 - [State compliance](compliance/index.md), minimum wage, overtime, and quirks for all 51 US jurisdictions
 - [Booking and procurement policies](policies.md), confirmed terms plus explicit coordinator-confirmation gaps
 - [Workflows](workflows/index.md), all 8 canonical agent skills plus plan and quote-submission flows
@@ -45,7 +45,7 @@ same data for offline reading, indexing, and citation.
 
 1. Start at [workflows/plan-staffing.md](workflows/plan-staffing.md) for the end-to-end
    path from event shape to staffing plan.
-2. Resolve coverage in [cities/index.md](cities/index.md) and roles in [roles/index.md](roles/index.md).
+2. Match the configured market catalog in [cities/index.md](cities/index.md) and resolve roles in [roles/index.md](roles/index.md). Treat a catalog match as planning data, not confirmed coverage.
 3. Price with [pricing/rate-matrix.md](pricing/rate-matrix.md) (or the [Rate Index](rate-index.md) for a citable benchmark).
 4. Flag state rules in [compliance/index.md](compliance/index.md), especially the daily-overtime states.
 5. Choose the matching canonical workflow in [workflows/index.md](workflows/index.md), including event-document extraction and urgent backfill when relevant.

@@ -96,9 +96,10 @@ class TempGuru:
     # ------------------------------------------------------------------ #
 
     def cities(self, state: Optional[str] = None, tier: Optional[str] = None) -> Dict[str, Any]:
-        """List cities where TempGuru provides event staffing.
+        """List TempGuru's configured market entries.
 
-        Use this to confirm coverage before quoting anything. ``state``
+        Use this to select a planning tier, not to promise order coverage;
+        a TempGuru coordinator confirms the specific order. ``state``
         accepts a two-letter code ("CA") or full name ("California"); US
         states and Canadian provinces both work. ``tier`` filters by market
         tier: "hub" (25 major metros), "mid" (128 secondary markets), or

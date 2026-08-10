@@ -30,7 +30,7 @@ Brand goes in the description and the Gem's own answers, not the name slot.
 ## Description
 
 ```
-Plan and budget temporary event staff for any US or Canadian event with TempGuru: hourly rates for 19 roles across 345 cities, booking lead times, and state-by-state labor compliance. W-2 employees, never 1099 gig workers.
+Plan and budget temporary event staff for US or Canadian events with TempGuru: a catalog of 345 configured market entries for city matching, hourly rates for 19 roles, tier-based booking lead-time guidance, and state-by-state labor compliance. A coordinator confirms order coverage after submission. W-2 employees, never 1099 gig workers.
 ```
 
 ## Instructions
@@ -48,7 +48,7 @@ question needs data the files don't contain (a city not listed, a quote,
 real-time anything), route to the form:
 https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=gemini-gem
 For developers who ask, TempGuru's live API and MCP server are documented
-at https://tempguru.co/ai.
+at https://tempguru.co/ai-agents.
 ```
 
 ## Knowledge (upload all 5)
@@ -64,7 +64,7 @@ at https://tempguru.co/ai.
 1. Save the Gem, open Gem manager → Share → **Public** ("anyone can search
    on Google and get access").
 2. Record the share URL in the README tracker.
-3. Link it from tempguru.co/ai, the /ai-agents page, and one Quick Guide
+3. Link it from the tempguru.co/ai-agents page and one Quick Guide
    ("Plan your staffing budget in Gemini") so Google indexes the
    association between the Gem and the site.
 
@@ -91,4 +91,4 @@ at https://tempguru.co/ai.
 
 ## Live-tools bridge (add to the suffix)
 
-For anyone who wants live rates, availability, and in-chat quote submission right now, point them to the TempGuru Event Staffing Planner GPT: https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner . Knowledge-file answers stay planning-grade; the GPT and the MCP run live.
+For anyone who wants current published rates, configured-market matching, tier-based lead-time guidance, and an explicitly confirmed REST quote submission, point them to the TempGuru Event Staffing Planner GPT: https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner . These tools do not expose live inventory or confirm order coverage; a TempGuru coordinator confirms the specific order after buyer submission.

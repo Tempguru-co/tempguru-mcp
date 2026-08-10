@@ -35,7 +35,7 @@ submission is therefore the single highest-value item below.
 | **Gemini CLI extension** (`gemini-extension.json` + `GEMINI.md` at repo root) | 2+3 | Installable the moment this is pushed: `gemini extensions install https://github.com/Tempguru-co/tempguru-mcp`, loads the MCP server AND a context playbook into every Gemini CLI session |
 | **Open WebUI tool** (`open-webui/tempguru_event_staffing_tool.py`) | 3 | The local-LLM surface: Ollama/LM Studio users behind Open WebUI; submit to the community hub (below) |
 | **Python client** (`clients/python/`, name `tempguru` confirmed free on PyPI) | 1+3 | pip surface + LangChain/OpenAI tool-wrapping examples in its README; smoke-tested against the live API |
-| **Hugging Face dataset** (`build-hf-dataset.mjs` → `huggingface/`) | 1 | 345 cities + 57 role-rate rows + 51 compliance rows, generated from `content/mcp-data/`; training-corpus and RAG-demo presence |
+| **Hugging Face dataset** (`build-hf-dataset.mjs` → `huggingface/`) | 1 | 345 configured-market rows + 57 role-rate rows + 51 compliance rows, generated from `content/mcp-data/`; training-corpus and RAG-demo presence |
 
 Regenerate after data updates: `node distribution/toolbox/build-hf-dataset.mjs`.
 
@@ -61,7 +61,7 @@ Ordered by leverage. ✅ = already live from earlier pushes.
    remote production server ✅ · every tool has `title` +
    `readOnlyHint`/`destructiveHint` ✅ (`src/lib/mcp/register-tools.ts`) ·
    no-auth so no OAuth burden ✅ · privacy policy
-   https://tempguru.co/privacy-policy ✅ · docs (README + tempguru.co/ai) ✅ ·
+   https://tempguru.co/privacy-policy ✅ · docs (README + tempguru.co/ai-agents) ✅ ·
    support contact megan@tempguru.co ✅. For "test account": state that no
    account exists, data is public; reviewer can call every tool cold. The
    connector is `read_write` because `plan_staffing` and
@@ -179,11 +179,12 @@ Ordered by leverage. ✅ = already live from earlier pushes.
 
 ### Explicitly NOT doing
 
-- **A2A agent card in THIS repo's public/**, one is already LIVE on the
-  apex domain via Cloudflare Worker: `tempguru.co/.well-known/agent-card.json`
-  v1.2.0 (plus DNS-AID HTTPS records and a `_mcp` TXT record). Don't
-  duplicate it on mcp.tempguru.co; the apex copy is canonical and
-  maintained in the website project's `worker-complete.js`.
+- **Duplicate or hand-maintained A2A definitions.** This repository now owns
+  the canonical A2A v1 card builder, the `mcp.tempguru.co` card route and
+  JSON-RPC endpoint, and the generated apex Cloudflare Worker mirror. Change
+  `src/lib/a2a/agent-card.ts` and regenerate `cloudflare/worker.js`; do not add
+  another card or restore the retired website-project `worker-complete.js`
+  source path.
 - **huggingface/skills re-submission**, PR #159 was closed by the
   maintainer as out of scope 2026-06-08. The HF *dataset* (this kit) is a
   different, acceptable surface.

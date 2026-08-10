@@ -19,5 +19,6 @@ Schema `PricingResponse`.
 - `tier_definition` (string)
 - `all_tiers_for_context` (object)
 - `pricing_notes` (string)
+- `role_note` (string): Caveat emitted when the requested phrasing maps to a constrained service, for example security mapping to unarmed Crowd Control rather than licensed guards.
 
 [All schemas](index.md) · [bundle root](../index.md)

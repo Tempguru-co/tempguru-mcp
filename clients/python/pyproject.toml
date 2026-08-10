@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "tempguru"
 version = "0.3.0"
-description = "Event staffing data for AI agents and apps: live rates, 345-city US/Canada coverage, saved plans, policies, quote status, compliance, and quote submission from TempGuru's public API."
+description = "Event staffing data for AI agents and apps: live rates, 345 configured US/Canada market entries, saved plans, policies, quote status, compliance, and quote submission from TempGuru's public API."
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.9"
@@ -39,7 +39,7 @@ llamaindex = ["llama-index-core>=0.12"]
 
 [project.urls]
 Homepage = "https://tempguru.co"
-Documentation = "https://tempguru.co/ai"
+Documentation = "https://tempguru.co/ai-agents"
 Source = "https://github.com/Tempguru-co/tempguru-mcp"
 "API Reference (OpenAPI)" = "https://mcp.tempguru.co/openapi.json"
 "MCP Server" = "https://mcp.tempguru.co/mcp"

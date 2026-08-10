@@ -1,11 +1,11 @@
 ---
 type: "Market List"
 title: "Mid Markets"
-description: "TempGuru's 128 mid-tier event-staffing markets, grouped by state/province."
+description: "TempGuru's 128 configured mid-tier event-staffing market entries, grouped by state/province."
 tier: "mid"
 count: 128
 tags:
-  - "coverage"
+  - "market-catalog"
   - "cities"
   - "mid"
 timestamp: "2026-07-16T00:00:00Z"
@@ -71,4 +71,4 @@ Secondary markets (~128 cities), regional hubs, mid-size metros
 - **Quebec** (6): [Gatineau](https://tempguru.co/insights/gatineau-event-staffing), [Lévis](https://tempguru.co/insights/levis-event-staffing), [Montreal](https://tempguru.co/insights/montreal-event-staffing), [Quebec City](https://tempguru.co/insights/quebec-city-event-staffing), [Sherbrooke](https://tempguru.co/insights/sherbrooke-event-staffing), [Trois-Rivières](https://tempguru.co/insights/trois-rivieres-event-staffing)
 - **Saskatchewan** (2): [Regina](https://tempguru.co/insights/regina-event-staffing), [Saskatoon](https://tempguru.co/insights/saskatoon-event-staffing)
 
-See [all coverage](index.md) · [pricing for this tier](../pricing/rate-matrix.md).
+See [all configured market entries](index.md) · [pricing for this tier](../pricing/rate-matrix.md).

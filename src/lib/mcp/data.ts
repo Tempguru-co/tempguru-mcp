@@ -358,7 +358,7 @@ function stripTrailingState(
   return null;
 }
 
-// A close typo of a covered city ("Chcago") is a real, DIFFERENT city just as
+// A close typo of a configured city ("Chcago") is a real, DIFFERENT city just as
 // often as it is a misspelling ("Dover" is edit-distance 2 from "Denver",
 // "Gary" is 1 from "Cary"). So resolution here is DETERMINISTIC only, exact
 // slug / nickname / name / "City, ST". Typos never auto-resolve, they fall to
@@ -384,7 +384,7 @@ export function findCity(query: string): City | null {
   if (parsed) {
     const cityN = normCity(parsed.city);
     if (parsed.abbr) {
-      // An explicit state was given. Only accept a covered city of that name in
+      // An explicit state was given. Only accept a configured city of that name in
       // THAT state (or a nickname whose city sits in that state). Do NOT fall
       // through to a same-named city in a different state, that would silently
       // discard the state the user typed ("Springfield, IL" -> Springfield, MA).

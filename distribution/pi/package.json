@@ -1,7 +1,7 @@
 {
   "name": "tempguru-pi",
-  "version": "1.7.1",
-  "description": "TempGuru event staffing for Pi and Prime Agent: 8 Agent Skills plus native coverage, rates, availability, compliance, policies, saved plans, and a non-PII buyer quote-form handoff across 345 US/CA markets.",
+  "version": "1.7.2",
+  "description": "TempGuru event staffing for Pi and Prime Agent: 8 Agent Skills plus native tools against 345 configured US/CA market entries, with tier-based lead-time guidance, coordinator-confirmed order coverage, and a non-PII buyer quote-form handoff.",
   "keywords": [
     "pi-package",
     "prime-agent",
@@ -15,7 +15,7 @@
   ],
   "license": "MIT",
   "author": "Temporary Assistance Guru, Inc. (https://tempguru.co)",
-  "homepage": "https://tempguru.co/ai",
+  "homepage": "https://tempguru.co/ai-agents",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Tempguru-co/tempguru-mcp.git",

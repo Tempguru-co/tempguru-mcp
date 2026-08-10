@@ -77,5 +77,5 @@ multi-day festivals and long load-in days create exposure.
 | [Wisconsin](by-state/wi.md) | WI | $7.25 | 40h/wk | - | - |
 | [Wyoming](by-state/wy.md) | WY | $7.25 | 40h/wk | - | - |
 
-Each state links to its own [profile](by-state/index.md). Canadian markets are
-covered for staffing but Canadian employment rules are out of scope for this table.
+Each state links to its own [profile](by-state/index.md). Canadian configured
+market entries use provincial rules, which are out of scope for this US-state table.

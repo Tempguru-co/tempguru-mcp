@@ -3,10 +3,10 @@
   Source: content/mcp-data/ (cities.json updated 2026-05-21)
   Regenerate: node distribution/assistants/build-knowledge.mjs
 -->
-# TempGuru: City Coverage (345 markets)
+# TempGuru: Configured Market Catalog (345 entries)
 
-TempGuru staffs events in 345 published markets: 307 in the United
-States and 38 in Canada. Tiers: 25 hub, 128 mid, 192 small. Cities marked
+TempGuru's public market catalog contains 345 configured US and Canadian entries. Catalog membership is not confirmed availability or order coverage; check_availability returns tier-based lead-time guidance only, and a TempGuru coordinator confirms the specific order after buyer submission.
+The catalog contains 307 entries in the United States and 38 in Canada. Tiers: 25 hub, 128 mid, 192 small. Cities marked
 "(hub)" are primary markets with the shortest lead times and the highest rate
 band; "(mid)" are secondary markets; unmarked cities are small markets.
 

@@ -4,14 +4,14 @@ title: "Lead-time guidance for an event"
 description: "Use this when an agent wants to know whether TempGuru can typically staff an event at a given city and date, for example, 'is two weeks enough notice for Dallas?' Returns a recommendation in the se..."
 method: "GET"
 path: "/api/v1/availability"
-resource: "https://tempguru.co/api/v1/availability"
+resource: "https://mcp.tempguru.co/api/v1/availability"
 operation_id: "checkAvailability"
 tags:
   - "Planning"
 ---
 # Lead-time guidance for an event
 Use this when an agent wants to know whether TempGuru can typically staff an event at a given city and date, for example, 'is two weeks enough notice for Dallas?' Returns a recommendation in the set {yes, tight, rush, very-rush} based on the city's market tier and how far out the event is. **This is planning guidance, not a real-time reservation.** A confirmed booking requires a quote request at https://tempguru.co/get-staffing.
-- **Operation:** `GET https://tempguru.co/api/v1/availability`
+- **Operation:** `GET https://mcp.tempguru.co/api/v1/availability`
 - **Tags:** Planning
 ## Parameters
 

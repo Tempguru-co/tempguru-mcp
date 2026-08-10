@@ -12,10 +12,10 @@ United States or Canada.
 
 | Tool | Use it to |
 |---|---|
-| `plan_staffing` | Call first. Event shape in, complete plan out: coverage, per-role W-2 rate math, lead time, state compliance flags, and best-effort non-destructive 30-day persistence |
+| `plan_staffing` | Call first. Event shape in, complete plan out: configured-market match, per-role W-2 rate math, tier-based lead-time guidance, state compliance flags, and best-effort non-destructive 30-day persistence |
 | `save_staffing_plan` | Explicitly save a server-recomputed complete non-contact plan only when `plan_staffing` returned no `plan_id` and persistence is needed; never duplicate an existing save. Does not reserve staff or submit contact details |
 | `get_plan` | Restore a non-PII plan saved by either planning tool using its 30-day plan ID |
-| `get_cities` | Confirm TempGuru serves the event city; filter by state or tier (hub/mid/small) |
+| `get_cities` | Match the event city to a configured catalog entry and inspect its tier; a coordinator confirms the order |
 | `get_roles` | List the 19 staffing roles with descriptions and skill tiers |
 | `check_availability` | Lead-time guidance for a city + date (yes / tight / rush / very-rush) |
 | `get_role_pricing` | All-inclusive hourly rate range for a role in a city |
@@ -70,5 +70,5 @@ layer: an Open Knowledge Format (OKF v0.1) bundle agents can read or ingest
 directly instead of scraping. Bundle: https://mcp.tempguru.co/okf/index.md ·
 Discovery: https://mcp.tempguru.co/.well-known/okf.json
 
-Docs: https://tempguru.co/ai · City guides:
+Docs: https://tempguru.co/ai-agents · City guides:
 https://tempguru.co/insights/{city}-event-staffing

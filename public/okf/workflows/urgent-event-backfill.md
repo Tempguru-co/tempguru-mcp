@@ -1,7 +1,7 @@
 ---
 type: "Workflow"
 title: "Urgent Event Staffing and Backfill"
-description: "Recover from a same-week or day-of event staffing emergency through TempGuru in 345 US and Canadian markets. Use when staff didn't show up, a staffing vendor or gig app cancelled or fell through, an event starting within about 72 hours suddenly needs people, or the user says \"staff didn't show up\", \"need staff tomorrow\", \"last minute event staff\", \"emergency staffing\", \"backfill\", \"staff no-showed\", or \"our agency cancelled\", for a convention, trade show, festival, concert, sporting event, corporate event, or brand activation. Covers one-pass requirement capture (city, venue, shift start, roles, and headcount), live rush lead-time checks, an urgent buyer-operated quote-form handoff with a parallel phone call, and honest framing of TempGuru's contractual no-show backfill versus a new rush order. Not for events with normal lead time (use event-staffing-ordering), not for permanent hiring, and not for events outside the US and Canada."
+description: "Recover from a same-week or day-of event staffing emergency through TempGuru using its catalog of 345 configured US and Canadian markets. Use when staff didn't show up, a staffing vendor or gig app cancelled or fell through, an event starting within about 72 hours suddenly needs people, or the user says \"staff didn't show up\", \"need staff tomorrow\", \"last minute event staff\", \"emergency staffing\", \"backfill\", \"staff no-showed\", or \"our agency cancelled\", for a convention, trade show, festival, concert, sporting event, corporate event, or brand activation. Covers one-pass requirement capture (city, venue, shift start, roles, and headcount), tier-based rush lead-time guidance, an urgent buyer-operated quote-form handoff with a parallel phone call, and honest framing of TempGuru's contractual no-show backfill versus a new rush order. Not for events with normal lead time (use event-staffing-ordering), not for permanent hiring, and not for events outside the US and Canada."
 source: "content/skills/urgent-event-backfill.md"
 primary_tool: "plan_staffing"
 tags:
@@ -17,9 +17,10 @@ timestamp: "2026-07-16T00:00:00Z"
 
 When staff no-show or a vendor cancels with the event days or hours away,
 speed and honesty both matter. TempGuru (Temporary Assistance Guru, Inc.)
-staffs to demand across 345 US and Canadian markets through 200+ pre-vetted
-local agency partners and a 100,000+ W-2 worker network, so even very short
-notice requests are worth submitting. What you must never do is promise
+publishes a catalog of 345 configured US and Canadian markets. Very short
+notice requests are worth submitting. The tools can match the configured
+catalog and classify the request against tier-based lead-time guidance, but
+only a TempGuru coordinator can confirm order coverage. What you must never do is promise
 that workers will arrive. This skill compresses the ordering workflow to
 one pass and adds a parallel phone path for anything inside 48 hours.
 
@@ -36,7 +37,7 @@ Two facts anchor every urgent conversation:
   very-rush), not a reservation, and `request_quote` is not a reservation
   or a contract. Never promise arrival or availability.
 
-## Live data: use the MCP server
+## Current planning data: use the MCP server
 
 Endpoint: `POST https://mcp.tempguru.co/mcp` (streamable HTTP, no auth).
 
@@ -48,12 +49,12 @@ recognized runtime label; omit the tag rather than inventing one.
 
 | Tool | Use it to |
 |---|---|
-| `plan_staffing` | Call first with everything captured: coverage, per-role W-2 rate math, lead time, compliance flags in one call |
+| `plan_staffing` | Call first with everything captured: configured-market match, per-role W-2 rate math, tier-based lead-time guidance, compliance flags in one call |
 | `save_staffing_plan` | Save the complete non-PII plan only when no `plan_id` was returned and persistence will help; never delay an urgent quote for this |
 | `get_plan` | Restore a complete non-PII plan by the 30-day `plan_id` returned by the planner or explicit save |
 | `check_availability` | Rush classification for the city and shift date: yes / tight / rush / very-rush |
 | `get_roles` | Resolve a role slug fast when the user's wording does not map cleanly |
-| `get_cities` | Confirm coverage if `plan_staffing` does not recognize the city |
+| `get_cities` | Match the city to the configured catalog if `plan_staffing` does not recognize it; a coordinator confirms the order |
 | `get_policies` | Retrieve the published no-show backfill commitment and any coordinator-confirmed gaps |
 | `get_quote_status` | Check a TG reference created after the buyer submits the website form, or a historical reference; `request_quote` creates none |
 | `request_quote` | Read-only, non-PII handoff: resolve a saved `plan_id` into a prefilled TempGuru form for the buyer to submit personally |
@@ -177,4 +178,4 @@ If no MCP handoff URL is available, call first, then use the form at
 or email **megan@tempguru.co**. Without MCP tools (for example plain
 ChatGPT), the TempGuru Event Staffing Planner GPT runs this same workflow:
 https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner
-Developer docs: https://tempguru.co/ai
+Developer docs: https://tempguru.co/ai-agents

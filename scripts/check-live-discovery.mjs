@@ -9,6 +9,10 @@ import { SKILLS } from "./gen-skill-digests.mjs";
 
 const ORIGINS = ["https://mcp.tempguru.co", "https://tempguru.co"];
 const MCP_ENDPOINT = "https://mcp.tempguru.co/mcp";
+const PUBLIC_FACTS = JSON.parse(
+  readFileSync(new URL("../content/public-facts.json", import.meta.url), "utf8"),
+);
+const A2A_ENDPOINT = PUBLIC_FACTS.agentInterfaces.a2a.url;
 const MODERN_VERSION = "2026-07-28";
 const LEGACY_VERSION = "2025-11-25";
 const PROTOCOL_VERSION_META_KEY = "io.modelcontextprotocol/protocolVersion";
@@ -194,6 +198,46 @@ for (const skill of SKILLS) {
   await fetchOk(`https://mcp.tempguru.co/okf/workflows/${skill}.md`);
 }
 await fetchOk("https://tempguru.co/.well-known/security.txt");
+const requestSchema = await (
+  await fetchOk("https://tempguru.co/schemas/event-staffing-request.schema.json")
+).json();
+if (
+  requestSchema.$id !==
+  "https://tempguru.co/schemas/event-staffing-request.schema.json"
+) {
+  throw new Error("apex event-staffing request schema route is stale or unbound");
+}
+
+for (const origin of ORIGINS) {
+  const facts = await (
+    await fetchOk(`${origin}/.well-known/tempguru-facts.json`)
+  ).json();
+  if (JSON.stringify(facts) !== JSON.stringify(PUBLIC_FACTS)) {
+    throw new Error(`${origin}: public facts contract drifted from the repository`);
+  }
+  const auth = await (await fetchOk(`${origin}/auth.md`)).text();
+  if (
+    !auth.includes("do not require account registration") ||
+    !auth.includes(MCP_ENDPOINT) ||
+    !auth.includes(A2A_ENDPOINT) ||
+    !auth.includes("does not currently publish OAuth")
+  ) {
+    throw new Error(`${origin}/auth.md: public/no-OAuth authentication boundary is incomplete`);
+  }
+  const agentCard = await (
+    await fetchOk(`${origin}/.well-known/agent-card.json`)
+  ).json();
+  const preferred = agentCard.supportedInterfaces?.[0];
+  if (
+    preferred?.url !== A2A_ENDPOINT ||
+    preferred?.protocolBinding !== "JSONRPC" ||
+    preferred?.protocolVersion !== "1.0" ||
+    Object.hasOwn(agentCard, "url") ||
+    Object.hasOwn(agentCard, "protocolVersion")
+  ) {
+    throw new Error(`${origin}: A2A v1.0 agent card is invalid or points at the wrong endpoint`);
+  }
+}
 
 for (const origin of ORIGINS) {
   const card = await (
@@ -230,8 +274,17 @@ for (const origin of ORIGINS) {
   }
 }
 
+const llmsBodies = {};
 for (const path of ["/llms.txt", "/llms-full.txt"]) {
   const body = await (await fetchOk(`https://tempguru.co${path}`)).text();
+  llmsBodies[path] = body;
+  for (const claim of Object.values(PUBLIC_FACTS.withheldClaims)) {
+    for (const phrase of claim.blockedPhrases) {
+      if (body.toLowerCase().includes(phrase.toLowerCase())) {
+        throw new Error(`${path}: withheld public claim remains: ${phrase}`);
+      }
+    }
+  }
   const inventories = [...body.matchAll(/^- Canonical Agent Skills \((\d+)\):[^\n]*$/gm)];
   if (inventories.length !== 1 || Number(inventories[0][1]) !== SKILLS.length) {
     throw new Error(`${path}: expected exactly one ${SKILLS.length}-skill inventory`);
@@ -254,6 +307,61 @@ for (const path of ["/llms.txt", "/llms-full.txt"]) {
   for (const skill of SKILLS) {
     if (!inventories[0][0].includes(skill)) throw new Error(`${path}: inventory missing ${skill}`);
   }
+}
+const okfDiscovery = await (
+  await fetchOk("https://tempguru.co/.well-known/okf.json")
+).json();
+const fullMarkers =
+  llmsBodies["/llms-full.txt"].match(/^## Included document: \/okf\//gm) ?? [];
+if (
+  llmsBodies["/llms-full.txt"] === llmsBodies["/llms.txt"] ||
+  llmsBodies["/llms-full.txt"].length < llmsBodies["/llms.txt"].length * 5 ||
+  fullMarkers.length !== okfDiscovery.bundle?.file_count
+) {
+  throw new Error(
+    `/llms-full.txt is not the complete expanded OKF export (${fullMarkers.length} documents)`,
+  );
+}
+
+const a2aResponse = await fetchOk(A2A_ENDPOINT, {
+  method: "POST",
+  headers: {
+    "content-type": "application/json",
+    "a2a-version": "1.0",
+  },
+  body: JSON.stringify({
+    jsonrpc: "2.0",
+    id: "live-a2a-coverage",
+    method: "SendMessage",
+    params: {
+      message: {
+        messageId: "live-a2a-coverage-message",
+        role: "ROLE_USER",
+        parts: [
+          {
+            data: {
+              skillId: "event-staffing-lookup",
+              action: "catalog",
+              input: { city: "Chicago" },
+            },
+            mediaType: "application/json",
+          },
+        ],
+      },
+    },
+  }),
+});
+const a2aBody = await a2aResponse.json();
+const a2aData = a2aBody.result?.message?.parts?.find((part) =>
+  Object.hasOwn(part, "data"),
+)?.data;
+if (
+  a2aBody.id !== "live-a2a-coverage" ||
+  a2aBody.result?.message?.role !== "ROLE_AGENT" ||
+  a2aData?.result?.data?.catalog_match !== true ||
+  a2aData?.result?.data?.coverage_confirmation_required !== true
+) {
+  throw new Error(`${A2A_ENDPOINT}: SendMessage qualified catalog lookup failed`);
 }
 
 const legacyInitialize = await postRpc({
@@ -331,5 +439,5 @@ assertExactSet(
 );
 
 console.log(
-  `Live discovery OK: ${SKILLS.length} skills, ${TOOLS.length} tools across modern + legacy MCP, both Agent Skills origins, apex Hermes tree, digests, OKF, server cards, and llms inventories.`,
+  `Live discovery OK: ${SKILLS.length} skills, ${TOOLS.length} tools across modern + legacy MCP, A2A v1.0, auth.md, public facts, both Agent Skills origins, apex Hermes tree, digests, OKF, server cards, and llms inventories.`,
 );

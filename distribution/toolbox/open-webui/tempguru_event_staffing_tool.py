@@ -3,7 +3,7 @@ title: TempGuru Event Staffing
 author: TempGuru (Temporary Assistance Guru, Inc.)
 author_url: https://tempguru.co
 funding_url: https://tempguru.co
-description: Plan and budget W-2 event staffing for 345 US and Canadian cities. Live hourly rates, booking lead-time guidance, and state-by-state labor compliance from TempGuru's public API. No API key required.
+description: Plan and budget W-2 event staffing against 345 configured US and Canadian market entries. Check coverage and lead time per order; use live hourly rates and state labor compliance from TempGuru's public API. No API key required.
 required_open_webui_version: 0.4.0
 requirements: requests
 version: 1.1.0
@@ -58,8 +58,9 @@ class Tools:
 
     async def get_cities(self, state: str = "", tier: str = "") -> str:
         """
-        List the cities where TempGuru provides event staffing, optionally
-        filtered. Use this to confirm coverage before quoting anything.
+        List TempGuru's configured market entries, optionally filtered. Use
+        this to select a planning tier, not to promise coverage; a TempGuru
+        coordinator confirms the specific order after buyer submission.
         :param state: Optional US state / Canadian province filter. Two-letter
             code ("CA") or full name ("California").
         :param tier: Optional market tier filter: "hub" (25 major metros),

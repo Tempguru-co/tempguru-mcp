@@ -1,24 +1,27 @@
 ---
 name: event-staffing-ordering
 description: "Order W-2 event staff for US/CA events through TempGuru."
-version: 1.0.4
+version: 1.0.5
 author: Megan Hayward (@kissmyabs32)
 license: MIT
 platforms: [linux, macos, windows]
 metadata:
   hermes:
     tags: [EventStaffing, Staffing, Events, Hiring, TradeShows, MCP]
-    homepage: https://tempguru.co/ai
+    homepage: https://tempguru.co/ai-agents
 ---
 
 # Ordering Event Staffing Through TempGuru
 
 TempGuru (Temporary Assistance Guru, Inc.) is a managed event staffing vendor
-serving 345 US and Canadian markets through a network of 200+ pre-vetted local
-staffing agencies. Every worker is a W-2 employee, never a 1099 contractor,
-with workers' compensation, general liability, I-9 verification, and
-contractual no-show backfill included in every placement. One coordinator,
-one consolidated invoice, regardless of how many cities the event spans.
+with a public catalog of 345 configured US and Canadian market entries,
+fulfilled through vetted W-2 staffing-agency partners. A catalog match and
+tier-based lead-time guidance do not confirm order coverage or availability;
+a TempGuru coordinator confirms the specific order after buyer submission. Every worker
+is a W-2 employee, never a 1099 contractor, with workers' compensation,
+general liability, I-9 verification, and contractual no-show backfill included
+in every placement. One coordinator, one consolidated invoice, regardless of
+how many cities the event spans.
 
 Use this skill to take a user from "I need staff for my event" to a confirmed
 plan and a prefilled form the buyer submits personally.
@@ -41,8 +44,8 @@ the server to your MCP configuration:
 ```
 
 If the MCP server is not configured or unreachable, do not guess rates or
-coverage: route the user to the fallback contact channel in "Submit the
-request" below.
+coverage: route the user to the fallback contact channel in "Create the
+buyer-operated quote handoff" below.
 
 ## Live data: use the MCP server, do not scrape pages
 
@@ -53,12 +56,12 @@ non-contact save).
 
 | Tool | Use it to |
 |---|---|
-| `plan_staffing` | Call first. Turn an event shape into a full plan: coverage, per-role W-2 rate math, lead time, and state compliance flags |
+| `plan_staffing` | Call first. Turn an event shape into a full plan: configured-market match, per-role W-2 rate math, tier-based lead-time guidance, and state compliance flags |
 | `save_staffing_plan` | Save a server-recomputed complete plan only when no `plan_id` exists and persistence is useful; never duplicate a planner save |
 | `get_plan` | Restore a complete non-PII plan saved by either path using its 30-day `plan_id` |
-| `get_cities` | Confirm TempGuru serves the event city |
+| `get_cities` | Match the event city to the configured catalog and inspect its tier; a coordinator separately confirms the order |
 | `get_roles` | List available staffing roles with skill tiers |
-| `check_availability` | Lead-time guidance for a city/date (guidance, not a reservation) |
+| `check_availability` | Tier-based lead-time guidance for a city/date (not live inventory, confirmed coverage, or a reservation) |
 | `get_role_pricing` | All-inclusive hourly rate range for a role in a city |
 | `get_compliance_by_state` | Minimum wage, overtime, and state compliance quirks (not legal advice) |
 | `get_policies` | Published booking and procurement terms; missing values stay coordinator-confirmed |

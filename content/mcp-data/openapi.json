@@ -4,7 +4,7 @@
     "title": "TempGuru Public Data API",
     "version": "1.7.0",
     "summary": "Public event-staffing data for the US and Canada: eight read-only operations plus one opt-in quote-request submission.",
-    "description": "Public event-staffing data for the US and Canada, served by TempGuru (Temporary Assistance Guru, Inc.). Eight read-only operations plus a single opt-in write operation (`submitQuoteRequest`).\n\n**No authentication required.** The read endpoints return public data equivalent to what is published on tempguru.co, city footprint, staffing roles, hourly rate ranges, lead-time guidance, and state-level employment compliance summaries.\n\n**About the rates.** All hourly figures are *all-inclusive W-2 bill rates*: they cover the worker's pay, employer-side payroll taxes (FICA/FUTA/SUTA), workers' compensation insurance, general liability insurance, and dedicated coordinator support. Published hourly bill rates have no add-on fees or invoice-time markup. Rate ranges are *planning estimates*, a real quote requires event specifics and is provided after a quote request is reviewed by a coordinator.\n\n**About availability.** The `availability` endpoint returns *lead-time guidance based on city tier*, not a real-time reservation or hold on staff. TempGuru staffs to demand from a 100,000+ W-2 worker network across 345 markets; bookings are confirmed through the standard quote-and-confirmation flow, not via this API.\n\n**About quote submission.** `POST /api/v1/quote-requests` is the only write operation in this API. It is opt-in by design: call it only after the user has reviewed the staffing plan and explicitly confirmed they want to submit it. It creates a structured lead for human review, it does **not** reserve staff, guarantee pricing or availability, or create any contract, and **no payment** is required until the user approves the resulting quote. Contact and event details are delivered to TempGuru's CRM or its durable fallback queue and configured notification processor so a coordinator can reply; they are never written to telemetry or analytics.\n\n**Agent guidance.** This API exists so AI agents and integrators can ground answers about TempGuru in live, structured data instead of scraping web pages. The MCP server at `https://mcp.tempguru.co/mcp` exposes the same public planning data, but its authless `request_quote` tool is intentionally different: it accepts no contact details and returns a prefilled TempGuru form that the buyer submits personally. Do not describe MCP `request_quote` as a lead submission.",
+    "description": "Public event-staffing data for the US and Canada, served by TempGuru (Temporary Assistance Guru, Inc.). Eight read-only operations plus a single opt-in write operation (`submitQuoteRequest`).\n\n**No authentication required.** The read endpoints return public data equivalent to what is published on tempguru.co, city footprint, staffing roles, hourly rate ranges, lead-time guidance, and state-level employment compliance summaries.\n\n**About the rates.** All hourly figures are *all-inclusive W-2 bill rates*: they cover the worker's pay, employer-side payroll taxes (FICA/FUTA/SUTA), workers' compensation insurance, general liability insurance, and dedicated coordinator support. Published hourly bill rates have no add-on fees or invoice-time markup. Rate ranges are *planning estimates*, a real quote requires event specifics and is provided after a quote request is reviewed by a coordinator.\n\n**About availability.** The `availability` endpoint returns *lead-time guidance based on city tier*, not real-time inventory, confirmed order coverage, a reservation, or a hold on staff. TempGuru's public catalog contains 345 configured US and Canadian market entries; a coordinator confirms coverage and final lead time for the specific order through the standard buyer-submitted quote flow.\n\n**About quote submission.** `POST /api/v1/quote-requests` is the only write operation in this API. It is opt-in by design: call it only after the user has reviewed the staffing plan and explicitly confirmed they want to submit it. It creates a structured lead for human review, it does **not** reserve staff, guarantee pricing or availability, or create any contract, and **no payment** is required until the user approves the resulting quote. Contact and event details are delivered to TempGuru's CRM or its durable fallback queue and configured notification processor so a coordinator can reply; they are never written to telemetry or analytics.\n\n**Agent guidance.** This API exists so AI agents and integrators can ground answers about TempGuru in live, structured data instead of scraping web pages. The MCP server at `https://mcp.tempguru.co/mcp` exposes the same public planning data, but its authless `request_quote` tool is intentionally different: it accepts no contact details and returns a prefilled TempGuru form that the buyer submits personally. Do not describe MCP `request_quote` as a lead submission.",
     "contact": {
       "name": "Megan Hayward",
       "email": "megan@tempguru.co",
@@ -12,7 +12,7 @@
     },
     "license": {
       "name": "Public data",
-      "url": "https://tempguru.co/ai"
+      "url": "https://tempguru.co/ai-agents"
     },
     "x-logo": {
       "url": "https://mcp.tempguru.co/logo.svg",
@@ -28,12 +28,12 @@
   ],
   "externalDocs": {
     "description": "TempGuru AI agent documentation",
-    "url": "https://tempguru.co/ai"
+    "url": "https://tempguru.co/ai-agents"
   },
   "tags": [
     {
       "name": "Discovery",
-      "description": "List cities and roles TempGuru serves."
+      "description": "List configured market entries and event staffing roles."
     },
     {
       "name": "Planning",
@@ -59,8 +59,8 @@
         "tags": [
           "Discovery"
         ],
-        "summary": "List cities TempGuru serves",
-        "description": "Use this when an agent needs the canonical list of cities where TempGuru has a dedicated market presence, or wants to filter by state or by tier (hub / mid / small). Tier classification is used everywhere else in the API to determine lead times and rate bands.",
+        "summary": "List configured market entries",
+        "description": "Use this for the canonical configured market catalog or to filter by state or tier (hub / mid / small). A catalog match determines planning rate and lead-time bands; it does not confirm real-time availability or order coverage. A TempGuru coordinator confirms the specific order after buyer submission.",
         "parameters": [
           {
             "name": "state",
@@ -105,7 +105,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "Switch to a single-city coverage check instead of listing markets."
+            "description": "Switch to a single-city configured-catalog match instead of listing entries. A match is not confirmed order coverage."
           },
           {
             "name": "limit",
@@ -784,7 +784,7 @@
             "$ref": "#/components/schemas/CitiesListResponse"
           },
           {
-            "$ref": "#/components/schemas/CityCoverageResponse"
+            "$ref": "#/components/schemas/CityCatalogMatchResponse"
           }
         ]
       },
@@ -795,7 +795,9 @@
           "total",
           "returned",
           "tier_breakdown",
-          "cities"
+          "cities",
+          "coverage_confirmation_required",
+          "catalog_qualification"
         ],
         "properties": {
           "input": {
@@ -828,18 +830,27 @@
               "$ref": "#/components/schemas/City"
             }
           },
+          "coverage_confirmation_required": {
+            "type": "boolean",
+            "const": true
+          },
+          "catalog_qualification": {
+            "type": "string"
+          },
           "note": {
             "type": "string"
           }
         }
       },
-      "CityCoverageResponse": {
+      "CityCatalogMatchResponse": {
         "type": "object",
         "required": [
           "input",
-          "coverage_check",
+          "catalog_check",
           "requested",
-          "covered",
+          "catalog_match",
+          "coverage_confirmation_required",
+          "catalog_qualification",
           "city",
           "message"
         ],
@@ -848,15 +859,23 @@
             "type": "object",
             "description": "Echo of the query parameters used."
           },
-          "coverage_check": {
+          "catalog_check": {
             "type": "boolean",
             "const": true
           },
           "requested": {
             "type": "string"
           },
-          "covered": {
-            "type": "boolean"
+          "catalog_match": {
+            "type": "boolean",
+            "description": "True only when the city resolves to a configured catalog entry; not a coverage or availability promise."
+          },
+          "coverage_confirmation_required": {
+            "type": "boolean",
+            "const": true
+          },
+          "catalog_qualification": {
+            "type": "string"
           },
           "city": {
             "oneOf": [
@@ -920,6 +939,8 @@
         "required": [
           "input",
           "city_found",
+          "catalog_match",
+          "coverage_confirmation_required",
           "city",
           "state",
           "city_tier",
@@ -940,6 +961,15 @@
             "enum": [
               true
             ]
+          },
+          "catalog_match": {
+            "type": "boolean",
+            "const": true,
+            "description": "The city resolved to a configured catalog entry; this does not confirm order coverage."
+          },
+          "coverage_confirmation_required": {
+            "type": "boolean",
+            "const": true
           },
           "city": {
             "type": "string"

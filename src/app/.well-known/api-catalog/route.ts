@@ -16,7 +16,7 @@ export async function GET() {
         ],
         "service-doc": [
           {
-            href: "https://tempguru.co/ai",
+            href: "https://tempguru.co/ai-agents",
           },
         ],
         status: [

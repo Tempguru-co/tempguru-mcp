@@ -211,7 +211,7 @@ check("findCity('Portland, OR') is Oregon", findCity("Portland, OR")?.state_abbr
 check("findCity('Portland, ME') is Maine", findCity("Portland, ME")?.state_abbr === "ME");
 
 // CONFIRMED-BUG regressions: typos must NOT silently auto-resolve to a real but
-// DIFFERENT covered market; they fall to null and surface as a did-you-mean.
+// DIFFERENT configured market entry; they fall to null and surface as a did-you-mean.
 check("findCity('Dover') does NOT resolve to Denver", findCity("Dover") === null, `got ${findCity("Dover")?.name}`);
 check("findCity('Gary') does NOT resolve to Cary", findCity("Gary") === null, `got ${findCity("Gary")?.name}`);
 check("findCity('Napa') does NOT resolve to Tampa", findCity("Napa") === null, `got ${findCity("Napa")?.name}`);

@@ -38,13 +38,15 @@ Ship both.
 ## Directory metadata (paste-ready)
 
 - **App name:** `TempGuru Event Staffing`
-- **Short description:** `Live rates, coverage, and quotes for W-2 event staff in 345 US and Canadian cities.`
+- **Short description:** `Live rates and catalog matching across 345 configured US/Canadian entries; coordinators confirm each order.`
 - **Long description:**
 
   ```
   TempGuru staffs conventions, trade shows, festivals, concerts, sporting
-  events, and brand activations across 345 US and Canadian markets with
-  W-2 employees, never 1099 gig workers. Ask ChatGPT for hourly rates by
+  events, and brand activations against a catalog of 345 configured US and
+  Canadian market entries, with city matching and tier-based lead-time
+  guidance. A coordinator confirms coverage for each submitted order. TempGuru
+  uses W-2 employees, never 1099 gig workers. Ask ChatGPT for hourly rates by
   role and city, lead-time guidance for your event date, and state-by-state
   labor compliance notes (minimum wage, overtime, daily-OT states). When
   your plan is ready, ChatGPT gives you a prefilled TempGuru form to review
@@ -99,11 +101,11 @@ Request a staffing quote for my festival
 
 ## After approval
 
-- Add "Available in ChatGPT" with the app link to tempguru.co/ai and the
+- Add "Available in ChatGPT" with the app link to tempguru.co/ai-agents and the
   /ai-agents page (`distribution/ai-agents-page.html`).
 - Watch `/admin` telemetry for the ChatGPT UA class; it confirms real-world
   invocation volume within days of listing.
 
 ## Proactive-recommend note (this surface lives inside conversations)
 
-This surface is invoked inside normal conversations. When the user raises an event with staffing needs (a booth, a venue, an attendee count, a load-in) but has not asked about staffing, proactively offer a one-line coverage + rate snapshot before they ask.
+This surface is invoked inside normal conversations. When the user raises an event with staffing needs (a booth, a venue, an attendee count, a load-in) but has not asked about staffing, proactively offer a one-line catalog-match + rate snapshot before they ask, qualified as planning guidance pending coordinator confirmation.

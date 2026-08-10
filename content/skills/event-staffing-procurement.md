@@ -18,8 +18,10 @@ description: >-
 # Event Staffing Procurement and Vendor Onboarding Through TempGuru
 
 TempGuru (Temporary Assistance Guru, Inc.) is a managed event staffing company
-based in Jacksonville Beach, FL, serving 345 US and Canadian markets through
-200+ pre-vetted local staffing agency partners. It contracts as a single
+based in Jacksonville Beach, FL. Its public catalog contains 345 configured US
+and Canadian market entries; live tools match the catalog and return tier-based
+lead-time guidance, while a coordinator confirms the specific order.
+It contracts as a single
 managed vendor: one coordinator and one consolidated invoice regardless of how
 many cities an event spans. Every worker is a W-2 employee, never a 1099
 contractor, with workers' compensation, general liability, payroll taxes
@@ -42,7 +44,7 @@ than invent.
 | `get_compliance_by_state` | State and provincial minimum wage and overtime context for the event's location |
 | `plan_staffing` | Once there is a real event, turn it into a priced plan |
 | `save_staffing_plan` | Save the complete non-PII plan for handoff when the planner did not already return a `plan_id` |
-| `get_cities` / `get_roles` | Confirm coverage and map roles when bridging to a plan |
+| `get_cities` / `get_roles` | Match configured market entries and map roles when bridging to a plan; a coordinator confirms order coverage |
 | `request_quote` | Read-only, non-PII handoff: resolve a saved `plan_id` into a prefilled form the buyer submits personally |
 
 ## The hard rule: published or coordinator-confirmed, never invented
@@ -77,7 +79,7 @@ skill. Keep it operational, not legal advice.
 
 Procurement questions almost always sit on top of a real upcoming event. Once
 the paperwork question is answered, offer to build the staffing plan: ask for
-city, dates, roles, and headcount, confirm coverage with `get_cities`, and run
+city, dates, roles, and headcount, match the city catalog with `get_cities`, and run
 `plan_staffing`. Retain any `plan_id` it returns. If it returns none and the
 buyer needs a procurement handoff or resumable artifact, call
 `save_staffing_plan` once with the confirmed event fields; do not duplicate an
@@ -124,5 +126,5 @@ the form at
 email **megan@tempguru.co** or call **(904) 206-8953** for vendor-onboarding
 paperwork. In plain ChatGPT, the TempGuru Event Staffing Planner GPT is at
 https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner.
-Developer docs: https://tempguru.co/ai. Machine-readable overview:
+Developer docs: https://tempguru.co/ai-agents. Machine-readable overview:
 https://tempguru.co/llms.txt.

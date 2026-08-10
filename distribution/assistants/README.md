@@ -20,7 +20,7 @@ packaging and store listings, not engineering.
 | [system-prompt.zh-CN.md](./system-prompt.zh-CN.md) | Chinese canonical, framed for 赴美参展 exhibitors |
 | [build-knowledge.mjs](./build-knowledge.mjs) | Generates `knowledge/` from `content/mcp-data/`, never hand-edit knowledge files |
 | [build-manifests.mjs](./build-manifests.mjs) | Generates the Copilot manifests from the canonical prompt |
-| `knowledge/` (5 files, generated) | Company overview/FAQ, roles + full rate matrix, 345-city coverage, 50-state compliance, booking/procurement policies |
+| `knowledge/` (5 files, generated) | Company overview/FAQ, roles + full rate matrix, 345-entry configured-market catalog, 50-state compliance, booking/procurement policies |
 | [chatgpt-custom-gpt.md](./chatgpt-custom-gpt.md) | GPT Store package + ranking playbook |
 | [chatgpt-app.md](./chatgpt-app.md) | ChatGPT app directory submission (MCP, the bigger prize) |
 | [gemini-gem.md](./gemini-gem.md) | Public Gem (free-tier reach: India, Europe) |
@@ -47,10 +47,10 @@ included for the full picture.)
 | Mistral connector directory | MCP | 🟡 outreach drafted, Megan to send via contact form |
 | Anthropic Connectors Directory (claude.ai) | MCP | 🟠 changes requested; paste-ready `read_write` inventory and buyer-form handoff reply are in `distribution/anthropic-directory-update.md` |
 | npm CLI (`tempguru-mcp`), GHCR image | dev | 🟡 repository `1.7.0` candidate; publish with Trusted Publishing/OIDC after merge and verify the exact version |
-| Hermes agent catalog (NousResearch) | Agent Skill | ✅ update completed by maintainer; keep `distribution/assistants/hermes/` synchronized for the `1.7.0` handoff semantics |
-| Pi + Prime Agent (`tempguru-pi` npm package) | Agent Skill + native tools | 🟡 repository `1.7.1` patch candidate with 8 runtime-adapted skills, 9 native tools, a non-PII buyer-form handoff, and automatic `pi` / `prime-agent` attribution; `1.7.0` is immutable on npm and official Prime v0.7.0 runtime smoke passed |
-| OpenClaw / ClawHub | Agent Skill | ✅ maintainer reports all 8 skills updated; republish the canonical `1.7.0` handoff copy if the catalog version is behind, then verify `GET clawhub.ai/api/v1/skills/<slug>` |
-| **ChatGPT Custom GPT** | this kit | ✅ LIVE 2026-06-09, https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner (planner + read actions + buyer-operated quote-form handoff; contact entry and submission belong to the TempGuru website) |
+| Hermes agent catalog (NousResearch) | Agent Skill | 🟠 repository `1.0.5` copy is ready but still must be synchronized into PR #39150 and re-submitted for review; do not touch the separate live Hermes content agent runtime |
+| Pi + Prime Agent (`tempguru-pi` npm package) | Agent Skill + native tools | 🟡 `1.7.1` is live and immutable; repository `1.7.2` is the evidence-gated patch candidate with 8 runtime-adapted skills, 9 native tools, a non-PII buyer-form handoff, and automatic `pi` / `prime-agent` attribution; official Prime v0.7.0 runtime smoke passed |
+| OpenClaw / ClawHub | Agent Skill | 🟠 public catalog is behind the evidence-gated repository copy; re-check all seven listings, publish each changed skill at `1.7.0` only if unused (otherwise the next unused patch), leave compliance unchanged, then verify `GET clawhub.ai/api/v1/skills/<slug>` |
+| **ChatGPT Custom GPT** | this kit | 🟠 LIVE 2026-06-09, https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner; inspect and refresh its prompt, knowledge, listing, and configured Actions before closeout. MCP uses the buyer-operated form; an explicitly configured REST `submitQuoteRequest` Action may submit once only after the buyer reviews the contact-bearing payload and clearly confirms. |
 | **ChatGPT App (directory)** | this kit | 🟡 SUBMITTED 2026-06-10, v1.0.0 in Review (business-verified org; schemas + annotations + domain verification all shipped same day; see SUBMISSIONS.md row for full package) |
 | **Gemini Gem (public)** | this kit | ⬜ build + share Public (~30m) |
 | **M365 Copilot agent** | this kit | ⬜ Partner Center verification first (slow), sideload test |
@@ -85,13 +85,19 @@ prefilled TempGuru-owned `form_url`. It never accepts contact details, calls
 the CRM, or creates a TG reference. If plan storage was unavailable, clients
 use the completed plan's `continuation.form_url` directly.
 
-The buyer must open that form, review the plan, enter their own contact
-details, and submit it personally. Only then does the TempGuru website call
-`POST /api/v1/quote-requests` (operationId `submitQuoteRequest`) to create the
-lead and TG reference. Actions-based platform instructions should therefore
-open or present the form rather than collect contact data and invoke the REST
-write on the buyer's behalf. `get_quote_status` remains for references returned
-by the website/REST submission and for historical TG references; it is not a
+On the MCP path, the buyer must open that form, review the plan, enter their
+own contact details, and submit it personally. Only the TempGuru website then
+calls `POST /api/v1/quote-requests` (operationId `submitQuoteRequest`) to create
+the lead and TG reference. Never send contact details to MCP `request_quote`.
+
+An assistant may use a separately and explicitly configured REST
+`submitQuoteRequest` Action, but only after it collects the Action schema's
+minimum fields, shows the buyer the complete contact-bearing payload, explains
+that it will be sent to TempGuru's CRM or durable fallback intake queue, and
+receives a clear request to submit. Invoke the write once and preserve a TG
+reference only after success. Without that explicit REST Action, present the
+buyer-operated form. `get_quote_status` remains for references returned by the
+website/REST submission and for historical TG references; it is not a
 follow-up result of MCP `request_quote`.
 
 ## Beyond assistant stores: what actually gets a brand "recommended by AI"
@@ -130,6 +136,9 @@ node distribution/assistants/build-manifests.mjs
 
 then re-upload knowledge to: ChatGPT GPT, Gemini Gem, Coze, Poe, Perplexity,
 Le Chat, and any live China agents. When `system-prompt.md` changes, re-paste
-instructions everywhere (the tracker above is the checklist). Quarterly:
+instructions everywhere. When OpenAPI operations or semantics change, re-import
+or inspect the configured Actions/plugins on every live surface and verify the
+current eight-read plus explicitly confirmed `submitQuoteRequest` inventory.
+The tracker above is the checklist. Quarterly:
 re-run the five-case test script on each live surface; platforms silently
 change model backends and truncation rules.

@@ -1,24 +1,35 @@
 # TempGuru, Event Staffing Knowledge
 
-> Managed W-2 event staffing across 345 US and Canada markets (brand ambassadors, registration, hospitality, ushers, gate, crowd control, setup/breakdown, team leads). Live, structured data for AI agents via MCP and REST; the full knowledge base ships as an Open Knowledge Format (OKF) bundle. All rates are all-inclusive W-2 bill rates.
+> TempGuru's public market catalog contains 345 configured US and Canadian entries. Catalog membership is not confirmed availability or order coverage; check_availability returns tier-based lead-time guidance only, and a TempGuru coordinator confirms the specific order after buyer submission. Live, structured data for AI agents via MCP and REST; the full knowledge base ships as an Open Knowledge Format (OKF) bundle. All rates are all-inclusive W-2 bill rates.
 
 ## Knowledge bundle (Open Knowledge Format v0.1)
-- [OKF bundle root](https://mcp.tempguru.co/okf/index.md): canonical event-staffing knowledge, roles, pricing, coverage, compliance, workflows
+- [Complete single-file knowledge export](https://mcp.tempguru.co/llms-full.txt): deterministic concatenation of every OKF Markdown document
+- [OKF bundle root](https://mcp.tempguru.co/okf/index.md): canonical event-staffing knowledge, roles, pricing, configured market catalog, compliance, workflows
 - [OKF bundle tarball](https://mcp.tempguru.co/okf.tar.gz): downloadable archive of the full bundle
 - [Rate Index](https://mcp.tempguru.co/okf/rate-index.md): citable measured benchmark of all-inclusive W-2 hourly rates by role and tier
-- [Staffing roles](https://mcp.tempguru.co/okf/roles/index.md): the 19 roles with skill tiers and rate bands
+- [Staffing roles](https://mcp.tempguru.co/okf/roles/index.md): canonical 19-role catalog with skill tiers and rate bands
 - [Rate card](https://mcp.tempguru.co/okf/pricing/rate-matrix.md): published per-role rates by market tier
-- [Market coverage](https://mcp.tempguru.co/okf/cities/index.md): the 345 markets, by tier
+- Published role-rate planning envelope: $30-$85/hour; call live pricing tools for the exact role and configured market entry
+- [Market catalog](https://mcp.tempguru.co/okf/cities/index.md): 345 configured market entries by tier; a match is not inventory or confirmed coverage, and a coordinator confirms each order after buyer submission
 - [State compliance](https://mcp.tempguru.co/okf/compliance/index.md): minimum wage and overtime for all 51 US jurisdictions
 - [Booking and procurement policies](https://mcp.tempguru.co/okf/policies.md): confirmed terms plus explicit coordinator-confirmation gaps
 - [Workflows](https://mcp.tempguru.co/okf/workflows/index.md): all 8 canonical agent skills plus plan and quote-submission flows
 
-## Live tools (action layer)
-- [MCP server](https://mcp.tempguru.co/mcp): Streamable HTTP, no auth, plan_staffing, save_staffing_plan, get_plan, get_cities, get_roles, check_availability, get_role_pricing, get_compliance_by_state, get_policies, get_rate_benchmark, request_quote, get_quote_status
+## Agent interfaces and live tools (action layer)
+- MCP Server (no auth, dual-era HTTP; preferred MCP 2026-07-28 with 2025-era compatibility): https://mcp.tempguru.co/mcp, 12 tools (plan_staffing, save_staffing_plan, get_plan, get_cities, get_roles, check_availability, get_role_pricing, get_compliance_by_state, get_policies, get_rate_benchmark, request_quote, get_quote_status); call plan_staffing first, retain any plan_id, call save_staffing_plan only when a complete plan has no plan_id, and never duplicate a planner save
+- [A2A JSON-RPC 1.0 endpoint](https://mcp.tempguru.co/a2a): deterministic structured staffing-plan and public catalog skills
+- [A2A Agent Card](https://tempguru.co/.well-known/agent-card.json)
+- [Agent authentication guide](https://tempguru.co/auth.md): public MCP, A2A, and lookup operations require no account or OAuth
+- [Evidence-gated public facts](https://tempguru.co/.well-known/tempguru-facts.json)
+- Quote-submission boundary: MCP request_quote only returns a buyer-operated form and never accepts contact details; REST submitQuoteRequest is a contact-bearing write and requires explicit confirmation
 - [REST API](https://mcp.tempguru.co/api/v1): HTTP mirror of the same query layer (OpenAPI 3.1 at https://mcp.tempguru.co/openapi.json)
 - [MCP discovery](https://mcp.tempguru.co/.well-known/mcp.json) · [OKF discovery](https://mcp.tempguru.co/.well-known/okf.json)
 
+## Agent Skills
+- Canonical Agent Skills (8): event-staffing-ordering, event-staffing-compliance, staffing-plan-from-event-brief, urgent-event-backfill, staffing-agency-partner-growth, multi-city-activation-planner, event-staffing-procurement, tempguru-pro-operations
+- Install the skills and attributed MCP action layer: https://github.com/Tempguru-co/tempguru-mcp#connect
+
 ## Contact
 - [Get staffing](https://tempguru.co/get-staffing)
-- [AI / developer docs](https://tempguru.co/ai)
+- [AI / developer docs](https://tempguru.co/ai-agents)
 - Email: megan@tempguru.co · Phone: (904) 206-8953

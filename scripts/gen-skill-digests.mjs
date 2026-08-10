@@ -117,6 +117,29 @@ export function adaptSkillForPi(canonical) {
   for (const [canonicalName, piName] of Object.entries(PI_NATIVE_TOOL_MAP)) {
     body = body.replace(new RegExp(`\\b${canonicalName}\\b`, "g"), piName);
   }
+  // Runtime attribution is derived inside the native extension and is not a
+  // callable schema field. Canonical MCP skills may pass source_platform, but
+  // Pi/Prime copies must ask only for the native tool's actual optional fields.
+  body = body
+    .replace(
+      /`source_platform` set to the actual runtime\s+label \(for example\s+`hermes`,\s*`openclaw`,\s*or\s*`pi`\),\s*/g,
+      "runtime source is added automatically; ",
+    )
+    .replace(
+      /only the optional allowlisted `source_platform`, `skill_id`, and\s+`skill_version` attribution/g,
+      "only optional allowlisted `skill_id` and `skill_version` attribution; runtime source is added automatically",
+    )
+    .replace(
+      /allowlisted `source_platform`, `skill_id`, and `skill_version` attribution/g,
+      "allowlisted `skill_id` and `skill_version` attribution; runtime source is added automatically",
+    )
+    .replace(
+      /runtime source is added automatically; `skill_id` set to/g,
+      "runtime source is added automatically; set `skill_id` to",
+    );
+  if (body.includes("`source_platform`")) {
+    throw new Error("Pi skill adaptation left a non-callable source_platform field");
+  }
   // Keep remote MCP identifiers exact. Prefixing names inside backticks (for
   // example `MCP-only plan_staffing`) creates a nonexistent callable tool.
   // The runtime guide above marks these three as remote-only and supplies the

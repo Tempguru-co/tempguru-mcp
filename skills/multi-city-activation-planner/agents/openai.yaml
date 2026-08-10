@@ -1,7 +1,7 @@
 interface:
   display_name: "Multi-City Activation Planner"
   short_description: "Plan a multi-city staffing program as one quote"
-  default_prompt: "Use $multi-city-activation-planner to plan and price a tour or roadshow across several cities and submit one consolidated request only after I confirm."
+  default_prompt: "Use $multi-city-activation-planner to plan and price a tour or roadshow across several cities and prepare one buyer-operated form handoff after I confirm; do not submit it for me."
 dependencies:
   tools:
     - type: "mcp"

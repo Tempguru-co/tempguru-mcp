@@ -44,8 +44,8 @@ jobs:
       - run: npm install --global "npm@^11.15.0"
       - run: npm ci
       - run: npm run check:submissions
+      - run: npm run check:agent-readiness
       - name: Verify release version and package identity
-        id: release
         env:
           RELEASE_VERSION: ${{ inputs.version }}
         run: |
@@ -56,10 +56,8 @@ jobs:
           test "$PI_NAME" = "tempguru-pi"
           test "$PI_REPOSITORY" = "git+https://github.com/Tempguru-co/tempguru-mcp.git"
           if [ "$(npm view "tempguru-pi@$RELEASE_VERSION" version 2>/dev/null || true)" = "$RELEASE_VERSION" ]; then
-            echo "::notice::tempguru-pi@$RELEASE_VERSION is already published; validating the candidate and skipping the immutable npm write."
-            echo "already_published=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "already_published=false" >> "$GITHUB_OUTPUT"
+            echo "::error::tempguru-pi@$RELEASE_VERSION is already immutable on npm. Bump distribution/pi/package.json and dispatch the new version."
+            exit 1
           fi
       - name: Verify generated Pi package contents
         run: |
@@ -71,6 +69,5 @@ jobs:
           fi
           npm pack --dry-run --json ./distribution/pi
       - name: Publish with npm trusted publishing
-        if: steps.release.outputs.already_published != 'true'
         working-directory: distribution/pi
         run: npm publish --access public

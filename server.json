@@ -2,9 +2,9 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "co.tempguru/event-staffing",
   "title": "TempGuru Event Staffing",
-  "description": "Plan and price W-2 event staff across 345 US/CA markets; compliance and buyer quote handoffs.",
+  "description": "Plan W-2 event staffing from 345 catalog entries; a coordinator confirms each order.",
   "version": "1.7.0",
-  "websiteUrl": "https://tempguru.co/ai",
+  "websiteUrl": "https://tempguru.co/ai-agents",
   "repository": {
     "url": "https://github.com/tempguru-co/tempguru-mcp",
     "source": "github"

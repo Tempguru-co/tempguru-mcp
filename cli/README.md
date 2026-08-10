@@ -1,8 +1,8 @@
 # TempGuru Event Staffing: MCP Server and CLI
 
-W-2 event staffing data for AI agents across 345 US and Canadian markets. Twelve tools: ten read-only tools, including a non-PII buyer quote-form handoff, plus a non-destructive planner that may save a 30-day non-PII snapshot and an explicit non-contact save tool. Runs locally over the official dual-era stdio entry (MCP 2026-07-28 plus 2025-era initialize compatibility) with no authentication.
+W-2 event staffing data for AI agents against 345 configured US and Canadian market entries, with catalog matching, tier-based lead-time guidance, and coordinator-confirmed order coverage. A catalog match is not live inventory or confirmed coverage. Twelve tools: ten read-only tools, including a non-PII buyer quote-form handoff, plus a non-destructive planner that may save a 30-day non-PII snapshot and an explicit non-contact save tool. Runs locally over the official dual-era stdio entry (MCP 2026-07-28 plus 2025-era initialize compatibility) with no authentication.
 
-Hosted endpoint: `https://mcp.tempguru.co/mcp` · Agent docs: https://tempguru.co/ai
+Hosted endpoint: `https://mcp.tempguru.co/mcp` · Agent docs: https://tempguru.co/ai-agents
 
 ## Install
 
@@ -39,7 +39,7 @@ Works with Claude Desktop, Cursor, Windsurf, Claude Code, and other stdio MCP cl
 | `plan_staffing` | Call first. Builds a full plan and may automatically save a 30-day non-PII snapshot with a plan ID |
 | `save_staffing_plan` | Explicitly save a complete plan only when no plan ID already exists and persistence is useful |
 | `get_plan` | Restore a non-PII plan saved by either planning path using its 30-day plan ID |
-| `get_cities` | Cities TempGuru serves, filtered by state or market tier |
+| `get_cities` | Configured market entries, filtered by state or tier; a match is not confirmed order coverage |
 | `get_roles` | Staffing roles with descriptions and skill tiers |
 | `check_availability` | Lead-time guidance for a city and date |
 | `get_role_pricing` | All-inclusive W-2 hourly rate range for a role in a city |
