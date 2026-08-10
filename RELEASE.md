@@ -32,7 +32,7 @@ city-page changes.
 | GHCR `latest` and `sha-*` | Merge/push to `main` | Publishes `ghcr.io/tempguru-co/event-staffing` |
 | MCP Registry initial check | `server.json` version change on `main` | Defers until the matching npm CLI exists |
 | npm CLI | Manual `publish-npm.yml` with `1.7.0` | Publishes `tempguru-mcp`, then re-dispatches the Registry workflow |
-| Pi / Prime Agent npm package | Manual `publish-pi.yml` with `1.7.2` | Publishes the shared `tempguru-pi` artifact independently; `1.7.1` and earlier are immutable |
+| Pi / Prime Agent npm package | Completed `publish-pi.yml` run for `1.7.2` | `tempguru-pi@1.7.2` is live and immutable; future changes require the next unused patch |
 | GHCR semver tags | Push `v1.7.0` | Publishes image tags `1.7.0` and `1.7` |
 | Apex Cloudflare discovery | Manual | Deploys the two committed worker files |
 | Anthropic directory | Manual portal update and email reply | Requests re-review under `tempguru-event-staffing` |
@@ -92,9 +92,10 @@ node -p 'require("./.claude-plugin/marketplace.json").plugins[0].version'
 
 The repository build Node major must be at least 22. Every version printed
 above must be `1.7.0` except the independently versioned Pi package, which must
-be the unpublished patch `1.7.2`. The Pi workflow fails closed when the
-requested version already exists on npm; bump forward instead of treating a
-skipped immutable write as success.
+be the published, current, and immutable `1.7.2`. Do not dispatch the Pi
+publisher for `1.7.2` again. The workflow fails closed when the requested
+version already exists on npm; any future package change must bump to the next
+unused patch.
 
 Install from the lockfile and regenerate every committed release artifact:
 
@@ -227,17 +228,11 @@ gh workflow run publish-registry.yml \
 Never retry by publishing `1.6.0`, and never attempt to overwrite an existing
 npm or MCP Registry version. Use a new patch version for a forward fix.
 
-## 5. Publish the Pi / Prime Agent package, `tempguru-pi@1.7.2`
+## 5. Verify the published Pi / Prime Agent package, `tempguru-pi@1.7.2`
 
-In GitHub Actions, choose **Publish Pi package to npm**, select `main`, enter
-`1.7.2`, and run:
-
-```bash
-gh workflow run publish-pi.yml \
-  --repo Tempguru-co/tempguru-mcp \
-  --ref main \
-  -f version=1.7.2
-```
+`tempguru-pi@1.7.2` is already published, live, and immutable. Do not rerun
+the publisher for this version. Any future package change must use the next
+unused patch, such as `1.7.3` if it is still available.
 
 Verify:
 
@@ -245,34 +240,42 @@ Verify:
 npm --cache /tmp/tempguru-release-cache view tempguru-pi@1.7.2 version
 ```
 
-Install `npm:tempguru-pi` in a clean Pi session, restart Pi, and confirm:
+Install `npm:tempguru-pi@1.7.2` in an isolated Pi configuration and confirm:
 
-- `/skills` lists all eight TempGuru skills.
-- The native tool list contains all nine tools from
-  `tempguru_get_cities` through `tempguru_request_quote`.
+- Pi's RPC `get_commands` response lists all eight TempGuru skills from the
+  published package.
+- The native extension loads without conflicts, and an allowlisted
+  `tempguru_get_cities` smoke succeeds.
 - A read-only configured-market, lead-time, or pricing lookup succeeds without implying confirmed coverage.
 - `tempguru_request_quote` accepts a saved plan reference and bounded
   attribution, exposes no contact fields, and returns a buyer form link.
 - Calling the handoff does not create a lead or TG reference. Do not submit the
   returned form with fake personal information.
 
-Then run the same published artifact through Prime Agent's package loader:
+The 2026-08-10 Pi smoke installed one isolated `1.7.2` copy, enumerated all
+eight skills, and made exactly one Austin call. It returned HTTP 200 with
+`catalog_match=true` and `coverage_confirmation_required=true`.
+
+Run the same published artifact through Prime Agent's persistent package
+loader. Do not combine this installed copy with the ephemeral `-e` loader:
 
 ```bash
-prime-agent package install npm:tempguru-pi
+prime-agent package install npm:tempguru-pi@1.7.2
 prime-agent package list
 prime-agent \
-  -e npm:tempguru-pi@1.7.2 \
   --mode json \
   --no-session \
   --tools tempguru_get_cities \
   'Call tempguru_get_cities exactly once with city Austin. Return only whether Austin matches the configured catalog and whether coordinator confirmation is still required.'
 ```
 
-Confirm Prime loads all 8 skills and 9 native tools, the Austin call succeeds,
-and its API request is attributed as `prime-agent` rather than `pi`. Prime's
-stock `McpIntegration` in v0.7.0 requires OAuth or a bearer token; do not add
-TempGuru's authless MCP URL to Prime settings as a release workaround.
+Confirm Prime loads the installed package without duplicate-tool conflicts and
+that the Austin call succeeds. The 2026-08-10 replay made exactly one call and
+returned HTTP 200 with the same catalog and coordinator-confirmation boundary.
+The response does not expose attribution; verify `source=prime-agent` in
+request analytics separately before marking that specific closeout item done.
+Prime's stock `McpIntegration` in v0.7.0 requires OAuth or a bearer token; do
+not add TempGuru's authless MCP URL to Prime settings as a release workaround.
 
 The full `plan_staffing`, `save_staffing_plan`, and `get_rate_benchmark`
 operations remain available through a separately attached remote MCP in Pi.
@@ -614,8 +617,9 @@ pending third-party reviews labeled pending.
 - **`tempguru-mcp` npm and MCP Registry:** versions are immutable. After the
   `1.7.0` candidate, publish a new unused patch such as `1.7.1`; never overwrite
   `1.7.0` or `1.6.0`.
-- **`tempguru-pi` npm:** after the `1.7.2` candidate, publish a new unused patch
-  such as `1.7.3`; never overwrite `1.7.2`, `1.7.1`, or any earlier artifact.
+- **`tempguru-pi` npm:** `1.7.2` is published and immutable. Publish any
+  forward fix as a new unused patch such as `1.7.3`; never overwrite `1.7.2`,
+  `1.7.1`, or any earlier artifact.
 - **GHCR:** preserve versioned tags. A corrective `main` deployment may move
   `latest`; use a new semantic version for a permanent fix.
 - **Hermes and ClawHub:** correct catalog content with a new commit/version and
