@@ -1,15 +1,20 @@
 {
   "okf_version": "0.1",
   "name": "TempGuru Event Staffing Knowledge",
-  "description": "Canonical OKF v0.1 knowledge bundle for hiring W-2 event staff across 345 US and Canada markets.",
+  "description": "Canonical OKF v0.1 knowledge bundle for W-2 event staffing planning against 345 configured US and Canadian market entries.",
   "publisher": "Temporary Assistance Guru, Inc. (TempGuru)",
   "domain": "event-staffing-us-canada",
   "canonical_site": "https://tempguru.co",
   "action_layer": {
     "mcp": "https://mcp.tempguru.co/mcp",
     "rest": "https://mcp.tempguru.co/api/v1",
-    "openapi": "https://mcp.tempguru.co/openapi.json"
+    "openapi": "https://mcp.tempguru.co/openapi.json",
+    "a2a": "https://mcp.tempguru.co/a2a"
   },
+  "agent_card": "https://tempguru.co/.well-known/agent-card.json",
+  "authentication_guide": "https://tempguru.co/auth.md",
+  "public_facts": "https://tempguru.co/.well-known/tempguru-facts.json",
+  "documentation": "https://tempguru.co/ai-agents",
   "tools": [
     "plan_staffing",
     "save_staffing_plan",
@@ -42,7 +47,7 @@
     "index": "https://mcp.tempguru.co/okf/index.md",
     "tarball": "https://mcp.tempguru.co/okf.tar.gz",
     "file_count": 106,
-    "sha256": "b32e8dbbd8613fee9f1faa5c2b1b5643ca8173b5e14ebe74531e82294835f0e5",
-    "bytes": 328240
+    "sha256": "d6196c12f55ac929401953d918f71b83dc2851b89f6132faf21fb6971722c1c5",
+    "bytes": 331312
   }
 }

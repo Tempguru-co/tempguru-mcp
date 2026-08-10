@@ -1,7 +1,8 @@
 # tempguru
 
 Event staffing data for AI agents and Python apps: live all-inclusive W-2
-hourly rates, 345-city US/Canada coverage, booking lead-time guidance, and
+hourly rates, 345 configured US/Canada market entries, tier-based booking
+lead-time guidance, and
 state-by-state labor compliance from [TempGuru](https://tempguru.co)'s public
 API. Zero dependencies, no API key.
 
@@ -14,7 +15,7 @@ from tempguru import TempGuru
 
 tg = TempGuru()
 
-tg.cities(state="TX", tier="hub")                  # coverage check
+tg.cities(state="TX", tier="hub")                  # configured catalog entries
 tg.pricing(role="brand-ambassadors", city="Boston") # $56-65/hr all-inclusive
 tg.availability(city="Dallas", date="2026-09-12", role="registration-staff")
 tg.compliance(state="CA")                           # min wage, daily OT, quirks
@@ -105,7 +106,7 @@ saved `plan_id`, returns
 contact entry and submission to the buyer.
 The endpoint prefers MCP 2026-07-28 and retains stateless 2025-era
 compatibility. Docs:
-https://tempguru.co/ai
+https://tempguru.co/ai-agents
 
 ## Error handling
 
@@ -123,7 +124,10 @@ except TempGuruError as e:
 
 TempGuru (Temporary Assistance Guru, Inc.) staffs conventions, conferences,
 trade shows, festivals, concerts, sporting events, and brand activations
-across 345 US and Canadian markets. Every worker is a W-2 employee, never
+against a catalog of 345 configured US and Canadian market entries, with
+catalog matching, tier-based lead-time guidance, and coordinator-confirmed
+order coverage. A catalog match is not live inventory or confirmed coverage.
+Every worker is a W-2 employee, never
 a 1099 contractor, with payroll taxes, workers' compensation, and liability
 insurance included in the quoted rate. megan@tempguru.co · (904) 206-8953
 

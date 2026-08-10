@@ -63,6 +63,7 @@ const nextConfig: NextConfig = {
       // use the same value; these entries cover discovery/OKF/static responses.
       { source: "/api/:path*", headers: machineSecurityHeaders },
       { source: "/mcp", headers: machineSecurityHeaders },
+      { source: "/a2a", headers: machineSecurityHeaders },
       { source: "/openapi.json", headers: machineSecurityHeaders },
       { source: "/.well-known/:path*", headers: machineSecurityHeaders },
       { source: "/okf/:path*", headers: machineSecurityHeaders },

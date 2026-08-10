@@ -5,9 +5,10 @@ server on a user's behalf. No API key, no signup, no environment variables.
 
 ## What this server provides
 
-Live event staffing data for the US and Canada from TempGuru: city coverage
-(345 markets), 19 staffing roles, all-inclusive W-2 hourly rate ranges,
-booking lead-time guidance, state labor compliance summaries, and an opt-in
+Live event staffing data for the US and Canada from TempGuru: 345 configured
+market entries (not confirmed order coverage), 19 staffing roles,
+all-inclusive W-2 hourly rate ranges, tier-based booking lead-time guidance,
+state labor compliance summaries, and an opt-in
 `request_quote` tool that prepares a prefilled TempGuru form for the buyer to
 review and submit personally. The server exposes 12 tools. Ten tools are
 read-only, including `request_quote`.
@@ -130,12 +131,13 @@ legacy OpenClaw VPS container.
 
 ## Pi
 
-The repository's `tempguru-pi` 1.7.0 source contains 8 skills plus 9 native
+The repository's `tempguru-pi` 1.7.2 candidate contains 8 skills plus 9 native
 read-only tools with `?source=pi` attribution. The native
 `tempguru_request_quote` tool accepts a saved plan ID and returns the
 buyer-operated form; it does not transmit contact details. Check npm and the
-repository release tracker for publication status. Attach the remote MCP for
-the full planner, saved-plan write, and Rate Index:
+repository release tracker for publication status; `1.7.1` is already live
+and immutable. Attach the remote MCP for the full planner, saved-plan write,
+and Rate Index:
 
 ```bash
 pi install npm:tempguru-pi
@@ -160,9 +162,10 @@ prime-agent package install npm:tempguru-pi
 prime-agent package list
 ```
 
-Runtime-specific `source=prime-agent` attribution begins in `tempguru-pi`
-1.7.0. Until npm reports that version as published, an unpinned install still
-resolves to 1.6.0: its tools work in Prime, but its calls are labeled `pi`.
+Runtime-specific `source=prime-agent` attribution is already live in
+`tempguru-pi` 1.7.1. The repository's 1.7.2 candidate adds the evidence-gated
+instructions and catalog semantics in this release. Until npm reports `1.7.2`
+as published, an unpinned install resolves to `1.7.1` (as of 2026-08-10).
 
 Restart Prime Agent and verify that all 8 TempGuru skills and the 9 native
 tools from `tempguru_get_cities` through `tempguru_request_quote` load. The
@@ -245,4 +248,4 @@ ambassadors, registration staff, ushers, etc.). Then try
 - **Client rejects JSON or SSE responses:** use a current MCP client that
   supports the dual-era HTTP endpoint and advertises both
   `application/json` and `text/event-stream`, or use Option B.
-- Docs: https://tempguru.co/ai · Maintainer: megan@tempguru.co
+- Docs: https://tempguru.co/ai-agents · Maintainer: megan@tempguru.co

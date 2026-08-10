@@ -49,7 +49,7 @@ export async function GET(request: Request) {
   if (isPricingCityNotFound(result.data)) {
     return jsonError({
       code: "not_found",
-      message: `City "${result.data.requested}" is not in TempGuru's 345-page footprint. See /api/v1/cities for the canonical list.`,
+      message: `City "${result.data.requested}" is not in TempGuru's 345-entry configured market catalog. See /api/v1/cities for the canonical list; catalog membership does not confirm order coverage.`,
       field: "city",
     });
   }

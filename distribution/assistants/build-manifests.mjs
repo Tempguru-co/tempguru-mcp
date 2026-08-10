@@ -23,18 +23,14 @@ const canonical = m[1].trim();
 const copilotSuffix = `
 
 TOOLS ON THIS PLATFORM
-You have live REST actions (listCities, listRoles,
-checkAvailability, getRolePricing, getComplianceByState, getPolicies,
-getPlan, getQuoteStatus, and submitQuoteRequest). Use getPlan when the user
-provides a saved plan ID and getQuoteStatus for a supplied TG reference; never
-guess either ID. submitQuoteRequest is the only write action. Show the full
-contact-bearing payload, set source_platform to "copilot-agent", include
-plan_id when available, and call once only after explicit confirmation. It
-creates no reservation and requires no payment. On error or buyer preference,
-use
+REST actions: listCities, listRoles, checkAvailability, getRolePricing,
+getComplianceByState, getPolicies, getPlan, getQuoteStatus, and
+submitQuoteRequest. Use supplied plan IDs and TG references only.
+submitQuoteRequest is the sole write: show its contact-bearing payload,
+set source_platform to "copilot-agent", include plan_id when known, and call
+once only after explicit confirmation. On error or buyer preference, use
 https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=copilot-agent
-and offer drafted form text. Format plans as tables suitable for Teams,
-Outlook, or meeting notes.`;
+and offer form text.`;
 
 const instructions = canonical + copilotSuffix;
 if (instructions.length > 8000) {
@@ -49,7 +45,7 @@ const declarativeAgent = {
   version: "v1.5",
   name: "TempGuru Event Staffing Planner",
   description:
-    "Plan and budget temporary W-2 event staff for US and Canadian events: live hourly rates for 19 roles across 345 cities, booking lead-time guidance, and state-by-state labor compliance from TempGuru's public API.",
+    "Plan and budget temporary W-2 event staff using TempGuru's 345-entry configured US/Canada market catalog, with catalog matching, live rates for 19 roles, tier-based lead-time guidance, state labor compliance, and coordinator-confirmed order coverage.",
   instructions,
   conversation_starters: [
     {
@@ -84,9 +80,9 @@ const aiPlugin = {
   schema_version: "v2.3",
   name_for_human: "TempGuru Public Data API",
   description_for_human:
-    "Event staffing coverage, hourly rates, lead times, and state labor compliance for 345 US and Canadian markets.",
+    "Configured event-staffing market catalog, hourly rates, tier-based lead-time guidance, state labor compliance, and coordinator-confirmed order coverage for the US and Canada.",
   description_for_model:
-    "Public data and quote submission for event staffing in the US and Canada from TempGuru. Use listCities for coverage, listRoles for the role catalog, checkAvailability for lead-time guidance, getRolePricing for hourly rates, getComplianceByState for wage/overtime rules, getPolicies for published booking terms, getPlan to restore a supplied plan ID, and getQuoteStatus to check a supplied TG reference. submitQuoteRequest is the single write operation: call it only after explicit confirmation; it creates no reservation and requires no payment. No authentication.",
+    "Public data and quote submission for event staffing in the US and Canada from TempGuru. The 345 entries are a configured market catalog, not a guarantee; use listCities for catalog matching and checkAvailability only for tier-based lead-time guidance. Neither confirms coverage or inventory; a coordinator confirms the specific order after buyer submission. Use listRoles for the role catalog, getRolePricing for hourly rates, getComplianceByState for wage/overtime rules, getPolicies for published booking terms, getPlan to restore a supplied plan ID, and getQuoteStatus to check a supplied TG reference. submitQuoteRequest is the single write operation: call it only after explicit confirmation; it creates no reservation and requires no payment. No authentication.",
   contact_email: "megan@tempguru.co",
   namespace: "tempguru",
   legal_info_url: "https://tempguru.co/privacy-policy",
@@ -112,7 +108,7 @@ const aiPlugin = {
   capabilities: {
     conversation_starters: [
       { text: "What do brand ambassadors cost in Boston?" },
-      { text: "List the cities TempGuru covers in Texas" },
+      { text: "List TempGuru's configured market entries in Texas" },
     ],
   },
 };

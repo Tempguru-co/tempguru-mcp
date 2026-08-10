@@ -28,9 +28,9 @@ Inventory summary: **12 tools, 2 prompts, 8 resources**.
 
 ### Detail-card description
 
-TempGuru helps event organizers and planners build temporary W-2 staffing plans across 345 US and Canadian markets. Claude can turn an event brief into a structured plan; confirm coverage, roles, lead-time guidance, all-inclusive hourly rates, crew totals, and state or provincial compliance considerations; retrieve booking and procurement policies; save or resume a non-contact plan; and prepare a buyer-operated quote-form handoff. TempGuru supports trade shows, conferences, festivals, concerts, sporting events, corporate gatherings, brand activations, and multi-city programs across event roles. Placements use W-2 employees through vetted staffing-agency partners rather than 1099 gig workers.
+TempGuru helps planners build W-2 staffing plans from 345 configured US/Canada entries. Claude can turn an event brief into a plan; match the configured market catalog; return tier-based lead-time guidance, roles, all-inclusive hourly rates, crew totals, and state/provincial compliance; retrieve booking and procurement policies; save or resume a non-contact plan; and prepare a buyer-operated quote-form handoff. Catalog matching and lead-time guidance do not confirm coverage or inventory; a TempGuru coordinator confirms the order after buyer submission. TempGuru supports trade shows, conferences, festivals, concerts, sporting events, corporate events, brand activations, and multi-city programs. Placements use W-2 employees through vetted staffing-agency partners, not 1099 gig workers.
 
-The connector exposes 12 tools, 2 prompts, and 8 skill resources. Ten tools are read-only. It is classified read_write because plan_staffing may save a 30-day non-PII plan and save_staffing_plan explicitly saves one. Those non-destructive writes contain bounded event-planning fields only and exclude names, email addresses, phone numbers, companies, and free-text contact details. request_quote is read-only and idempotent. It accepts a saved non-PII plan ID plus allowlisted platform and skill attribution, restores the plan, and returns a prefilled form on TempGuru's mcp.tempguru.co origin. It does not collect or transmit contact information, call the CRM, create a lead, or issue a TG reference. The buyer opens the form, reviews or edits the staffing details, enters their own contact information, and submits it. Only that separate website submission creates a lead and reference for a TempGuru coordinator.
+The connector exposes 12 tools, 2 prompts and 8 skill resources. Ten tools are read-only. It is read_write because plan_staffing may save a 30-day non-PII plan and save_staffing_plan explicitly saves one. Those bounded writes exclude names, email addresses, phone numbers, companies, and free-text contact details. request_quote is read-only and idempotent. It accepts a saved non-PII plan ID plus allowlisted attribution, restores the plan, and returns a prefilled form on TempGuru's mcp.tempguru.co origin. It does not collect or transmit contact information, call the CRM, create a lead, or issue a TG reference. The buyer opens the form, reviews or edits staffing details, enters their own contact details, and submits it. Only that separate website submission creates a lead and reference for a TempGuru coordinator.
 
 Rates are planning estimates, availability responses are guidance rather than reservations, and compliance summaries are operational information rather than legal advice. The connector cannot guarantee staffing, finalize pricing, create a contract, process payment, or book workers. A TempGuru coordinator confirms availability and a binding quote after the buyer submits the form.
 
@@ -38,8 +38,8 @@ Rates are planning estimates, availability responses are guidance rather than re
 
 1. Build and price a complete temporary event staffing plan from a city, date,
    roles, and headcount.
-2. Check live TempGuru market coverage, role pricing, lead-time guidance,
-   booking policies, and state/provincial compliance context.
+2. Match TempGuru's configured market catalog, check role pricing and tier-based
+   lead-time guidance, and review booking policies and state/provincial compliance.
 3. Save or resume a non-contact staffing plan, then give the buyer a prefilled
    TempGuru form they personally review and submit for a human-issued quote.
 4. Turn an RFP, BEO, run of show, or multi-city activation brief into a

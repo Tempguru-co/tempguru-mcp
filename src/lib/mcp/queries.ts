@@ -60,7 +60,7 @@ const ok = <T>(data: T): QueryResult<T> => ({ ok: true, data });
 const fail = (error: QueryError): QueryResult<never> => ({ ok: false, error });
 
 // A did-you-mean handed back on a miss so the agent can auto-retry with the
-// resolved slug instead of relaying "not covered". Populated from the same
+// resolved slug instead of relaying "not in the catalog". Populated from the same
 // fuzzy layer findCity/findRole use, at a looser threshold.
 export type EntitySuggestion = { kind: "city" | "role"; slug: string; name: string };
 const citySuggestion = (q: string): EntitySuggestion | undefined => {
@@ -124,43 +124,53 @@ export type CitiesData = {
   returned: number;
   tier_breakdown: Record<CityTier, number>;
   cities: CityRow[];
+  coverage_confirmation_required: true;
+  catalog_qualification: string;
   note?: string;
 };
 
-export type CityCoverage = {
-  coverage_check: true;
+export type CityCatalogMatch = {
+  catalog_check: true;
   requested: string;
-  covered: boolean;
+  catalog_match: boolean;
+  coverage_confirmation_required: true;
+  catalog_qualification: string;
   city: CityRow | null;
   suggestion?: EntitySuggestion;
   message: string;
 };
 
-export function queryCities(input: CitiesQuery): QueryResult<CitiesData | CityCoverage> {
-  // Single-city coverage check: "do you cover Brooklyn?" resolves through the
-  // alias/borough-aware findCity and returns a direct yes/no + did-you-mean,
-  // instead of dumping the whole catalog for the agent to scan.
+export function queryCities(input: CitiesQuery): QueryResult<CitiesData | CityCatalogMatch> {
+  // Single-city catalog check: "is Brooklyn configured?" resolves through the
+  // alias/borough-aware findCity and returns a direct match + did-you-mean.
+  // Catalog membership is not real-time inventory or confirmed order coverage.
   if (input.city) {
     const match = findCity(input.city);
     if (match) {
       return ok({
-        coverage_check: true,
+        catalog_check: true,
         requested: input.city,
-        covered: true,
+        catalog_match: true,
+        coverage_confirmation_required: true,
+        catalog_qualification:
+          "A configured entry selects planning rates and lead-time guidance; it is not real-time inventory or confirmed order coverage.",
         city: cityRow(match),
-        message: `Yes, TempGuru staffs ${match.name}, ${match.state_abbr} (${match.tier}-tier market).`,
+        message: `${match.name}, ${match.state_abbr} is a configured ${match.tier}-tier catalog entry. This match does not confirm staff availability or order coverage; use check_availability only for lead-time guidance, then have a TempGuru coordinator confirm the specific order through the buyer form.`,
       });
     }
     const suggestion = citySuggestion(input.city);
     return ok({
-      coverage_check: true,
+      catalog_check: true,
       requested: input.city,
-      covered: false,
+      catalog_match: false,
+      coverage_confirmation_required: true,
+      catalog_qualification:
+        "Catalog absence is not a definitive service denial; a TempGuru coordinator confirms the specific order after buyer submission.",
       city: null,
       suggestion,
       message: suggestion
-        ? `No exact match for "${input.city}" in TempGuru's 345 US/CA markets. Closest covered market: ${suggestion.name}, confirm with the user before assuming. Coverage: https://tempguru.co/get-staffing.`
-        : `"${input.city}" is not in TempGuru's 345 US/CA markets. Confirm coverage at https://tempguru.co/get-staffing.`,
+        ? `No exact match for "${input.city}" in TempGuru's 345-entry configured US/CA market catalog. Closest configured entry: ${suggestion.name}; confirm the intended city with the user and ask a TempGuru coordinator to confirm order-specific coverage through https://tempguru.co/get-staffing.`
+        : `"${input.city}" is not in TempGuru's 345-entry configured US/CA market catalog. A TempGuru coordinator can confirm order-specific coverage through https://tempguru.co/get-staffing.`,
     });
   }
 
@@ -218,9 +228,12 @@ export function queryCities(input: CitiesQuery): QueryResult<CitiesData | CityCo
     returned: capped.length,
     tier_breakdown,
     cities: capped.map(cityRow),
+    coverage_confirmation_required: true,
+    catalog_qualification:
+      "Configured entries select planning rates and lead-time guidance; they are not real-time inventory or confirmed order coverage.",
     ...(capped.length < total
       ? {
-          note: `Showing ${capped.length} of ${total} matching markets. Narrow with state/tier/country, pass city='<name>' for a single coverage check, or raise limit.`,
+          note: `Showing ${capped.length} of ${total} matching configured entries. Narrow with state/tier/country, pass city='<name>' for a single catalog check, or raise limit. Catalog membership does not confirm order coverage.`,
         }
       : {}),
   });
@@ -271,6 +284,8 @@ export type AvailabilityDateInvalid = {
 
 export type AvailabilityData = {
   city_found: true;
+  catalog_match: true;
+  coverage_confirmation_required: true;
   city: string;
   state: string;
   city_tier: CityTier;
@@ -318,8 +333,8 @@ export function queryAvailability(
       requested: input.city,
       suggestion,
       message: suggestion
-        ? `No exact match for "${input.city}" among TempGuru's 345 US/CA markets. The closest covered market is ${suggestion.name}, confirm with the user before using it (do not assume). Coverage: https://tempguru.co/get-staffing.`
-        : `No match for "${input.city}" among TempGuru's 345 US/CA markets. Confirm coverage at https://tempguru.co/get-staffing.`,
+        ? `No exact match for "${input.city}" in TempGuru's 345-entry configured US/CA market catalog. The closest configured entry is ${suggestion.name}; confirm with the user before using it (do not assume). A TempGuru coordinator confirms order-specific coverage and final lead time through https://tempguru.co/get-staffing.`
+        : `No match for "${input.city}" in TempGuru's 345-entry configured US/CA market catalog. Confirm order-specific coverage at https://tempguru.co/get-staffing.`,
     });
   }
 
@@ -366,7 +381,7 @@ export function queryAvailability(
   const pricing = roleMatch ? PRICING[roleMatch.slug]?.[cityMatch.tier] ?? null : null;
 
   const notes = [
-    `${cityMatch.name} is a ${cityMatch.tier}-tier market.`,
+    `${cityMatch.name} is a configured ${cityMatch.tier}-tier catalog entry; this is not confirmed order coverage or real-time inventory.`,
     `Typical lead time for ${cityMatch.tier} cities: ${leadHours} hours.`,
     inPast
       ? `The requested date is in the past — confirm the intended date with the user before planning or quoting.`
@@ -384,9 +399,12 @@ export function queryAvailability(
     notes.push(SECURITY_ROLE_NOTE);
   }
   notes.push("To book, visit https://tempguru.co/get-staffing or request a quote via the dashboard.");
+  notes.push("A TempGuru coordinator confirms order-specific coverage and lead time after the buyer submits the form.");
 
   return ok({
     city_found: true,
+    catalog_match: true,
+    coverage_confirmation_required: true,
     city: cityMatch.name,
     state: cityMatch.state,
     city_tier: cityMatch.tier,
@@ -478,7 +496,7 @@ export function queryRolePricing(
       suggestion: citySuggestion(input.city),
       role: roleMatch.name,
       fallback_pricing: PRICING[roleMatch.slug],
-      note: "City not in TempGuru's 345-market footprint. Showing pricing across all tiers as fallback.",
+      note: "City not in TempGuru's 345-entry configured market catalog. Showing pricing across all tiers as fallback; a TempGuru coordinator must confirm order-specific coverage and final lead time.",
     });
   }
   // Published per-role rate card (role-pricing.json): a distinct rate per role,

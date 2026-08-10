@@ -1,5 +1,5 @@
 // GET /api/v1/cities?state={name}&tier={hub|mid|small}&country={US|CA}&city={name}&limit={n}
-// List cities TempGuru serves, or (with city=) a single coverage check. All optional.
+// List configured market entries, or (with city=) a single catalog match. All optional.
 
 import { queryCities, type CitiesQuery, type CityTier } from "@/lib/mcp/queries";
 import {

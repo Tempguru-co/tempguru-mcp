@@ -13,5 +13,7 @@ content/skills/event-staffing-ordering.md; re-derive when the canonical skill
 changes. The current package documents the attributed Hermes endpoint, the
 12-tool inventory (10 read-only, 2 non-contact persistence writes),
 conditional explicit-save guidance, and the non-PII buyer form handoff; re-sync
-both files to
-PR #39150 before requesting another sweeper review.
+both files after any canonical facts change. The `1.0.5` catalog copy replaces
+unsupported network-size language with the repository-backed market-catalog
+qualification. Re-sync both files to PR #39150 before requesting another
+sweeper review.

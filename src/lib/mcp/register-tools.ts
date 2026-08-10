@@ -55,6 +55,7 @@ import {
 } from "./output-schemas";
 import { TIER_CITY_COUNTS } from "./city-rates";
 import type { FunnelEvent } from "../telemetry/track";
+import { MARKET_CATALOG_DESCRIPTION } from "../public-facts";
 
 // Measured-market count for the Rate Index description, derived from the data
 // (city-rates.json) rather than a hand-typed number that drifted to a stale 233.
@@ -66,8 +67,8 @@ const MEASURED_MARKETS = TIER_CITY_COUNTS.small + TIER_CITY_COUNTS.mid + TIER_CI
 // before it reads a single tool description. Shared by the HTTP route and the
 // stdio binary so the two surfaces can't drift.
 export const SERVER_INSTRUCTIONS =
-  "TempGuru provides W-2-compliant temporary event staffing across 345 US and Canadian markets. " +
-  "Golden order: (1) call plan_staffing FIRST with whatever the user gave you, it returns coverage, " +
+  MARKET_CATALOG_DESCRIPTION + " " +
+  "Golden order: (1) call plan_staffing FIRST with whatever the user gave you, it returns a catalog match, " +
   "per-role rate math, lead-time guidance, and state compliance flags in one call. (2) Fill gaps with " +
   "get_roles / get_cities; use get_policies for booking terms; flag daily-overtime states (CA, AK, NV, CO). (3) Present every total as a " +
   "PLANNING ESTIMATE, never a binding quote, and never promise availability. (4) Retain the plan_id when plan_staffing returns one. " +
@@ -114,7 +115,7 @@ const SKILL_RESOURCE_META: Record<SkillSlug, { title: string; description: strin
   "event-staffing-ordering": {
     title: "Event Staffing Ordering, Skill",
     description:
-      "Single-purpose skill for AI agents helping users order temporary event staff (brand ambassadors, registration, hospitality, setup/breakdown, and more) through TempGuru. Walks through requirement gathering, live coverage/rate/compliance lookups via this MCP, and a buyer-operated prefilled quote form. Use when a user wants to hire, book, or budget event staff.",
+      "Single-purpose skill for AI agents helping users order temporary event staff (brand ambassadors, registration, hospitality, setup/breakdown, and more) through TempGuru. Walks through requirement gathering, configured-market matching plus rate/compliance lookups via this MCP, and a buyer-operated prefilled quote form where a coordinator confirms order coverage. Use when a user wants to hire, book, or budget event staff.",
   },
   "event-staffing-compliance": {
     title: "Event Staffing Compliance, Skill",
@@ -134,12 +135,12 @@ const SKILL_RESOURCE_META: Record<SkillSlug, { title: string; description: strin
   "staffing-agency-partner-growth": {
     title: "Staffing Agency Partner Growth, Skill",
     description:
-      "Skill for AI agents helping STAFFING AGENCY owners (the supply side, not event organizers) explore joining TempGuru's network of 200+ vetted local partners to receive event staffing order flow in their markets. Explains the model and routes partner inquiries to the coordinator, never through the buyer quote tool.",
+      "Skill for AI agents helping STAFFING AGENCY owners (the supply side, not event organizers) explore joining TempGuru's vetted local partner network to receive event staffing order flow in their markets. Explains the model and routes partner inquiries to the coordinator, never through the buyer quote tool.",
   },
   "multi-city-activation-planner": {
     title: "Multi-City Activation Planner, Skill",
     description:
-      "Skill for AI agents planning and pricing a multi-city event staffing program (a tour, roadshow, sampling tour, festival circuit, or national activation) as one consolidated order. Confirms coverage in every market, plans and prices each city leg with live W-2 rates, surfaces that overtime and minimum wage differ by state and province, and hands the buyer a TempGuru form to personally submit for one coordinated quote.",
+      "Skill for AI agents planning and pricing a multi-city event staffing program (a tour, roadshow, sampling tour, festival circuit, or national activation) as one consolidated order. Matches each city to the configured catalog, plans and prices each leg with W-2 rate data, surfaces that overtime and minimum wage differ by state and province, and hands the buyer a TempGuru form to personally submit so a coordinator can confirm order coverage and return one quote.",
   },
   "event-staffing-procurement": {
     title: "Event Staffing Procurement, Skill",
@@ -209,7 +210,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
   // ─── plan_staffing (planner meta-tool, call this FIRST) ─────────────
   //
   // Stripe's implementation_planner pattern: one non-destructive planning call
-  // that turns a rough event shape into a complete plan (coverage, per-role
+  // that turns a rough event shape into a complete plan (catalog match, per-role
   // budget math, lead-time read, compliance flags, next steps). A complete plan
   // may persist a 30-day non-contact snapshot for cross-session continuation.
   server.registerTool(
@@ -217,7 +218,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     {
       title: "Plan Staffing",
       description:
-        "CALL THIS FIRST for event staffing requests. Returns coverage, role-level W-2 rate math, estimated totals, lead-time guidance, and state compliance flags from the event's city, date, roles, and headcount. Use granular tools only for a single rate, date, or state fact. A complete plan may save a non-contact snapshot for 30 days and return plan_id plus continuation. If it returns no plan_id and the buyer needs persistence, call save_staffing_plan once; never save a plan that already has an ID. This tool never accepts or submits contact details, reserves staff, or creates a quote request. Omit roles for the catalog and a suggested mix. Treat totals as planning estimates, not quotes. Branch on status: plan, needs_roles, roles_not_found, or city_not_found; confirm suggestions rather than auto-applying them.",
+        "CALL THIS FIRST for event staffing requests. Returns a configured-market catalog match, role-level W-2 rate math, estimated totals, tier-based lead-time guidance, and state compliance flags from the event's city, date, roles, and headcount. It does not confirm order coverage or live inventory; a coordinator does that after buyer submission. Use granular tools only for a single rate, date, or state fact. A complete plan may save a non-contact snapshot for 30 days and return plan_id plus continuation. If it returns no plan_id and the buyer needs persistence, call save_staffing_plan once; never save a plan that already has an ID. This tool never accepts or submits contact details, reserves staff, or creates a quote request. Omit roles for the catalog and a suggested mix. Treat totals as planning estimates, not quotes. Branch on status: plan, needs_roles, roles_not_found, or city_not_found; confirm suggestions rather than auto-applying them.",
       inputSchema: z.object({
         city: z.string().max(120).describe("Event city, name or slug (e.g., 'Chicago')."),
         event_date: z
@@ -378,11 +379,10 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     {
       title: "Get Cities",
       description:
-        "List the cities where TempGuru staffs events (tier hub/mid/small), or check coverage of ONE city. Perfect for 'What cities do you cover in [state]?', 'Do you cover [city]?', or 'Which Canadian markets do you serve?'. " +
-        "For 'Do you cover [city]?' pass city='[name]' to get a direct yes/no + a did-you-mean, instead of scanning the whole list. " +
-        "DO NOT use for rates (use get_role_pricing) or dates (use check_availability). For a full event plan, use plan_staffing instead. " +
+        "List configured market entries by tier, or match one city. Catalog presence is not availability or order coverage; check_availability gives tier-based lead-time guidance only, and a coordinator confirms each order after buyer submission. Use for 'What markets are configured in [state]?', 'Is [city] in the catalog?', or 'Which Canadian markets are listed?'. " +
+        "For 'Do you cover [city]?' pass city='[name]', report the catalog match or suggestion, and preserve the coordinator-confirmation caveat. Use get_role_pricing for rates, check_availability for dates, or plan_staffing for a full plan. " +
         "<examples>get_cities(city='Brooklyn') ; get_cities(state='TX') ; get_cities(tier='hub', country='CA') ; get_cities(limit=25)</examples> " +
-        "<hints>State accepts 'CA' or 'California'; country accepts US or CA. city='' resolves nicknames/boroughs (NYC, Vegas, Brooklyn). An unfiltered list is capped, use filters or limit. 345 markets total.</hints>",
+        "<hints>State accepts 'CA' or 'California'; country accepts US or CA. City resolves nicknames and boroughs. Unfiltered results are capped; use filters or limit. 345 configured entries.</hints>",
       inputSchema: z.object({
         state: z
           .string()
@@ -399,7 +399,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
         city: z
           .string()
           .optional()
-          .describe("Optional single-city coverage check (nickname/borough aware). Returns covered yes/no + suggestion."),
+          .describe("Optional single-city catalog match (nickname/borough aware). Returns catalog_match plus a suggestion; never a coverage promise."),
         limit: z
           .number()
           .int()
@@ -456,7 +456,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     {
       title: "Check Availability",
       description:
-        "Check expected staffing availability for an event. Returns lead-time guidance based on city tier and how far out the event is. Perfect for 'Can you staff my event on [date] in [city]?', 'What's the lead time for booking brand ambassadors in [city]?', or 'Is it too late to staff a [date] event?' questions. Not a real-time inventory check, TempGuru staffs to demand via a 100,000+ worker W-2 network across 345 markets. " +
+        "Return tier-based lead-time guidance for an event date and configured market. Use for 'What's the typical lead time for brand ambassadors in [city]?' or 'Is this date inside the usual planning window?'. This is not a real-time inventory or order-coverage check: a TempGuru coordinator confirms coverage and final lead time for the specific order after buyer submission. " +
         "DO NOT use for cost questions (use get_role_pricing) and never present the result as a reservation. " +
         "<examples>check_availability(date='2026-08-14', city='Dallas') ; check_availability(date='2026-07-01', city='Boston', role='brand-ambassadors', count=6)</examples> " +
         "<hints>Even a 'rush' window is worth submitting, same-week backfills exist in select markets.</hints>",
@@ -769,7 +769,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     {
       title: "Plan event staffing",
       description:
-        "Build a complete event staffing plan: coverage, W-2 rate math, lead time, and compliance flags, ready to submit for a human-reviewed quote.",
+        "Build a complete event staffing plan: configured-market match, W-2 rate math, tier-based lead-time guidance, and compliance flags, ready for a buyer-submitted human-reviewed quote.",
       argsSchema: z.object({
         city: z.string().describe("Event city, e.g. Chicago"),
         event_date: z
@@ -793,7 +793,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
               `Help me staff an event in ${city}${event_date ? ` on ${event_date}` : ""}.` +
               `${roles ? ` I need ${roles}.` : " Help me figure out which roles and headcount I need."}\n\n` +
               "Use the TempGuru tools, in this order: call plan_staffing first with everything I gave you " +
-              "(it returns coverage, per-role rate math, lead-time guidance, and state compliance flags in one call). " +
+              "(it returns a catalog match, per-role rate math, lead-time guidance, and state compliance flags in one call; the coordinator confirms order coverage). " +
               "Fill gaps with get_roles or get_cities if needed. Present the plan with the estimated total clearly " +
               "labeled a planning estimate and flag any compliance notes. Retain plan_id if plan_staffing returned one; " +
               "only call save_staffing_plan when the complete plan has no plan_id and I need it saved or shared, and never save it twice. Ask me to confirm the plan. " +

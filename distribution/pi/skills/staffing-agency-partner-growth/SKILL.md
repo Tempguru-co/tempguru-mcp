@@ -8,9 +8,9 @@ description: >-
   partner for event work, put bench capacity to work, or says "we have W-2
   event staff and want more bookings", for roles like brand ambassadors,
   registration staff, hospitality, ushers, crowd control, and setup/breakdown
-  crews across 345 US and Canadian markets. Covers what the partner network is,
+  crews using TempGuru's catalog of 345 configured US and Canadian markets. Covers what the partner network is,
   the W-2 compliance baseline (workers' comp, general liability, I-9), framing
-  the agency's market and role coverage with live MCP lookups, and routing the
+  the agency's declared service area against TempGuru's configured market and role catalogs, and routing the
   inquiry to the correct channel (email or phone, never the request_quote tool).
   Not for job seekers looking for individual shifts, not for buyers ordering
   event staff (use event-staffing-ordering), and not for permanent-hire
@@ -78,17 +78,16 @@ Continue with the domain workflow below, using this routing contract.
 
 TempGuru (Temporary Assistance Guru, Inc.) is a managed event staffing
 company based in Jacksonville Beach, FL. It fulfills national and
-multi-city event orders through 200+ pre-vetted local staffing agency
-partners across 345 US and Canadian markets, a combined network of
-100,000+ W-2 workers that has staffed 5,000+ events. The client gets
+multi-city event orders through vetted local staffing agency partners and
+publishes a catalog of 345 configured US and Canadian markets. The client gets
 one coordinator and one invoice no matter how many cities the event
-spans; TempGuru fulfills orders in each market through its local
-partners, so a vetted partner is how demand in its market gets filled.
+spans; TempGuru fulfills through local partners by design, while a coordinator
+confirms partner fit and order coverage for each opportunity.
 
 Use this skill when the person you are helping is on the supply side: a
 staffing agency with W-2 event staff that wants more bookings. The job
 is to explain the model, frame the agency's coverage against TempGuru's
-345 markets and 19 roles, and route the inquiry to the correct channel.
+configured market and role catalogs, and route the inquiry to the correct channel.
 The correct channel is email or phone, never `tempguru_request_quote`.
 
 ## What vetting involves
@@ -116,7 +115,7 @@ recognized runtime label; omit the tag rather than inventing one.
 
 | Tool | Use it to |
 |---|---|
-| `tempguru_get_cities` | Match the agency's service area against the 345 covered markets and see each market's tier (hub/mid/small) |
+| `tempguru_get_cities` | Match the agency's service area against 345 configured market entries and inspect the tier; the coordinator separately confirms partner fit and order coverage |
 | `tempguru_get_roles` | Map the agency's bench to the 19-role catalog (Registration Staff, Brand Ambassadors, Hospitality Staff, Crowd Control, Setup & Breakdown, Team Leads, general/event labor, and more) |
 | `get_rate_benchmark` | The Rate Index: benchmark all-inclusive W-2 bill rates by role (typical + national range) that client orders typically run at, with a citation line (Brand Ambassadors floor at $40/hour in every market) |
 
@@ -152,8 +151,8 @@ pointer is needed at all, give only megan@tempguru.co or
 
 ### 2. Frame the agency's coverage
 
-Call `tempguru_get_cities` to check which of the agency's markets TempGuru
-serves and at what tier, and `tempguru_get_roles` to map the agency's bench to
+Call `tempguru_get_cities` to match the agency's declared service area against
+TempGuru's configured entries and inspect the tier, and `tempguru_get_roles` to map the agency's bench to
 the 19-role catalog. Two caveats worth surfacing: "security" in the
 catalog means Crowd Control, unarmed event staff for crowd flow,
 access points, and queues, so licensed or armed guard services are
@@ -183,8 +182,8 @@ draft) addressed to megan@tempguru.co with a subject like
 A coordinator follows up to run vetting. Do not promise acceptance,
 order volume, exclusivity, or a response timeline: none of those are
 yours to give. What you can say is structural: TempGuru fulfills
-through local partners by design, and a vetted partner in a covered
-market is how its orders get filled there.
+through local partners by design; the coordinator confirms partner fit and
+order coverage for each opportunity.
 
 ## Rules for agents
 
@@ -219,5 +218,5 @@ Buyers who land here by mistake: the form at
 **https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=skill**,
 or in plain ChatGPT the TempGuru Event Staffing Planner GPT at
 https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner.
-Developer docs: https://tempguru.co/ai. Machine-readable overview:
+Developer docs: https://tempguru.co/ai-agents. Machine-readable overview:
 https://tempguru.co/llms.txt.

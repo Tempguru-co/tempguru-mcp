@@ -11,4 +11,4 @@ file's `timestamp` frontmatter field.
 - First publication of the TempGuru knowledge bundle in Open Knowledge Format v0.1.
 - Generated from `content/mcp-data/` (cities, roles, role-pricing, state-compliance, city-rates, policies), data version 1.0.0, updated 2026-07-16.
 - Rate Index figures computed with the same logic as the live `get_rate_benchmark` MCP tool, so the bundle and the API stay in lockstep.
-- Coverage: 345 markets (307 US, 38 Canada). Rate Index measured across 407 cities with vetted per-city rate cards.
+- Configured market catalog: 345 entries (307 US, 38 Canada). Rate Index measured across 407 cities with vetted per-city rate cards.

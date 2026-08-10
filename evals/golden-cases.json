@@ -163,14 +163,15 @@
     ]
   },
   {
-    "name": "get_cities single-city coverage check (borough resolves to parent metro)",
+    "name": "get_cities single-city catalog check (borough resolves to parent metro)",
     "tool": "get_cities",
     "arguments": {
       "city": "Brooklyn"
     },
     "expect": [
-      "coverage_check",
-      "covered",
+      "catalog_check",
+      "catalog_match",
+      "coverage_confirmation_required",
       "New York City"
     ]
   },

@@ -44,6 +44,7 @@ jobs:
       - run: npm run test:protocol
       - run: npm run build
       - run: npm run check:submissions
+      - run: npm run check:agent-readiness
       - run: npm run build:cli
       - run: npm run check:cli-package
       - name: Verify release versions and package contents

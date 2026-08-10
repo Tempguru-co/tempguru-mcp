@@ -11,6 +11,8 @@
 // Served at mcp.tempguru.co AND at tempguru.co via Cloudflare Worker.
 // Both copies must stay in sync.
 
+import { MARKET_CATALOG_DESCRIPTION } from "@/lib/public-facts";
+
 const MCP_DISCOVERY = {
   servers: [
     {
@@ -19,7 +21,8 @@ const MCP_DISCOVERY = {
       name: "tempguru-mcp",
       title: "TempGuru Event Staffing",
       description:
-        "Dual-era TempGuru event staffing MCP across 345 US/Canada markets with 12 tools: ten read-only tools including a non-PII request_quote buyer handoff, the non-destructive plan_staffing planner, and an explicit non-destructive save_staffing_plan write. Also ships 8 skill resources and two guided prompts.",
+        "Dual-era TempGuru event staffing MCP backed by a repository-controlled public catalog, with 12 tools: ten read-only tools including a non-PII request_quote buyer handoff, the non-destructive plan_staffing planner, and an explicit non-destructive save_staffing_plan write. Also ships 8 skill resources and two guided prompts. " +
+        MARKET_CATALOG_DESCRIPTION,
       endpoint: "https://mcp.tempguru.co/mcp",
       transport: "streamable-http",
       // Preferred modern revision. The same endpoint also accepts the listed
@@ -39,8 +42,12 @@ const MCP_DISCOVERY = {
         legacy: "Stateless MCP initialize/streamable-HTTP compatibility",
       },
       authentication: { type: "none" },
-      documentation: "https://tempguru.co/ai",
+      documentation: "https://tempguru.co/ai-agents",
       serverCard: "https://mcp.tempguru.co/.well-known/mcp/server-card.json",
+      a2a: "https://mcp.tempguru.co/a2a",
+      agentCard: "https://mcp.tempguru.co/.well-known/agent-card.json",
+      authenticationGuide: "https://mcp.tempguru.co/auth.md",
+      publicFacts: "https://mcp.tempguru.co/.well-known/tempguru-facts.json",
       knowledge: "https://mcp.tempguru.co/.well-known/okf.json",
       workflow: {
         phase: "A",

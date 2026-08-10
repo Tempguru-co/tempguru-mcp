@@ -5,6 +5,8 @@
 - [Role](role.md)
 - [PriceBand](priceband.md)
 - [CitiesResponse](citiesresponse.md)
+- [CitiesListResponse](citieslistresponse.md)
+- [CityCatalogMatchResponse](citycatalogmatchresponse.md)
 - [RolesResponse](rolesresponse.md)
 - [AvailabilityResponse](availabilityresponse.md)
 - [PricingResponse](pricingresponse.md)

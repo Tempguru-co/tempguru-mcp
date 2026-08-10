@@ -22,7 +22,7 @@ Build at https://www.coze.com → Create bot.
 - **Description:**
 
   ```
-  Plan and budget temporary event staff for US and Canadian events with TempGuru. Live hourly rates for 19 roles in 345 cities, booking lead times, and state labor compliance. W-2 employees, never gig workers. Quote in one business day.
+  Plan and budget temporary event staff for US and Canadian events with TempGuru. Use 345 configured market entries for catalog matching, live hourly rates for 19 roles, tier-based booking lead-time guidance, and state labor compliance. A coordinator confirms order coverage after submission. W-2 employees, never gig workers. Quote in one business day.
   ```
 
 - **Avatar:** upload `public/logo.svg` (Coze accepts SVG/PNG).
@@ -36,7 +36,7 @@ then append:
 TOOLS ON THIS PLATFORM
 You have the TempGuru plugin (eight read-only API operations plus the
 submitQuoteRequest write operation) and five knowledge documents. Prefer
-the plugin for rates, coverage, lead times, and compliance; knowledge for
+the plugin for catalog matching, rates, lead-time guidance, and compliance; knowledge for
 background and fallback. Use getPolicies for booking terms, getPlan only
 when the user supplies a saved plan ID, and getQuoteStatus only when the user
 supplies a TG reference; never guess either ID. To submit a staffing request:
@@ -79,7 +79,7 @@ chunking. Set the bot's knowledge recall to Auto.
 - **Opening message:**
 
   ```
-  I plan and price temporary event staff anywhere in the US and Canada, rates, lead times, and labor compliance, with a real quote one business day after you submit. What's the event?
+  I plan and price temporary event staff for US and Canadian events using TempGuru's configured market catalog. I match the city and check tier-based lead-time guidance, rates, and labor compliance; a coordinator confirms order coverage after you submit. What's the event?
   ```
 
 - **Suggested questions:** reuse the four conversation starters from the
@@ -90,7 +90,7 @@ chunking. Set the bot's knowledge recall to Auto.
 1. **Coze Agent Store**, category Business/Tools; store listing copy =
    description above.
 2. **Telegram bot**, name `@TempGuruStaffingBot` (or nearest available);
-   put the handle on tempguru.co/ai.
+   put the handle on tempguru.co/ai-agents.
 3. **Discord**, publishable app; useful for event-industry and
    experiential-marketing servers (join as the brand, don't spam: answer
    staffing questions when asked).
@@ -105,4 +105,4 @@ run in Coze's preview pane before each publish target goes live.
 
 ## Live-tools bridge (add to the suffix)
 
-For anyone who wants live rates, availability, and in-chat quote submission right now, point them to the TempGuru Event Staffing Planner GPT: https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner . Knowledge-file answers stay planning-grade; the GPT and the MCP run live.
+For anyone who wants current published rates, configured-market matching, tier-based lead-time guidance, and an explicitly confirmed REST quote submission, point them to the TempGuru Event Staffing Planner GPT: https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner . These tools do not expose live inventory or confirm order coverage; a TempGuru coordinator confirms the specific order after buyer submission.

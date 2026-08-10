@@ -1,0 +1,57 @@
+name: deploy-apex-agent-readiness
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tempguru-apex-agent-readiness-production
+  cancel-in-progress: false
+
+jobs:
+  verify-and-deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: Production
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run build:okf
+      - run: npm run build:worker
+      - run: npm run build:llms-worker -- --from-committed
+      - run: npm run check:agent-readiness
+      - name: Require generated artifacts to match the reviewed commit
+        run: |
+          git diff --exit-code -- public content skills plugins/tempguru/skills distribution/pi/skills distribution/okf/example distribution/okf/knowledge-catalog-contrib/openapi-to-okf/example cloudflare/worker.js cloudflare/llms-worker.js
+          test -z "$(git status --porcelain --untracked-files=all -- public content skills plugins/tempguru/skills distribution/pi/skills distribution/okf/example distribution/okf/knowledge-catalog-contrib/openapi-to-okf/example cloudflare/worker.js cloudflare/llms-worker.js)"
+      - name: Deploy apex discovery Worker
+        uses: cloudflare/wrangler-action@9acf94ace14e7dc412b076f2c5c20b8ce93c79cd # v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: >-
+            deploy cloudflare/worker.js
+            --name ${{ vars.CLOUDFLARE_DISCOVERY_WORKER_NAME }}
+            --compatibility-date 2026-08-10
+            --keep-vars
+            --yes
+      - name: Deploy apex llms Worker
+        uses: cloudflare/wrangler-action@9acf94ace14e7dc412b076f2c5c20b8ce93c79cd # v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: >-
+            deploy cloudflare/llms-worker.js
+            --name ${{ vars.CLOUDFLARE_LLMS_WORKER_NAME }}
+            --compatibility-date 2026-08-10
+            --keep-vars
+            --yes
+      - name: Verify live discovery, route bindings, and agent protocols
+        run: npm run check:live-discovery

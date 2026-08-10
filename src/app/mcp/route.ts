@@ -10,7 +10,7 @@
 //   - plan_staffing              build a complete plan from city/date/roles
 //   - save_staffing_plan         explicitly save a complete non-contact plan
 //   - get_plan                    restore a non-PII saved staffing plan
-//   - get_cities                 list all cities TempGuru serves (with tier)
+//   - get_cities                 list/match configured market entries (with tier)
 //   - get_roles                  list all staffing roles with descriptions
 //   - check_availability         deterministic lead-time guidance for a city/date
 //   - get_role_pricing           rate range for a role in a specific city

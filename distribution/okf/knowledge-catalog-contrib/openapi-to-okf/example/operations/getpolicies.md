@@ -4,14 +4,14 @@ title: "Published booking and procurement policies"
 description: "Returns TempGuru's published minimum-hours, cancellation/rescheduling, no-show backfill, COI/additional-insured, payment, background-check, order-confirmation, and quote-response policies."
 method: "GET"
 path: "/api/v1/policies"
-resource: "https://tempguru.co/api/v1/policies"
+resource: "https://mcp.tempguru.co/api/v1/policies"
 operation_id: "getPolicies"
 tags:
   - "Compliance"
 ---
 # Published booking and procurement policies
 Returns TempGuru's published minimum-hours, cancellation/rescheduling, no-show backfill, COI/additional-insured, payment, background-check, order-confirmation, and quote-response policies. Unsupported values are explicitly marked `confirm_with_coordinator` and never fabricated. Pass an optional topic for one policy; an unknown topic returns a clean expected-miss variant with the available topics.
-- **Operation:** `GET https://tempguru.co/api/v1/policies`
+- **Operation:** `GET https://mcp.tempguru.co/api/v1/policies`
 - **Tags:** Compliance
 ## Parameters
 

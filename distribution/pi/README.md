@@ -1,7 +1,7 @@
 # tempguru-pi — TempGuru event staffing for Pi and Prime Agent
 
 This package documents the runtime-adapted skill and native-tool behavior
-included in version `1.7.1`. Publication status is tracked in the repository,
+included in version `1.7.2`. Publication status is tracked in the repository,
 not inside this immutable npm artifact.
 
 One package gives either Pi or Prime Agent both layers:
@@ -24,7 +24,7 @@ from a Markdown skill alone, so the package installs an attributed native
 action layer with the skills. No MCP bridge is required for the 9 granular
 operations.
 The full `plan_staffing` planner, explicit `save_staffing_plan` artifact write,
-and `get_rate_benchmark` remain MCP-only in version 1.7.1. Pi can attach the
+and `get_rate_benchmark` remain MCP-only in version 1.7.2. Pi can attach the
 remote MCP through a compatible client; Prime Agent has the authless-MCP
 limitation described below. See `llms-install.md` until native REST parity
 ships in a follow-up release.
@@ -95,7 +95,7 @@ publishing with npm Trusted Publishing (OIDC). From the repository:
 gh workflow run publish-pi.yml \
   --repo Tempguru-co/tempguru-mcp \
   --ref main \
-  -f version=1.7.1
+  -f version=1.7.2
 ```
 
 Notes:
@@ -123,7 +123,7 @@ Notes:
   `prime-agent package list`. Each runtime must expose 8 TempGuru skills and
   the 9 tools `tempguru_get_cities` … `tempguru_request_quote`.
 - Confirm npm independently before calling the release live:
-  `npm view tempguru-pi@1.7.1 version`.
+  `npm view tempguru-pi@1.7.2 version`.
 - Record the listing in `distribution/assistants/README.md`'s status tracker.
 
 ## Safety posture (mirrors the MCP server)

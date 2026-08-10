@@ -32,15 +32,16 @@ city-page changes.
 | GHCR `latest` and `sha-*` | Merge/push to `main` | Publishes `ghcr.io/tempguru-co/event-staffing` |
 | MCP Registry initial check | `server.json` version change on `main` | Defers until the matching npm CLI exists |
 | npm CLI | Manual `publish-npm.yml` with `1.7.0` | Publishes `tempguru-mcp`, then re-dispatches the Registry workflow |
-| Pi / Prime Agent npm package | Manual `publish-pi.yml` with `1.7.1` | Publishes the shared `tempguru-pi` artifact independently; `1.7.0` is immutable |
+| Pi / Prime Agent npm package | Manual `publish-pi.yml` with `1.7.2` | Publishes the shared `tempguru-pi` artifact independently; `1.7.1` and earlier are immutable |
 | GHCR semver tags | Push `v1.7.0` | Publishes image tags `1.7.0` and `1.7` |
 | Apex Cloudflare discovery | Manual | Deploys the two committed worker files |
 | Anthropic directory | Manual portal update and email reply | Requests re-review under `tempguru-event-staffing` |
 | Hermes and ClawHub | Manual | Refreshes third-party skill catalog copies |
 
-Cloudflare, Anthropic, Hermes, and ClawHub do not deploy from this repository's
-GitHub Actions. Do not mark any surface published until its own verification
-succeeds.
+Cloudflare deployment is manual and review-gated through this repository's
+`deploy-apex-agent-readiness.yml` workflow. Anthropic, Hermes, and ClawHub
+remain external manual updates. Do not mark any surface published until its
+own verification succeeds.
 
 ## Prerequisites
 
@@ -91,7 +92,9 @@ node -p 'require("./.claude-plugin/marketplace.json").plugins[0].version'
 
 The repository build Node major must be at least 22. Every version printed
 above must be `1.7.0` except the independently versioned Pi package, which must
-be the unpublished patch `1.7.1`.
+be the unpublished patch `1.7.2`. The Pi workflow fails closed when the
+requested version already exists on npm; bump forward instead of treating a
+skipped immutable write as success.
 
 Install from the lockfile and regenerate every committed release artifact:
 
@@ -108,9 +111,10 @@ git status --short
 
 Review all generated changes before committing them. The release commit must
 contain the source, skill copies and digests, OKF bundle, discovery documents,
-OpenAPI/schema artifacts, Cloudflare workers, CLI bundle, manifests, tests, and
-documentation intended for `1.7.0`. Do not include unrelated city-page work or
-duplicate local files.
+OpenAPI/schema artifacts, Cloudflare workers, CLI source and manifests, tests,
+and documentation intended for `1.7.0`. The ignored CLI bundle is built and
+package-checked dynamically by the publisher; it is not committed. Do not
+include unrelated city-page work or duplicate local files.
 
 ## 2. Run the release gates
 
@@ -126,6 +130,7 @@ npm run build
 npm run build:worker
 npm run build:llms-worker -- --from-committed
 npm run check:submissions
+npm run check:agent-readiness
 npm run build:cli
 npm run check:cli-package
 npm pack --dry-run --json ./cli
@@ -222,22 +227,22 @@ gh workflow run publish-registry.yml \
 Never retry by publishing `1.6.0`, and never attempt to overwrite an existing
 npm or MCP Registry version. Use a new patch version for a forward fix.
 
-## 5. Publish the Pi / Prime Agent package, `tempguru-pi@1.7.1`
+## 5. Publish the Pi / Prime Agent package, `tempguru-pi@1.7.2`
 
 In GitHub Actions, choose **Publish Pi package to npm**, select `main`, enter
-`1.7.1`, and run:
+`1.7.2`, and run:
 
 ```bash
 gh workflow run publish-pi.yml \
   --repo Tempguru-co/tempguru-mcp \
   --ref main \
-  -f version=1.7.1
+  -f version=1.7.2
 ```
 
 Verify:
 
 ```bash
-npm --cache /tmp/tempguru-release-cache view tempguru-pi@1.7.1 version
+npm --cache /tmp/tempguru-release-cache view tempguru-pi@1.7.2 version
 ```
 
 Install `npm:tempguru-pi` in a clean Pi session, restart Pi, and confirm:
@@ -245,7 +250,7 @@ Install `npm:tempguru-pi` in a clean Pi session, restart Pi, and confirm:
 - `/skills` lists all eight TempGuru skills.
 - The native tool list contains all nine tools from
   `tempguru_get_cities` through `tempguru_request_quote`.
-- A read-only coverage or pricing lookup succeeds.
+- A read-only configured-market, lead-time, or pricing lookup succeeds without implying confirmed coverage.
 - `tempguru_request_quote` accepts a saved plan reference and bounded
   attribution, exposes no contact fields, and returns a buyer form link.
 - Calling the handoff does not create a lead or TG reference. Do not submit the
@@ -257,11 +262,11 @@ Then run the same published artifact through Prime Agent's package loader:
 prime-agent package install npm:tempguru-pi
 prime-agent package list
 prime-agent \
-  -e npm:tempguru-pi@1.7.1 \
+  -e npm:tempguru-pi@1.7.2 \
   --mode json \
   --no-session \
   --tools tempguru_get_cities \
-  'Call tempguru_get_cities exactly once with city Austin. Return only whether Austin is covered.'
+  'Call tempguru_get_cities exactly once with city Austin. Return only whether Austin matches the configured catalog and whether coordinator confirmation is still required.'
 ```
 
 Confirm Prime loads all 8 skills and 9 native tools, the Austin call succeeds,
@@ -276,17 +281,24 @@ Prime supports authless MCP.
 
 ## 6. Deploy apex discovery to Cloudflare
 
-Vercel does not serve discovery routes at the `tempguru.co` apex. After the
-Vercel deployment is healthy, deploy the committed worker artifacts:
+Cloudflare Pages serves the `tempguru.co` site, while route-scoped Workers own
+the apex discovery files. After the Vercel MCP deployment is healthy, deploy
+the committed Worker artifacts:
 
 1. Record the current deployment ID for each worker.
-2. Paste the entire `cloudflare/worker.js` file into the worker bound to the
-   apex `.well-known/*` and `robots.txt` routes, then deploy.
-3. Paste the entire `cloudflare/llms-worker.js` file into the worker bound to
-   `llms.txt` and `llms-full.txt`, then deploy.
+2. Dispatch `deploy-apex-agent-readiness.yml` from `main` and approve the
+   GitHub `Production` environment gate.
+3. Confirm the existing discovery Worker routes are
+   `tempguru.co/robots.txt`, `tempguru.co/.well-known/*`,
+   `tempguru.co/auth.md`, and `tempguru.co/schemas/*`; confirm the llms Worker
+   routes are `tempguru.co/llms.txt` and `tempguru.co/llms-full.txt`.
+4. Confirm both Wrangler deployment steps and the post-deploy live canary
+   succeeded. The workflow rebuilds the
+   artifacts, requires them to match the reviewed commit, and leaves the Pages
+   deployment and Worker route bindings unchanged.
 
-Do not paste a fragment, prose, or a diff into the Cloudflare editor. The
-committed files are the release artifacts.
+Do not deploy by pasting source into the Cloudflare editor. The committed files
+and GitHub workflow are the production path.
 
 After Vercel and both workers are deployed, run the live canary:
 
@@ -311,6 +323,8 @@ Also verify the deployed version and buyer-form origin:
 curl -fsS https://mcp.tempguru.co/api/v1/health | jq
 curl -fsS https://mcp.tempguru.co/.well-known/mcp/server-card.json \
   | jq '{version: .serverInfo.version, tools: [.tools[].name]}'
+curl -fsS https://mcp.tempguru.co/.well-known/agent-card.json \
+  | jq '{version, supportedInterfaces, skills: [.skills[].id]}'
 curl -fsSI https://mcp.tempguru.co/request-quote
 ```
 
@@ -355,6 +369,12 @@ The release notes must call out:
 - MCP `request_quote` is now a read-only, non-PII buyer-form handoff.
 - Only a buyer's website/REST form submission creates a lead and TG reference.
 - The connector inventory is 12 tools, 2 prompts, and 8 resources.
+- The A2A v1.0 agent card now points to an executable JSON-RPC `/a2a`
+  endpoint with repository-backed planning and lookup skills.
+- `/auth.md` documents the public no-account/no-OAuth boundary, while
+  `/.well-known/tempguru-facts.json` evidence-gates public scale claims.
+- Cloudflare Pages discovery now publishes the distinct concise `llms.txt` and
+  complete `llms-full.txt` OKF export through generated, route-scoped Workers.
 
 Publish the draft only after the closeout checklist is complete.
 
@@ -480,23 +500,30 @@ VPS.
 
 ### ClawHub
 
-Republish the five canonical skills whose quote workflow changed:
+Republish the seven canonical skills whose quote workflow or public factual
+claims changed. On 2026-08-10, ClawHub's public API showed a latest version
+below `1.7.0` for every listed slug, so `1.7.0` was not yet listed:
 
 - `tempguru-event-staffing-ordering`
 - `tempguru-staffing-plan-from-event-brief`
 - `tempguru-urgent-event-backfill`
 - `tempguru-multi-city-activation-planner`
 - `tempguru-event-staffing-procurement`
+- `tempguru-staffing-agency-partner-growth`
+- `tempguru-pro-operations`
 
 Use each matching `skills/<canonical-slug>/SKILL.md` from the tagged `v1.7.0`
-commit. ClawHub versions are immutable: publish the new `1.7.0` skill version
-and never retry `1.6.0`.
+commit. Immediately before publishing, query all seven listings again. ClawHub
+versions are immutable: use `1.7.0` only while it remains unused for that slug;
+if it has appeared, choose the next unused patch (for example `1.7.1`) rather
+than overwriting or retrying an existing version.
 
 This repository does not contain a generic ClawHub publication command. Use
 the already authenticated `kissmyabs32` publisher workflow. If the local shell
 function `publish_all` is used, inspect it with `type publish_all`, run its dry
-run first, and verify that it targets only the five skills above at `1.7.0`
-before enabling writes.
+run first, and verify that it targets only the seven skills above at the
+preflight-confirmed unused version for each (`1.7.0` was expected from the
+2026-08-10 observation) before enabling writes.
 
 Verify each listing:
 
@@ -506,11 +533,34 @@ curl -fsS https://clawhub.ai/api/v1/skills/tempguru-staffing-plan-from-event-bri
 curl -fsS https://clawhub.ai/api/v1/skills/tempguru-urgent-event-backfill | jq
 curl -fsS https://clawhub.ai/api/v1/skills/tempguru-multi-city-activation-planner | jq
 curl -fsS https://clawhub.ai/api/v1/skills/tempguru-event-staffing-procurement | jq
+curl -fsS https://clawhub.ai/api/v1/skills/tempguru-staffing-agency-partner-growth | jq
+curl -fsS https://clawhub.ai/api/v1/skills/tempguru-pro-operations | jq
 ```
 
 Confirm each listing reflects the non-PII handoff and tells the buyer to submit
 the TempGuru form personally. Record the actual published versions; do not
 infer success from a local command alone.
+
+### Live assistant copies
+
+Repository changes do not update assistants whose prompt, knowledge files, or
+store listing were pasted into a platform. For every surface currently marked
+live or submitted in `distribution/assistants/README.md`:
+
+1. Re-paste the current English or zh-CN system prompt where that platform uses
+   one.
+2. Re-upload all five files in `distribution/assistants/knowledge/` where the
+   platform supports knowledge uploads.
+3. For each live surface with REST Actions or a plugin, re-import or inspect
+   the current OpenAPI schema. Verify the eight public read operations plus the
+   explicitly confirmed `submitQuoteRequest` write (health may remain hidden),
+   and remove stale inventories such as the six-operation Coze configuration.
+4. Refresh its paste-ready listing copy when this release changed that copy.
+5. Run the documented five-case smoke test and record the observed date and
+   result in the tracker.
+
+Do not create or configure platforms still marked unbuilt merely to close this
+release; keep those rows as future work.
 
 Do not SSH to or change the legacy OpenClaw VPS container at
 `/docker/openclaw-y5yb/`. Do not edit `openclaw.json`, restart
@@ -522,11 +572,13 @@ Do not mark `1.7.0` complete until every applicable item is verified:
 
 - Vercel Production serves the merge commit and `/request-quote`.
 - `tempguru-mcp@1.7.0` resolves from npm.
-- `tempguru-pi@1.7.1` resolves from npm.
-- The published `tempguru-pi@1.7.1` loads all 8 skills and 9 native tools in
+- `tempguru-pi@1.7.2` resolves from npm.
+- The published `tempguru-pi@1.7.2` loads all 8 skills and 9 native tools in
   both Pi and Prime Agent, and Prime calls carry `source=prime-agent`.
 - The official MCP Registry reports `1.7.0`.
 - Both Cloudflare worker deployments are live.
+- All six documented Cloudflare route bindings resolve to the expected Worker
+  content, including `/auth.md`, the request schema, and distinct llms exports.
 - `check-live-discovery.yml` passes.
 - GHCR exposes `latest`, `1.7.0`, `1.7`, and the expected `sha-*` image.
 - The Anthropic portal says `read_write` and lists all 12 tools, 2 prompts, 8
@@ -535,8 +587,11 @@ Do not mark `1.7.0` complete until every applicable item is verified:
   recorded as pending until Anthropic responds.
 - Hermes PR #39150 contains the current files and has been re-submitted for
   review, if that catalog refresh applies.
-- The five changed ClawHub skills report their new versions and current
+- The seven changed ClawHub skills report their new versions and current
   buyer-operated handoff instructions.
+- Every actually-live or submitted assistant consumer has received the current
+  prompt, knowledge files, Action/plugin schema, and listing copy that apply to
+  it, with the smoke result recorded; unbuilt platforms remain tracker-only.
 - The GitHub Release notes accurately distinguish the repository's Node 22+
   build floor from the CLI's Node 20+ runtime floor and describe the non-PII
   handoff.
@@ -556,8 +611,11 @@ pending third-party reviews labeled pending.
 - **Anthropic:** keep the portal declaration aligned with the server actually
   deployed. If the safe handoff is unavailable, tell the reviewer and pause
   re-review rather than leaving an inaccurate listing.
-- **npm and MCP Registry:** versions are immutable. Publish a forward fix such
-  as `1.7.1`; never overwrite `1.7.0` or `1.6.0`.
+- **`tempguru-mcp` npm and MCP Registry:** versions are immutable. After the
+  `1.7.0` candidate, publish a new unused patch such as `1.7.1`; never overwrite
+  `1.7.0` or `1.6.0`.
+- **`tempguru-pi` npm:** after the `1.7.2` candidate, publish a new unused patch
+  such as `1.7.3`; never overwrite `1.7.2`, `1.7.1`, or any earlier artifact.
 - **GHCR:** preserve versioned tags. A corrective `main` deployment may move
   `latest`; use a new semantic version for a permanent fix.
 - **Hermes and ClawHub:** correct catalog content with a new commit/version and

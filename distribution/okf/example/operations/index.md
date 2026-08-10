@@ -1,6 +1,6 @@
 # Operations
 
-- [List cities TempGuru serves](listcities.md), `GET /api/v1/cities`
+- [List configured market entries](listcities.md), `GET /api/v1/cities`
 - [List event staffing roles](listroles.md), `GET /api/v1/roles`
 - [Lead-time guidance for an event](checkavailability.md), `GET /api/v1/availability`
 - [All-inclusive hourly rate range for a role in a city](getrolepricing.md), `GET /api/v1/pricing`

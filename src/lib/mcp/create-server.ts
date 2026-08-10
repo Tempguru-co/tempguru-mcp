@@ -5,6 +5,7 @@ import {
   SERVER_INSTRUCTIONS,
   type RegisterToolsOptions,
 } from "./register-tools";
+import { MARKET_CATALOG_DESCRIPTION } from "../public-facts";
 
 const PUBLIC_CATALOG_CACHE_HINT = {
   ttlMs: 300_000,
@@ -39,7 +40,9 @@ export function createTempGuruMcpServer(options: RegisterToolsOptions = {}): Mcp
       version: pkg.version,
       title: "TempGuru Event Staffing",
       description:
-        "W-2 event staffing data for AI agents across 345 US/CA markets. Twelve tools: ten read-only tools including a non-PII request_quote buyer handoff, a compatibility planner that may save a 30-day non-PII snapshot, and an explicit non-contact save_staffing_plan artifact write. Ships skill resources and guided prompts. No authentication required.",
+        "W-2 event staffing data for AI agents. " +
+        MARKET_CATALOG_DESCRIPTION +
+        " Twelve tools: ten read-only tools including a non-PII request_quote buyer handoff, a compatibility planner that may save a 30-day non-PII snapshot, and an explicit non-contact save_staffing_plan artifact write. Ships skill resources and guided prompts. No authentication required.",
       icons: [
         {
           src: "https://mcp.tempguru.co/logo.svg",

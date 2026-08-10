@@ -1,8 +1,8 @@
 // plan_staffing, the planner meta-tool (Stripe's implementation_planner pattern).
 //
 // Agents are told to call this FIRST: it takes a rough event shape and returns a
-// complete, structured staffing plan, coverage, per-role budget math, lead-time
-// read, and the state compliance flags that change the plan, plus the exact next
+// complete, structured staffing plan, catalog match, per-role budget math,
+// lead-time guidance, and the state compliance flags that change the plan, plus the exact next
 // tool to call. It composes the same query layer the individual tools wrap, so a
 // plan is always consistent with what get_role_pricing / check_availability /
 // get_compliance_by_state would return one call at a time.
@@ -116,9 +116,9 @@ function engagementOtHours(days: number, h: number, rules: OtRules): OtHours {
 }
 
 export function buildStaffingPlan(input: PlanStaffingInput) {
-  // Resolve the city FIRST, independent of roles, so an uncovered/misspelled
+  // Resolve the city FIRST, independent of roles, so an unconfigured/misspelled
   // city is reported as city_not_found even on a roles-free catalog call, and
-  // a valid city with unmatched role phrasing never reads as "not covered".
+  // a valid catalog entry with unmatched role phrasing never reads as a city miss.
   const city = findCity(input.city);
   if (!city) {
     const sug = suggestCity(input.city);
@@ -129,8 +129,8 @@ export function buildStaffingPlan(input: PlanStaffingInput) {
         ? ({ kind: "city", slug: sug.slug, name: sug.name } as EntitySuggestion)
         : undefined,
       message: sug
-        ? `TempGuru has no exact match for "${input.city}" among its 345 US/CA markets. The closest covered market is ${sug.name}, confirm with the user that they mean ${sug.name} before planning it (do not assume), or check get_cities.`
-        : `TempGuru has no match for "${input.city}" among its 345 US/CA markets (US and Canada only). Check spelling, ask the user for the nearest major city, or confirm coverage with get_cities.`,
+        ? `TempGuru has no exact match for "${input.city}" in its 345-entry configured US/CA market catalog. The closest configured entry is ${sug.name}; confirm with the user that they mean ${sug.name} before planning it (do not assume). A TempGuru coordinator confirms order-specific coverage and final lead time after buyer submission.`
+        : `TempGuru has no match for "${input.city}" in its 345-entry configured US/CA market catalog (US and Canada only). Check spelling, ask for the nearest major city, or ask a TempGuru coordinator to confirm order-specific coverage through the buyer form.`,
       next_steps: FALLBACK_LADDER,
     };
   }
@@ -139,6 +139,8 @@ export function buildStaffingPlan(input: PlanStaffingInput) {
     state: city.state,
     tier: city.tier as string,
     currency: city.country === "CA" ? ("CAD" as const) : ("USD" as const),
+    catalog_match: true as const,
+    coverage_confirmation_required: true as const,
   };
 
   // No roles yet: return the catalog so the agent can come back with a real mix.
@@ -146,9 +148,15 @@ export function buildStaffingPlan(input: PlanStaffingInput) {
     const roles = queryRoles();
     return {
       status: "needs_roles" as const,
-      event: { city: cityMeta.city, state: cityMeta.state, market_tier: cityMeta.tier },
+      event: {
+        city: cityMeta.city,
+        state: cityMeta.state,
+        market_tier: cityMeta.tier,
+        catalog_match: cityMeta.catalog_match,
+        coverage_confirmation_required: cityMeta.coverage_confirmation_required,
+      },
       message:
-        `${cityMeta.city} is covered (${cityMeta.tier}-tier market). No roles specified. Pick roles and headcount from the catalog below, then call plan_staffing again with a roles array, e.g. [{role: 'brand-ambassadors', headcount: 4}].`,
+        `${cityMeta.city} matches a configured ${cityMeta.tier}-tier catalog entry; this is not confirmed order coverage. No roles were specified. Pick roles and headcount from the catalog below, then call plan_staffing again with a roles array, e.g. [{role: 'brand-ambassadors', headcount: 4}].`,
       available_roles: roles.ok ? roles.data : null,
       tip:
         input.attendees && input.attendees > 0
@@ -201,16 +209,22 @@ export function buildStaffingPlan(input: PlanStaffingInput) {
   }
 
   // City is valid but NOT ONE role resolved. Distinct from city_not_found:
-  // report coverage + the catalog + per-role suggestions so the agent recovers.
+  // report the catalog match + per-role suggestions so the agent recovers.
   if (lines.length === 0) {
     const roles = queryRoles();
     return {
       status: "roles_not_found" as const,
-      event: { city: cityMeta.city, state: cityMeta.state, market_tier: cityMeta.tier },
+      event: {
+        city: cityMeta.city,
+        state: cityMeta.state,
+        market_tier: cityMeta.tier,
+        catalog_match: cityMeta.catalog_match,
+        coverage_confirmation_required: cityMeta.coverage_confirmation_required,
+      },
       requested_roles: input.roles.map((r) => r.role),
       unresolved_roles: unresolved,
       available_roles: roles.ok ? roles.data : null,
-      message: `${cityMeta.city} is covered, but none of the requested roles matched TempGuru's catalog. Pick roles from the list below (or use each unresolved role's suggestion) and call plan_staffing again.`,
+      message: `${cityMeta.city} matches the configured market catalog (not confirmed order coverage), but none of the requested roles matched TempGuru's role catalog. Pick roles from the list below (or use each unresolved role's suggestion) and call plan_staffing again.`,
       next_steps: FALLBACK_LADDER,
     };
   }
@@ -225,7 +239,9 @@ export function buildStaffingPlan(input: PlanStaffingInput) {
     { low: 0, high: 0 },
   );
 
-  const staffingNotes: string[] = [];
+  const staffingNotes: string[] = [
+    "The city is a configured catalog entry, not a promise of order coverage or live inventory. A TempGuru coordinator confirms coverage and lead time for the specific order after buyer submission.",
+  ];
   if (!planComplete) {
     const parts = unresolved.map((u) =>
       u.suggestion ? `${u.role} × ${u.headcount} (did you mean ${u.suggestion.name}?)` : `${u.role} × ${u.headcount}`,
@@ -263,7 +279,7 @@ export function buildStaffingPlan(input: PlanStaffingInput) {
         note:
           avail.data.days_until_event < 0
             ? "This date is in the PAST — confirm the intended date with the user before planning or quoting."
-            : "Lead-time guidance, not a reservation. Even rush windows are worth submitting.",
+            : "Tier-based lead-time guidance, not a coverage check or reservation. Even rush windows are worth submitting; a coordinator confirms the specific order.",
       };
     }
   }
@@ -421,6 +437,8 @@ export function buildStaffingPlan(input: PlanStaffingInput) {
       city: cityMeta.city,
       state: cityMeta.state,
       market_tier: cityMeta.tier,
+      catalog_match: cityMeta.catalog_match,
+      coverage_confirmation_required: cityMeta.coverage_confirmation_required,
       event_type: input.event_type ?? null,
       event_date: input.event_date ?? null,
       attendees: input.attendees ?? null,
@@ -444,6 +462,7 @@ export function buildStaffingPlan(input: PlanStaffingInput) {
             "Do NOT prepare a request_quote handoff from this partial plan: resolve the unpriced_roles (each carries a did-you-mean suggestion; get_roles lists exact names), then call plan_staffing again for complete totals.",
           ]),
       "Present this plan to the user: roles, headcount, the estimated total range (label it a planning estimate), the lead-time read, and any staffing notes.",
+      "State that catalog membership and tier-based lead-time guidance do not confirm order coverage; the coordinator confirms the specific order after buyer submission.",
       ...FALLBACK_LADDER,
       "After the buyer submits the TempGuru form themselves, a human coordinator replies with a binding quote within one business day. No payment until the buyer approves the quote.",
     ],

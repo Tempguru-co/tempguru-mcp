@@ -112,7 +112,7 @@ User-agent: CommonCrawl
 Allow: /
 
 # ------------------------------
-# ALL OTHER BOTS - Squarespace defaults
+# ALL OTHER BOTS - Cloudflare Pages site defaults
 # ------------------------------
 User-agent: *
 Content-Signal: search=yes, ai-input=yes, ai-train=yes

@@ -1,0 +1,74 @@
+{
+  "contractVersion": "1.0.0",
+  "reviewedAt": "2026-08-10",
+  "organization": {
+    "legalName": "Temporary Assistance Guru, Inc.",
+    "brandName": "TempGuru",
+    "website": "https://tempguru.co"
+  },
+  "catalog": {
+    "markets": {
+      "status": "verified_from_repository",
+      "value": 345,
+      "unit": "configured US and Canadian market entries",
+      "source": "content/mcp-data/cities.json",
+      "publicDescription": "TempGuru's public market catalog contains 345 configured US and Canadian entries. Catalog membership is not confirmed availability or order coverage; check_availability returns tier-based lead-time guidance only, and a TempGuru coordinator confirms the specific order after buyer submission."
+    },
+    "roles": {
+      "status": "verified_from_repository",
+      "value": 19,
+      "unit": "event staffing roles",
+      "source": "content/mcp-data/roles.json"
+    }
+  },
+  "servicePolicies": {
+    "workerClassification": {
+      "status": "published_policy",
+      "value": "TempGuru fulfills event staffing orders with W-2 employees, not 1099 independent contractors."
+    },
+    "pricing": {
+      "status": "repository_backed",
+      "source": "content/mcp-data/role-pricing.json",
+      "qualification": "Published rates are planning estimates. A human-reviewed quote is binding."
+    },
+    "availability": {
+      "status": "repository_backed_guidance",
+      "source": "src/lib/mcp/queries.ts",
+      "qualification": "Availability results are tier-based lead-time guidance, not real-time inventory, confirmed order coverage, a reservation, or a guarantee."
+    }
+  },
+  "withheldClaims": {
+    "fillRate": {
+      "status": "withheld_pending_repository_evidence",
+      "publicValue": null,
+      "blockedPhrases": ["99% fill rate", "99% fulfillment rate"]
+    },
+    "eventsStaffed": {
+      "status": "withheld_pending_repository_evidence",
+      "publicValue": null,
+      "blockedPhrases": ["5,000+ events", "2,500+ events"]
+    },
+    "workersPlaced": {
+      "status": "withheld_pending_repository_evidence",
+      "publicValue": null,
+      "blockedPhrases": ["100,000+ workers", "100,000+ W-2 workers"]
+    },
+    "partnerCount": {
+      "status": "withheld_pending_repository_evidence",
+      "publicValue": null,
+      "blockedPhrases": ["200+ partners", "200+ vetted local partners", "200+ pre-vetted local staffing"]
+    }
+  },
+  "agentInterfaces": {
+    "mcp": {
+      "url": "https://mcp.tempguru.co/mcp",
+      "authenticationRequired": false
+    },
+    "a2a": {
+      "url": "https://mcp.tempguru.co/a2a",
+      "protocolBinding": "JSONRPC",
+      "protocolVersion": "1.0",
+      "authenticationRequired": false
+    }
+  }
+}

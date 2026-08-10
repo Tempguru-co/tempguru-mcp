@@ -52,9 +52,14 @@ def test_no_unavailable_companion_skills():
 
 def test_agent_safety_rules_present():
     _, body = _frontmatter_and_body()
+    normalized = " ".join(body.split())
     assert "planning estimates" in body
     assert "Never promise availability" in body
     assert "not legal advice" in body
+    assert "configured US and Canadian market entries" in normalized
+    assert "catalog match and tier-based lead-time guidance do not confirm" in normalized
+    assert "coordinator confirms the specific order" in normalized
+    assert "200+" not in body
 
 
 def test_current_tool_and_buyer_handoff_contract():

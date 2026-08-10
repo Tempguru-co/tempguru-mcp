@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "TempGuru MCP Server, W-2 Event Staffing Data for AI Agents",
   description:
-    "MCP server and REST API for TempGuru event staffing: all-inclusive W-2 hourly rates, role catalog, city coverage across 345 US/Canada markets, lead times, state compliance, the Event Staffing Rate Index, and a non-PII buyer quote handoff.",
+    "MCP server and REST API for TempGuru event staffing: all-inclusive W-2 hourly rates, a 345-entry configured US/Canada market catalog, tier-based lead-time guidance, coordinator-confirmed order coverage, state compliance, the Event Staffing Rate Index, and a non-PII buyer quote handoff.",
   // Indexable: this subdomain is the natural ranking target for 'event staffing
   // MCP' / 'TempGuru MCP' queries and passes crawlers to /okf/, llms.txt, and the
   // OpenAPI spec. /admin sets its own noindex via src/app/admin/layout.tsx.

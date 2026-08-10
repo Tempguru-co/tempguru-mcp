@@ -1,7 +1,7 @@
 interface:
   display_name: "Urgent Event Backfill"
   short_description: "Handle urgent event staffing shortfalls"
-  default_prompt: "Use $urgent-event-backfill to triage this staffing emergency and submit an honest rush request after I confirm."
+  default_prompt: "Use $urgent-event-backfill to triage this staffing emergency and prepare a buyer-operated rush form handoff after I confirm; do not submit it for me."
 dependencies:
   tools:
     - type: "mcp"

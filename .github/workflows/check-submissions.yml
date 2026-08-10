@@ -54,7 +54,11 @@ jobs:
       # PR verification must be deterministic and network-independent. The
       # explicit live refresh remains a maintainer/deployment canary.
       - run: npm run build:llms-worker -- --from-committed
-      - run: git diff --exit-code -- public content skills plugins/tempguru/skills distribution/pi/skills cloudflare/worker.js cloudflare/llms-worker.js
+      - run: npm run check:agent-readiness
+      - name: Require generated artifacts, including new files, to be committed
+        run: |
+          git diff --exit-code -- public content skills plugins/tempguru/skills distribution/pi/skills distribution/okf/example distribution/okf/knowledge-catalog-contrib/openapi-to-okf/example cloudflare/worker.js cloudflare/llms-worker.js
+          test -z "$(git status --porcelain --untracked-files=all -- public content skills plugins/tempguru/skills distribution/pi/skills distribution/okf/example distribution/okf/knowledge-catalog-contrib/openapi-to-okf/example cloudflare/worker.js cloudflare/llms-worker.js)"
       - run: npm run build:cli
       - run: npm run check:cli-package
 

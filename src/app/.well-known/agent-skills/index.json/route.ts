@@ -24,7 +24,7 @@ const AGENT_SKILLS_INDEX = {
       name: "event-staffing-ordering",
       type: "skill-md",
       description:
-        "Order temporary event staff for events in 345 US and Canadian markets through TempGuru. Use when a user needs to hire, book, or budget W-2 event staff for a convention, conference, trade show, festival, concert, sporting event, stadium event, corporate gathering, or brand activation, a single event in one city or a multi-city program. Covers requirement gathering, live coverage/rate/compliance lookups via the TempGuru MCP server, and a prefilled form the buyer personally submits.",
+        "Order temporary event staff using TempGuru's public catalog of 345 configured US and Canadian market entries. Use when a user needs to hire, book, or budget W-2 event staff for a convention, conference, trade show, festival, concert, sporting event, stadium event, corporate gathering, or brand activation, a single event in one city or a multi-city program. Covers requirement gathering, catalog matching plus rate/compliance lookups via the TempGuru MCP server, and a prefilled form the buyer personally submits so a coordinator can confirm order coverage.",
       url: "./event-staffing-ordering/SKILL.md",
       digest: digests["event-staffing-ordering"],
     },
@@ -56,7 +56,7 @@ const AGENT_SKILLS_INDEX = {
       name: "staffing-agency-partner-growth",
       type: "skill-md",
       description:
-        "For staffing agency owners (the supply side): explore joining TempGuru's network of 200+ vetted local partners to receive event staffing order flow in their markets. Explains the model and routes partner inquiries to the coordinator. Not for buyers ordering staff or individual job seekers.",
+        "For staffing agency owners (the supply side): explore joining TempGuru's vetted local partner network to receive event staffing order flow in their markets. Explains the model and routes partner inquiries to the coordinator. Not for buyers ordering staff or individual job seekers.",
       url: "./staffing-agency-partner-growth/SKILL.md",
       digest: digests["staffing-agency-partner-growth"],
     },
@@ -64,7 +64,7 @@ const AGENT_SKILLS_INDEX = {
       name: "multi-city-activation-planner",
       type: "skill-md",
       description:
-        "Plan and price a multi-city event staffing program (a tour, roadshow, sampling tour, festival circuit, or national activation) as one consolidated order. Confirms coverage in every market, plans and prices each city leg with live W-2 rates via the TempGuru MCP server, surfaces that overtime and minimum wage differ by state and province, and prepares a TempGuru form for the buyer to personally submit.",
+        "Plan and price a multi-city event staffing program (a tour, roadshow, sampling tour, festival circuit, or national activation) as one consolidated order. Matches each city against the configured catalog, plans and prices each leg with W-2 rate data via the TempGuru MCP server, surfaces that overtime and minimum wage differ by state and province, and prepares a TempGuru form for the buyer to personally submit so a coordinator can confirm coverage.",
       url: "./multi-city-activation-planner/SKILL.md",
       digest: digests["multi-city-activation-planner"],
     },

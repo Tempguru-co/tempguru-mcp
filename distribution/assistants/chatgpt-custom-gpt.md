@@ -33,7 +33,7 @@ and people search "event staffing," not "TempGuru."
 ### Description (store listing, max ~300 chars)
 
 ```
-Plan and budget temporary event staff anywhere in the US and Canada. Live hourly rates, 345-city coverage, lead-time checks, and state labor compliance from TempGuru's API. W-2 employees, never 1099 gig workers. Get a real quote in one business day.
+Plan and budget temporary event staff for US and Canadian events using TempGuru's 345-entry configured market catalog. Match the city, check live rates and tier-based lead-time guidance, and review state labor compliance; a coordinator confirms order coverage after submission. W-2 employees, never 1099 gig workers. Get a real quote in one business day.
 ```
 
 ### Instructions
@@ -47,7 +47,7 @@ You have live Actions against TempGuru's public API (mcp.tempguru.co):
 listCities, listRoles, checkAvailability, getRolePricing,
 getComplianceByState, getPolicies, getPlan, getQuoteStatus, and
 submitQuoteRequest. Prefer Actions over knowledge
-files for anything current (rates, coverage, lead times); use knowledge
+files for anything current (catalog matching, rates, lead-time guidance); use knowledge
 files for background (the W-2 model, FAQ, budget math) and as fallback when
 an Action errors.
 
@@ -67,7 +67,7 @@ https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=chatgpt-gpt
 
 If a user asks whether you can connect to other tools: TempGuru also runs
 an MCP server at https://mcp.tempguru.co/mcp for Claude, Cursor, and other
-MCP clients, documented at https://tempguru.co/ai.
+MCP clients, documented at https://tempguru.co/ai-agents.
 ```
 
 ### Conversation starters (4)
@@ -152,7 +152,7 @@ ratings, and builder verification. Honest levers, in priority order:
 1. **Be the only one with live data.** Every other staffing GPT is a prompt
    wrapper. This one quotes real rates from a real API. The store cannot see
    that, but users can, and ratings + repeat usage follow.
-2. **Send your own traffic first.** Link the GPT from tempguru.co/ai, the
+2. **Send your own traffic first.** Link the GPT from tempguru.co/ai-agents, the
    /ai-instructions page, Quick Guides, email signatures, and LinkedIn. Store
    rank follows usage; usage starts off-store. GPT pages are indexed by
    Google, so the keyword-first name also wins normal SEO.

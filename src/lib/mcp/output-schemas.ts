@@ -73,7 +73,8 @@ const CITY_ROW = z.object({
   url: z.string().describe("City detail page on tempguru.co."),
 });
 
-// Two variants: a filtered LIST, or a single-city COVERAGE check (coverage_check:true).
+// Two variants: a filtered LIST, or a single-city catalog check
+// (catalog_check:true). A match never means order coverage or availability.
 export const GET_CITIES_OUTPUT = {
   // list variant
   total: z.number().int().optional().describe("Total cities matching the filter (before limit)."),
@@ -82,21 +83,37 @@ export const GET_CITIES_OUTPUT = {
     .object({ hub: z.number().int(), mid: z.number().int(), small: z.number().int() })
     .optional(),
   cities: z.array(CITY_ROW).optional(),
+  coverage_confirmation_required: z.literal(true).optional(),
+  catalog_qualification: z.string().optional(),
   note: z.string().optional().describe("Present when the list was truncated by limit."),
-  // coverage-check variant (city param)
-  coverage_check: z.literal(true).optional().describe("Present when a single-city coverage check was requested."),
-  covered: z.boolean().optional(),
+  // catalog-check variant (city param)
+  catalog_check: z.literal(true).optional().describe("Present when a single-city catalog check was requested."),
+  catalog_match: z.boolean().optional().describe("Whether the city resolved to a configured catalog entry; not an availability or coverage promise."),
   requested: z.string().optional(),
   suggestion: SUGGESTION,
-  city: CITY_ROW.nullable().optional().describe("The matched market (coverage check), or null if not covered."),
+  city: CITY_ROW.nullable().optional().describe("The matched configured entry, or null when there was no catalog match."),
   message: z.string().optional(),
 };
 
 export const GET_CITIES_SCHEMA = z.object(GET_CITIES_OUTPUT).superRefine((value, ctx) => {
-  if (value.coverage_check === true) {
-    requireFields(value, ctx, "coverage", ["requested", "covered", "city", "message"]);
+  if (value.catalog_check === true) {
+    requireFields(value, ctx, "catalog", [
+      "requested",
+      "catalog_match",
+      "coverage_confirmation_required",
+      "catalog_qualification",
+      "city",
+      "message",
+    ]);
   } else {
-    requireFields(value, ctx, "list", ["total", "returned", "tier_breakdown", "cities"]);
+    requireFields(value, ctx, "list", [
+      "total",
+      "returned",
+      "tier_breakdown",
+      "cities",
+      "coverage_confirmation_required",
+      "catalog_qualification",
+    ]);
   }
 });
 
@@ -121,7 +138,7 @@ export const GET_ROLES_OUTPUT = {
 export const CHECK_AVAILABILITY_OUTPUT = {
   city_found: z
     .boolean()
-    .describe("false = city not in the published footprint (see message); true = guidance below."),
+    .describe("false = city did not match the configured catalog (see message); true = planning guidance below, not confirmed coverage."),
   // city-not-found variant
   requested: z.string().optional().describe("Echo of the unmatched city input."),
   suggestion: SUGGESTION,
@@ -129,6 +146,8 @@ export const CHECK_AVAILABILITY_OUTPUT = {
   // invalid-date variant
   error: z.string().optional().describe("Present when the date could not be parsed."),
   // full guidance variant
+  catalog_match: z.literal(true).optional(),
+  coverage_confirmation_required: z.literal(true).optional(),
   city: z.string().optional(),
   state: z.string().optional(),
   city_tier: CITY_TIER.optional(),
@@ -170,6 +189,8 @@ export const CHECK_AVAILABILITY_SCHEMA = z.object(CHECK_AVAILABILITY_OUTPUT).sup
   } else {
     requireFields(value, ctx, "availability", [
       "city",
+      "catalog_match",
+      "coverage_confirmation_required",
       "state",
       "city_tier",
       "event_date",
@@ -385,6 +406,8 @@ export const PLAN_STAFFING_OUTPUT = {
       city: z.string(),
       state: z.string(),
       market_tier: z.string(),
+      catalog_match: z.literal(true),
+      coverage_confirmation_required: z.literal(true),
       event_type: z.string().nullable().optional(),
       event_date: z.string().nullable().optional(),
       attendees: z.number().nullable().optional(),

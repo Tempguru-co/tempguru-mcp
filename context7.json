@@ -1,7 +1,7 @@
 {
   "$schema": "https://context7.com/schema/context7.json",
   "projectTitle": "TempGuru Event Staffing MCP",
-  "description": "MCP server for W-2 compliant event staffing across 345 US and Canadian markets. Twelve tools: plan_staffing and save_staffing_plan are non-destructive non-contact persistence writes; get_plan, get_cities, get_roles, check_availability, get_role_pricing, get_compliance_by_state, get_policies, get_rate_benchmark, get_quote_status, and request_quote are read-only. request_quote turns a saved non-PII plan_id into a prefilled buyer-operated form URL and never accepts contact details or creates a lead or quote reference.",
+  "description": "MCP server for W-2 compliant event staffing against 345 configured US and Canadian market entries, with catalog matching, tier-based lead-time guidance, and coordinator-confirmed order coverage. Twelve tools: plan_staffing and save_staffing_plan are non-destructive non-contact persistence writes; get_plan, get_cities, get_roles, check_availability, get_role_pricing, get_compliance_by_state, get_policies, get_rate_benchmark, get_quote_status, and request_quote are read-only. request_quote turns a saved non-PII plan_id into a prefilled buyer-operated form URL and never accepts contact details or creates a lead or quote reference.",
   "folders": ["content/skills"],
   "excludeFolders": ["src", "public", ".next", "node_modules"],
   "excludeFiles": ["package-lock.json", "tsconfig.json", "next.config.ts", "smithery-config.schema.json"],

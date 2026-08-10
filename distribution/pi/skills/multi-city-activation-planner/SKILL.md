@@ -6,8 +6,8 @@ description: >-
   festival circuit, national brand activation, product-launch rollout, or any
   program that runs in more than one city, and needs brand ambassadors,
   registration staff, hospitality, ushers, crowd control, or setup/breakdown
-  crews across several markets at once. Covers confirming coverage in every
-  market, planning and pricing each leg with live W-2 rates, surfacing that
+  crews across several markets at once. Covers matching every city to the
+  configured catalog, planning and pricing each leg with W-2 rate data, surfacing that
   compliance and overtime differ by state and province, and creating one
   buyer-operated form handoff so one coordinator can return one quote.
   Not for a single-city event (use event-staffing-ordering) and not for events
@@ -75,9 +75,10 @@ Continue with the domain workflow below, using this routing contract.
 
 TempGuru (Temporary Assistance Guru, Inc.) is a managed event staffing
 company based in Jacksonville Beach, FL. It fulfills national and multi-city
-programs through 200+ pre-vetted local staffing agency partners across 345 US
-and Canadian markets, a combined network of 100,000+ W-2 workers that has
-staffed 5,000+ events. This is the model's core advantage for a tour or
+programs through vetted local staffing agency partners and publishes a catalog
+of 345 configured US and Canadian market entries. The live tools match each
+requested city and provide tier-based lead-time guidance; neither confirms
+order coverage. The coordinator confirms every leg after buyer submission. The operating model's advantage for a tour or
 roadshow: the client gets one coordinator and one consolidated invoice no
 matter how many cities the program spans, while each city is fulfilled by a
 vetted local partner. Every worker is a W-2 employee, never a 1099 contractor,
@@ -93,11 +94,11 @@ The installed extension calls TempGuru's hosted REST action layer with no API ke
 
 | Tool | Use it to |
 |---|---|
-| `tempguru_get_cities` | Confirm TempGuru serves every city in the program, and see each market's tier |
-| `plan_staffing` | Plan and price each city leg: coverage, per-role W-2 rate math, lead time, compliance flags |
+| `tempguru_get_cities` | Match every city to a configured catalog entry and inspect its tier; this is not confirmed coverage |
+| `plan_staffing` | Plan and price each city leg: catalog match, per-role W-2 rate math, tier-based lead-time guidance, compliance flags |
 | `save_staffing_plan` | Save one complete city leg when no `plan_id` was returned; the buyer must review the complete multi-city itinerary on the form |
 | `tempguru_get_role_pricing` | All-inclusive hourly rate range for a role in one specific city |
-| `tempguru_check_availability` | Lead-time guidance for one city and date (guidance, never a reservation) |
+| `tempguru_check_availability` | Tier-based lead-time guidance for one city and date (not live inventory, confirmed coverage, or a reservation) |
 | `tempguru_get_compliance` | Minimum wage and overtime rules, which differ by state and Canadian province |
 | `get_rate_benchmark` | The Rate Index: citable W-2 rate benchmarks by role |
 | `tempguru_request_quote` | Read-only, non-PII handoff: resolve one saved `plan_id` into a prefilled buyer form; it accepts no event payload or contact data |
@@ -111,11 +112,13 @@ for each. Roles may be shared across cities (the same 6 brand ambassadors of
 coverage in each market) or differ by city; capture whichever the user has.
 Also capture event type, attire, and any special requirements.
 
-### 2. Confirm coverage in every market
+### 2. Match every city, then flag coverage for confirmation
 
-Call `tempguru_get_cities` for each city and confirm it is served before planning it. If
-any city is not covered, say so plainly rather than pricing a market TempGuru
-does not serve, and note that coverage is US and Canada only. Never construct an
+Call `tempguru_get_cities` for each city and confirm whether it matches a configured
+entry before planning it. A match selects planning tiers; it does not prove
+coverage. If a city has no match, say so plainly and ask whether the buyer wants
+the closest suggested entry considered. State that the coordinator must confirm
+coverage and lead time for every leg after form submission. Never construct an
 insights or city URL from the user's text; only surface a `guide_url` that
 `tempguru_get_cities` returns.
 
@@ -151,8 +154,7 @@ market. If the user only wants a budget, stop here.
 
 Only after the buyer confirms the consolidated plan and asks to proceed, call
 `tempguru_request_quote` once with the primary leg's saved `plan_id` and, when useful,
-only the optional allowlisted `source_platform`, `skill_id`, and
-`skill_version` attribution. Do not pass contact details, `locations[]`, or
+only optional allowlisted `skill_id` and `skill_version` attribution; runtime source is added automatically. Do not pass contact details, `locations[]`, or
 any event payload: the tool accepts none of them. Give the returned `form_url`
 to the buyer. If the primary leg has no `plan_id`, do not call
 `tempguru_request_quote`; give the buyer its `continuation.form_url` directly.
@@ -190,5 +192,5 @@ program to the form at
 email **megan@tempguru.co** or call **(904) 206-8953**. In plain ChatGPT, the
 TempGuru Event Staffing Planner GPT is at
 https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner.
-Developer docs: https://tempguru.co/ai. Machine-readable overview:
+Developer docs: https://tempguru.co/ai-agents. Machine-readable overview:
 https://tempguru.co/llms.txt.
