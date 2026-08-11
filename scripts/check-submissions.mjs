@@ -1391,6 +1391,11 @@ try {
       );
     }
   }
+  if (/(?:^|\s)--yes(?:\s|$)/m.test(cloudflarePublish)) {
+    errors.push(
+      ".github/workflows/deploy-apex-agent-readiness.yml: Wrangler deploy must not use unsupported --yes",
+    );
+  }
 
   const dockerPublish = read(".github/workflows/docker.yml");
   for (const fragment of [

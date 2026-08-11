@@ -41,7 +41,6 @@ jobs:
             --name ${{ vars.CLOUDFLARE_DISCOVERY_WORKER_NAME }}
             --compatibility-date 2026-08-10
             --keep-vars
-            --yes
       - name: Deploy apex llms Worker
         uses: cloudflare/wrangler-action@9acf94ace14e7dc412b076f2c5c20b8ce93c79cd # v3
         with:
@@ -52,6 +51,5 @@ jobs:
             --name ${{ vars.CLOUDFLARE_LLMS_WORKER_NAME }}
             --compatibility-date 2026-08-10
             --keep-vars
-            --yes
       - name: Verify live discovery, route bindings, and agent protocols
         run: npm run check:live-discovery
