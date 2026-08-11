@@ -1048,6 +1048,90 @@ for (const p of ["README.md", "llms-install.md", "distribution/pi/README.md"]) {
   }
 }
 
+// Pi is published independently from the MCP CLI, so the external install and
+// release docs can go stale even when every package manifest is consistent.
+// Do not include distribution/pi/README.md here: it is part of the immutable
+// npm tarball and should change only with a new package version.
+{
+  const piStatusDocs = [
+    "README.md",
+    "README.zh-CN.md",
+    "llms-install.md",
+    "RELEASE.md",
+    "distribution/assistants/README.md",
+    "distribution/ai-agents-page.html",
+    "distribution/ai-agents-page.zh-CN.html",
+  ];
+  const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const currentVersion = escapeRegExp(PI_PKG.version);
+  const [piMajor, piMinor, piPatch] = PI_PKG.version.split(".").map(Number);
+  const previousVersion = escapeRegExp(`${piMajor}.${piMinor}.${piPatch - 1}`);
+  const currentStatus = String.raw`\b(?:published|live|current)\b|(?:已发布|当前|现行|正式发布)`;
+  const staleCandidate = String.raw`\b(?:candidate|unpublished)\b|候选`;
+  const stalePreviousStatus = String.raw`\b(?:live|current)\b|(?:当前|现行)`;
+  const relation = (version, status) =>
+    new RegExp(`(?:${version}.{0,96}(?:${status})|(?:${status}).{0,96}${version})`, "iu");
+
+  for (const p of piStatusDocs) {
+    const clauses = read(p)
+      .replace(/<[^>]*>/g, " ")
+      .replace(/[`*_]/g, "")
+      .split(/\n+|[!?。！？;；]|\.(?=\s|$)|\s+\|\s+/u)
+      .map((clause) => clause.replace(/\s+/g, " ").trim())
+      .filter(Boolean);
+    if (clauses.some((clause) => relation(currentVersion, staleCandidate).test(clause))) {
+      errors.push(`${p}: tempguru-pi@${PI_PKG.version} must not be described as a candidate or unpublished`);
+    }
+    if (clauses.some((clause) => relation(previousVersion, stalePreviousStatus).test(clause))) {
+      errors.push(`${p}: the superseded tempguru-pi ${piMajor}.${piMinor}.${piPatch - 1} must not be described as current/live/published`);
+    }
+    if (!clauses.some((clause) => relation(currentVersion, currentStatus).test(clause))) {
+      errors.push(`${p}: must identify tempguru-pi@${PI_PKG.version} as the published live/current package`);
+    }
+  }
+
+  const release = read("RELEASE.md");
+  const shellBlocks = [...release.matchAll(/```(?:bash|sh|shell)?[^\n]*\n([\s\S]*?)```/giu)].map(
+    (match) => match[1].replace(/\\\r?\n\s*/g, " ").replace(/\s+/g, " ").trim(),
+  );
+  const primeSmoke = shellBlocks.find(
+    (block) => /\bprime-agent\b/u.test(block) && /--tools\s+tempguru_get_cities\b/u.test(block),
+  );
+  const pinnedPrimeInstall = new RegExp(
+    `\\bprime-agent\\s+package\\s+install\\s+npm:tempguru-pi@${currentVersion}(?=$|\\s)`,
+    "mu",
+  );
+  if (!primeSmoke) {
+    errors.push("RELEASE.md: could not find the fenced Prime Agent native-tool smoke test");
+  } else {
+    const persistentInstall = /\bprime-agent\s+package\s+install\s+npm:tempguru-pi(?:@[^\s\\]+)?/u;
+    const ephemeralInstall = /(?:^|\s)-e\s+npm:tempguru-pi(?:@[^\s\\]+)?/u;
+    if (!pinnedPrimeInstall.test(primeSmoke)) {
+      errors.push(`RELEASE.md: Prime Agent smoke must persistently install npm:tempguru-pi@${PI_PKG.version}`);
+    }
+    if (persistentInstall.test(primeSmoke) && ephemeralInstall.test(primeSmoke)) {
+      errors.push("RELEASE.md: Prime Agent smoke must use one package-loading path, not persistent install plus -e");
+    }
+  }
+
+  const piReleaseSection = release.match(
+    /^##[^\n]*(?:Pi\s*\/\s*Prime Agent|tempguru-pi)[^\n]*\n(?:(?!^##[ \t])[\s\S])*/imu,
+  )?.[0];
+  if (!piReleaseSection) {
+    errors.push("RELEASE.md: Pi / Prime Agent release section is missing");
+  } else if (
+    piReleaseSection
+      .split("\n")
+      .some(
+        (line) =>
+          /(^|[\s("'`])\/skills(?=$|[\s).,;:'"`])/u.test(line) &&
+          !/\b(?:do not|don't|avoid|unsupported|not (?:use|supported))\b/iu.test(line),
+      )
+  ) {
+    errors.push("RELEASE.md: Pi / Prime Agent release smoke must not instruct operators to use unsupported /skills");
+  }
+}
+
 for (const skill of SKILLS.filter((name) => name !== "tempguru-pro-operations")) {
   if (!read(`content/skills/${skill}.md`).includes("?source=prime-agent")) {
     errors.push(`content/skills/${skill}.md: Prime Agent attribution endpoint missing`);

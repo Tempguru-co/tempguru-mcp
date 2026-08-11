@@ -131,13 +131,13 @@ legacy OpenClaw VPS container.
 
 ## Pi
 
-The repository's `tempguru-pi` 1.7.2 candidate contains 8 skills plus 9 native
+The published `tempguru-pi@1.7.2` package is live, current, and immutable. An
+unpinned install resolves to `1.7.2`. It contains 8 skills plus 9 native
 read-only tools with `?source=pi` attribution. The native
 `tempguru_request_quote` tool accepts a saved plan ID and returns the
-buyer-operated form; it does not transmit contact details. Check npm and the
-repository release tracker for publication status; `1.7.1` is already live
-and immutable. Attach the remote MCP for the full planner, saved-plan write,
-and Rate Index:
+buyer-operated form; it does not transmit contact details. Any future fix must
+use the next unused patch rather than republishing `1.7.2`. Attach the remote
+MCP for the full planner, saved-plan write, and Rate Index:
 
 ```bash
 pi install npm:tempguru-pi
@@ -151,6 +151,13 @@ remain MCP-only in the current native package; when a Pi deployment also has a
 trusted MCP client, attach `https://mcp.tempguru.co/mcp?source=pi` for those
 capabilities.
 
+The published-artifact Pi smoke passed on 2026-08-10: an isolated `1.7.2`
+install loaded all 8 TempGuru skills in Pi's RPC `get_commands` response and
+loaded the native extension without conflicts. Exactly one Austin
+`tempguru_get_cities` call returned HTTP 200 with `catalog_match=true` and
+`coverage_confirmation_required=true`, and the final wording did not imply
+confirmed coverage.
+
 ## Prime Agent
 
 Prime Agent implements the same Agent Skills and Pi-package manifest contract,
@@ -162,15 +169,22 @@ prime-agent package install npm:tempguru-pi
 prime-agent package list
 ```
 
-Runtime-specific `source=prime-agent` attribution is already live in
-`tempguru-pi` 1.7.1. The repository's 1.7.2 candidate adds the evidence-gated
-instructions and catalog semantics in this release. Until npm reports `1.7.2`
-as published, an unpinned install resolves to `1.7.1` (as of 2026-08-10).
+Runtime-specific `source=prime-agent` attribution and the evidence-gated
+instructions and catalog semantics are live in `tempguru-pi@1.7.2`. An
+unpinned install resolves to `1.7.2` (as of 2026-08-10).
 
 Restart Prime Agent and verify that all 8 TempGuru skills and the 9 native
 tools from `tempguru_get_cities` through `tempguru_request_quote` load. The
 shared extension detects Prime Agent and applies `source=prime-agent` to its
 REST calls and buyer-form handoff; Pi continues to use `source=pi`.
+
+The published-artifact Prime replay used a pinned, persistent `1.7.2` package
+install and list with no duplicate conflicts. Exactly one Austin
+`tempguru_get_cities` call returned HTTP 200 with `catalog_match=true` and
+`coverage_confirmation_required=true`, and the final wording preserved the
+coordinator-confirmation boundary. That replay was a functional smoke; it did
+not independently re-enumerate all skills/tools or inspect server attribution
+logs.
 
 Prime Agent v0.7.0's standard `McpIntegration` requires OAuth or a bearer token,
 so merely adding TempGuru's authless MCP URL to `.prime/agent/settings.json`
