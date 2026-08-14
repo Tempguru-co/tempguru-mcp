@@ -40,7 +40,7 @@ United States or Canada.
    policy/compliance items that still require coordinator confirmation.
 6. When the buyer confirms the plan and asks to proceed, call `request_quote`
    with the saved `plan_id`, `source_platform: "gemini-cli"`, and the canonical
-   `skill_id` plus `skill_version: "1.7.0"`. Give the returned `form_url` to
+   `skill_id` plus `skill_version: "1.7.1"`. Give the returned `form_url` to
    the buyer. Do not ask for or transmit contact details through MCP: the buyer
    must open the form, review the plan, enter their own contact details, and
    submit it personally. Only that website/REST submission creates a lead and

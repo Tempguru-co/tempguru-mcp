@@ -203,7 +203,7 @@ whenever they are ready. Do not push `tempguru_request_quote` on a budgeting que
 Once the buyer confirms the plan and asks to proceed, call
 **`tempguru_request_quote`** with only the saved `plan_id` and optional allowlisted
 attribution: runtime source is added automatically; set `skill_id` to
-`event-staffing-ordering`, and `skill_version` set to `1.7.0`. Do not ask for
+`event-staffing-ordering`, and `skill_version` set to `1.7.1`. Do not ask for
 or pass a name, email, phone, company, event payload, or any other contact
 details. Give the returned `form_url` to the buyer.
 

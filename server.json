@@ -3,7 +3,7 @@
   "name": "co.tempguru/event-staffing",
   "title": "TempGuru Event Staffing",
   "description": "Plan W-2 event staffing from 345 catalog entries; a coordinator confirms each order.",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "websiteUrl": "https://tempguru.co/ai-agents",
   "repository": {
     "url": "https://github.com/tempguru-co/tempguru-mcp",
@@ -19,7 +19,7 @@
     {
       "registryType": "npm",
       "identifier": "tempguru-mcp",
-      "version": "1.7.0",
+      "version": "1.7.1",
       "transport": { "type": "stdio" }
     }
   ]

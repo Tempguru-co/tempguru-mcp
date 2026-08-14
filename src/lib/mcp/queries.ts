@@ -14,7 +14,6 @@ import {
   PRICING_META,
   STATES,
   STATE_META,
-  POLICIES,
   POLICIES_META,
   findCity,
   findRole,
@@ -32,6 +31,7 @@ import {
   type Policy,
 } from "./data";
 import { parseEventStart } from "../dates/parse-event-start";
+import { getPublishedPolicies } from "./published-offer";
 
 // Re-export shared types so REST/MCP route files can import everything
 // query-related from one place.
@@ -627,11 +627,15 @@ export type PolicyNotFound = {
 const normalizePolicyTopic = (value: string) =>
   value.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 
-export function queryPolicies(input: PoliciesQuery = {}): QueryResult<PoliciesData | PolicyNotFound> {
-  let selected = POLICIES;
+export function queryPolicies(
+  input: PoliciesQuery = {},
+  now = new Date(),
+): QueryResult<PoliciesData | PolicyNotFound> {
+  const publishedPolicies = getPublishedPolicies(now);
+  let selected = publishedPolicies;
   if (input.topic?.trim()) {
     const requested = normalizePolicyTopic(input.topic);
-    selected = POLICIES.filter(
+    selected = publishedPolicies.filter(
       (policy) =>
         normalizePolicyTopic(policy.topic) === requested ||
         normalizePolicyTopic(policy.title) === requested,
@@ -641,7 +645,7 @@ export function queryPolicies(input: PoliciesQuery = {}): QueryResult<PoliciesDa
         status: "policy_not_found",
         policy_found: false,
         requested: input.topic,
-        available_topics: POLICIES.map((policy) => policy.topic),
+        available_topics: publishedPolicies.map((policy) => policy.topic),
         message:
           `No published TempGuru policy topic matched "${input.topic}". ` +
           "Choose an available topic or ask a coordinator at megan@tempguru.co for event-specific terms.",

@@ -12,6 +12,24 @@ const MCP_ENDPOINT = "https://mcp.tempguru.co/mcp";
 const PUBLIC_FACTS = JSON.parse(
   readFileSync(new URL("../content/public-facts.json", import.meta.url), "utf8"),
 );
+const POLICIES = JSON.parse(
+  readFileSync(new URL("../content/mcp-data/policies.json", import.meta.url), "utf8"),
+);
+const AGENT5_OFFER = POLICIES.policies.find((policy) => policy.topic === "offers");
+const AGENT5_TERMS = AGENT5_OFFER?.confirmed_claims?.[0];
+const AGENT5_SERVER_INSTRUCTION =
+  "A published first-order offer (code AGENT5) exists; get_policies returns its exact terms.";
+if (
+  AGENT5_OFFER?.confirmed_claims?.length !== 1 ||
+  AGENT5_OFFER?.code !== "AGENT5" ||
+  AGENT5_OFFER?.discount_percent !== 5 ||
+  AGENT5_OFFER?.cap_usd !== 500 ||
+  AGENT5_OFFER?.expires !== "2026-12-31" ||
+  AGENT5_OFFER?.scope !== "first order, new clients" ||
+  !AGENT5_TERMS
+) {
+  throw new Error("canonical AGENT5 offer record is missing or incomplete");
+}
 const A2A_ENDPOINT = PUBLIC_FACTS.agentInterfaces.a2a.url;
 const MODERN_VERSION = "2026-07-28";
 const LEGACY_VERSION = "2025-11-25";
@@ -285,6 +303,9 @@ for (const path of ["/llms.txt", "/llms-full.txt"]) {
       }
     }
   }
+  if (!body.includes(AGENT5_TERMS)) {
+    throw new Error(`${path}: canonical AGENT5 offer terms are missing`);
+  }
   const inventories = [...body.matchAll(/^- Canonical Agent Skills \((\d+)\):[^\n]*$/gm)];
   if (inventories.length !== 1 || Number(inventories[0][1]) !== SKILLS.length) {
     throw new Error(`${path}: expected exactly one ${SKILLS.length}-skill inventory`);
@@ -382,6 +403,9 @@ if (legacyInitialize.protocolVersion !== LEGACY_VERSION) {
     `${MCP_ENDPOINT}: legacy initialize negotiated ${legacyInitialize.protocolVersion}, expected ${LEGACY_VERSION}`,
   );
 }
+if (!legacyInitialize.instructions?.includes(AGENT5_SERVER_INSTRUCTION)) {
+  throw new Error(`${MCP_ENDPOINT}: initialize instructions omit the AGENT5 offer pointer`);
+}
 const legacyTools = await postRpc(
   {
     jsonrpc: "2.0",
@@ -398,6 +422,32 @@ assertExactSet(
     : [],
   TOOLS,
 );
+
+const liveOfferResult = await postRpc(
+  {
+    jsonrpc: "2.0",
+    id: "live-legacy-agent5-offer",
+    method: "tools/call",
+    params: {
+      name: "get_policies",
+      arguments: { topic: "offers" },
+    },
+  },
+  { "mcp-protocol-version": LEGACY_VERSION },
+);
+const liveOffer = liveOfferResult.structuredContent?.policies?.[0];
+if (
+  liveOfferResult.isError === true ||
+  liveOfferResult.structuredContent?.policy_found !== true ||
+  liveOffer?.confirmed_claims?.[0] !== AGENT5_TERMS ||
+  liveOffer?.code !== "AGENT5" ||
+  liveOffer?.discount_percent !== 5 ||
+  liveOffer?.cap_usd !== 500 ||
+  liveOffer?.expires !== "2026-12-31" ||
+  liveOffer?.scope !== "first order, new clients"
+) {
+  throw new Error(`${MCP_ENDPOINT}: live AGENT5 policy drifted from canonical data`);
+}
 
 const discoverMeta = modernMeta("tempguru-live-discovery-modern");
 const modernDiscover = await postRpc(

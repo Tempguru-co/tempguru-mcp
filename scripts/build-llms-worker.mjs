@@ -15,6 +15,20 @@ for (const arg of process.argv.slice(2)) {
 }
 
 const publicFacts = JSON.parse(readFileSync("content/public-facts.json", "utf8"));
+const policies = JSON.parse(readFileSync("content/mcp-data/policies.json", "utf8"));
+const agent5Offer = policies.policies.find((policy) => policy.topic === "offers");
+const agent5Terms = agent5Offer?.confirmed_claims?.[0];
+if (
+  agent5Offer?.confirmed_claims?.length !== 1 ||
+  agent5Offer?.code !== "AGENT5" ||
+  agent5Offer?.discount_percent !== 5 ||
+  agent5Offer?.cap_usd !== 500 ||
+  agent5Offer?.expires !== "2026-12-31" ||
+  agent5Offer?.scope !== "first order, new clients" ||
+  !agent5Terms
+) {
+  throw new Error("canonical AGENT5 offer record is missing or incomplete");
+}
 const okfDiscovery = JSON.parse(
   readFileSync("public/.well-known/okf.json", "utf8"),
 );
@@ -30,6 +44,9 @@ for (const [path, body] of Object.entries(FILES)) {
   if (body.includes(emDash)) errors.push(`${path}: em-dash remains`);
   if (!body.includes(publicFacts.catalog.markets.publicDescription)) {
     errors.push(`${path}: canonical market qualification is missing`);
+  }
+  if (!body.includes(agent5Terms)) {
+    errors.push(`${path}: canonical AGENT5 offer terms are missing`);
   }
   for (const claim of Object.values(publicFacts.withheldClaims)) {
     for (const phrase of claim.blockedPhrases) {

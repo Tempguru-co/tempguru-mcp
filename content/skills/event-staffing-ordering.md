@@ -150,7 +150,7 @@ Once the buyer confirms the plan and asks to proceed, call
 **`request_quote`** with only the saved `plan_id` and optional allowlisted
 attribution: `source_platform` set to the actual runtime label (for example
 `hermes`, `openclaw`, or `pi`), `skill_id` set to
-`event-staffing-ordering`, and `skill_version` set to `1.7.0`. Do not ask for
+`event-staffing-ordering`, and `skill_version` set to `1.7.1`. Do not ask for
 or pass a name, email, phone, company, event payload, or any other contact
 details. Give the returned `form_url` to the buyer.
 

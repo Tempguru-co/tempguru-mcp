@@ -83,12 +83,19 @@ function check(name, ok, detail = "") {
 }
 
 try {
-  await rpc("initialize", {
+  const initialized = await rpc("initialize", {
     protocolVersion: "2025-03-26",
     capabilities: {},
     clientInfo: { name: "tempguru-evals", version: "1.0" },
   });
   notify("notifications/initialized");
+  check(
+    "server instructions advertise the exact published AGENT5 policy pointer",
+    initialized.result?.instructions?.includes(
+      "A published first-order offer (code AGENT5) exists; get_policies returns its exact terms.",
+    ) === true,
+    initialized.result?.instructions ?? "missing instructions",
+  );
 
   // Surface checks: the full tool + prompt inventory must be advertised.
   const tools = await rpc("tools/list", {});
@@ -211,12 +218,27 @@ try {
               plan_id: planId,
               source_platform: "openclaw",
               skill_id: "event-staffing-ordering",
-              skill_version: "1.7.0",
+              skill_version: "1.7.1",
             },
           })
         : null;
       const text = JSON.stringify({ plan, savedPlan, restored, quoted });
       const missing = c.expect.filter((marker) => !text.includes(marker));
+      const expectedOfferNote =
+        "First-order offer AGENT5 may apply (5% off, $500 cap, expires 2026-12-31); see get_policies. Not reflected in the totals above.";
+      const restoredPlan = restored?.result?.structuredContent;
+      if (plan?.offer_note !== expectedOfferNote) missing.push("exact plan_staffing offer_note");
+      if (restoredPlan?.offer_note !== expectedOfferNote) missing.push("exact get_plan offer_note");
+      if (
+        JSON.stringify(restoredPlan?.snapshot?.estimated_total_range) !==
+        JSON.stringify(plan?.estimated_total_range)
+      ) {
+        missing.push("unchanged restored totals");
+      }
+      const quotedFormUrl = quoted?.result?.structuredContent?.form_url;
+      if (typeof quotedFormUrl === "string" && new URL(quotedFormUrl).searchParams.has("details")) {
+        missing.push("quote URL without free-text details");
+      }
       if (
         quoted?.result?.structuredContent?.handoff_ready !== true ||
         quoted?.result?.structuredContent?.buyer_submission_required !== true

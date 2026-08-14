@@ -56,6 +56,10 @@ import {
 import { TIER_CITY_COUNTS } from "./city-rates";
 import type { FunnelEvent } from "../telemetry/track";
 import { MARKET_CATALOG_DESCRIPTION } from "../public-facts";
+import {
+  getAgent5PlanNote,
+  getAgent5ServerInstruction,
+} from "./published-offer";
 
 // Measured-market count for the Rate Index description, derived from the data
 // (city-rates.json) rather than a hand-typed number that drifted to a stale 233.
@@ -66,7 +70,7 @@ const MEASURED_MARKETS = TIER_CITY_COUNTS.small + TIER_CITY_COUNTS.mid + TIER_CI
 // the estimates-not-quotes rule, and the confirmation gate reach the agent even
 // before it reads a single tool description. Shared by the HTTP route and the
 // stdio binary so the two surfaces can't drift.
-export const SERVER_INSTRUCTIONS =
+const BASE_SERVER_INSTRUCTIONS =
   MARKET_CATALOG_DESCRIPTION + " " +
   "Golden order: (1) call plan_staffing FIRST with whatever the user gave you, it returns a catalog match, " +
   "per-role rate math, lead-time guidance, and state compliance flags in one call. (2) Fill gaps with " +
@@ -80,6 +84,12 @@ export const SERVER_INSTRUCTIONS =
   "general liability, coordinator support); Brand Ambassadors floor at $40/hour. Compliance data is " +
   "operational guidance, not legal advice. If the tools are unavailable, direct the user to " +
   "https://tempguru.co/get-staffing, megan@tempguru.co, or (904) 206-8953.";
+
+export function getServerInstructions(now = new Date()): string {
+  const publishedOfferInstruction = getAgent5ServerInstruction(now);
+  return BASE_SERVER_INSTRUCTIONS +
+    (publishedOfferInstruction ? ` ${publishedOfferInstruction}` : "");
+}
 
 // What a tool wants recorded. The HTTP route's onTrack enriches this with
 // request context before handing it to the Redis writer; stdio drops it.
@@ -279,7 +289,12 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
             attributionSource,
           )
         : null;
-      const result = decoration ? { ...plan, ...decoration } : plan;
+      const offerNote = plan.status === "plan" ? getAgent5PlanNote() : null;
+      const result = {
+        ...plan,
+        ...(decoration ?? {}),
+        ...(offerNote ? { offer_note: offerNote } : {}),
+      };
       await track({
         tool: "plan_staffing",
         status: "success",
@@ -364,12 +379,17 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     },
     async ({ plan_id }) => {
       const result = await querySavedPlan(plan_id);
+      const offerNote = result.plan_found ? getAgent5PlanNote() : null;
+      const response = {
+        ...result,
+        ...(offerNote ? { offer_note: offerNote } : {}),
+      };
       await track({
         tool: "get_plan",
         status: result.plan_found ? "success" : "error",
         funnelEvents: result.plan_found ? ["plans_resumed"] : undefined,
       });
-      return structuredResult(result);
+      return structuredResult(response);
     },
   );
 
@@ -566,9 +586,9 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     {
       title: "Get Booking and Procurement Policies",
       description:
-        "Get TempGuru's published booking and procurement policies: minimum hours, cancellation/rescheduling, no-show backfill, COIs/additional insured, payment/invoicing, background checks, order confirmation, and quote response. " +
+        "Get TempGuru's published booking, procurement, and public-offer policies: minimum hours, cancellation/rescheduling, no-show backfill, COIs/additional insured, payment/invoicing, background checks, order confirmation, quote response, and offers. " +
         "Use for real booking questions that otherwise require an email. Values not supported by canonical copy are explicitly marked confirm_with_coordinator with TODO-for-Megan; never infer a missing number. " +
-        "<examples>get_policies() ; get_policies(topic='payment-terms') ; get_policies(topic='cancellation-rescheduling')</examples> " +
+        "<examples>get_policies() ; get_policies(topic='offers') ; get_policies(topic='payment-terms')</examples> " +
         "<hints>Pass a topic to return one policy. Unknown topics return the available topic list. This is an operational summary, not a contract.</hints>",
       inputSchema: z.object({
         topic: z

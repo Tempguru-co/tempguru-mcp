@@ -8,6 +8,7 @@ import {
   type PlanSnapshot,
 } from "@/lib/mcp/plan-store";
 import { sanitizeQuoteAttributionQuery } from "@/lib/mcp/quote-attribution";
+import { getAgent5QuoteDetailsPrefill } from "@/lib/mcp/published-offer";
 import QuoteRequestForm, {
   type QuoteFormInitial,
   type QuoteRolePrefill,
@@ -139,6 +140,7 @@ function queryPrefill(params: RequestQuoteSearchParams): QuoteFormInitial {
     eventType: normalizePlanEventType(rawEventType) ?? "",
     attendees: safePositiveInteger(singleValue(params.attendees)?.trim(), 5_000_000),
     roles: parseQueryRoles(params.roles),
+    specialRequirements: "",
   };
 }
 
@@ -329,6 +331,7 @@ export default async function RequestQuotePage({
         attendees: fallback.attendees,
         roles: fallback.roles,
       };
+  const attribution = sanitizeQuoteAttributionQuery(params);
   const initial: QuoteFormInitial = {
     city: review.city,
     eventDates: review.eventDates,
@@ -339,8 +342,11 @@ export default async function RequestQuotePage({
       headcount,
       ...(shifts ? { shifts } : {}),
     })),
+    specialRequirements: getAgent5QuoteDetailsPrefill({
+      planRestored: Boolean(planId),
+      utmCampaign: attribution.utm_campaign,
+    }),
   };
-  const attribution = sanitizeQuoteAttributionQuery(params);
   const roleOptions = ROLES.map((role) => ({
     value: role.name,
     label: role.slug,

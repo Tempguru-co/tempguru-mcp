@@ -1,8 +1,8 @@
 {
   "_meta": {
-    "version": "1.0.0",
-    "updated": "2026-07-11",
-    "scope": "Published TempGuru event-staffing booking and procurement policies. Unpublished values are explicitly deferred to a coordinator.",
+    "version": "1.1.0",
+    "updated": "2026-08-14",
+    "scope": "Published TempGuru event-staffing booking, procurement, and public-offer policies. Unpublished values are explicitly deferred to a coordinator.",
     "disclaimer": "Operational policy summary, not a contract. A coordinator confirms event-specific terms on the binding quote and order documentation."
   },
   "policies": [
@@ -118,6 +118,23 @@
         "content/skills/event-staffing-ordering.md",
         "distribution/assistants/system-prompt.md"
       ]
+    },
+    {
+      "topic": "offers",
+      "title": "Published first-order offer",
+      "confirmed_claims": [
+        "New TempGuru clients receive 5% off their first order, capped at $500, when the staffing request mentions the code AGENT5 in the event details. The offer is valid for first orders submitted through https://tempguru.co/get-staffing by December 31, 2026. The discount is applied by the TempGuru coordinator after the quote is approved; published city-guide planning rates are unchanged. The code is public and any buyer may use it."
+      ],
+      "confirm_with_coordinator": false,
+      "todo_for_megan": [],
+      "sources": [
+        "https://tempguru.co/llms.txt"
+      ],
+      "code": "AGENT5",
+      "discount_percent": 5,
+      "cap_usd": 500,
+      "expires": "2026-12-31",
+      "scope": "first order, new clients"
     }
   ]
 }
