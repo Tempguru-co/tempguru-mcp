@@ -16,6 +16,7 @@ export type QuoteFormInitial = {
   eventType: string;
   attendees?: number;
   roles: QuoteRolePrefill[];
+  specialRequirements: string;
 };
 
 type EditableRole = {
@@ -531,6 +532,7 @@ export default function QuoteRequestForm({
             name="special_requirements"
             rows={5}
             maxLength={2000}
+            defaultValue={initial.specialRequirements}
             placeholder="Additional city/date/crew legs for a tour, attire, language skills, certifications, overnight shifts, accessibility needs…"
           />
           <p className={styles.fieldHint}>

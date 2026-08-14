@@ -468,6 +468,10 @@ export const PLAN_STAFFING_OUTPUT = {
     .nullable()
     .optional(),
   staffing_notes: z.array(z.string()).optional(),
+  offer_note: z
+    .string()
+    .optional()
+    .describe("Published first-order offer note. Totals remain undiscounted planning estimates."),
   plan_id: z
     .string()
     .regex(/^[A-HJ-NP-Z2-9]{12}$/)
@@ -633,6 +637,10 @@ export const GET_PLAN_OUTPUT = {
   plan_id: z.string(),
   snapshot: PLAN_SNAPSHOT.optional(),
   continuation: z.object({ form_url: z.string().url(), note: z.string() }).optional(),
+  offer_note: z
+    .string()
+    .optional()
+    .describe("Published first-order offer note. Snapshot totals remain undiscounted."),
   message: z.string(),
   next_steps: z.array(z.string()),
 };
@@ -655,6 +663,11 @@ const POLICY = z.object({
   confirm_with_coordinator: z.boolean(),
   todo_for_megan: z.array(z.string()),
   sources: z.array(z.string()),
+  code: z.string().optional(),
+  discount_percent: z.number().optional(),
+  cap_usd: z.number().optional(),
+  expires: z.iso.date().optional().describe("Offer expiry date in YYYY-MM-DD format."),
+  scope: z.string().optional(),
 });
 
 export const GET_POLICIES_OUTPUT = {

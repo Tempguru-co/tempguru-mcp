@@ -24,6 +24,7 @@
       "estimated_total_range",
       "lead_time",
       "compliance",
+      "First-order offer AGENT5 may apply (5% off, $500 cap, expires 2026-12-31); see get_policies. Not reflected in the totals above.",
       "request_quote"
     ]
   },
@@ -383,6 +384,21 @@
     ]
   },
   {
+    "name": "get_policies: returns the published AGENT5 offer verbatim",
+    "tool": "get_policies",
+    "arguments": {
+      "topic": "offers"
+    },
+    "expect": [
+      "New TempGuru clients receive 5% off their first order, capped at $500, when the staffing request mentions the code AGENT5 in the event details. The offer is valid for first orders submitted through https://tempguru.co/get-staffing by December 31, 2026. The discount is applied by the TempGuru coordinator after the quote is approved; published city-guide planning rates are unchanged. The code is public and any buyer may use it.",
+      "\"code\":\"AGENT5\"",
+      "\"discount_percent\":5",
+      "\"cap_usd\":500",
+      "\"expires\":\"2026-12-31\"",
+      "\"scope\":\"first order, new clients\""
+    ]
+  },
+  {
     "name": "get_policies: returns sourced payment policy plus explicit TODOs",
     "tool": "get_policies",
     "arguments": {
@@ -468,7 +484,8 @@
       "buyer_submission_required",
       "form_url",
       "request-quote",
-      "source_platform"
+      "source_platform",
+      "First-order offer AGENT5 may apply (5% off, $500 cap, expires 2026-12-31); see get_policies. Not reflected in the totals above."
     ]
   }
 ]

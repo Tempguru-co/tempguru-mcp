@@ -38,15 +38,15 @@ included for the full picture.)
 
 | Surface | Type | Status |
 |---|---|---|
-| Official MCP Registry (`co.tempguru/event-staffing`) | MCP | 🟡 repository `1.7.0` candidate; verify the published Registry version after release |
+| Official MCP Registry (`co.tempguru/event-staffing`) | MCP | 🟡 repository `1.7.1` candidate; verify the published Registry version after release |
 | Smithery, Glama | MCP | ✅ live |
 | ModelScope MCP 广场 | MCP | ✅ live |
 | Docker MCP Registry | MCP | 🟡 PR #3902 awaiting review |
 | APIs.guru | OpenAPI | 🟡 issue #2610 in review queue |
 | Postman collection | REST | ✅ imported (re-import after city fix) |
 | Mistral connector directory | MCP | 🟡 outreach drafted, Megan to send via contact form |
-| Anthropic Connectors Directory (claude.ai) | MCP | 🟠 changes requested; paste-ready `read_write` inventory and buyer-form handoff reply are in `distribution/anthropic-directory-update.md` |
-| npm CLI (`tempguru-mcp`), GHCR image | dev | 🟡 repository `1.7.0` candidate; publish with Trusted Publishing/OIDC after merge and verify the exact version |
+| Anthropic Connectors Directory (claude.ai) | MCP | 🟡 approved as a community connector; verify directory publication and obtain guidance on the AGENT5 public-offer surface before deploying `1.7.1` |
+| npm CLI (`tempguru-mcp`), GHCR image | dev | 🟡 repository `1.7.1` candidate; publish with Trusted Publishing/OIDC after merge and verify the exact version |
 | Hermes agent catalog (NousResearch) | Agent Skill | 🟠 repository `1.0.5` copy is ready but still must be synchronized into PR #39150 and re-submitted for review; do not touch the separate live Hermes content agent runtime |
 | Pi + Prime Agent (`tempguru-pi` npm package) | Agent Skill + native tools | ✅ `1.7.2` is live, current, and immutable; unpinned installs resolve to it. The package has 8 runtime-adapted skills, 9 native tools, a non-PII buyer-form handoff, and automatic `pi` / `prime-agent` attribution. The published Pi smoke enumerated all 8 skills and loaded the native extension; pinned persistent Pi and Prime functional smokes each made exactly one Austin call and preserved the coordinator-confirmation boundary. The Prime replay did not independently inspect attribution logs or re-enumerate the full inventory. Use the next unused patch for any fix; never republish `1.7.2`. |
 | OpenClaw / ClawHub | Agent Skill | 🟠 public catalog is behind the evidence-gated repository copy; re-check all seven listings, publish each changed skill at `1.7.0` only if unused (otherwise the next unused patch), leave compliance unchanged, then verify `GET clawhub.ai/api/v1/skills/<slug>` |

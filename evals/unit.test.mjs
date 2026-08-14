@@ -328,7 +328,13 @@ check("findCity('Toronto, Canada') scopes by country", findCity("Toronto, Canada
 check("findCity('Austin, USA') scopes by country", findCity("Austin, USA")?.name === "Austin");
 
 // ── queries: country filter, default cap, strict dates, role miss ──
-const { queryCities, queryRoles, queryAvailability, queryRolePricing } = await load("src/lib/mcp/queries.ts");
+const {
+  queryCities,
+  queryRoles,
+  queryAvailability,
+  queryRolePricing,
+  queryPolicies,
+} = await load("src/lib/mcp/queries.ts");
 const ussr = queryCities({ country: "USSR" });
 check("get_cities country=USSR is invalid_param, not all US markets", !ussr.ok && ussr.error.code === "invalid_param");
 const uk = queryCities({ country: "United Kingdom" });
@@ -358,6 +364,90 @@ const secPrice = queryRolePricing({ role: "security guard", city: "Boston" });
 check("get_role_pricing 'security guard' carries the unarmed-crowd-control note",
   secPrice.ok && "role_note" in secPrice.data && secPrice.data.role_note.includes("NOT licensed"));
 
+const AGENT5_CANONICAL_TERMS =
+  "New TempGuru clients receive 5% off their first order, capped at $500, when the staffing request mentions the code AGENT5 in the event details. The offer is valid for first orders submitted through https://tempguru.co/get-staffing by December 31, 2026. The discount is applied by the TempGuru coordinator after the quote is approved; published city-guide planning rates are unchanged. The code is public and any buyer may use it.";
+const activeOfferResult = queryPolicies(
+  { topic: "offers" },
+  new Date("2026-12-31T23:59:59.000-05:00"),
+);
+const activeOffer = activeOfferResult.ok && activeOfferResult.data.policy_found
+  ? activeOfferResult.data.policies[0]
+  : null;
+check("get_policies returns the canonical AGENT5 terms and structured fields verbatim",
+  activeOffer?.confirmed_claims?.[0] === AGENT5_CANONICAL_TERMS
+    && activeOffer?.code === "AGENT5"
+    && activeOffer?.discount_percent === 5
+    && activeOffer?.cap_usd === 500
+    && activeOffer?.expires === "2026-12-31"
+    && activeOffer?.scope === "first order, new clients",
+  JSON.stringify(activeOffer));
+const expiredOfferResult = queryPolicies(
+  { topic: "offers" },
+  new Date("2027-01-01T00:00:00.000-05:00"),
+);
+check("get_policies removes the offer immediately after 2026-12-31",
+  expiredOfferResult.ok
+    && expiredOfferResult.data.policy_found === false
+    && !expiredOfferResult.data.available_topics.includes("offers"),
+  JSON.stringify(expiredOfferResult));
+
+const offerContract = await load("src/lib/mcp/published-offer.ts");
+const { getServerInstructions } = await load("src/lib/mcp/register-tools.ts");
+check("all AGENT5 runtime surfaces share the same inclusive expiry gate",
+  offerContract.isAgent5OfferActive(new Date("2027-01-01T04:59:59.999Z"))
+    && !offerContract.isAgent5OfferActive(new Date("2027-01-01T05:00:00.000Z"))
+    && offerContract.getAgent5ServerInstruction(new Date("2026-12-31T23:59:59.000-05:00"))
+      === "A published first-order offer (code AGENT5) exists; get_policies returns its exact terms."
+    && offerContract.getAgent5ServerInstruction(new Date("2027-01-01T00:00:00.000-05:00")) === null);
+check("REST policy caching cannot carry a pre-expiry offer past the cutoff",
+  offerContract.getPublishedPolicyCacheMaxAge(new Date("2027-01-01T03:00:00.000Z")) === 3_600
+    && offerContract.getPublishedPolicyCacheMaxAge(new Date("2027-01-01T04:59:58.000Z")) === 2
+    && offerContract.getPublishedPolicyCacheMaxAge(new Date("2027-01-01T04:59:59.999Z")) === 0
+    && offerContract.getPublishedPolicyCacheMaxAge(new Date("2027-01-01T05:00:00.000Z")) === 3_600);
+check("server instructions drop the AGENT5 sentence after the shared expiry boundary",
+  getServerInstructions(new Date("2026-12-31T23:59:59.000-05:00"))
+    .includes("A published first-order offer (code AGENT5) exists; get_policies returns its exact terms.")
+    && !getServerInstructions(new Date("2027-01-01T00:00:00.000-05:00"))
+      .includes("AGENT5"));
+check("AGENT5 details prefill is bounded, idempotent, and expiry-aware",
+  offerContract.appendAgent5ToDetails("", new Date("2026-08-14T12:00:00Z")) === "AGENT5"
+    && offerContract.appendAgent5ToDetails("Needs ADA access", new Date("2026-08-14T12:00:00Z"))
+      === "Needs ADA access\n\nAGENT5"
+    && offerContract.appendAgent5ToDetails("agent5", new Date("2026-08-14T12:00:00Z")) === "agent5"
+    && offerContract.appendAgent5ToDetails("", new Date("2027-01-01T05:00:00Z")) === ""
+    && offerContract.appendAgent5ToDetails("AGENT5", new Date("2027-01-01T05:00:00Z")) === ""
+    && offerContract.appendAgent5ToDetails("Needs ADA access\n\nAGENT5", new Date("2027-01-01T05:00:00Z"))
+      === "Needs ADA access"
+    && offerContract.appendAgent5ToDetails("x".repeat(2_000), new Date("2026-08-14T12:00:00Z")).length === 2_000);
+const activeQuoteOfferDetails = offerContract.getAgent5QuoteDetailsPrefill(
+  { planRestored: true, utmCampaign: "quote-handoff" },
+  new Date("2026-08-14T12:00:00Z"),
+);
+check("verified buyer handoffs prefill uppercase AGENT5 only while the offer is active",
+  activeQuoteOfferDetails === "AGENT5"
+    && offerContract.getAgent5QuoteDetailsPrefill(
+      { planRestored: false, utmCampaign: "quote-handoff" },
+      new Date("2026-08-14T12:00:00Z"),
+    ) === ""
+    && offerContract.getAgent5QuoteDetailsPrefill(
+      { planRestored: true, utmCampaign: "other" },
+      new Date("2026-08-14T12:00:00Z"),
+    ) === ""
+    && offerContract.getAgent5QuoteDetailsPrefill(
+      { planRestored: true, utmCampaign: "quote-handoff" },
+      new Date("2027-01-01T05:00:00Z"),
+    ) === "");
+const quotePageSource = readFileSync(join(repoRoot, "src/app/request-quote/page.tsx"), "utf8");
+const quoteFormSource = readFileSync(
+  join(repoRoot, "src/app/request-quote/quote-request-form.tsx"),
+  "utf8",
+);
+check("verified handoff offer prefill is wired into the buyer-submitted details control",
+  quotePageSource.includes("specialRequirements: getAgent5QuoteDetailsPrefill({")
+    && !quotePageSource.includes("details?: SearchValue")
+    && quoteFormSource.includes("defaultValue={initial.specialRequirements}")
+    && quoteFormSource.includes('text("special_requirements")'));
+
 // ── plan_staffing: partial plans can't read as complete ──
 const partial = buildStaffingPlan({
   city: "Chicago",
@@ -380,6 +470,32 @@ check("US plan compliance retains wage source and dataset freshness",
     && !!complete.compliance?.min_wage_source
     && !!complete.compliance?.min_wage_as_of
     && !!complete.compliance?.data_current_as_of);
+const offerBaselinePlan = buildStaffingPlan({
+  city: "Chicago",
+  event_date: "2027-03-10",
+  event_type: "trade-show",
+  roles: [
+    { role: "registration-staff", headcount: 6, hours_per_shift: 8, days: 2 },
+    { role: "team-leads", headcount: 1 },
+  ],
+});
+check("AGENT5 does not discount or alter the canonical Chicago planning totals",
+  offerBaselinePlan.status === "plan"
+    && offerBaselinePlan.estimated_total_range.low === 5_360
+    && offerBaselinePlan.estimated_total_range.high === 6_248
+    && offerBaselinePlan.plan_lines.every((line) => line.hourly_range.low >= 40),
+  JSON.stringify(offerBaselinePlan.estimated_total_range));
+const bowlingGreenOfferBaseline = buildStaffingPlan({
+  city: "Bowling Green",
+  roles: [{ role: "brand-ambassadors", headcount: 1, hours_per_shift: 8, days: 1 }],
+});
+check("AGENT5 leaves the $40/hour Brand Ambassador floor and totals undiscounted",
+  bowlingGreenOfferBaseline.status === "plan"
+    && bowlingGreenOfferBaseline.plan_lines[0]?.hourly_range.low === 40
+    && bowlingGreenOfferBaseline.plan_lines[0]?.hourly_range.high === 48
+    && bowlingGreenOfferBaseline.estimated_total_range.low === 320
+    && bowlingGreenOfferBaseline.estimated_total_range.high === 384,
+  JSON.stringify(bowlingGreenOfferBaseline));
 
 // ── plan persistence / handoff: allowlist, TTL, signature, resume ──
 const {
@@ -938,6 +1054,7 @@ check("MCP quote handoff returns a prefilled buyer-operated form without submitt
     && readyHandoffUrl?.searchParams.get("utm_campaign") === "quote-handoff"
     && readyHandoffUrl?.searchParams.get("utm_content") === "mcp"
     && readyHandoffUrl?.searchParams.get("skill_id") === "event-staffing-ordering"
+    && !readyHandoffUrl?.searchParams.has("details")
     && !JSON.stringify(readyHandoff).includes("jane@example.com"),
   JSON.stringify(readyHandoff));
 check("MCP quote handoff output matches its structured schema",
@@ -1441,6 +1558,20 @@ check("REST get_policies rejects an overlong topic with 400",
   overlongTopicResponse.status === 400
     && overlongTopicBody.error?.code === "invalid_param"
     && overlongTopicBody.error?.field === "topic");
+const restOfferResponse = await policiesRoute.GET(
+  new Request("https://mcp.tempguru.co/api/v1/policies?topic=offers"),
+);
+const restOfferBody = await restOfferResponse.json();
+const restOfferMaxAge = Number(
+  restOfferResponse.headers.get("cache-control")?.match(/^public, max-age=(\d+)$/)?.[1],
+);
+check("REST get_policies serves the exact AGENT5 policy with expiry-bounded caching",
+  restOfferResponse.status === 200
+    && Number.isInteger(restOfferMaxAge)
+    && restOfferMaxAge >= 0
+    && restOfferMaxAge <= 3_600
+    && restOfferBody.policies?.[0]?.confirmed_claims?.[0] === AGENT5_CANONICAL_TERMS
+    && restOfferBody.policies?.[0]?.code === "AGENT5");
 
 // ── quote status stub lifecycle: queued -> received, 90-day TTL ──
 const {
@@ -1615,9 +1746,13 @@ try {
     utm_medium: "openclaw",
     utm_campaign: "quote-handoff",
     utm_content: "mcp",
+    special_requirements: activeQuoteOfferDetails,
   });
   const replayedDuplicate = await queueModule.createLead(queuedInput);
   const healthyNotionProperties = notionBodies[1]?.properties ?? {};
+  const healthyCallNotes = healthyNotionProperties["Call Notes"]?.rich_text
+    ?.map((entry) => entry.text?.content ?? "")
+    .join("") ?? "";
   check("lead attribution reaches result, CRM fields, and notification webhook",
     healthyLead.source_platform === "openclaw"
       && healthyLead.skill_id === "urgent-event-backfill"
@@ -1634,7 +1769,9 @@ try {
       && webhookBodies[0]?.utm_source === "ai-agent"
       && webhookBodies[0]?.utm_medium === "openclaw"
       && webhookBodies[0]?.utm_campaign === "quote-handoff"
-      && webhookBodies[0]?.utm_content === "mcp",
+      && webhookBodies[0]?.utm_content === "mcp"
+      && healthyCallNotes.includes("SPECIAL REQUIREMENTS")
+      && healthyCallNotes.includes("AGENT5"),
     JSON.stringify({ healthyLead, healthyNotionProperties, webhook: webhookBodies[0] }));
   check("drained lead is idempotent and duplicate status advances to CRM received",
     healthyLead.success === true

@@ -9,7 +9,7 @@ https://claude.com/docs/connectors/building/submission.
 | Portal field | Value |
 |---|---|
 | Server name | TempGuru Event Staffing |
-| Release being reviewed | `1.7.0` |
+| Release being reviewed | `1.7.1` |
 | URL slug | `tempguru-event-staffing` |
 | Tagline | Plan W-2 event staffing across the US and Canada |
 | Connector access | `read_write` |
@@ -25,6 +25,12 @@ https://claude.com/docs/connectors/building/submission.
 | Allowed link origin | `https://mcp.tempguru.co` |
 
 Inventory summary: **12 tools, 2 prompts, 8 resources**.
+
+> **AGENT5 disclosure gate:** Version `1.7.1` adds a factual public first-order
+> offer to server instructions, `get_policies`, completed-plan notes, and the
+> buyer-operated form. Before deploying, ask the Anthropic MCP Directory team
+> whether this changes the portal's sponsored/promoted-content answer. Their
+> directory policy controls whether the community connector may surface it.
 
 ### Detail-card description
 

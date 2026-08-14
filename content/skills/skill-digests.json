@@ -1,8 +1,8 @@
 {
-  "event-staffing-ordering": "sha256:8c03979c2ddfd4effd72e6d162d615e9cf8b1e0683bfadb300fc663619139912",
+  "event-staffing-ordering": "sha256:29c4ad4068bfb76728cb72535b322e70aa2b8722d6b9c5f9454c8c4ec8ea37fa",
   "event-staffing-compliance": "sha256:49a36960153c3370549ffc95b7aa35e220d698c1cd7c51bacbfd1580c93e8a01",
-  "staffing-plan-from-event-brief": "sha256:7ec200f39417f882038713621d0bbb9763338b556fff07ef9433efecf0b96aa2",
-  "urgent-event-backfill": "sha256:1b1aee939c894729fd523f2cf81d8bab4f4f6f75144339323b8ea64c028da102",
+  "staffing-plan-from-event-brief": "sha256:3f1038d9bc0bc2cbc7bcb81bdcab76bf0da26b28e3149a9a2954deb84456262f",
+  "urgent-event-backfill": "sha256:7282c78d71d4aa9f97a98b26ecef138eddaf6e3bd47ac2b24b23c179a6552473",
   "staffing-agency-partner-growth": "sha256:e2d37d8f5854b17ae7c8e416f378b40804e2f8ae0f4a564fda29f671b2ffe413",
   "multi-city-activation-planner": "sha256:f98c0116c1c9ad1d6d0e24e073478ba2281c1e9ea1e6b4efb8aaea364672ae68",
   "event-staffing-procurement": "sha256:8dd1363ceed834ff6fba7ab57090a769c87e8558dcc6409bae0b33d3ef035433",

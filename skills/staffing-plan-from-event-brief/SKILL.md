@@ -151,7 +151,7 @@ When the buyer confirms the plan and asks to proceed, call `request_quote`
 with only the retained `plan_id` and optional allowlisted attribution:
 `source_platform` set to the actual runtime label (for example `hermes`,
 `openclaw`, or `pi`), `skill_id` set to
-`staffing-plan-from-event-brief`, and `skill_version` set to `1.7.0`. Do not
+`staffing-plan-from-event-brief`, and `skill_version` set to `1.7.1`. Do not
 ask for or send contact fields, document text, shifts, venue notes, or other
 event payload through `request_quote`. Give the returned `form_url` to the
 buyer. If no `plan_id` exists, do not call the tool; give the buyer the

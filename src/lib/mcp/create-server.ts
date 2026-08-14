@@ -1,8 +1,8 @@
 import { McpServer, type ServerOptions } from "@modelcontextprotocol/server";
 import pkg from "../../../package.json";
 import {
+  getServerInstructions,
   registerTools,
-  SERVER_INSTRUCTIONS,
   type RegisterToolsOptions,
 } from "./register-tools";
 import { MARKET_CATALOG_DESCRIPTION } from "../public-facts";
@@ -52,7 +52,7 @@ export function createTempGuruMcpServer(options: RegisterToolsOptions = {}): Mcp
       ],
     },
     {
-      instructions: SERVER_INSTRUCTIONS,
+      instructions: getServerInstructions(),
       cacheHints: CACHE_HINTS,
     },
   );

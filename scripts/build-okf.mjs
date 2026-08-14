@@ -276,6 +276,19 @@ const policySections = policies.policies
   .map((policy) => `## ${policy.title}\n\n${policyBody(policy)}`)
   .join("\n\n");
 const cancellationPolicy = policyFor("cancellation-rescheduling");
+const offerPolicy = policyFor("offers");
+const offerTerms = offerPolicy.confirmed_claims[0];
+if (
+  offerPolicy.confirmed_claims.length !== 1 ||
+  offerPolicy.code !== "AGENT5" ||
+  offerPolicy.discount_percent !== 5 ||
+  offerPolicy.cap_usd !== 500 ||
+  offerPolicy.expires !== "2026-12-31" ||
+  offerPolicy.scope !== "first order, new clients" ||
+  !offerTerms
+) {
+  throw new Error("The canonical AGENT5 offer record is incomplete");
+}
 
 // ─── Rate Index math, mirrors src/lib/mcp/city-rates.ts exactly ──────────────
 const CARD_KEYS = ["event_staff", "ushers", "crowd", "asst_lead", "team_lead", "brand_amb"];
@@ -1313,7 +1326,7 @@ the measured benchmark behind the [Rate Index](../rate-index.md).
 Each role key is a \`[low, high]\` pair in USD/hour. ${measuredTotal} measured cities feed
 the [Rate Index](../rate-index.md). See [MCP tools](mcp-tools.md).
 
-## Policy \`{ topic, title, confirmed_claims[], confirm_with_coordinator, todo_for_megan[], sources[] }\`
+## Policy \`{ topic, title, confirmed_claims[], confirm_with_coordinator, todo_for_megan[], sources[], code?, discount_percent?, cap_usd?, expires?, scope? }\`
 
 ${policies.policies.length} policy topics are published in [booking and procurement
 policies](../policies.md). Empty \`confirmed_claims\` never authorizes an inferred
@@ -1374,6 +1387,9 @@ const llmsTxt = `# TempGuru, Event Staffing Knowledge
 - [State compliance](${BUNDLE_URL}/compliance/index.md): minimum wage and overtime for all 51 US jurisdictions
 - [Booking and procurement policies](${BUNDLE_URL}/policies.md): confirmed terms plus explicit coordinator-confirmation gaps
 - [Workflows](${BUNDLE_URL}/workflows/index.md): all ${SKILLS.length} canonical agent skills plus plan and quote-submission flows
+
+## Published first-order offer
+${offerTerms}
 
 ## Agent interfaces and live tools (action layer)
 - MCP Server (no auth, dual-era HTTP; preferred MCP 2026-07-28 with 2025-era compatibility): ${MCP_ENDPOINT}, ${TOOLS.length} tools (${TOOLS.map((t) => t.name).join(", ")}); call plan_staffing first, retain any plan_id, call save_staffing_plan only when a complete plan has no plan_id, and never duplicate a planner save

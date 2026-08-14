@@ -106,7 +106,7 @@ rush status) and get explicit confirmation; an emergency does not waive
 that step. Then call `request_quote` with only the retained `plan_id` and
 optional allowlisted attribution: `source_platform` set to the actual runtime
 label (for example `hermes`, `openclaw`, or `pi`), `skill_id` set to
-`urgent-event-backfill`, and `skill_version` set to `1.7.0`. Give the returned
+`urgent-event-backfill`, and `skill_version` set to `1.7.1`. Give the returned
 `form_url` to the buyer. If there is no `plan_id`, do not call
 `request_quote`; give the buyer the complete plan's `continuation.form_url`
 directly.

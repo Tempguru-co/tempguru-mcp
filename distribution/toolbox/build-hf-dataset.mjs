@@ -95,6 +95,13 @@ const policyRows = policies.policies.map((policy) => ({
   confirm_with_coordinator: policy.confirm_with_coordinator,
   todo_for_megan: policy.todo_for_megan,
   canonical_sources: policy.sources,
+  ...(policy.code ? { code: policy.code } : {}),
+  ...(Number.isFinite(policy.discount_percent)
+    ? { discount_percent: policy.discount_percent }
+    : {}),
+  ...(Number.isFinite(policy.cap_usd) ? { cap_usd: policy.cap_usd } : {}),
+  ...(policy.expires ? { expires: policy.expires } : {}),
+  ...(policy.scope ? { scope: policy.scope } : {}),
   policy_version: policies._meta.version,
   updated: policies._meta.updated,
   disclaimer: policies._meta.disclaimer,

@@ -15,6 +15,9 @@
 - [Booking and procurement policies](https://mcp.tempguru.co/okf/policies.md): confirmed terms plus explicit coordinator-confirmation gaps
 - [Workflows](https://mcp.tempguru.co/okf/workflows/index.md): all 8 canonical agent skills plus plan and quote-submission flows
 
+## Published first-order offer
+New TempGuru clients receive 5% off their first order, capped at $500, when the staffing request mentions the code AGENT5 in the event details. The offer is valid for first orders submitted through https://tempguru.co/get-staffing by December 31, 2026. The discount is applied by the TempGuru coordinator after the quote is approved; published city-guide planning rates are unchanged. The code is public and any buyer may use it.
+
 ## Agent interfaces and live tools (action layer)
 - MCP Server (no auth, dual-era HTTP; preferred MCP 2026-07-28 with 2025-era compatibility): https://mcp.tempguru.co/mcp, 12 tools (plan_staffing, save_staffing_plan, get_plan, get_cities, get_roles, check_availability, get_role_pricing, get_compliance_by_state, get_policies, get_rate_benchmark, request_quote, get_quote_status); call plan_staffing first, retain any plan_id, call save_staffing_plan only when a complete plan has no plan_id, and never duplicate a planner save
 - [A2A JSON-RPC 1.0 endpoint](https://mcp.tempguru.co/a2a): deterministic structured staffing-plan and public catalog skills

@@ -1,11 +1,11 @@
 <!--
   GENERATED FILE. Do not hand-edit.
-  Source: content/mcp-data/ (policies.json updated 2026-07-11)
+  Source: content/mcp-data/ (policies.json updated 2026-08-14)
   Regenerate: node distribution/assistants/build-knowledge.mjs
 -->
 # TempGuru: Booking and Procurement Policies
 
-Published TempGuru event-staffing booking and procurement policies. Unpublished values are explicitly deferred to a coordinator.
+Published TempGuru event-staffing booking, procurement, and public-offer policies. Unpublished values are explicitly deferred to a coordinator.
 
 > Operational policy summary, not a contract. A coordinator confirms event-specific terms on the binding quote and order documentation.
 
@@ -109,3 +109,10 @@ No concrete cancellation or rescheduling windows or fees are currently published
 - `README.md`
 - `content/skills/event-staffing-ordering.md`
 - `distribution/assistants/system-prompt.md`
+
+## Published first-order offer
+
+- New TempGuru clients receive 5% off their first order, capped at $500, when the staffing request mentions the code AGENT5 in the event details. The offer is valid for first orders submitted through https://tempguru.co/get-staffing by December 31, 2026. The discount is applied by the TempGuru coordinator after the quote is approved; published city-guide planning rates are unchanged. The code is public and any buyer may use it.
+
+**Canonical sources:**
+- `https://tempguru.co/llms.txt`

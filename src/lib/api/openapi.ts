@@ -337,14 +337,14 @@ export function buildOpenApiSpec() {
           tags: ["Compliance"],
           summary: "Published booking and procurement policies",
           description:
-            "Returns TempGuru's published minimum-hours, cancellation/rescheduling, no-show backfill, COI/additional-insured, payment, background-check, order-confirmation, and quote-response policies. Unsupported values are explicitly marked `confirm_with_coordinator` and never fabricated. Pass an optional topic for one policy; an unknown topic returns a clean expected-miss variant with the available topics.",
+            "Returns TempGuru's published minimum-hours, cancellation/rescheduling, no-show backfill, COI/additional-insured, payment, background-check, order-confirmation, quote-response, and public-offer policies. Unsupported values are explicitly marked `confirm_with_coordinator` and never fabricated. Pass an optional topic for one policy; an unknown topic returns a clean expected-miss variant with the available topics.",
           parameters: [
             {
               name: "topic",
               in: "query",
               required: false,
               schema: { type: "string", maxLength: 80 },
-              description: "Optional policy topic, e.g. payment-terms or coi-additional-insured.",
+              description: "Optional policy topic, e.g. offers, payment-terms, or coi-additional-insured.",
             },
           ],
           responses: {
@@ -871,6 +871,11 @@ export function buildOpenApiSpec() {
             confirm_with_coordinator: { type: "boolean" },
             todo_for_megan: { type: "array", items: { type: "string" } },
             sources: { type: "array", items: { type: "string" } },
+            code: { type: "string" },
+            discount_percent: { type: "number" },
+            cap_usd: { type: "number" },
+            expires: { type: "string", format: "date" },
+            scope: { type: "string" },
           },
           additionalProperties: false,
         },

@@ -76,6 +76,11 @@ export type Policy = {
   confirm_with_coordinator: boolean;
   todo_for_megan: string[];
   sources: string[];
+  code?: string;
+  discount_percent?: number;
+  cap_usd?: number;
+  expires?: string;
+  scope?: string;
 };
 
 // ─── Loaders (validated, exported) ────────────────────────────────────────

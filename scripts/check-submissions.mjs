@@ -54,6 +54,9 @@ const PKG_VERSION = JSON.parse(read("package.json")).version;
 const SERVER_JSON = JSON.parse(read("server.json"));
 const SERVER_VERSION = SERVER_JSON.version;
 const ROLE_COUNT = JSON.parse(read("content/mcp-data/roles.json")).roles.length;
+const POLICIES_DATA = JSON.parse(read("content/mcp-data/policies.json"));
+const AGENT5_OFFER = POLICIES_DATA.policies.find((policy) => policy.topic === "offers");
+const AGENT5_TERMS = AGENT5_OFFER?.confirmed_claims?.[0];
 const CLAUDE_PLUGIN = JSON.parse(read("plugins/tempguru/.claude-plugin/plugin.json"));
 const CLAUDE_MARKETPLACE = JSON.parse(read(".claude-plugin/marketplace.json"));
 const CLI_PKG = JSON.parse(read("cli/package.json"));
@@ -109,6 +112,23 @@ const FILES = [
 ];
 
 const errors = [];
+
+if (
+  AGENT5_OFFER?.confirmed_claims?.length !== 1 ||
+  AGENT5_OFFER?.code !== "AGENT5" ||
+  AGENT5_OFFER?.discount_percent !== 5 ||
+  AGENT5_OFFER?.cap_usd !== 500 ||
+  AGENT5_OFFER?.expires !== "2026-12-31" ||
+  AGENT5_OFFER?.scope !== "first order, new clients" ||
+  !AGENT5_TERMS
+) {
+  errors.push("content/mcp-data/policies.json: canonical AGENT5 offer is missing or incomplete");
+}
+if (Date.now() >= Date.parse("2027-01-01T05:00:00.000Z") && AGENT5_OFFER) {
+  errors.push(
+    "AGENT5 expired after 2026-12-31: remove it from policies, server instructions, plan notes, quote prefill, generated llms artifacts, and the dated checks in one change",
+  );
+}
 
 // cities.json carries a convenience summary used by generators. Derive the
 // authoritative counts from the rows and fail if the summary drifts, rather
@@ -985,6 +1005,7 @@ for (const fragment of [
   ROLE_RATE_ENVELOPE,
   `canonical ${ROLE_COUNT}-role catalog`,
   ...SKILLS,
+  ...(AGENT5_TERMS ? [AGENT5_TERMS] : []),
 ]) {
   if (!llmsWorker.includes(fragment)) {
     errors.push(`cloudflare/llms-worker.js: canonical agent guidance missing ${fragment}`);

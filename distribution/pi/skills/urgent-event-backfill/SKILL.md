@@ -162,7 +162,7 @@ Show a compact plan (roles, headcount, rate range as a planning estimate,
 rush status) and get explicit confirmation; an emergency does not waive
 that step. Then call `tempguru_request_quote` with only the retained `plan_id` and
 optional allowlisted attribution: runtime source is added automatically; set `skill_id` to
-`urgent-event-backfill`, and `skill_version` set to `1.7.0`. Give the returned
+`urgent-event-backfill`, and `skill_version` set to `1.7.1`. Give the returned
 `form_url` to the buyer. If there is no `plan_id`, do not call
 `tempguru_request_quote`; give the buyer the complete plan's `continuation.form_url`
 directly.
