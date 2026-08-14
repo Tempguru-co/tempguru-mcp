@@ -1,6 +1,6 @@
 {
   "name": "tempguru-event-staffing",
-  "version": "1.7.1",
+  "version": "1.7.2",
   "description": "Plan and budget W-2 event staffing against 345 configured US and Canadian market entries, with catalog matching, live rates, tier-based lead-time guidance, coordinator-confirmed order coverage, compliance, and a non-PII buyer quote-form handoff.",
   "mcpServers": {
     "tempguru-event-staffing": {

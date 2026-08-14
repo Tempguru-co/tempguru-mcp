@@ -42,6 +42,12 @@ const expectedToolNames = [
     ].map((match) => match[1]),
   ),
 ].sort();
+const expectedPolicyTopics = JSON.parse(
+  readFileSync(join(root, "content", "mcp-data", "policies.json"), "utf8"),
+).policies
+  .filter((policy) =>
+    policy.topic !== "offers" || Date.now() < Date.parse("2027-01-01T05:00:00.000Z"))
+  .map((policy) => policy.topic);
 if (
   expectedToolNames.length !== 12 ||
   !expectedToolNames.includes("save_staffing_plan")
@@ -129,6 +135,9 @@ function assertExactToolSet(label, tools) {
   const availabilityInput = tools.find(
     (tool) => tool.name === "check_availability",
   )?.inputSchema?.properties;
+  const policiesInput = tools.find(
+    (tool) => tool.name === "get_policies",
+  )?.inputSchema?.properties;
   if (
     JSON.stringify(planInput?.event_type?.enum) !==
       JSON.stringify(canonicalEventTypes) ||
@@ -143,6 +152,12 @@ function assertExactToolSet(label, tools) {
     availabilityInput?.date?.format !== "date"
   ) {
     throw new Error(`${label}: MCP event-date inputs must advertise format:date`);
+  }
+  if (
+    JSON.stringify(policiesInput?.topic?.enum) !==
+    JSON.stringify(expectedPolicyTopics)
+  ) {
+    throw new Error(`${label}: get_policies must advertise the canonical topic enum`);
   }
   const oversizedDescriptions = tools.filter(
     (tool) => (tool.description?.length ?? 0) > 1000,

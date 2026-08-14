@@ -1,6 +1,9 @@
 // GET /api/v1/policies, REST mirror of MCP get_policies.
 
-import { queryPolicies } from "@/lib/mcp/queries";
+import {
+  policyQueryTelemetryStatus,
+  queryPolicies,
+} from "@/lib/mcp/queries";
 import { getPublishedPolicyCacheMaxAge } from "@/lib/mcp/published-offer";
 import {
   jsonBadRequest,
@@ -26,7 +29,7 @@ export async function GET(request: Request) {
   }
   await trackRest(request, {
     tool: "get_policies",
-    status: result.data.policy_found ? "success" : "error",
+    status: policyQueryTelemetryStatus(result),
   });
   return jsonOk({ topic: topic ?? null }, result.data, {
     cacheControl: `public, max-age=${getPublishedPolicyCacheMaxAge(now)}`,

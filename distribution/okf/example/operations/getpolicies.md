@@ -15,7 +15,7 @@ Returns TempGuru's published minimum-hours, cancellation/rescheduling, no-show b
 - **Tags:** Compliance
 ## Parameters
 
-- `topic` (query): Optional policy topic, e.g. offers, payment-terms, or coi-additional-insured.
+- `topic` (query): Optional canonical policy topic. Choose an enum value; omit for all policies or a broader question.
 
 ## Related schemas
 

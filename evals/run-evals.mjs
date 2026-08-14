@@ -17,6 +17,13 @@ import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const cases = JSON.parse(readFileSync(join(here, "golden-cases.json"), "utf-8"));
+const canonicalPolicyRows = JSON.parse(
+  readFileSync(join(here, "..", "content", "mcp-data", "policies.json"), "utf-8"),
+).policies;
+const canonicalPolicyTopics = canonicalPolicyRows
+  .filter((policy) =>
+    policy.topic !== "offers" || Date.now() < Date.parse("2027-01-01T05:00:00.000Z"))
+  .map((policy) => policy.topic);
 
 const server = spawn("node", [join(here, "..", "dist", "mcp-stdio.mjs")], {
   stdio: ["pipe", "pipe", "inherit"],
@@ -155,6 +162,7 @@ try {
   const saveInput = toolByName.get("save_staffing_plan")?.inputSchema?.properties ?? {};
   const availabilityInput =
     toolByName.get("check_availability")?.inputSchema?.properties ?? {};
+  const policiesInput = toolByName.get("get_policies")?.inputSchema?.properties ?? {};
   check(
     "planning tools advertise the canonical event_type enum",
     JSON.stringify(planInput.event_type?.enum) === JSON.stringify(canonicalEventTypes) &&
@@ -174,6 +182,11 @@ try {
       save: saveInput.event_date,
       availability: availabilityInput.date,
     }),
+  );
+  check(
+    "get_policies advertises every canonical policy topic as an enum",
+    JSON.stringify(policiesInput.topic?.enum) === JSON.stringify(canonicalPolicyTopics),
+    JSON.stringify(policiesInput.topic),
   );
   const oversizedDescriptions = [...toolByName.values()]
     .filter((tool) => (tool.description?.length ?? 0) > 1000)

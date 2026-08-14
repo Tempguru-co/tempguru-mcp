@@ -55,6 +55,7 @@ const SERVER_JSON = JSON.parse(read("server.json"));
 const SERVER_VERSION = SERVER_JSON.version;
 const ROLE_COUNT = JSON.parse(read("content/mcp-data/roles.json")).roles.length;
 const POLICIES_DATA = JSON.parse(read("content/mcp-data/policies.json"));
+const POLICY_TOPICS = POLICIES_DATA.policies.map((policy) => policy.topic);
 const AGENT5_OFFER = POLICIES_DATA.policies.find((policy) => policy.topic === "offers");
 const AGENT5_TERMS = AGENT5_OFFER?.confirmed_claims?.[0];
 const CLAUDE_PLUGIN = JSON.parse(read("plugins/tempguru/.claude-plugin/plugin.json"));
@@ -81,6 +82,17 @@ const ROLE_RATE_ENVELOPE = `$${Math.min(...ROLE_RATE_VALUES)}-$${Math.max(...ROL
 const EXPECTED_TOOL_COUNT = 12;
 const EXPECTED_DEMAND_SKILL_COUNT = 7;
 const EXPECTED_DISCOVERY_SKILL_COUNT = EXPECTED_DEMAND_SKILL_COUNT + 1; // plus compliance
+const QUOTE_ATTRIBUTION_SKILLS = [
+  "event-staffing-ordering",
+  "staffing-plan-from-event-brief",
+  "urgent-event-backfill",
+];
+// Skill attribution identifies the installed skill artifact, not the MCP server
+// package. Server-only patch releases must not force unchanged skills to claim a
+// new version or require needless Hermes/ClawHub/Pi republishing.
+const SKILL_ATTRIBUTION_VERSION = read(
+  `content/skills/${QUOTE_ATTRIBUTION_SKILLS[0]}.md`,
+).match(/`skill_version` set to `([^`]+)`/)?.[1];
 
 if (
   MARKET_COUNT < 1 ||
@@ -112,6 +124,10 @@ const FILES = [
 ];
 
 const errors = [];
+
+if (!SKILL_ATTRIBUTION_VERSION || !/^\d+\.\d+\.\d+$/.test(SKILL_ATTRIBUTION_VERSION)) {
+  errors.push("canonical quote skills must declare one valid SemVer skill_version");
+}
 
 if (
   AGENT5_OFFER?.confirmed_claims?.length !== 1 ||
@@ -237,6 +253,19 @@ for (const bundleRoot of [
 // (catches the 1.0.x-vs-1.2.0 drift), and the OKF knowledge layer must be present.
 if (SERVER_VERSION !== PKG_VERSION) {
   errors.push(`server.json version "${SERVER_VERSION}" != package.json "${PKG_VERSION}"`);
+}
+const openApiPolicyTopicEnum = OPENAPI.paths?.["/api/v1/policies"]?.get
+  ?.parameters?.find((parameter) => parameter.name === "topic")?.schema?.enum ?? [];
+if (!sameStringSet(openApiPolicyTopicEnum, POLICY_TOPICS)) {
+  errors.push(
+    `content/mcp-data/openapi.json: getPolicies topic enum [${openApiPolicyTopicEnum.join(", ")}] ` +
+      `!= canonical policy topics [${POLICY_TOPICS.join(", ")}]`,
+  );
+}
+if (!REGISTER_TOOLS_SOURCE.includes(".meta({ enum: publishedPolicyTopics })")) {
+  errors.push(
+    "src/lib/mcp/register-tools.ts: get_policies must advertise the expiry-aware canonical topic enum",
+  );
 }
 if (existsSync(join(root, "plugins/tempguru/plugin.json"))) {
   errors.push("plugins/tempguru/plugin.json: manifest must live at .claude-plugin/plugin.json");
@@ -485,11 +514,7 @@ for (const skill of SKILLS) {
   }
 }
 
-for (const skill of [
-  "event-staffing-ordering",
-  "staffing-plan-from-event-brief",
-  "urgent-event-backfill",
-]) {
+for (const skill of QUOTE_ATTRIBUTION_SKILLS) {
   const body = read(`content/skills/${skill}.md`);
   for (const fragment of [
     "`plan_id`",
@@ -497,7 +522,7 @@ for (const skill of [
     "`skill_id`",
     `\`${skill}\``,
     "`skill_version`",
-    `\`${PKG_VERSION}\``,
+    `\`${SKILL_ATTRIBUTION_VERSION}\``,
     "`get_quote_status`",
   ]) {
     if (!body.includes(fragment)) {
@@ -1100,13 +1125,22 @@ for (const p of ["README.md", "llms-install.md", "distribution/pi/README.md"]) {
       .split(/\n+|[!?。！？;；]|\.(?=\s|$)|\s+\|\s+/u)
       .map((clause) => clause.replace(/\s+/g, " ").trim())
       .filter(Boolean);
-    if (clauses.some((clause) => relation(currentVersion, staleCandidate).test(clause))) {
+    // The MCP CLI and Pi package may legitimately share the same number while
+    // having different release states. Scope these checks to the clause that
+    // names tempguru-pi, plus two adjacent clauses for tables/HTML/code layouts
+    // where a type column or install command separates the name and status.
+    const piClauses = clauses.filter((_, index) =>
+      clauses
+        .slice(Math.max(0, index - 2), index + 3)
+        .some((clause) => /\btempguru-pi\b/iu.test(clause)),
+    );
+    if (piClauses.some((clause) => relation(currentVersion, staleCandidate).test(clause))) {
       errors.push(`${p}: tempguru-pi@${PI_PKG.version} must not be described as a candidate or unpublished`);
     }
-    if (clauses.some((clause) => relation(previousVersion, stalePreviousStatus).test(clause))) {
+    if (piClauses.some((clause) => relation(previousVersion, stalePreviousStatus).test(clause))) {
       errors.push(`${p}: the superseded tempguru-pi ${piMajor}.${piMinor}.${piPatch - 1} must not be described as current/live/published`);
     }
-    if (!clauses.some((clause) => relation(currentVersion, currentStatus).test(clause))) {
+    if (!piClauses.some((clause) => relation(currentVersion, currentStatus).test(clause))) {
       errors.push(`${p}: must identify tempguru-pi@${PI_PKG.version} as the published live/current package`);
     }
   }

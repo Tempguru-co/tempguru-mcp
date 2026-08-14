@@ -686,6 +686,12 @@ export const GET_POLICIES_OUTPUT = {
 
 export const GET_POLICIES_SCHEMA = z.object(GET_POLICIES_OUTPUT).superRefine((value, ctx) => {
   if (value.policy_found) {
+    if (value.status !== "policies") {
+      ctx.addIssue({
+        code: "custom",
+        message: "policy_found:true requires status:policies",
+      });
+    }
     requireFields(value, ctx, "policies", [
       "data_version",
       "updated",
@@ -695,6 +701,12 @@ export const GET_POLICIES_SCHEMA = z.object(GET_POLICIES_OUTPUT).superRefine((va
       "disclaimer",
     ]);
   } else {
+    if (value.status !== "policy_not_found") {
+      ctx.addIssue({
+        code: "custom",
+        message: "policy_found:false requires status:policy_not_found",
+      });
+    }
     requireFields(value, ctx, "policy_not_found", ["requested", "available_topics", "message"]);
   }
 });

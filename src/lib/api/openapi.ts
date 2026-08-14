@@ -9,8 +9,9 @@
 
 import pkg from "../../../package.json";
 import { RequestQuoteSchema } from "../mcp/quote";
+import { getPublishedPolicyTopics } from "../mcp/published-offer";
 
-export function buildOpenApiSpec() {
+export function buildOpenApiSpec(now = new Date()) {
   return {
     openapi: "3.1.0",
     info: {
@@ -343,8 +344,13 @@ export function buildOpenApiSpec() {
               name: "topic",
               in: "query",
               required: false,
-              schema: { type: "string", maxLength: 80 },
-              description: "Optional policy topic, e.g. offers, payment-terms, or coi-additional-insured.",
+              schema: {
+                type: "string",
+                maxLength: 80,
+                enum: getPublishedPolicyTopics(now),
+              },
+              description:
+                "Optional canonical policy topic. Choose an enum value; omit for all policies or a broader question.",
             },
           ],
           responses: {
@@ -865,7 +871,7 @@ export function buildOpenApiSpec() {
             "sources",
           ],
           properties: {
-            topic: { type: "string" },
+            topic: { type: "string", enum: getPublishedPolicyTopics(now) },
             title: { type: "string" },
             confirmed_claims: { type: "array", items: { type: "string" } },
             confirm_with_coordinator: { type: "boolean" },
@@ -882,6 +888,31 @@ export function buildOpenApiSpec() {
         PoliciesResponse: {
           type: "object",
           required: ["input", "status", "policy_found"],
+          oneOf: [
+            {
+              title: "Published policies",
+              required: [
+                "data_version",
+                "updated",
+                "scope",
+                "policies",
+                "todo_for_megan",
+                "disclaimer",
+              ],
+              properties: {
+                status: { const: "policies" },
+                policy_found: { const: true },
+              },
+            },
+            {
+              title: "Policy topic not found",
+              required: ["requested", "available_topics", "message"],
+              properties: {
+                status: { const: "policy_not_found" },
+                policy_found: { const: false },
+              },
+            },
+          ],
           properties: {
             input: { type: "object" },
             status: { type: "string", enum: ["policies", "policy_not_found"] },
@@ -893,7 +924,10 @@ export function buildOpenApiSpec() {
             todo_for_megan: { type: "array", items: { type: "string" } },
             disclaimer: { type: "string" },
             requested: { type: "string" },
-            available_topics: { type: "array", items: { type: "string" } },
+            available_topics: {
+              type: "array",
+              items: { type: "string", enum: getPublishedPolicyTopics(now) },
+            },
             message: { type: "string" },
           },
         },

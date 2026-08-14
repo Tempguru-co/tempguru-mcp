@@ -9,7 +9,7 @@ https://claude.com/docs/connectors/building/submission.
 | Portal field | Value |
 |---|---|
 | Server name | TempGuru Event Staffing |
-| Release being reviewed | `1.7.1` |
+| Release being reviewed | `1.7.2` |
 | URL slug | `tempguru-event-staffing` |
 | Tagline | Plan W-2 event staffing across the US and Canada |
 | Connector access | `read_write` |
@@ -26,11 +26,14 @@ https://claude.com/docs/connectors/building/submission.
 
 Inventory summary: **12 tools, 2 prompts, 8 resources**.
 
-> **AGENT5 disclosure gate:** Version `1.7.1` adds a factual public first-order
-> offer to server instructions, `get_policies`, completed-plan notes, and the
-> buyer-operated form. Before deploying, ask the Anthropic MCP Directory team
-> whether this changes the portal's sponsored/promoted-content answer. Their
-> directory policy controls whether the community connector may surface it.
+> **AGENT5 disclosure record:** Version `1.7.1` added a factual public
+> first-order offer to server instructions, `get_policies`, completed-plan
+> notes, and the buyer-operated form. TempGuru disclosed that surface to the
+> Anthropic MCP Directory team on 2026-08-14, then deployed `1.7.1` after the
+> operator chose to proceed without waiting for further guidance. This does
+> not mean Anthropic approved the offer. Version `1.7.2` does not change its
+> terms; it only improves policy-topic discovery, aliases, and clean-miss
+> telemetry.
 
 ### Detail-card description
 
@@ -83,6 +86,15 @@ field is intentionally absent rather than implicitly set.
 Permission summary for the portal: **10 read-only tools and 2
 non-destructive, non-contact write tools.** The write tools only persist
 allowlisted non-PII staffing plans.
+
+In `1.7.2`, the optional `get_policies.topic` schema advertises these current
+canonical values: `minimum-booking-hours`, `cancellation-rescheduling`,
+`no-show-backfill`, `coi-additional-insured`, `payment-terms`,
+`background-checks`, `order-confirmation`, `quote-response`, and `offers`.
+The runtime also normalizes a small set of unambiguous legacy aliases. A valid
+unknown topic returns a normal `policy_not_found` response with the available
+topics; it is not a tool failure. The `offers` topic disappears from advertised
+values when its published offer expires.
 
 ## Exact prompt inventory
 
@@ -171,28 +183,30 @@ Suggested end-to-end review:
    enter contact information or submit a live lead to validate the MCP
    connector.
 
-## Concise reply email
+## Optional `1.7.2` status email
+
+The connector is already approved as a community connector, so this hotfix
+does not need a new submission. Send the note below only if Anthropic requests
+an implementation update or replies on the existing AGENT5 disclosure thread.
 
 **To:** `mcp-review@anthropic.com`
-**Subject:** TempGuru Event Staffing connector — updated non-PII handoff contract
+**Subject:** TempGuru Event Staffing connector — get_policies schema hotfix
 
 Hello Anthropic MCP Review,
 
-We updated the existing TempGuru Event Staffing submission
-(`tempguru-event-staffing`) to remove agent-side contact collection and CRM
-submission from MCP. `request_quote` is now a strict read-only, idempotent
-handoff: it accepts only a saved non-PII `plan_id` plus optional allowlisted
-attribution and returns a TempGuru-owned buyer form URL. The buyer must enter
-their own contact details and submit the form personally; only the website REST
-flow creates a lead or TG reference.
+We deployed TempGuru MCP `1.7.2` for the existing community connector
+(`tempguru-event-staffing`). This is a schema and telemetry hotfix for
+`get_policies`: clients now receive the current canonical topic values, safe
+legacy aliases normalize to those topics, and a valid unknown topic returns a
+normal `policy_not_found` result rather than error telemetry.
 
-The connector remains `read_write` because `plan_staffing` and
-`save_staffing_plan` may persist non-contact plans. The live inventory is 12
-tools (10 read-only, 2 non-destructive non-contact writes), 2 prompts, and 8
-resources. Allowed link origin: `https://mcp.tempguru.co`.
+There is no change to the connector's permissions, inventory, authentication,
+non-PII buyer-form handoff, or the previously disclosed AGENT5 terms. It
+remains `read_write` with 12 tools, 2 prompts, 8 resources, and allowed link
+origin `https://mcp.tempguru.co`.
 
-Please use the updated submission details and re-review the live endpoint at
-`https://mcp.tempguru.co/mcp`. No account or credentials are required.
+The live endpoint remains `https://mcp.tempguru.co/mcp`. No account or
+credentials are required.
 
 Thank you,
 
