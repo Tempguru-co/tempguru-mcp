@@ -1,7 +1,8 @@
-// Live canary for the two public discovery origins and the dual-era MCP
-// endpoint. This deliberately runs outside pull-request CI: Vercel and the
-// apex Cloudflare worker must be deployed before their bytes can match the
-// merged canonical sources.
+// Live canary for the two public discovery origins, the MCP-owned knowledge
+// exports, and the dual-era MCP endpoint. This deliberately runs outside
+// pull-request CI: Vercel and the apex discovery Worker must be deployed before
+// their bytes can match the merged canonical sources. The tempguru.co apex
+// llms files are site-owned and intentionally outside this repository's gate.
 
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
@@ -9,6 +10,7 @@ import { SKILLS } from "./gen-skill-digests.mjs";
 
 const ORIGINS = ["https://mcp.tempguru.co", "https://tempguru.co"];
 const MCP_ENDPOINT = "https://mcp.tempguru.co/mcp";
+const MCP_KNOWLEDGE_ORIGIN = "https://mcp.tempguru.co";
 const PUBLIC_FACTS = JSON.parse(
   readFileSync(new URL("../content/public-facts.json", import.meta.url), "utf8"),
 );
@@ -295,7 +297,7 @@ for (const origin of ORIGINS) {
 
 const llmsBodies = {};
 for (const path of ["/llms.txt", "/llms-full.txt"]) {
-  const body = await (await fetchOk(`https://tempguru.co${path}`)).text();
+  const body = await (await fetchOk(`${MCP_KNOWLEDGE_ORIGIN}${path}`)).text();
   llmsBodies[path] = body;
   for (const claim of Object.values(PUBLIC_FACTS.withheldClaims)) {
     for (const phrase of claim.blockedPhrases) {
@@ -524,5 +526,5 @@ assertExactSet(
 );
 
 console.log(
-  `Live discovery OK: ${SKILLS.length} skills, ${TOOLS.length} tools across modern + legacy MCP, A2A v1.0, auth.md, public facts, both Agent Skills origins, apex Hermes tree, digests, OKF, server cards, and llms inventories.`,
+  `Live discovery OK: ${SKILLS.length} skills, ${TOOLS.length} tools across modern + legacy MCP, A2A v1.0, auth.md, public facts, both Agent Skills origins, apex Hermes tree, digests, OKF, server cards, and MCP-hosted llms inventories.`,
 );

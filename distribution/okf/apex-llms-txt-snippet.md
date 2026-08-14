@@ -2,6 +2,10 @@
 
 Add this section to the llms.txt at `tempguru.co/llms.txt`. The apex domain is where most agents and crawlers look first, so the OKF pointer belongs here in addition to `mcp.tempguru.co/llms.txt`.
 
+The website repository owns and deploys the apex file. The MCP repository only
+generates its separate `mcp.tempguru.co/llms.txt` knowledge export and must not
+deploy a Cloudflare Worker on either apex llms route.
+
 ---
 
 ```

@@ -28,7 +28,7 @@ The tools above are the action layer. The same data is also published as a stati
 ## Maintaining (never hand-edit generated files)
 
 - `npm run build:okf` regenerates the OKF bundle plus `public/llms.txt`, `sitemap.xml`, `robots.txt`, and `.well-known/okf.json` from `content/mcp-data/`; it runs inside `npm run build`. Edit the source data or the generator, never `public/okf/`.
-- The `tempguru.co` apex is Cloudflare Pages. Two route-scoped Cloudflare Workers serve `.well-known/*` + `robots.txt` and `llms.txt` + `llms-full.txt`; regenerate them with `npm run build:worker` and `npm run build:llms-worker`, then deploy the reviewed artifacts with the manual `deploy-apex-agent-readiness.yml` workflow. Never copy/paste production Worker source in the dashboard.
+- The `tempguru.co` apex is Cloudflare Pages. One route-scoped Cloudflare Worker serves `.well-known/*`, `robots.txt`, `auth.md`, and `schemas/*`; regenerate it with `npm run build:worker`, then deploy the reviewed artifact with the manual `deploy-apex-agent-readiness.yml` workflow. The website owns `tempguru.co/llms.txt` and `llms-full.txt`; never add an MCP-repo Worker, build step, or route binding for those apex files. This repo still generates its separate MCP-hosted exports under `public/`.
 - `npm run check:submissions` and `check-rates` are CI drift gates that keep the registry/catalog files and rate data consistent with the canonical sources.
 
 ## Golden order

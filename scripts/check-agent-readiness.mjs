@@ -560,7 +560,6 @@ const publicSurfaceFiles = [...new Set([
   "distribution/event-staffing-rate-index.html",
   "public/llms.txt",
   "public/llms-full.txt",
-  "cloudflare/llms-worker.js",
 ])];
 const blockedScalePatterns = [
   /99%\s+(?:fill|fulfillment)\s+rate/i,

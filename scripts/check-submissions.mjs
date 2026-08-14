@@ -11,7 +11,7 @@
 //
 //   node scripts/check-submissions.mjs   (npm run check:submissions)
 
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -120,7 +120,6 @@ const FILES = [
   { path: "distribution/postman-collection.json", mcpTools: false },
   { path: "public/.well-known/glama.json", mcpTools: false },
   { path: "cloudflare/worker.js", mcpTools: true },
-  { path: "cloudflare/llms-worker.js", mcpTools: true },
 ];
 
 const errors = [];
@@ -795,7 +794,6 @@ const RATE_INDEX_SURFACES = [
   "public/okf/rate-index.md",
   "public/okf/workflows/event-staffing-ordering.md",
   "cloudflare/worker.js",
-  "cloudflare/llms-worker.js",
 ];
 for (const p of RATE_INDEX_SURFACES) {
   let body;
@@ -992,48 +990,80 @@ if (existsSync(join(root, "public/.well-known/agent-skills/index.json"))) {
   errors.push("public/.well-known/agent-skills/index.json is a stale shadow of the route; delete it (the App Router route is canonical)");
 }
 
-const llmsWorker = read("cloudflare/llms-worker.js");
-if (!JSON.parse(read("package.json")).scripts?.["build:llms-worker"]) {
-  errors.push("package.json: missing build:llms-worker generator command");
-}
-if (!read(".github/workflows/check-submissions.yml").includes("npm run build:llms-worker -- --from-committed")) {
-  errors.push(".github/workflows/check-submissions.yml: llms worker regeneration must use the committed offline snapshot in PR CI");
-}
-const llmsWorkerBuilder = read("scripts/build-llms-worker.mjs");
-if (
-  !llmsWorkerBuilder.includes('"--from-committed"') ||
-  !llmsWorkerBuilder.includes('readFileSync("public/llms.txt"') ||
-  !llmsWorkerBuilder.includes('readFileSync("public/llms-full.txt"')
-) {
-  errors.push("scripts/build-llms-worker.mjs: deterministic repository-only llms sources or compatibility alias are missing");
-}
-if (llmsWorker.includes("tempguru-agent-skills")) {
-  errors.push("cloudflare/llms-worker.js: points agents at the stale two-skill repository");
-}
-if (
-  llmsWorker.includes("request_quote / submitQuoteRequest") ||
-  llmsWorker.includes("request_quote is a no-auth public MCP write tool")
-) {
-  errors.push("cloudflare/llms-worker.js: conflates the read-only MCP buyer handoff with the contact-bearing REST write");
-}
-for (const fragment of [
+const requiredMcpLlmsFragments = [
   "MCP request_quote only returns a buyer-operated form",
   "REST submitQuoteRequest is a contact-bearing write and requires explicit confirmation",
-]) {
-  if (!llmsWorker.includes(fragment)) {
-    errors.push(`cloudflare/llms-worker.js: missing MCP/REST quote-boundary guidance: ${fragment}`);
-  }
-}
-for (const fragment of [
+  "https://mcp.tempguru.co/mcp",
+  "https://mcp.tempguru.co/api/v1",
+  "https://mcp.tempguru.co/a2a",
   "https://github.com/Tempguru-co/tempguru-mcp",
   `Canonical Agent Skills (${SKILLS.length})`,
   ROLE_RATE_ENVELOPE,
   `canonical ${ROLE_COUNT}-role catalog`,
   ...SKILLS,
   ...(AGENT5_TERMS ? [AGENT5_TERMS] : []),
-]) {
-  if (!llmsWorker.includes(fragment)) {
-    errors.push(`cloudflare/llms-worker.js: canonical agent guidance missing ${fragment}`);
+];
+for (const path of ["public/llms.txt", "public/llms-full.txt"]) {
+  const body = read(path);
+  if (body.includes("tempguru-agent-skills")) {
+    errors.push(`${path}: points agents at the stale two-skill repository`);
+  }
+  if (
+    body.includes("request_quote / submitQuoteRequest") ||
+    body.includes("request_quote is a no-auth public MCP write tool")
+  ) {
+    errors.push(`${path}: conflates the read-only MCP buyer handoff with the contact-bearing REST write`);
+  }
+  for (const fragment of requiredMcpLlmsFragments) {
+    if (!body.includes(fragment)) {
+      errors.push(`${path}: canonical agent guidance missing ${fragment}`);
+    }
+  }
+}
+
+// The website owns tempguru.co/llms.txt and /llms-full.txt. Keep the retired
+// Worker generator, generated script, and deploy hooks out of this repository
+// so a future MCP release cannot silently overwrite or re-shadow those files.
+const retiredLlmsWorkerPaths = [
+  "scripts/build-llms-worker.mjs",
+  "cloudflare/llms-worker.js",
+];
+for (const path of retiredLlmsWorkerPaths) {
+  if (existsSync(join(root, path))) {
+    errors.push(`${path}: retired apex llms Worker ownership must not be restored`);
+  }
+}
+const retiredLlmsWorkerPatterns = [
+  /build:llms-worker/i,
+  /build-llms-worker/i,
+  /cloudflare\/llms-worker\.js/i,
+  /CLOUDFLARE_LLMS_WORKER_NAME/i,
+  /llms[-_ ]worker/i,
+  /https?:\/\/tempguru\.co\/llms(?:-full)?\.txt/i,
+];
+const packageScripts = JSON.parse(read("package.json")).scripts ?? {};
+for (const [name, command] of Object.entries(packageScripts)) {
+  const definition = `${name}: ${command}`;
+  if (retiredLlmsWorkerPatterns.some((pattern) => pattern.test(definition))) {
+    errors.push(`package.json: retired apex llms Worker hook must not be restored in script ${name}`);
+  }
+  if (/wrangler/i.test(definition) && /public\/llms(?:-full)?\.txt/i.test(definition)) {
+    errors.push(`package.json: script ${name} must not deploy an MCP-hosted llms export to Cloudflare`);
+  }
+}
+const workflowDirectory = ".github/workflows";
+for (const entry of readdirSync(join(root, workflowDirectory), { withFileTypes: true })) {
+  if (!entry.isFile() || !/\.ya?ml$/i.test(entry.name)) continue;
+  const workflow = `${workflowDirectory}/${entry.name}`;
+  const body = read(workflow);
+  const searchable = `${entry.name}\n${body}`;
+  for (const pattern of retiredLlmsWorkerPatterns) {
+    if (pattern.test(searchable)) {
+      errors.push(`${workflow}: retired apex llms deploy hook remains (${pattern})`);
+    }
+  }
+  if (/wrangler|cloudflare\/wrangler-action/i.test(body) && /public\/llms(?:-full)?\.txt/i.test(body)) {
+    errors.push(`${workflow}: must not deploy an MCP-hosted llms export to Cloudflare`);
   }
 }
 
