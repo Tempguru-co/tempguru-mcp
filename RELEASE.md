@@ -539,8 +539,10 @@ below `1.7.0` for every listed slug, so `1.7.0` was not yet listed:
 - `tempguru-staffing-agency-partner-growth`
 - `tempguru-pro-operations`
 
-Use each matching `skills/<canonical-slug>/SKILL.md` from the tagged `v1.7.0`
-commit. Immediately before publishing, query all seven listings again. ClawHub
+The repository never received a `v1.7.0` tag. Use each matching
+`skills/<canonical-slug>/SKILL.md` from the pre-AGENT5 `origin/main` commit
+`125ee8a1435482ffee0906a7cbf73b5f3579e04e`. Immediately before publishing,
+query all seven listings again. ClawHub
 versions are immutable: use `1.7.0` only while it remains unused for that slug;
 if it has appeared, choose the next unused patch (for example `1.7.1`) rather
 than overwriting or retrying an existing version.
@@ -551,6 +553,12 @@ function `publish_all` is used, inspect it with `type publish_all`, run its dry
 run first, and verify that it targets only the seven skills above at the
 preflight-confirmed unused version for each (`1.7.0` was expected from the
 2026-08-10 observation) before enabling writes.
+
+Observed closeout: all seven dry-runs returned `would-publish`, and all seven
+skills were published as `1.7.0` on 2026-08-14 with source commit `125ee8a`.
+The published files teach the read-only, non-PII saved-plan handoff and require
+the buyer to review and submit TempGuru's form personally. Do not republish or
+overwrite these immutable versions.
 
 Verify each listing:
 
