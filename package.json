@@ -18,7 +18,6 @@
     "build:okf": "node scripts/gen-skill-digests.mjs && node scripts/dump-openapi.mjs && node scripts/dump-request-schema.mjs && npm run build:okf-examples && node scripts/build-okf.mjs",
     "build:okf-examples": "node distribution/okf/openapi-to-okf.mjs content/mcp-data/openapi.json distribution/okf/example --base https://mcp.tempguru.co && node distribution/okf/knowledge-catalog-contrib/openapi-to-okf/openapi-to-okf.mjs content/mcp-data/openapi.json distribution/okf/knowledge-catalog-contrib/openapi-to-okf/example --base https://mcp.tempguru.co",
     "build:worker": "node scripts/build-edge-worker.mjs",
-    "build:llms-worker": "node scripts/build-llms-worker.mjs",
     "build:url-map": "node scripts/build-url-map.mjs",
     "sync-rates": "node scripts/sync-rates.mjs",
     "sync:postman": "node scripts/sync-postman-examples.mjs",

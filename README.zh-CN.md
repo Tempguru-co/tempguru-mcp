@@ -160,7 +160,7 @@ mcp_manager.add_server({
 - **数据源：** `content/mcp-data/` 下的 JSON 文件（城市、岗位、岗位定价、州合规）
 - **身份认证：** `tempguru.co` 根域的 DNS TXT 记录承载 Ed25519 公钥，授权在官方 MCP 注册中心以 `co.tempguru` 命名空间发布
 - **知识层：** 同一份数据还以静态 Open Knowledge Format（OKF v0.1）知识包形式发布，位于 `/okf/`（含 `/.well-known/okf.json`、`/okf.tar.gz`、`/sitemap.xml`、`/robots.txt`），由 `npm run build:okf` 从 `content/mcp-data/` 生成（已接入 `npm run build`），因此行动层与知识层永不偏离
-- **根域发现：** `tempguru.co` 的 `.well-known/*`、`robots.txt`、`llms.txt`、`llms-full.txt` 由两个 Cloudflare worker 提供，分别通过 `npm run build:worker` 和 `npm run build:llms-worker` 从规范源生成（输出在 `cloudflare/`）
+- **根域发现：** 一个由 `npm run build:worker` 生成的 Cloudflare Worker 提供 `tempguru.co` 的 `.well-known/*`、`robots.txt`、`auth.md` 和 `schemas/*`。根域的 `llms.txt` 与 `llms-full.txt` 由网站仓库负责生成和部署；本仓库只生成 `public/` 下由 MCP 子域提供的独立知识导出。
 - **漂移门禁：** `npm run check:submissions`（CI）与 `npm run check-rates` 确保注册/目录文件与费率数据同规范源保持一致
 
 公开数据也通过 `mcp.tempguru.co/api/v1/*` 的 REST 接口提供，OpenAPI 3.1 规范见 `/openapi.json`，RFC 9727 api-catalog 见 `/.well-known/api-catalog`。需要特别区分两条报价路径：MCP 的只读 `request_quote` 只接受已保存的 `plan_id` 与受限归因字段，并返回 `https://mcp.tempguru.co/request-quote` 下的买家表单；它不会创建线索。REST 的 `POST /api/v1/quote-requests`（operationId 为 `submitQuoteRequest`）则是由网站表单或明确集成调用的直接写入接口，会验证联系人与活动字段、写入 CRM 或持久队列，并因其为无需认证的公开写入而附加按 IP 的轻量限流。两条路径都不创建预订，也无需付款。
@@ -256,11 +256,10 @@ public/
   schemas/                # event-staffing-request.schema.json
 scripts/
   build-okf.mjs · dump-openapi.mjs · dump-request-schema.mjs
-  build-edge-worker.mjs · build-llms-worker.mjs  # 根域 Cloudflare worker
+  build-edge-worker.mjs                  # 根域发现 Cloudflare worker
   check-submissions.mjs · sync-rates.mjs    # 漂移门禁
 cloudflare/
   worker.js               # 根域 .well-known/* + robots（生成）
-  llms-worker.js          # 根域 llms.txt + llms-full.txt（生成）
 distribution/okf/         # openapi-to-okf 生成器 + Google knowledge-catalog 贡献
 server.json               # MCP 注册中心清单
 public/logo.svg           # 方形 SVG 标识

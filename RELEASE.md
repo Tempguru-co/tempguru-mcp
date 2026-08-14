@@ -51,7 +51,7 @@ city-page changes.
 | npm CLI | Manual `publish-npm.yml` with `1.7.2` | Publishes `tempguru-mcp`, then re-dispatches the Registry workflow |
 | Pi / Prime Agent npm package | Completed `publish-pi.yml` run for `1.7.2` | `tempguru-pi@1.7.2` is live and immutable; future changes require the next unused patch |
 | GHCR semver tags | Push `v1.7.2` | Publishes image tags `1.7.2` and `1.7` |
-| Apex Cloudflare discovery | Manual | Deploys the two committed worker files |
+| Apex Cloudflare discovery | Manual | Deploys the committed discovery Worker artifact |
 | Anthropic directory | Verification only | Keep the approved community listing aligned with the live server; do not imply AGENT5-specific approval |
 | Hermes and ClawHub | No hotfix action | Skill artifacts stay at `skill_version: 1.7.1`; do not republish unchanged copies |
 
@@ -80,8 +80,9 @@ own verification succeeds.
 5. Store the Ed25519 private key as the GitHub environment secret
    `Production` → `MCP_PRIVATE_KEY`. Restrict that environment to `main`.
 6. Confirm the GHCR package is public and the release operator can merge,
-   dispatch Actions, push tags, deploy both Cloudflare workers, and edit the
-   Anthropic directory submission if its live declaration needs correction.
+   dispatch Actions, push tags, deploy the Cloudflare discovery Worker, and
+   edit the Anthropic directory submission if its live declaration needs
+   correction.
 7. Protect the `v*` tag namespace so only release maintainers can create or
    update release tags.
 
@@ -122,7 +123,6 @@ npm ci
 npm run sync:postman
 npm run build:okf
 npm run build:worker
-npm run build:llms-worker -- --from-committed
 npm run build:cli
 git diff --check
 git status --short
@@ -130,8 +130,8 @@ git status --short
 
 Review all generated changes before committing them. The release commit must
 contain the source, OKF bundle, discovery documents, OpenAPI/schema artifacts,
-Cloudflare workers, CLI source and manifests, tests, and documentation intended
-for `1.7.2`. The unchanged skill copies and digests retain
+the Cloudflare discovery Worker, CLI source and manifests, tests, and
+documentation intended for `1.7.2`. The unchanged skill copies and digests retain
 `skill_version: 1.7.1`. The ignored CLI bundle is built and
 package-checked dynamically by the publisher; it is not committed. Do not
 include unrelated city-page work or duplicate local files.
@@ -148,7 +148,6 @@ npm run evals
 npm run test:protocol
 npm run build
 npm run build:worker
-npm run build:llms-worker -- --from-committed
 npm run check:submissions
 npm run check:agent-readiness
 npm run build:cli
@@ -303,26 +302,30 @@ Prime supports authless MCP.
 
 ## 6. Deploy apex discovery to Cloudflare
 
-Cloudflare Pages serves the `tempguru.co` site, while route-scoped Workers own
-the apex discovery files. After the Vercel MCP deployment is healthy, deploy
-the committed Worker artifacts:
+Cloudflare Pages serves the `tempguru.co` site, while one route-scoped Worker
+owns the apex discovery files. The website deployment—not this repository—owns
+the apex `llms.txt` and `llms-full.txt` files. After the Vercel MCP deployment
+is healthy, deploy the committed discovery Worker artifact:
 
-1. Record the current deployment ID for each worker.
+1. Record the current discovery Worker deployment ID.
 2. Dispatch `deploy-apex-agent-readiness.yml` from `main` and approve the
    GitHub `Production` environment gate.
 3. Confirm the existing discovery Worker routes are
    `tempguru.co/robots.txt`, `tempguru.co/.well-known/*`,
-   `tempguru.co/auth.md`, and `tempguru.co/schemas/*`; confirm the llms Worker
-   routes are `tempguru.co/llms.txt` and `tempguru.co/llms-full.txt`.
-4. Confirm both Wrangler deployment steps and the post-deploy live canary
-   succeeded. The workflow rebuilds the
-   artifacts, requires them to match the reviewed commit, and leaves the Pages
-   deployment and Worker route bindings unchanged.
+   `tempguru.co/auth.md`, and `tempguru.co/schemas/*`.
+4. Confirm the Wrangler deployment step and the post-deploy live canary
+   succeeded. The workflow rebuilds the artifact, requires it to match the
+   reviewed commit, and leaves the Pages deployment and Worker route bindings
+   unchanged.
+5. Confirm no legacy MCP-repository Worker route is bound to
+   `tempguru.co/llms.txt` or `tempguru.co/llms-full.txt`. Removing the old
+   builder and deploy step does not remove a route already configured in
+   Cloudflare.
 
 Do not deploy by pasting source into the Cloudflare editor. The committed files
 and GitHub workflow are the production path.
 
-After Vercel and both workers are deployed, run the live canary:
+After Vercel and the discovery Worker are deployed, run the live canary:
 
 ```bash
 gh workflow run check-live-discovery.yml \
@@ -395,8 +398,9 @@ The release notes must call out:
   endpoint with repository-backed planning and lookup skills.
 - `/auth.md` documents the public no-account/no-OAuth boundary, while
   `/.well-known/tempguru-facts.json` evidence-gates public scale claims.
-- Cloudflare Pages discovery now publishes the distinct concise `llms.txt` and
-  complete `llms-full.txt` OKF export through generated, route-scoped Workers.
+- The website deployment owns the apex `llms.txt` and `llms-full.txt`; the MCP
+  repository publishes its distinct knowledge exports only from
+  `mcp.tempguru.co` and cannot redeploy an apex llms Worker.
 - `get_policies` now advertises its canonical topic list, maps documented safe
   aliases, and reports valid no-match lookups as successful clean misses.
 - The canonical AGENT5 offer introduced in `1.7.1` remains identical in
@@ -532,9 +536,10 @@ Do not mark `1.7.2` complete until every applicable item is verified:
 - `tempguru-pi@1.7.2` resolves from npm.
 - `tempguru-pi@1.7.2` was not republished or overwritten.
 - The official MCP Registry reports `1.7.2`.
-- Both Cloudflare worker deployments are live.
-- All six documented Cloudflare route bindings resolve to the expected Worker
-  content, including `/auth.md`, the request schema, and distinct llms exports.
+- The Cloudflare discovery Worker deployment is live.
+- The documented discovery route bindings resolve to the expected Worker
+  content, including `/auth.md` and the request schema; no legacy MCP-repository
+  Worker shadows the website-owned apex llms files.
 - `check-live-discovery.yml` passes.
 - GHCR exposes `latest`, `1.7.2`, `1.7`, and the expected `sha-*` image.
 - Live MCP and OpenAPI schemas advertise the current canonical
@@ -565,7 +570,9 @@ pending third-party reviews labeled pending.
   to the `1.6.0` server also restores the old direct MCP lead-submission
   behavior; keep the Anthropic listing pending or disabled until the approved
   `1.7.x` safety boundary is live again.
-- **Cloudflare:** roll back each worker independently from its Deployments tab.
+- **Cloudflare:** roll back the discovery Worker from its Deployments tab. The
+  website deployment owns the apex llms files; do not restore the retired MCP
+  llms Worker as a rollback path.
 - **Anthropic:** keep the portal declaration aligned with the server actually
   deployed. If the safe handoff is unavailable, tell the reviewer and pause
   re-review rather than leaving an inaccurate listing.

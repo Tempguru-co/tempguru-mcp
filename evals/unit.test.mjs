@@ -1568,12 +1568,9 @@ const apexRobotResponse = await apexWorker.fetch(
 const apexDiscoveryResponse = await apexWorker.fetch(
   new Request("https://tempguru.co/.well-known/mcp.json"),
 );
-const llmsWorker = (await load("cloudflare/llms-worker.js")).default;
-const llmsResponse = await llmsWorker.fetch(new Request("https://tempguru.co/llms.txt"));
 check("generated Cloudflare discovery responses carry machine security headers",
   hasMachineSecurity(apexRobotResponse)
-    && hasMachineSecurity(apexDiscoveryResponse)
-    && hasMachineSecurity(llmsResponse));
+    && hasMachineSecurity(apexDiscoveryResponse));
 
 const publicRequestSchema = JSON.parse(
   readFileSync(join(repoRoot, "public/schemas/event-staffing-request.schema.json"), "utf8"),

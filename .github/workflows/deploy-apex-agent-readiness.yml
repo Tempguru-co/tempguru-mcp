@@ -1,4 +1,4 @@
-name: deploy-apex-agent-readiness
+name: deploy-apex-agent-discovery
 
 on:
   workflow_dispatch:
@@ -25,12 +25,11 @@ jobs:
       - run: npm ci
       - run: npm run build:okf
       - run: npm run build:worker
-      - run: npm run build:llms-worker -- --from-committed
       - run: npm run check:agent-readiness
       - name: Require generated artifacts to match the reviewed commit
         run: |
-          git diff --exit-code -- public content skills plugins/tempguru/skills distribution/pi/skills distribution/okf/example distribution/okf/knowledge-catalog-contrib/openapi-to-okf/example cloudflare/worker.js cloudflare/llms-worker.js
-          test -z "$(git status --porcelain --untracked-files=all -- public content skills plugins/tempguru/skills distribution/pi/skills distribution/okf/example distribution/okf/knowledge-catalog-contrib/openapi-to-okf/example cloudflare/worker.js cloudflare/llms-worker.js)"
+          git diff --exit-code -- public content skills plugins/tempguru/skills distribution/pi/skills distribution/okf/example distribution/okf/knowledge-catalog-contrib/openapi-to-okf/example cloudflare/worker.js
+          test -z "$(git status --porcelain --untracked-files=all -- public content skills plugins/tempguru/skills distribution/pi/skills distribution/okf/example distribution/okf/knowledge-catalog-contrib/openapi-to-okf/example cloudflare/worker.js)"
       - name: Deploy apex discovery Worker
         uses: cloudflare/wrangler-action@9acf94ace14e7dc412b076f2c5c20b8ce93c79cd # v3
         with:
@@ -41,15 +40,5 @@ jobs:
             --name ${{ vars.CLOUDFLARE_DISCOVERY_WORKER_NAME }}
             --compatibility-date 2026-08-10
             --keep-vars
-      - name: Deploy apex llms Worker
-        uses: cloudflare/wrangler-action@9acf94ace14e7dc412b076f2c5c20b8ce93c79cd # v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: >-
-            deploy cloudflare/llms-worker.js
-            --name ${{ vars.CLOUDFLARE_LLMS_WORKER_NAME }}
-            --compatibility-date 2026-08-10
-            --keep-vars
-      - name: Verify live discovery, route bindings, and agent protocols
+      - name: Verify live discovery and agent protocols
         run: npm run check:live-discovery
