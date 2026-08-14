@@ -20,6 +20,7 @@ import {
   queryRolePricing,
   queryStateCompliance,
   queryPolicies,
+  policyQueryTelemetryStatus,
   type CityTier,
 } from "./queries";
 import { checkReadRateLimit } from "../api/rate-limit";
@@ -59,6 +60,7 @@ import { MARKET_CATALOG_DESCRIPTION } from "../public-facts";
 import {
   getAgent5PlanNote,
   getAgent5ServerInstruction,
+  getPublishedPolicyTopics,
 } from "./published-offer";
 
 // Measured-market count for the Rate Index description, derived from the data
@@ -216,6 +218,7 @@ function errorResult(obj: unknown) {
 
 export function registerTools(server: McpServer, options: RegisterToolsOptions = {}): void {
   const track = (record: TrackRecord) => options.onTrack?.(record);
+  const publishedPolicyTopics = getPublishedPolicyTopics();
 
   // ─── plan_staffing (planner meta-tool, call this FIRST) ─────────────
   //
@@ -586,17 +589,20 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     {
       title: "Get Booking and Procurement Policies",
       description:
-        "Get TempGuru's published booking, procurement, and public-offer policies: minimum hours, cancellation/rescheduling, no-show backfill, COIs/additional insured, payment/invoicing, background checks, order confirmation, quote response, and offers. " +
+        "Get TempGuru's published booking and procurement policies, plus any currently published public offer. " +
         "Use for real booking questions that otherwise require an email. Values not supported by canonical copy are explicitly marked confirm_with_coordinator with TODO-for-Megan; never infer a missing number. " +
-        "<examples>get_policies() ; get_policies(topic='offers') ; get_policies(topic='payment-terms')</examples> " +
-        "<hints>Pass a topic to return one policy. Unknown topics return the available topic list. This is an operational summary, not a contract.</hints>",
+        "<examples>get_policies() ; get_policies(topic='payment-terms') ; get_policies(topic='coi-additional-insured')</examples> " +
+        "<hints>Choose an advertised topic to return one policy. Narrow lexical aliases remain accepted, and unknown topics return the current available-topic list. This is an operational summary, not a contract.</hints>",
       inputSchema: z.object({
         topic: z
           .string()
           .trim()
           .max(80)
+          .meta({ enum: publishedPolicyTopics })
           .optional()
-          .describe("Optional policy topic or title. Omit to return all published topics."),
+          .describe(
+            "Optional canonical policy topic. Choose an advertised enum value; omit for all policies or a broader question.",
+          ),
       }),
       outputSchema: GET_POLICIES_SCHEMA,
       annotations: {
@@ -610,7 +616,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
       const result = queryPolicies({ topic });
       await track({
         tool: "get_policies",
-        status: result.ok && result.data.policy_found ? "success" : "error",
+        status: policyQueryTelemetryStatus(result),
       });
       if (!result.ok) return errorResult({ error: result.error.message });
       return structuredResult(result.data);

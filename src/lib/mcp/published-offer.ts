@@ -77,6 +77,11 @@ export function getPublishedPolicies(now = new Date()): Policy[] {
   );
 }
 
+/** Canonical topic enum for the policies that are publishable right now. */
+export function getPublishedPolicyTopics(now = new Date()): string[] {
+  return getPublishedPolicies(now).map((policy) => policy.topic);
+}
+
 export function getAgent5ServerInstruction(now = new Date()): string | null {
   return getActiveAgent5Offer(now) ? AGENT5_SERVER_INSTRUCTION : null;
 }

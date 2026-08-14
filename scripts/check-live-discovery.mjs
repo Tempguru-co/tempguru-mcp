@@ -15,6 +15,7 @@ const PUBLIC_FACTS = JSON.parse(
 const POLICIES = JSON.parse(
   readFileSync(new URL("../content/mcp-data/policies.json", import.meta.url), "utf8"),
 );
+const POLICY_TOPICS = POLICIES.policies.map((policy) => policy.topic);
 const AGENT5_OFFER = POLICIES.policies.find((policy) => policy.topic === "offers");
 const AGENT5_TERMS = AGENT5_OFFER?.confirmed_claims?.[0];
 const AGENT5_SERVER_INSTRUCTION =
@@ -422,6 +423,21 @@ assertExactSet(
     : [],
   TOOLS,
 );
+const livePoliciesTool = legacyTools.tools.find((tool) => tool.name === "get_policies");
+if (
+  JSON.stringify(livePoliciesTool?.inputSchema?.properties?.topic?.enum) !==
+  JSON.stringify(POLICY_TOPICS)
+) {
+  throw new Error(`${MCP_ENDPOINT}: get_policies topic enum drifted from canonical policies`);
+}
+const liveOpenApi = await (
+  await fetchOk("https://mcp.tempguru.co/openapi.json")
+).json();
+const liveOpenApiPolicyTopics = liveOpenApi.paths?.["/api/v1/policies"]?.get
+  ?.parameters?.find((parameter) => parameter.name === "topic")?.schema?.enum;
+if (JSON.stringify(liveOpenApiPolicyTopics) !== JSON.stringify(POLICY_TOPICS)) {
+  throw new Error("live OpenAPI getPolicies topic enum drifted from canonical policies");
+}
 
 const liveOfferResult = await postRpc(
   {
@@ -447,6 +463,25 @@ if (
   liveOffer?.scope !== "first order, new clients"
 ) {
   throw new Error(`${MCP_ENDPOINT}: live AGENT5 policy drifted from canonical data`);
+}
+const liveAliasResult = await postRpc(
+  {
+    jsonrpc: "2.0",
+    id: "live-legacy-policy-alias",
+    method: "tools/call",
+    params: {
+      name: "get_policies",
+      arguments: { topic: "COI" },
+    },
+  },
+  { "mcp-protocol-version": LEGACY_VERSION },
+);
+if (
+  liveAliasResult.isError === true ||
+  liveAliasResult.structuredContent?.policies?.[0]?.topic !==
+    "coi-additional-insured"
+) {
+  throw new Error(`${MCP_ENDPOINT}: get_policies COI alias did not resolve canonically`);
 }
 
 const discoverMeta = modernMeta("tempguru-live-discovery-modern");

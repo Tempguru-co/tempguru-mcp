@@ -68,7 +68,10 @@ async function loadRestRoute(rel) {
           loader: "js",
           contents:
             path === "track-rest"
-              ? "export async function trackRest() {}"
+              ? `export async function trackRest(_request, record) {
+                   const records = globalThis.__tempguruRestTrackRecords;
+                   if (Array.isArray(records)) records.push(record);
+                 }`
               : `export const redisJsonStore = {
                    async get() { return null; },
                    async put() { return "unavailable"; },
@@ -147,7 +150,13 @@ function check(name, ok, detail = "") {
   }
 }
 
-const { findCity, findRole, suggestCity, cityDetailUrl, roleDetailUrl } = await load("src/lib/mcp/data.ts");
+const {
+  findCity,
+  findRole,
+  suggestCity,
+  cityDetailUrl,
+  roleDetailUrl,
+} = await load("src/lib/mcp/data.ts");
 
 // URL map: tool results must never emit a deep link to an unpublished page.
 // A mapped slug keeps its rich link; an unmapped one degrades to /insights.
@@ -334,7 +343,9 @@ const {
   queryAvailability,
   queryRolePricing,
   queryPolicies,
+  policyQueryTelemetryStatus,
 } = await load("src/lib/mcp/queries.ts");
+const offerContract = await load("src/lib/mcp/published-offer.ts");
 const ussr = queryCities({ country: "USSR" });
 check("get_cities country=USSR is invalid_param, not all US markets", !ussr.ok && ussr.error.code === "invalid_param");
 const uk = queryCities({ country: "United Kingdom" });
@@ -364,6 +375,80 @@ const secPrice = queryRolePricing({ role: "security guard", city: "Boston" });
 check("get_role_pricing 'security guard' carries the unarmed-crowd-control note",
   secPrice.ok && "role_note" in secPrice.data && secPrice.data.role_note.includes("NOT licensed"));
 
+const expectedPolicyTopics = [
+  "minimum-booking-hours",
+  "cancellation-rescheduling",
+  "no-show-backfill",
+  "coi-additional-insured",
+  "payment-terms",
+  "background-checks",
+  "order-confirmation",
+  "quote-response",
+  "offers",
+];
+check("canonical policy topics are derived from policies.json without drift",
+  JSON.stringify(offerContract.getPublishedPolicyTopics(
+    new Date("2026-08-14T12:00:00Z"),
+  )) === JSON.stringify(expectedPolicyTopics)
+    && !offerContract.getPublishedPolicyTopics(
+      new Date("2027-01-01T05:00:00Z"),
+    ).includes("offers"),
+  JSON.stringify(offerContract.getPublishedPolicyTopics(
+    new Date("2026-08-14T12:00:00Z"),
+  )));
+const unknownPolicyResult = queryPolicies(
+  { topic: "x".repeat(80) },
+  new Date("2026-08-14T12:00:00Z"),
+);
+check("get_policies unknown topic is a clean expected miss with canonical choices",
+  unknownPolicyResult.ok
+    && unknownPolicyResult.data.policy_found === false
+    && JSON.stringify(unknownPolicyResult.data.available_topics)
+      === JSON.stringify(expectedPolicyTopics),
+  JSON.stringify(unknownPolicyResult));
+check("get_policies expected misses are telemetry success, real query failures remain errors",
+  policyQueryTelemetryStatus(unknownPolicyResult) === "success"
+    && policyQueryTelemetryStatus({
+      ok: false,
+      error: { code: "invalid_param", message: "test failure" },
+    }) === "error");
+for (const [alias, topic] of [
+  ["minimum hours", "minimum-booking-hours"],
+  ["cancellation", "cancellation-rescheduling"],
+  ["rescheduling", "cancellation-rescheduling"],
+  ["no show", "no-show-backfill"],
+  ["COI", "coi-additional-insured"],
+  ["COIs", "coi-additional-insured"],
+  ["certificate of insurance", "coi-additional-insured"],
+  ["additional insured", "coi-additional-insured"],
+  ["COIs additional insured", "coi-additional-insured"],
+  ["payment", "payment-terms"],
+  ["invoicing", "payment-terms"],
+  ["payment invoicing", "payment-terms"],
+  ["background check", "background-checks"],
+  ["offer", "offers"],
+  ["AGENT5", "offers"],
+]) {
+  const aliasResult = queryPolicies(
+    { topic: alias },
+    new Date("2026-08-14T12:00:00Z"),
+  );
+  check(`get_policies resolves the unambiguous alias "${alias}"`,
+    aliasResult.ok
+      && aliasResult.data.policy_found === true
+      && aliasResult.data.policies[0]?.topic === topic,
+    JSON.stringify(aliasResult));
+}
+const expiredAgent5Alias = queryPolicies(
+  { topic: "AGENT5" },
+  new Date("2027-01-01T05:00:00Z"),
+);
+check("get_policies aliases cannot revive an expired offer",
+  expiredAgent5Alias.ok
+    && expiredAgent5Alias.data.policy_found === false
+    && !expiredAgent5Alias.data.available_topics.includes("offers"),
+  JSON.stringify(expiredAgent5Alias));
+
 const AGENT5_CANONICAL_TERMS =
   "New TempGuru clients receive 5% off their first order, capped at $500, when the staffing request mentions the code AGENT5 in the event details. The offer is valid for first orders submitted through https://tempguru.co/get-staffing by December 31, 2026. The discount is applied by the TempGuru coordinator after the quote is approved; published city-guide planning rates are unchanged. The code is public and any buyer may use it.";
 const activeOfferResult = queryPolicies(
@@ -390,8 +475,18 @@ check("get_policies removes the offer immediately after 2026-12-31",
     && expiredOfferResult.data.policy_found === false
     && !expiredOfferResult.data.available_topics.includes("offers"),
   JSON.stringify(expiredOfferResult));
+check("get_policies output schema accepts a clean miss and rejects contradictory discriminators",
+  outputSchemas.GET_POLICIES_SCHEMA.safeParse(unknownPolicyResult.data).success
+    && !outputSchemas.GET_POLICIES_SCHEMA.safeParse({
+      ...unknownPolicyResult.data,
+      status: "policies",
+    }).success
+    && activeOfferResult.ok
+    && !outputSchemas.GET_POLICIES_SCHEMA.safeParse({
+      ...activeOfferResult.data,
+      status: "policy_not_found",
+    }).success);
 
-const offerContract = await load("src/lib/mcp/published-offer.ts");
 const { getServerInstructions } = await load("src/lib/mcp/register-tools.ts");
 check("all AGENT5 runtime surfaces share the same inclusive expiry gate",
   offerContract.isAgent5OfferActive(new Date("2027-01-01T04:59:59.999Z"))
@@ -1441,6 +1536,7 @@ check("public read REST data remains openly reusable but gains machine security 
 
 const { buildOpenApiSpec } = await load("src/lib/api/openapi.ts");
 const hardenedOpenApi = buildOpenApiSpec();
+const expiredOfferOpenApi = buildOpenApiSpec(new Date("2027-01-01T05:00:00Z"));
 const quoteResponses = hardenedOpenApi.paths["/api/v1/quote-requests"].post.responses;
 const errorCodes = hardenedOpenApi.components.schemas.Error.properties.error
   .properties.code.enum;
@@ -1448,6 +1544,22 @@ check("OpenAPI declares quote Origin/content-type failures and forbidden errors"
   quoteResponses["403"] !== undefined
     && quoteResponses["415"] !== undefined
     && errorCodes.includes("forbidden"));
+check("OpenAPI advertises the canonical get_policies topic enum",
+  JSON.stringify(
+    hardenedOpenApi.paths["/api/v1/policies"].get.parameters[0].schema.enum,
+  ) === JSON.stringify(expectedPolicyTopics)
+    && !expiredOfferOpenApi.paths["/api/v1/policies"].get.parameters[0].schema.enum
+      .includes("offers"));
+const policyResponseBranches = hardenedOpenApi.components.schemas.PoliciesResponse.oneOf;
+check("OpenAPI pins get_policies status and policy_found to consistent response branches",
+  policyResponseBranches?.some((branch) =>
+    branch.properties?.status?.const === "policies"
+      && branch.properties?.policy_found?.const === true
+      && branch.required?.includes("policies"))
+    && policyResponseBranches?.some((branch) =>
+      branch.properties?.status?.const === "policy_not_found"
+        && branch.properties?.policy_found?.const === false
+        && branch.required?.includes("available_topics")));
 
 const apexWorker = (await load("cloudflare/worker.js")).default;
 const apexRobotResponse = await apexWorker.fetch(
@@ -1548,6 +1660,7 @@ check("REST get_quote_status returns a no-store 200 for a valid absent reference
     && absentStatusBody.quote_found === false);
 
 const policiesRoute = await loadRestRoute("src/app/api/v1/policies/route.ts");
+globalThis.__tempguruRestTrackRecords = [];
 const overlongTopicResponse = await policiesRoute.GET(
   new Request(
     `https://mcp.tempguru.co/api/v1/policies?topic=${encodeURIComponent("x".repeat(81))}`,
@@ -1557,7 +1670,19 @@ const overlongTopicBody = await overlongTopicResponse.json();
 check("REST get_policies rejects an overlong topic with 400",
   overlongTopicResponse.status === 400
     && overlongTopicBody.error?.code === "invalid_param"
-    && overlongTopicBody.error?.field === "topic");
+    && overlongTopicBody.error?.field === "topic"
+    && globalThis.__tempguruRestTrackRecords.at(-1)?.status === "error");
+const restUnknownPolicyResponse = await policiesRoute.GET(
+  new Request(
+    `https://mcp.tempguru.co/api/v1/policies?topic=${encodeURIComponent("x".repeat(80))}`,
+  ),
+);
+const restUnknownPolicyBody = await restUnknownPolicyResponse.json();
+check("REST get_policies records an unknown canonical-topic miss as success",
+  restUnknownPolicyResponse.status === 200
+    && restUnknownPolicyBody.policy_found === false
+    && globalThis.__tempguruRestTrackRecords.at(-1)?.tool === "get_policies"
+    && globalThis.__tempguruRestTrackRecords.at(-1)?.status === "success");
 const restOfferResponse = await policiesRoute.GET(
   new Request("https://mcp.tempguru.co/api/v1/policies?topic=offers"),
 );

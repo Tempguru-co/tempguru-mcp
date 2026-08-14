@@ -174,8 +174,9 @@ const expectedServerInfo = {
 };
 
 const reportedErrors = [];
+const trackedRecords = [];
 const handler = createMcpHandler(
-  () => createTempGuruMcpServer(),
+  () => createTempGuruMcpServer({ onTrack: (record) => trackedRecords.push(record) }),
   {
     legacy: "stateless",
     responseMode: "json",
@@ -289,6 +290,87 @@ try {
     expectedServerInfo.name,
   );
   assertNoSessionHeader(modernTools.response, "modern tools/list");
+
+  const policyRows = JSON.parse(
+    readFileSync(join(repoRoot, "content", "mcp-data", "policies.json"), "utf8"),
+  ).policies;
+  const policyTopics = policyRows
+    .filter((policy) =>
+      policy.topic !== "offers" || Date.now() < Date.parse("2027-01-01T05:00:00.000Z"))
+    .map((policy) => policy.topic);
+  const policyTool = modernToolsResult.tools.find((tool) => tool.name === "get_policies");
+  assert.deepEqual(
+    policyTool?.inputSchema?.properties?.topic?.enum,
+    policyTopics,
+    "get_policies must advertise the canonical topic enum",
+  );
+
+  const policyTracksBefore = trackedRecords.filter(
+    (record) => record.tool === "get_policies",
+  ).length;
+  const unknownPolicyId = "modern-policy-miss";
+  const unknownPolicy = await readRpcResponse(
+    await handler.fetch(
+      requestFor(
+        rpcBody(unknownPolicyId, "tools/call", {
+          _meta: modernMeta(),
+          name: "get_policies",
+          arguments: { topic: "x".repeat(80) },
+        }),
+        {
+          "mcp-protocol-version": MODERN_VERSION,
+          "mcp-method": "tools/call",
+          "mcp-name": "get_policies",
+        },
+      ),
+    ),
+  );
+  const unknownPolicyResult = assertSuccessfulRpc(
+    unknownPolicy,
+    unknownPolicyId,
+    "modern get_policies expected miss",
+  );
+  assert.notEqual(unknownPolicyResult.isError, true);
+  assert.equal(unknownPolicyResult.structuredContent?.policy_found, false);
+  assert.equal(
+    trackedRecords.findLast((record) => record.tool === "get_policies")?.status,
+    "success",
+    "expected policy misses must not inflate MCP error telemetry",
+  );
+  assert.equal(
+    trackedRecords.filter((record) => record.tool === "get_policies").length,
+    policyTracksBefore + 1,
+    "one policy invocation must produce exactly one telemetry record",
+  );
+
+  const invalidPolicyId = "modern-policy-invalid";
+  const invalidPolicy = await readRpcResponse(
+    await handler.fetch(
+      requestFor(
+        rpcBody(invalidPolicyId, "tools/call", {
+          _meta: modernMeta(),
+          name: "get_policies",
+          arguments: { topic: "x".repeat(81) },
+        }),
+        {
+          "mcp-protocol-version": MODERN_VERSION,
+          "mcp-method": "tools/call",
+          "mcp-name": "get_policies",
+        },
+      ),
+    ),
+  );
+  const invalidPolicyResult = assertSuccessfulRpc(
+    invalidPolicy,
+    invalidPolicyId,
+    "modern get_policies invalid input",
+  );
+  assert.equal(invalidPolicyResult.isError, true);
+  assert.equal(
+    trackedRecords.filter((record) => record.tool === "get_policies").length,
+    policyTracksBefore + 1,
+    "schema-rejected policy input must not run the handler or emit handler telemetry",
+  );
 
   // Dynamic tool results must not inherit the public catalog cache policy.
   // This is especially important for non-contact saved-plan writes now and

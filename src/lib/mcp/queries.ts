@@ -624,13 +624,48 @@ export type PolicyNotFound = {
   message: string;
 };
 
+export type PolicyQueryResult = QueryResult<PoliciesData | PolicyNotFound>;
+
+/**
+ * A well-formed lookup is a successful tool invocation even when no canonical
+ * topic matches. The response deliberately carries policy_found:false plus
+ * the valid topic list; only a real query failure belongs in error telemetry.
+ */
+export function policyQueryTelemetryStatus(
+  result: PolicyQueryResult,
+): "success" | "error" {
+  return result.ok ? "success" : "error";
+}
+
 const normalizePolicyTopic = (value: string) =>
   value.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+
+// Backward-compatible lexical aliases only. Do not map broad procurement
+// concepts (W-9, MSA, vendor onboarding, workers' comp) to a policy that does
+// not actually answer them. Alias targets are still matched only against the
+// currently published set, so `agent5` cannot revive an expired offer row.
+const POLICY_TOPIC_ALIASES: Readonly<Record<string, string>> = Object.freeze({
+  "minimum-hours": "minimum-booking-hours",
+  cancellation: "cancellation-rescheduling",
+  rescheduling: "cancellation-rescheduling",
+  "no-show": "no-show-backfill",
+  coi: "coi-additional-insured",
+  cois: "coi-additional-insured",
+  "certificate-of-insurance": "coi-additional-insured",
+  "additional-insured": "coi-additional-insured",
+  "cois-additional-insured": "coi-additional-insured",
+  payment: "payment-terms",
+  invoicing: "payment-terms",
+  "payment-invoicing": "payment-terms",
+  "background-check": "background-checks",
+  offer: "offers",
+  agent5: "offers",
+});
 
 export function queryPolicies(
   input: PoliciesQuery = {},
   now = new Date(),
-): QueryResult<PoliciesData | PolicyNotFound> {
+): PolicyQueryResult {
   const publishedPolicies = getPublishedPolicies(now);
   let selected = publishedPolicies;
   if (input.topic?.trim()) {
@@ -640,6 +675,14 @@ export function queryPolicies(
         normalizePolicyTopic(policy.topic) === requested ||
         normalizePolicyTopic(policy.title) === requested,
     );
+    if (selected.length === 0) {
+      const aliasTarget = POLICY_TOPIC_ALIASES[requested];
+      if (aliasTarget) {
+        selected = publishedPolicies.filter(
+          (policy) => normalizePolicyTopic(policy.topic) === aliasTarget,
+        );
+      }
+    }
     if (selected.length === 0) {
       return ok({
         status: "policy_not_found",

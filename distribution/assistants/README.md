@@ -38,18 +38,18 @@ included for the full picture.)
 
 | Surface | Type | Status |
 |---|---|---|
-| Official MCP Registry (`co.tempguru/event-staffing`) | MCP | 🟡 repository `1.7.1` candidate; verify the published Registry version after release |
+| Official MCP Registry (`co.tempguru/event-staffing`) | MCP | 🟡 `1.7.1` is released and immutable; repository `1.7.2` hotfix candidate adds canonical policy-topic discovery, safe aliases, and correct clean-miss telemetry. Verify the published Registry version after release. |
 | Smithery, Glama | MCP | ✅ live |
 | ModelScope MCP 广场 | MCP | ✅ live |
 | Docker MCP Registry | MCP | 🟡 PR #3902 awaiting review |
 | APIs.guru | OpenAPI | 🟡 issue #2610 in review queue |
 | Postman collection | REST | ✅ imported (re-import after city fix) |
 | Mistral connector directory | MCP | 🟡 outreach drafted, Megan to send via contact form |
-| Anthropic Connectors Directory (claude.ai) | MCP | 🟡 approved as a community connector; AGENT5 disclosure sent on the original review thread 2026-08-14, awaiting guidance before deploying `1.7.1` |
-| npm CLI (`tempguru-mcp`), GHCR image | dev | 🟡 repository `1.7.1` candidate; publish with Trusted Publishing/OIDC after merge and verify the exact version |
-| Hermes agent catalog (NousResearch) | Agent Skill | 🟡 PR #39150 is open and its two submission files match the repository `1.0.5` copies as of 2026-08-14; awaiting upstream review. Do not touch the separate live Hermes content agent runtime. |
+| Anthropic Connectors Directory (claude.ai) | MCP | ✅ approved as a community connector. The AGENT5 disclosure was sent on the original review thread 2026-08-14; `1.7.1` was subsequently deployed after the operator chose to proceed without waiting for guidance. This records no Anthropic approval of the offer. The `1.7.2` hotfix changes policy-topic discovery and telemetry, not offer terms or connector inventory. |
+| npm CLI (`tempguru-mcp`), GHCR image | dev | 🟡 `1.7.1` is released and immutable; repository `1.7.2` hotfix candidate should publish through Trusted Publishing/OIDC after merge and be verified at the exact version. |
+| Hermes agent catalog (NousResearch) | Agent Skill | 🟡 PR #39150 is open and its two submission files match the repository `1.0.5` copies as of 2026-08-14; awaiting upstream review. The `1.7.2` server hotfix does not change these files; keep canonical `skill_version: 1.7.1` and do not republish for this release. Do not touch the separate live Hermes content agent runtime. |
 | Pi + Prime Agent (`tempguru-pi` npm package) | Agent Skill + native tools | ✅ `1.7.2` is live, current, and immutable; unpinned installs resolve to it. The package has 8 runtime-adapted skills, 9 native tools, a non-PII buyer-form handoff, and automatic `pi` / `prime-agent` attribution. The published Pi smoke enumerated all 8 skills and loaded the native extension; pinned persistent Pi and Prime functional smokes each made exactly one Austin call and preserved the coordinator-confirmation boundary. The Prime replay did not independently inspect attribution logs or re-enumerate the full inventory. Use the next unused patch for any fix; never republish `1.7.2`. |
-| OpenClaw / ClawHub | Agent Skill | ✅ seven buyer-handoff safety updates published and verified as immutable `1.7.0` on 2026-08-14 from pre-AGENT5 commit `125ee8a`; the compliance skill and legacy OpenClaw VPS runtime were unchanged |
+| OpenClaw / ClawHub | Agent Skill | ✅ seven buyer-handoff safety updates published and verified as immutable `1.7.0` on 2026-08-14 from pre-AGENT5 commit `125ee8a`; the compliance skill and legacy OpenClaw VPS runtime were unchanged. The `1.7.2` server hotfix leaves canonical skills at `skill_version: 1.7.1`; no ClawHub republish is needed. |
 | **ChatGPT Custom GPT** | this kit | 🟠 LIVE 2026-06-09, https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner; inspect and refresh its prompt, knowledge, listing, and configured Actions before closeout. MCP uses the buyer-operated form; an explicitly configured REST `submitQuoteRequest` Action may submit once only after the buyer reviews the contact-bearing payload and clearly confirms. |
 | **ChatGPT App (directory)** | this kit | 🟡 SUBMITTED 2026-06-10, v1.0.0 in Review (business-verified org; schemas + annotations + domain verification all shipped same day; see SUBMISSIONS.md row for full package) |
 | **Gemini Gem (public)** | this kit | ⬜ build + share Public (~30m) |
@@ -62,6 +62,11 @@ included for the full picture.)
 | **Bailian MCP submission** | this kit | ⬜ submit existing server |
 | **Kimi agent (intl)** | this kit | ⬜ zh prompt ready |
 | **Coze.cn → Doubao, Yuanqi, Baidu, Zhipu** | this kit | ⬜ blocked on +86 verification (see china-platforms.md tiers) |
+
+`tempguru-mcp@1.7.2` and `tempguru-pi@1.7.2` are independently versioned
+packages. This hotfix publishes only the former. The Pi package is already
+immutable at that number, and unchanged Hermes/ClawHub skill artifacts remain
+`skill_version: 1.7.1`.
 
 ## Launch order (highest leverage first)
 
