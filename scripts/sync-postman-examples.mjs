@@ -13,6 +13,8 @@ const readJson = (path) => JSON.parse(readFileSync(resolve(root, path), "utf8"))
 const cityCount = readJson("content/mcp-data/cities.json").cities.length;
 const roleCount = readJson("content/mcp-data/roles.json").roles.length;
 const packageVersion = readJson("package.json").version;
+const publicFacts = readJson("content/public-facts.json");
+const approvedClaims = publicFacts.approvedClaims;
 
 // queries.ts is TypeScript and uses the app's @/* alias. Bundle it the same way
 // dump-openapi.mjs bundles the canonical spec, then call the real data layer.
@@ -33,6 +35,18 @@ rmSync(queryModuleDir, { recursive: true, force: true });
 const original = readFileSync(collectionPath, "utf8");
 const collection = JSON.parse(original);
 let syncedExamples = 0;
+
+collection.info.description =
+  `TempGuru's public REST API for W-2 event staffing across ${approvedClaims.markets.publicFigure}, ` +
+  `backed by ${approvedClaims.events.publicFigure} and ${approvedClaims.completedShifts.publicFigure}; ` +
+  "coverage and lead time require an order-specific check. " +
+  `Claim IDs: ${approvedClaims.markets.claimId}, ${approvedClaims.events.claimId}, ` +
+  `${approvedClaims.completedShifts.claimId}. Includes eight read-only business operations, one health probe, ` +
+  "and one opt-in quote-request submission. No authentication required. All rates are all-inclusive W-2 " +
+  "bill rates (worker pay, payroll taxes, workers' comp, general liability, coordinator support).\n\n" +
+  "MCP server: https://mcp.tempguru.co/mcp\n" +
+  "OpenAPI 3.1: https://mcp.tempguru.co/openapi.json\n" +
+  "Website: https://tempguru.co";
 
 function optionalString(url, name) {
   const value = url.searchParams.get(name)?.trim();

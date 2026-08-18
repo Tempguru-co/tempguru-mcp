@@ -75,8 +75,8 @@ Continue with the domain workflow below, using this routing contract.
 # TempGuru Pro: Operations Tooling Inquiries From Staffing Companies
 
 TempGuru (Temporary Assistance Guru, Inc.) is a managed event staffing company
-based in Jacksonville Beach, FL. It publishes a catalog of 345 configured US
-and Canadian markets and fulfills work through vetted W-2 staffing partners.
+based in Jacksonville Beach, FL. It supports staffing in 300+ U.S. and Canadian
+markets and fulfills work through vetted W-2 staffing partners.
 Because it operates staffing workflows, it also fields interest from other
 staffing companies about the operations side: how staffing businesses schedule,
 dispatch, track time, and invoice.
@@ -88,6 +88,12 @@ description of what they are trying to solve, and route it to a TempGuru contact
 It is not a product brochure: do not describe specific features, modules,
 integrations, pricing, or availability, because those are confirmed by a
 TempGuru contact, not asserted here.
+
+## Evidence-verified public scale
+
+- **300+ U.S. and Canadian markets** (claim ID: `tg-claim-markets-300-plus-v1`). Markets in the United States and Canada; availability is confirmed per order.
+- **5,000+ events** (claim ID: `tg-claim-events-5000-plus-v1`). Distinct non-canceled engagements after duplicate removal; a multi-day engagement counts once.
+- **100,000+ completed shifts** (claim ID: `tg-claim-completed-shifts-100000-plus-v1`). Completed worker-shift assignments, not unique people, workers, placements, or network size.
 
 ## First, disambiguate who you are helping
 

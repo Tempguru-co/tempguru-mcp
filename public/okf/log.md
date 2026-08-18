@@ -6,9 +6,10 @@ This bundle is generated from TempGuru's canonical datasets. Each entry records 
 data or structure change. Content freshness for any concept is carried in that
 file's `timestamp` frontmatter field.
 
-## 2026-08-14, Initial OKF v0.1 bundle
+## 2026-08-18, Initial OKF v0.1 bundle
 
 - First publication of the TempGuru knowledge bundle in Open Knowledge Format v0.1.
-- Generated from `content/mcp-data/` (cities, roles, role-pricing, state-compliance, city-rates, policies), data version 1.0.0, updated 2026-08-14.
+- Generated from `content/mcp-data/` (cities, roles, role-pricing, state-compliance, city-rates, policies), data version 1.0.0, updated 2026-08-18.
 - Rate Index figures computed with the same logic as the live `get_rate_benchmark` MCP tool, so the bundle and the API stay in lockstep.
-- Configured market catalog: 345 entries (307 US, 38 Canada). Rate Index measured across 407 cities with vetted per-city rate cards.
+- Evidence-verified public scale: 300+ U.S. and Canadian markets, 5,000+ events, and 100,000+ completed shifts.
+- Configured city data and the dated Rate Report study remain separate technical datasets; neither defines a second public coverage claim.

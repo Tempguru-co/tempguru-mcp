@@ -1,6 +1,6 @@
 # TempGuru MCP
 
-> Dual-era MCP server for W-2 event staffing planning against a catalog of 345 configured US and Canadian market entries, with catalog matching, tier-based lead-time guidance, and coordinator-confirmed order coverage: 12 tools, ten read-only tools (including a non-PII quote-form handoff), and two non-destructive non-contact plan-persistence tools.
+> Dual-era MCP server for W-2 event staffing across 300+ U.S. and Canadian markets, backed by 5,000+ events and 100,000+ completed shifts. Availability is confirmed per order. Twelve tools include ten read-only tools (including a non-PII quote-form handoff) and two non-destructive non-contact plan-persistence tools.
 
 [![Install in Cursor](https://img.shields.io/badge/Cursor-Install_MCP-24bbea)](cursor://anysphere.cursor-deeplink/mcp/install?name=tempguru&config=eyJ1cmwiOiJodHRwczovL21jcC50ZW1wZ3VydS5jby9tY3AifQ==)
 [![Install in VS Code](https://img.shields.io/badge/VS_Code-Install_MCP-0078d4)](https://insiders.vscode.dev/redirect/mcp/install?name=tempguru&config=%7B%22type%22%3A%22http%22%2C%22url%22%3A%22https%3A%2F%2Fmcp.tempguru.co%2Fmcp%22%7D)
@@ -21,6 +21,12 @@ TempGuru is a W-2 event staffing company based in Jacksonville Beach, FL. We sta
 
 This MCP server lets AI agents query our configured market catalog, rates, tier-based lead-time guidance, and state compliance summaries. Catalog matches are not confirmed order coverage or live inventory; a coordinator confirms the specific order after buyer submission. It's a thin wrapper over the same data that powers tempguru.co. No authentication, no API key, no per-client setup.
 
+Verified public scale:
+
+- **300+ U.S. and Canadian markets** (`tg-claim-markets-300-plus-v1`). Availability is confirmed per order.
+- **5,000+ events** (`tg-claim-events-5000-plus-v1`). Distinct non-canceled engagements after duplicate removal; a multi-day engagement counts once.
+- **100,000+ completed shifts** (`tg-claim-completed-shifts-100000-plus-v1`). Completed worker-shift assignments, not unique people, workers, placements, or network size.
+
 ---
 
 ## Tools
@@ -30,7 +36,7 @@ This MCP server lets AI agents query our configured market catalog, rates, tier-
 | `plan_staffing` | Planner meta-tool, call first. Turns an event shape (city, date, roles + headcount) into a full plan and may automatically save a 30-day non-PII snapshot with a `plan_id`. |
 | `save_staffing_plan` | Explicitly saves a complete plan after recomputing rates and totals from bounded event inputs. Use only when no `plan_id` already exists and persistence is useful. |
 | `get_plan` | Restores a complete non-PII staffing plan saved by `plan_staffing` or `save_staffing_plan` for 30 days. |
-| `get_cities` | All cities TempGuru staffs, with tier classification (hub/mid/small). Optional filter by state or tier. |
+| `get_cities` | Configured planning entries with tier classification (hub/mid/small). Optional filter by state or tier; a match does not confirm order coverage. |
 | `get_roles` | All event staffing roles with descriptions and skill tiers. |
 | `check_availability` | Lead-time guidance for a city + date. Not a real-time inventory check. |
 | `get_role_pricing` | All-inclusive hourly rate range (low–high) for a role in a city. Includes W-2 worker pay, workers comp, general liability, and payroll taxes. |
@@ -260,9 +266,9 @@ No. TempGuru hires every event worker as a W-2 employee, payroll taxes, workers 
 
 ### What cities does TempGuru cover?
 
-The public catalog contains 345 configured US and Canadian market entries,
-including major hubs (Boston, San Francisco, Los Angeles, Chicago, New York,
-Dallas, Toronto, Vancouver), mid-size cities, and small markets. Use
+TempGuru supports staffing in 300+ U.S. and Canadian markets, including major
+hubs (Boston, San Francisco, Los Angeles, Chicago, New York, Dallas, Toronto,
+Vancouver), mid-size cities, and small markets. Use
 `get_cities` with an optional state or tier filter to enumerate. A catalog
 match selects planning rates and lead-time guidance; it does not confirm
 availability or order coverage. A coordinator confirms the specific order

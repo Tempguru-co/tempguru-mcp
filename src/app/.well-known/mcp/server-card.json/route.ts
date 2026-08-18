@@ -8,14 +8,14 @@
 // served with application/json + 1-hour public cache.
 
 import pkg from "../../../../../package.json";
-import { MARKET_CATALOG_DESCRIPTION } from "@/lib/public-facts";
+import { APPROVED_SCALE_DESCRIPTION } from "@/lib/public-facts";
 
 const SERVER_CARD = {
   $comment:
     "MCP Server Card per SEP-1649 (schema in standardization at modelcontextprotocol PR #2127). Update if the final schema diverges.",
   description:
     "Public TempGuru MCP server for repository-backed event staffing planning, configured-market matching, pricing, lead-time guidance, compliance, policy, and buyer-operated handoff tools. " +
-    MARKET_CATALOG_DESCRIPTION,
+    APPROVED_SCALE_DESCRIPTION,
   serverInfo: {
     // Matches serverInfo.name from the live initialize + the npm package id
     // (check:submissions gates this against mcp.json and the runtime).
@@ -24,7 +24,7 @@ const SERVER_CARD = {
     version: pkg.version,
     description:
       "Dual-era Model Context Protocol server for TempGuru's repository-backed event staffing catalog. Twelve tools: ten read-only tools including a non-PII request_quote buyer handoff, the non-destructive plan_staffing planner, and an explicit non-destructive save_staffing_plan write. Also ships 8 skill resources and two guided prompts. " +
-      MARKET_CATALOG_DESCRIPTION,
+      APPROVED_SCALE_DESCRIPTION,
     websiteUrl: "https://tempguru.co",
   },
   transport: {
@@ -140,7 +140,7 @@ const SERVER_CARD = {
     okfVersion: "0.1",
     description:
       "Canonical Open Knowledge Format bundle: staffing roles, all-inclusive W-2 rate card, the Rate Index benchmark, configured-market catalog, state compliance, and quote workflows. " +
-      MARKET_CATALOG_DESCRIPTION,
+      APPROVED_SCALE_DESCRIPTION,
     bundle: "https://mcp.tempguru.co/okf/index.md",
     tarball: "https://mcp.tempguru.co/okf.tar.gz",
     discovery: "https://mcp.tempguru.co/.well-known/okf.json",

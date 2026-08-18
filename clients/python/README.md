@@ -1,8 +1,8 @@
 # tempguru
 
 Event staffing data for AI agents and Python apps: live all-inclusive W-2
-hourly rates, 345 configured US/Canada market entries, tier-based booking
-lead-time guidance, and
+hourly rates across 300+ U.S. and Canadian markets, backed by 5,000+ events
+and 100,000+ completed shifts, plus tier-based booking lead-time guidance and
 state-by-state labor compliance from [TempGuru](https://tempguru.co)'s public
 API. Zero dependencies, no API key.
 
@@ -124,9 +124,10 @@ except TempGuruError as e:
 
 TempGuru (Temporary Assistance Guru, Inc.) staffs conventions, conferences,
 trade shows, festivals, concerts, sporting events, and brand activations
-against a catalog of 345 configured US and Canadian market entries, with
-catalog matching, tier-based lead-time guidance, and coordinator-confirmed
-order coverage. A catalog match is not live inventory or confirmed coverage.
+across 300+ U.S. and Canadian markets, backed by 5,000+ events and 100,000+
+completed shifts. Catalog matching and tier-based lead-time guidance support
+planning, but a catalog match is not live inventory or confirmed availability;
+a coordinator confirms availability per order.
 Every worker is a W-2 employee, never
 a 1099 contractor, with payroll taxes, workers' compensation, and liability
 insurance included in the quoted rate. megan@tempguru.co · (904) 206-8953

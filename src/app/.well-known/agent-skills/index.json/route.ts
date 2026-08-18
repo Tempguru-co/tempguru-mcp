@@ -16,6 +16,7 @@
 // worker serves. check-submissions.mjs fails CI if that JSON drifts from the files.
 
 import digests from "../../../../../content/skills/skill-digests.json";
+import { APPROVED_SCALE_DESCRIPTION } from "@/lib/public-facts";
 
 const AGENT_SKILLS_INDEX = {
   $schema: "https://schemas.agentskills.io/discovery/0.2.0/schema.json",
@@ -24,7 +25,9 @@ const AGENT_SKILLS_INDEX = {
       name: "event-staffing-ordering",
       type: "skill-md",
       description:
-        "Order temporary event staff using TempGuru's public catalog of 345 configured US and Canadian market entries. Use when a user needs to hire, book, or budget W-2 event staff for a convention, conference, trade show, festival, concert, sporting event, stadium event, corporate gathering, or brand activation, a single event in one city or a multi-city program. Covers requirement gathering, catalog matching plus rate/compliance lookups via the TempGuru MCP server, and a prefilled form the buyer personally submits so a coordinator can confirm order coverage.",
+        "Order temporary W-2 event staff for a single event or multi-city program. " +
+        APPROVED_SCALE_DESCRIPTION +
+        " Use when a user needs to hire, book, or budget staff for a convention, conference, trade show, festival, concert, sporting event, stadium event, corporate gathering, or brand activation. Covers requirement gathering, catalog matching plus rate/compliance lookups via the TempGuru MCP server, and a prefilled form the buyer personally submits so a coordinator can confirm order coverage.",
       url: "./event-staffing-ordering/SKILL.md",
       digest: digests["event-staffing-ordering"],
     },

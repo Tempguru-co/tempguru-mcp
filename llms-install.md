@@ -5,8 +5,9 @@ server on a user's behalf. No API key, no signup, no environment variables.
 
 ## What this server provides
 
-Live event staffing data for the US and Canada from TempGuru: 345 configured
-market entries (not confirmed order coverage), 19 staffing roles,
+Live event staffing data for the US and Canada from TempGuru: service across
+300+ U.S. and Canadian markets (availability confirmed per order), 5,000+
+events, 100,000+ completed shifts, 19 staffing roles,
 all-inclusive W-2 hourly rate ranges, tier-based booking lead-time guidance,
 state labor compliance summaries, and an opt-in
 `request_quote` tool that prepares a prefilled TempGuru form for the buyer to
@@ -19,6 +20,11 @@ plan before persistence. The overall connector capability is therefore
 `read_write`. Authless `request_quote` accepts only a saved `plan_id` plus
 allowlisted source attribution. It never accepts contact details, creates a
 CRM lead, or returns a TG reference.
+
+Approved claim IDs are `tg-claim-markets-300-plus-v1`,
+`tg-claim-events-5000-plus-v1`, and
+`tg-claim-completed-shifts-100000-plus-v1`. Completed shifts are worker-shift
+assignments, not unique people, workers, placements, or network size.
 
 Phase A workflow: call `plan_staffing` first. If its complete result contains a
 `plan_id`, retain it and do not call `save_staffing_plan`. Only when a complete

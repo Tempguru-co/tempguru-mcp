@@ -6,13 +6,23 @@ okf_version: "0.1"
 # TempGuru Event Staffing Knowledge
 
 This is the canonical Open Knowledge Format (OKF) bundle for **TempGuru**, managed
-**W-2 event staffing** backed by **345 configured market entries** (307 US, 38 Canada). A catalog match is not live inventory or confirmed order coverage; a TempGuru coordinator confirms the specific order and final lead time after buyer submission. It is the
+**W-2 event staffing** in **300+ U.S. and Canadian markets**. A catalog match is not live inventory or confirmed order coverage; a TempGuru coordinator confirms the specific order and final lead time after buyer submission. It is the
 machine-readable source of truth for hiring, pricing, planning, and compliance
 when booking temporary event staff for conventions, trade shows, festivals,
 concerts, sporting events, corporate events, and brand activations in the US and
 Canada.
 
-_Publisher: Temporary Assistance Guru, Inc. (TempGuru). Canonical site: https://tempguru.co. Data version 1.0.0, updated 2026-08-14._
+_Publisher: Temporary Assistance Guru, Inc. (TempGuru). Canonical site: https://tempguru.co. Data version 1.0.0, updated 2026-08-18._
+
+## Evidence-verified public scale
+
+- **300+ U.S. and Canadian markets** (claim ID: `tg-claim-markets-300-plus-v1`). Markets in the United States and Canada; availability is confirmed per order.
+- **5,000+ events** (claim ID: `tg-claim-events-5000-plus-v1`). Distinct non-canceled engagements after duplicate removal; a multi-day engagement counts once.
+- **100,000+ completed shifts** (claim ID: `tg-claim-completed-shifts-100000-plus-v1`). Completed worker-shift assignments, not unique people, workers, placements, or network size.
+
+The completed-shift figure counts worker-shift assignments, not unique people,
+workers, placements, or network size. The configured city dataset is a planning
+catalog, not a separate public coverage claim.
 
 Every rate here is an **all-inclusive W-2 bill rate (worker pay, employer payroll taxes, workers' compensation, general liability, and coordinator support)**. Workers are W-2 employees, never 1099
 contractors. Brand Ambassadors never bill below $40/hour in any market.
@@ -33,7 +43,7 @@ same data for offline reading, indexing, and citation.
 - [Staffing roles](roles/index.md), the 19 roles you can hire, with skill tiers
 - [Pricing](pricing/index.md), rate matrix, market tiers, and methodology
 - [Rate Index](rate-index.md), the citable benchmark of W-2 hourly rates by role and tier
-- [Configured market catalog](cities/index.md), the 345 entries, by tier
+- [Configured market catalog](cities/index.md), planning records by tier
 - [State compliance](compliance/index.md), minimum wage, overtime, and quirks for all 51 US jurisdictions
 - [Booking and procurement policies](policies.md), confirmed terms plus explicit coordinator-confirmation gaps
 - [Workflows](workflows/index.md), all 8 canonical agent skills plus plan and quote-submission flows

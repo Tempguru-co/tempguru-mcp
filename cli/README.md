@@ -1,6 +1,6 @@
 # TempGuru Event Staffing: MCP Server and CLI
 
-W-2 event staffing data for AI agents against 345 configured US and Canadian market entries, with catalog matching, tier-based lead-time guidance, and coordinator-confirmed order coverage. A catalog match is not live inventory or confirmed coverage. Twelve tools: ten read-only tools, including a non-PII buyer quote-form handoff, plus a non-destructive planner that may save a 30-day non-PII snapshot and an explicit non-contact save tool. Runs locally over the official dual-era stdio entry (MCP 2026-07-28 plus 2025-era initialize compatibility) with no authentication.
+W-2 event staffing data for AI agents across 300+ U.S. and Canadian markets, backed by 5,000+ events and 100,000+ completed shifts, with catalog matching, tier-based lead-time guidance, and coordinator-confirmed order coverage. A catalog match is not live inventory or confirmed coverage. Twelve tools: ten read-only tools, including a non-PII buyer quote-form handoff, plus a non-destructive planner that may save a 30-day non-PII snapshot and an explicit non-contact save tool. Runs locally over the official dual-era stdio entry (MCP 2026-07-28 plus 2025-era initialize compatibility) with no authentication.
 
 Hosted endpoint: `https://mcp.tempguru.co/mcp` · Agent docs: https://tempguru.co/ai-agents
 

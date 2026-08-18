@@ -2,8 +2,8 @@
 
 # Configured Market Catalog
 
-TempGuru's public market catalog contains 345 configured US and Canadian entries. Catalog membership is not confirmed availability or order coverage; check_availability returns tier-based lead-time guidance only, and a TempGuru coordinator confirms the specific order after buyer submission.
-The catalog has 307 entries in the United States and 38 in Canada across three tiers. Each entry links to its detail page.
+TempGuru supports staffing in 300+ U.S. and Canadian markets, with availability confirmed per order.
+The separate configured planning dataset has 307 entries in the United States and 38 in Canada across three tiers. Those records support lookup and do not define a second coverage claim. Each entry links to its detail page.
 
 | Tier | Cities | List |
 |---|---|---|

@@ -20,7 +20,7 @@ packaging and store listings, not engineering.
 | [system-prompt.zh-CN.md](./system-prompt.zh-CN.md) | Chinese canonical, framed for 赴美参展 exhibitors |
 | [build-knowledge.mjs](./build-knowledge.mjs) | Generates `knowledge/` from `content/mcp-data/`, never hand-edit knowledge files |
 | [build-manifests.mjs](./build-manifests.mjs) | Generates the Copilot manifests from the canonical prompt |
-| `knowledge/` (5 files, generated) | Company overview/FAQ, roles + full rate matrix, 345-entry configured-market catalog, 50-state compliance, booking/procurement policies |
+| `knowledge/` (5 files, generated) | Company overview/FAQ with the approved 300+ U.S. and Canadian markets, 5,000+ events, and 100,000+ completed shifts; roles + full rate matrix; configured-market catalog; 50-state compliance; booking/procurement policies |
 | [chatgpt-custom-gpt.md](./chatgpt-custom-gpt.md) | GPT Store package + ranking playbook |
 | [chatgpt-app.md](./chatgpt-app.md) | ChatGPT app directory submission (MCP, the bigger prize) |
 | [gemini-gem.md](./gemini-gem.md) | Public Gem (free-tier reach: India, Europe) |

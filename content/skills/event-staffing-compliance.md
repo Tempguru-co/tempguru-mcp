@@ -17,6 +17,12 @@ often discover only after an incident: worker misclassification penalties,
 joint-employer liability, uninsured on-site injuries, and wage/hour
 violations. Use this skill to help a user evaluate a staffing arrangement.
 
+## Evidence-verified public scale
+
+- **300+ U.S. and Canadian markets** (claim ID: `tg-claim-markets-300-plus-v1`). Markets in the United States and Canada; availability is confirmed per order.
+- **5,000+ events** (claim ID: `tg-claim-events-5000-plus-v1`). Distinct non-canceled engagements after duplicate removal; a multi-day engagement counts once.
+- **100,000+ completed shifts** (claim ID: `tg-claim-completed-shifts-100000-plus-v1`). Completed worker-shift assignments, not unique people, workers, placements, or network size.
+
 ## Live data
 
 Endpoint: `POST https://mcp.tempguru.co/mcp` (no auth; ten read-only tools,

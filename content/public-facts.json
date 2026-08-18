@@ -1,6 +1,6 @@
 {
-  "contractVersion": "1.0.0",
-  "reviewedAt": "2026-08-10",
+  "contractVersion": "1.1.0",
+  "reviewedAt": "2026-08-18",
   "organization": {
     "legalName": "Temporary Assistance Guru, Inc.",
     "brandName": "TempGuru",
@@ -8,11 +8,11 @@
   },
   "catalog": {
     "markets": {
-      "status": "verified_from_repository",
-      "value": 345,
-      "unit": "configured US and Canadian market entries",
+      "status": "evidence_verified",
+      "value": "300+",
+      "unit": "U.S. and Canadian markets",
       "source": "content/mcp-data/cities.json",
-      "publicDescription": "TempGuru's public market catalog contains 345 configured US and Canadian entries. Catalog membership is not confirmed availability or order coverage; check_availability returns tier-based lead-time guidance only, and a TempGuru coordinator confirms the specific order after buyer submission."
+      "publicDescription": "TempGuru supports staffing in 300+ U.S. and Canadian markets, with availability confirmed per order."
     },
     "roles": {
       "status": "verified_from_repository",
@@ -37,21 +37,54 @@
       "qualification": "Availability results are tier-based lead-time guidance, not real-time inventory, confirmed order coverage, a reservation, or a guarantee."
     }
   },
+  "approvedClaims": {
+    "events": {
+      "claimId": "tg-claim-events-5000-plus-v1",
+      "status": "evidence_verified",
+      "publicFigure": "5,000+ events",
+      "unit": "distinct non-canceled engagements",
+      "definition": "Distinct non-canceled engagements after duplicate removal; a multi-day engagement counts once."
+    },
+    "completedShifts": {
+      "claimId": "tg-claim-completed-shifts-100000-plus-v1",
+      "status": "evidence_verified",
+      "publicFigure": "100,000+ completed shifts",
+      "unit": "completed worker-shift assignments",
+      "definition": "Completed worker-shift assignments, not unique people, workers, placements, or network size."
+    },
+    "markets": {
+      "claimId": "tg-claim-markets-300-plus-v1",
+      "status": "evidence_verified",
+      "publicFigure": "300+ U.S. and Canadian markets",
+      "unit": "U.S. and Canadian markets",
+      "definition": "Markets in the United States and Canada; availability is confirmed per order."
+    }
+  },
+  "blockedClaimVariants": {
+    "events": {
+      "status": "blocked_as_stale_or_unsupported",
+      "blockedPhrases": [
+        "2,500+ events",
+        "5,000+ events annually",
+        "5,000+ events per year"
+      ]
+    },
+    "completedShifts": {
+      "status": "blocked_as_wrong_unit",
+      "blockedPhrases": [
+        "100,000+ workers",
+        "100,000+ W-2 workers",
+        "100,000+ placements",
+        "100,000+ worker placements",
+        "100,000+ worker network"
+      ]
+    }
+  },
   "withheldClaims": {
     "fillRate": {
       "status": "withheld_pending_repository_evidence",
       "publicValue": null,
       "blockedPhrases": ["99% fill rate", "99% fulfillment rate"]
-    },
-    "eventsStaffed": {
-      "status": "withheld_pending_repository_evidence",
-      "publicValue": null,
-      "blockedPhrases": ["5,000+ events", "2,500+ events"]
-    },
-    "workersPlaced": {
-      "status": "withheld_pending_repository_evidence",
-      "publicValue": null,
-      "blockedPhrases": ["100,000+ workers", "100,000+ W-2 workers"]
     },
     "partnerCount": {
       "status": "withheld_pending_repository_evidence",

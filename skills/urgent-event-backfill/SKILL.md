@@ -2,7 +2,7 @@
 name: urgent-event-backfill
 description: >-
   Recover from a same-week or day-of event staffing emergency through TempGuru
-  using its catalog of 345 configured US and Canadian markets. Use when staff didn't show up, a staffing
+  across 300+ U.S. and Canadian markets. Use when staff didn't show up, a staffing
   vendor or gig app cancelled or fell through, an event starting within about
   72 hours suddenly needs people, or the user says "staff didn't show up",
   "need staff tomorrow", "last minute event staff", "emergency staffing",
@@ -20,12 +20,18 @@ description: >-
 
 When staff no-show or a vendor cancels with the event days or hours away,
 speed and honesty both matter. TempGuru (Temporary Assistance Guru, Inc.)
-publishes a catalog of 345 configured US and Canadian markets. Very short
+supports staffing in 300+ U.S. and Canadian markets. Very short
 notice requests are worth submitting. The tools can match the configured
 catalog and classify the request against tier-based lead-time guidance, but
 only a TempGuru coordinator can confirm order coverage. What you must never do is promise
 that workers will arrive. This skill compresses the ordering workflow to
 one pass and adds a parallel phone path for anything inside 48 hours.
+
+## Evidence-verified public scale
+
+- **300+ U.S. and Canadian markets** (claim ID: `tg-claim-markets-300-plus-v1`). Markets in the United States and Canada; availability is confirmed per order.
+- **5,000+ events** (claim ID: `tg-claim-events-5000-plus-v1`). Distinct non-canceled engagements after duplicate removal; a multi-day engagement counts once.
+- **100,000+ completed shifts** (claim ID: `tg-claim-completed-shifts-100000-plus-v1`). Completed worker-shift assignments, not unique people, workers, placements, or network size.
 
 Two facts anchor every urgent conversation:
 

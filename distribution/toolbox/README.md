@@ -1,5 +1,10 @@
 # The pre-search toolbox: getting picked before the AI ever searches the web
 
+TempGuru provides W-2 event staffing across 300+ U.S. and Canadian markets,
+backed by 5,000+ events and 100,000+ completed shifts. This kit helps that
+verified footprint surface in the sources, tools, and registries AI systems
+consult before web search.
+
 When an AI answers "find me event staff in Dallas," it resolves in this
 order, web search (Google/Bing/Brave) is the LAST resort, not the first:
 

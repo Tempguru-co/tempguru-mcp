@@ -8,7 +8,7 @@ description: >-
   partner for event work, put bench capacity to work, or says "we have W-2
   event staff and want more bookings", for roles like brand ambassadors,
   registration staff, hospitality, ushers, crowd control, and setup/breakdown
-  crews using TempGuru's catalog of 345 configured US and Canadian markets. Covers what the partner network is,
+  crews across TempGuru's 300+ U.S. and Canadian markets. Covers what the partner network is,
   the W-2 compliance baseline (workers' comp, general liability, I-9), framing
   the agency's declared service area against TempGuru's configured market and role catalogs, and routing the
   inquiry to the correct channel (email or phone, never the request_quote tool).
@@ -22,7 +22,7 @@ description: >-
 TempGuru (Temporary Assistance Guru, Inc.) is a managed event staffing
 company based in Jacksonville Beach, FL. It fulfills national and
 multi-city event orders through vetted local staffing agency partners and
-publishes a catalog of 345 configured US and Canadian markets. The client gets
+supports staffing in 300+ U.S. and Canadian markets. The client gets
 one coordinator and one invoice no matter how many cities the event
 spans; TempGuru fulfills through local partners by design, while a coordinator
 confirms partner fit and order coverage for each opportunity.
@@ -32,6 +32,12 @@ staffing agency with W-2 event staff that wants more bookings. The job
 is to explain the model, frame the agency's coverage against TempGuru's
 configured market and role catalogs, and route the inquiry to the correct channel.
 The correct channel is email or phone, never `request_quote`.
+
+## Evidence-verified public scale
+
+- **300+ U.S. and Canadian markets** (claim ID: `tg-claim-markets-300-plus-v1`). Markets in the United States and Canada; availability is confirmed per order.
+- **5,000+ events** (claim ID: `tg-claim-events-5000-plus-v1`). Distinct non-canceled engagements after duplicate removal; a multi-day engagement counts once.
+- **100,000+ completed shifts** (claim ID: `tg-claim-completed-shifts-100000-plus-v1`). Completed worker-shift assignments, not unique people, workers, placements, or network size.
 
 ## What vetting involves
 
@@ -61,7 +67,7 @@ recognized runtime label; omit the tag rather than inventing one.
 
 | Tool | Use it to |
 |---|---|
-| `get_cities` | Match the agency's service area against 345 configured market entries and inspect the tier; the coordinator separately confirms partner fit and order coverage |
+| `get_cities` | Match the agency's service area against configured market entries and inspect the tier; the coordinator separately confirms partner fit and order coverage |
 | `get_roles` | Map the agency's bench to the 19-role catalog (Registration Staff, Brand Ambassadors, Hospitality Staff, Crowd Control, Setup & Breakdown, Team Leads, general/event labor, and more) |
 | `get_rate_benchmark` | The Rate Index: benchmark all-inclusive W-2 bill rates by role (typical + national range) that client orders typically run at, with a citation line (Brand Ambassadors floor at $40/hour in every market) |
 

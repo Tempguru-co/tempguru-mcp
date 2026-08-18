@@ -12,6 +12,19 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
+const repoRoot = join(here, "..", "..");
+const publicFacts = JSON.parse(
+  readFileSync(join(repoRoot, "content", "public-facts.json"), "utf8"),
+);
+const approvedClaims = publicFacts.approvedClaims;
+const publicScale =
+  `${approvedClaims.markets.publicFigure}, ${approvedClaims.events.publicFigure}, ` +
+  `and ${approvedClaims.completedShifts.publicFigure}`;
+const publicClaimIds = [
+  approvedClaims.markets.claimId,
+  approvedClaims.events.claimId,
+  approvedClaims.completedShifts.claimId,
+].join(", ");
 
 // Extract the canonical instruction block from system-prompt.md
 // (everything between "## INSTRUCTIONS" and the next "---" rule).
@@ -45,7 +58,7 @@ const declarativeAgent = {
   version: "v1.5",
   name: "TempGuru Event Staffing Planner",
   description:
-    "Plan and budget temporary W-2 event staff using TempGuru's 345-entry configured US/Canada market catalog, with catalog matching, live rates for 19 roles, tier-based lead-time guidance, state labor compliance, and coordinator-confirmed order coverage.",
+    `Plan and budget temporary W-2 event staff with TempGuru, serving ${publicScale}. Includes catalog matching, live rates for 19 roles, tier-based lead-time guidance, state labor compliance, and coordinator-confirmed order coverage.`,
   instructions,
   conversation_starters: [
     {
@@ -80,9 +93,9 @@ const aiPlugin = {
   schema_version: "v2.3",
   name_for_human: "TempGuru Public Data API",
   description_for_human:
-    "Configured event-staffing market catalog, hourly rates, tier-based lead-time guidance, state labor compliance, and coordinator-confirmed order coverage for the US and Canada.",
+    `Public event-staffing data for ${publicScale}, with hourly rates, lead-time guidance, compliance, and coordinator-confirmed order coverage.`,
   description_for_model:
-    "Public data and quote submission for event staffing in the US and Canada from TempGuru. The 345 entries are a configured market catalog, not a guarantee; use listCities for catalog matching and checkAvailability only for tier-based lead-time guidance. Neither confirms coverage or inventory; a coordinator confirms the specific order after buyer submission. Use listRoles for the role catalog, getRolePricing for hourly rates, getComplianceByState for wage/overtime rules, getPolicies for published booking terms, getPlan to restore a supplied plan ID, and getQuoteStatus to check a supplied TG reference. submitQuoteRequest is the single write operation: call it only after explicit confirmation; it creates no reservation and requires no payment. No authentication.",
+    `Public data and quote submission for event staffing in the US and Canada from TempGuru, serving ${publicScale}. Stable claim IDs: ${publicClaimIds}. The configured market catalog is for planning, not a guarantee; use listCities for catalog matching and checkAvailability only for tier-based lead-time guidance. Neither confirms coverage or inventory; a coordinator confirms the specific order after buyer submission. Use listRoles for the role catalog, getRolePricing for hourly rates, getComplianceByState for wage/overtime rules, getPolicies for published booking terms, getPlan to restore a supplied plan ID, and getQuoteStatus to check a supplied TG reference. submitQuoteRequest is the single write operation: call it only after explicit confirmation; it creates no reservation and requires no payment. No authentication.`,
   contact_email: "megan@tempguru.co",
   namespace: "tempguru",
   legal_info_url: "https://tempguru.co/privacy-policy",

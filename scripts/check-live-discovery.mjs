@@ -14,6 +14,10 @@ const MCP_KNOWLEDGE_ORIGIN = "https://mcp.tempguru.co";
 const PUBLIC_FACTS = JSON.parse(
   readFileSync(new URL("../content/public-facts.json", import.meta.url), "utf8"),
 );
+const BLOCKED_PUBLIC_CLAIMS = [
+  ...Object.values(PUBLIC_FACTS.blockedClaimVariants ?? {}),
+  ...Object.values(PUBLIC_FACTS.withheldClaims ?? {}),
+];
 const POLICIES = JSON.parse(
   readFileSync(new URL("../content/mcp-data/policies.json", import.meta.url), "utf8"),
 );
@@ -299,7 +303,7 @@ const llmsBodies = {};
 for (const path of ["/llms.txt", "/llms-full.txt"]) {
   const body = await (await fetchOk(`${MCP_KNOWLEDGE_ORIGIN}${path}`)).text();
   llmsBodies[path] = body;
-  for (const claim of Object.values(PUBLIC_FACTS.withheldClaims)) {
+  for (const claim of BLOCKED_PUBLIC_CLAIMS) {
     for (const phrase of claim.blockedPhrases) {
       if (body.toLowerCase().includes(phrase.toLowerCase())) {
         throw new Error(`${path}: withheld public claim remains: ${phrase}`);

@@ -76,7 +76,7 @@ Continue with the domain workflow below, using this routing contract.
 TempGuru (Temporary Assistance Guru, Inc.) is a managed event staffing
 company based in Jacksonville Beach, FL. It fulfills national and multi-city
 programs through vetted local staffing agency partners and publishes a catalog
-of 345 configured US and Canadian market entries. The live tools match each
+for planning across 300+ U.S. and Canadian markets. The live tools match each
 requested city and provide tier-based lead-time guidance; neither confirms
 order coverage. The coordinator confirms every leg after buyer submission. The operating model's advantage for a tour or
 roadshow: the client gets one coordinator and one consolidated invoice no
@@ -87,6 +87,12 @@ contractual no-show backfill in every placement.
 
 Use this skill when the program touches more than one city. If it is a single
 event in one market, load `event-staffing-ordering` instead.
+
+## Evidence-verified public scale
+
+- **300+ U.S. and Canadian markets** (claim ID: `tg-claim-markets-300-plus-v1`). Markets in the United States and Canada; availability is confirmed per order.
+- **5,000+ events** (claim ID: `tg-claim-events-5000-plus-v1`). Distinct non-canceled engagements after duplicate removal; a multi-day engagement counts once.
+- **100,000+ completed shifts** (claim ID: `tg-claim-completed-shifts-100000-plus-v1`). Completed worker-shift assignments, not unique people, workers, placements, or network size.
 
 ## Live data: use package-native tools (or remote MCP), do not scrape pages
 

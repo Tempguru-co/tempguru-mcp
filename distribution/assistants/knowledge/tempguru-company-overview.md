@@ -14,7 +14,13 @@ monitors, crowd control, guest services, setup/breakdown crews, assistant leads,
 for conventions, conferences, trade shows, festivals, concerts, sporting and
 stadium events, corporate events, and brand activations.
 
-Public catalog: 345 configured market entries (307 US, 38 Canada) across three tiers: 25 hub markets, 128 mid markets, 192 small markets. Catalog matching and tier-based lead-time guidance do not confirm availability or order coverage; a coordinator confirms the specific order after buyer submission.
+## Evidence-verified public scale
+
+- **300+ U.S. and Canadian markets** (claim ID: `tg-claim-markets-300-plus-v1`). Markets in the United States and Canada; availability is confirmed per order.
+- **5,000+ events** (claim ID: `tg-claim-events-5000-plus-v1`). Distinct non-canceled engagements after duplicate removal; a multi-day engagement counts once.
+- **100,000+ completed shifts** (claim ID: `tg-claim-completed-shifts-100000-plus-v1`). Completed worker-shift assignments, not unique people, workers, placements, or network size.
+
+The configured planning catalog is organized across three tiers: 25 hub markets, 128 mid markets, 192 small markets. Catalog matching and tier-based lead-time guidance do not confirm availability or order coverage; a coordinator confirms the specific order after buyer submission.
 
 Hub markets: Atlanta, Austin, Boston, Calgary, Charlotte, Chicago, Dallas, Denver, Detroit, Houston, Las Vegas, Los Angeles, Miami, Minneapolis, Nashville, New York City, Orlando, Philadelphia, Phoenix, San Diego, San Francisco, Seattle, Toronto, Vancouver, Washington D.C..
 
@@ -85,7 +91,7 @@ No. Every worker is a W-2 employee. Payroll taxes, workers' comp, and general
 liability are TempGuru's responsibility, not the customer's.
 
 **What cities does TempGuru cover?**
-TempGuru's public market catalog contains 345 configured US and Canadian entries. Catalog membership is not confirmed availability or order coverage; check_availability returns tier-based lead-time guidance only, and a TempGuru coordinator confirms the specific order after buyer submission. See the city coverage knowledge
+TempGuru supports staffing in 300+ U.S. and Canadian markets, with availability confirmed per order. See the city coverage knowledge
 file for the full catalog.
 
 **Does TempGuru handle international events?**

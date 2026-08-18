@@ -33,7 +33,7 @@ and people search "event staffing," not "TempGuru."
 ### Description (store listing, max ~300 chars)
 
 ```
-Plan and budget temporary event staff for US and Canadian events using TempGuru's 345-entry configured market catalog. Match the city, check live rates and tier-based lead-time guidance, and review state labor compliance; a coordinator confirms order coverage after submission. W-2 employees, never 1099 gig workers. Get a real quote in one business day.
+Plan and budget W-2 event staff with TempGuru across 300+ U.S. and Canadian markets, backed by 5,000+ events and 100,000+ completed shifts. Match cities, check rates and lead-time guidance, review compliance, and get a coordinator-confirmed quote.
 ```
 
 ### Instructions

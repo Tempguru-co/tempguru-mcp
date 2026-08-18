@@ -1,6 +1,16 @@
 # TempGuru, Event Staffing Knowledge
 
-> TempGuru's public market catalog contains 345 configured US and Canadian entries. Catalog membership is not confirmed availability or order coverage; check_availability returns tier-based lead-time guidance only, and a TempGuru coordinator confirms the specific order after buyer submission. Live, structured data for AI agents via MCP and REST; the full knowledge base ships as an Open Knowledge Format (OKF) bundle. All rates are all-inclusive W-2 bill rates.
+> TempGuru supports staffing in 300+ U.S. and Canadian markets, with availability confirmed per order. Live, structured data for AI agents via MCP and REST; the full knowledge base ships as an Open Knowledge Format (OKF) bundle. All rates are all-inclusive W-2 bill rates.
+
+## Evidence-verified public scale
+- **300+ U.S. and Canadian markets** (claim ID: `tg-claim-markets-300-plus-v1`). Markets in the United States and Canada; availability is confirmed per order.
+- **5,000+ events** (claim ID: `tg-claim-events-5000-plus-v1`). Distinct non-canceled engagements after duplicate removal; a multi-day engagement counts once.
+- **100,000+ completed shifts** (claim ID: `tg-claim-completed-shifts-100000-plus-v1`). Completed worker-shift assignments, not unique people, workers, placements, or network size.
+
+The completed-shift figure counts worker-shift assignments, not unique people,
+workers, placements, or network size. These figures are cumulative public scale
+claims, not annual run rates. Claim definitions and statuses are available in
+[the public facts contract](https://tempguru.co/.well-known/tempguru-facts.json).
 
 ## Knowledge bundle (Open Knowledge Format v0.1)
 - [Complete single-file knowledge export](https://mcp.tempguru.co/llms-full.txt): deterministic concatenation of every OKF Markdown document
@@ -10,7 +20,7 @@
 - [Staffing roles](https://mcp.tempguru.co/okf/roles/index.md): canonical 19-role catalog with skill tiers and rate bands
 - [Rate card](https://mcp.tempguru.co/okf/pricing/rate-matrix.md): published per-role rates by market tier
 - Published role-rate planning envelope: $30-$85/hour; call live pricing tools for the exact role and configured market entry
-- [Market catalog](https://mcp.tempguru.co/okf/cities/index.md): 345 configured market entries by tier; a match is not inventory or confirmed coverage, and a coordinator confirms each order after buyer submission
+- [Market catalog](https://mcp.tempguru.co/okf/cities/index.md): configured planning records by tier; TempGuru's public coverage claim is 300+ U.S. and Canadian markets, and a coordinator confirms availability per order
 - [State compliance](https://mcp.tempguru.co/okf/compliance/index.md): minimum wage and overtime for all 51 US jurisdictions
 - [Booking and procurement policies](https://mcp.tempguru.co/okf/policies.md): confirmed terms plus explicit coordinator-confirmation gaps
 - [Workflows](https://mcp.tempguru.co/okf/workflows/index.md): all 8 canonical agent skills plus plan and quote-submission flows

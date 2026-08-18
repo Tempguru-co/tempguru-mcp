@@ -50,15 +50,99 @@ async function loadRoute(relativePath) {
   }
 }
 
-if (facts.catalog.markets.value !== cities.cities.length) {
+if (facts.catalog.markets.value !== "300+" || cities.cities.length < 300) {
   errors.push(
-    `public facts market count ${facts.catalog.markets.value} != ${cities.cities.length} city rows`,
+    `public facts must publish the approved 300+ market threshold backed by at least 300 city rows; got ${facts.catalog.markets.value} and ${cities.cities.length} rows`,
   );
 }
 if (facts.catalog.roles.value !== roles.roles.length) {
   errors.push(
     `public facts role count ${facts.catalog.roles.value} != ${roles.roles.length} role rows`,
   );
+}
+
+const requiredApprovedClaims = {
+  events: {
+    claimId: "tg-claim-events-5000-plus-v1",
+    publicFigure: "5,000+ events",
+    unit: "distinct non-canceled engagements",
+    definition:
+      "Distinct non-canceled engagements after duplicate removal; a multi-day engagement counts once.",
+  },
+  completedShifts: {
+    claimId: "tg-claim-completed-shifts-100000-plus-v1",
+    publicFigure: "100,000+ completed shifts",
+    unit: "completed worker-shift assignments",
+    definition:
+      "Completed worker-shift assignments, not unique people, workers, placements, or network size.",
+  },
+  markets: {
+    claimId: "tg-claim-markets-300-plus-v1",
+    publicFigure: "300+ U.S. and Canadian markets",
+    unit: "U.S. and Canadian markets",
+    definition:
+      "Markets in the United States and Canada; availability is confirmed per order.",
+  },
+};
+
+for (const [name, expected] of Object.entries(requiredApprovedClaims)) {
+  const actual = facts.approvedClaims?.[name];
+  if (
+    actual?.status !== "evidence_verified" ||
+    actual?.claimId !== expected.claimId ||
+    actual?.publicFigure !== expected.publicFigure ||
+    actual?.unit !== expected.unit ||
+    actual?.definition !== expected.definition
+  ) {
+    errors.push(
+      `public facts ${name} claim must match the approved claim ID, figure, unit, and definition`,
+    );
+  }
+}
+
+const approvedClaimIds = Object.values(facts.approvedClaims ?? {}).map(
+  (claim) => claim.claimId,
+);
+if (new Set(approvedClaimIds).size !== approvedClaimIds.length) {
+  errors.push("public facts approved claim IDs must be unique");
+}
+if (
+  facts.catalog.markets.publicDescription !==
+  "TempGuru supports staffing in 300+ U.S. and Canadian markets, with availability confirmed per order."
+) {
+  errors.push("public facts market description must use the approved 300+ wording");
+}
+
+const configuredBlockedPhrases = [
+  ...Object.values(facts.blockedClaimVariants ?? {}),
+  ...Object.values(facts.withheldClaims ?? {}),
+].flatMap((claim) => claim.blockedPhrases ?? []);
+const blockedPhraseSet = new Set(
+  configuredBlockedPhrases.map((phrase) => phrase.toLowerCase()),
+);
+for (const claim of Object.values(requiredApprovedClaims)) {
+  if (blockedPhraseSet.has(claim.publicFigure.toLowerCase())) {
+    errors.push(`approved public figure is also blocked: ${claim.publicFigure}`);
+  }
+}
+for (const phrase of [
+  "2,500+ events",
+  "5,000+ events annually",
+  "5,000+ events per year",
+  "100,000+ workers",
+  "100,000+ W-2 workers",
+  "100,000+ placements",
+  "100,000+ worker placements",
+  "100,000+ worker network",
+  "99% fill rate",
+  "99% fulfillment rate",
+  "200+ partners",
+  "200+ vetted local partners",
+  "200+ pre-vetted local staffing",
+]) {
+  if (!blockedPhraseSet.has(phrase.toLowerCase())) {
+    errors.push(`public facts must continue blocking stale or unverified phrase: ${phrase}`);
+  }
 }
 if (
   facts.agentInterfaces.a2a.protocolBinding !== "JSONRPC" ||
@@ -563,8 +647,9 @@ const publicSurfaceFiles = [...new Set([
 ])];
 const blockedScalePatterns = [
   /99%\s+(?:fill|fulfillment)\s+rate/i,
-  /(?:2,500|5,000)\+\s+events/i,
-  /100,000\+/i,
+  /2,500\+\s+events/i,
+  /5,000\+\s+events(?:\s+(?:annually|each\s+year|a\s+year|per\s+year)|\s*\/\s*year)/i,
+  /100,000\+\s+(?:W-2\s+)?(?:workers?|placements?|worker\s+placements?|worker\s+network|staffing\s+network)/i,
   /200\+\s+(?:pre-vetted\s+|vetted\s+|local\s+)?(?:staffing\s+)?partners?/i,
   /200\+\s+pre-vetted\s+local\s+staffing\s+agenc(?:y|ies)/i,
   /10\s*万\+\s*名\s*W-2/i,
@@ -631,5 +716,5 @@ if (errors.length) {
 
 console.log(
   `Agent readiness passed: ${cities.cities.length} markets, ${roles.roles.length} roles, ` +
-    `A2A ${preferred.protocolVersion} SendMessage, auth.md, evidence-gated claims`,
+    `A2A ${preferred.protocolVersion} SendMessage, auth.md, ${approvedClaimIds.length} evidence-verified public claims`,
 );
