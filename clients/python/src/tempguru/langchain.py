@@ -42,7 +42,7 @@ def get_tools(
 
     @_tool
     def event_staffing_cities(state: str = "", tier: str = "") -> dict:
-        """List TempGuru's 345 configured US and Canadian market entries.
+        """List TempGuru's catalog for 300+ U.S. and Canadian markets.
         Use this to select a planning tier, not to promise coverage; a TempGuru
         coordinator confirms the specific order after buyer submission.
         Optional filters: state (two-letter code like 'CA' or full name),

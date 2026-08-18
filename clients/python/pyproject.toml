@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "tempguru"
 version = "0.3.0"
-description = "Event staffing data for AI agents and apps: live rates, 345 configured US/Canada market entries, saved plans, policies, quote status, compliance, and quote submission from TempGuru's public API."
+description = "Event staffing data for AI agents and apps across 300+ U.S. and Canadian markets, backed by 5,000+ events and 100,000+ completed shifts, with live rates, saved plans, compliance, and quote submission."
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.9"

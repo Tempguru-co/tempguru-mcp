@@ -6,6 +6,14 @@
 
 // schema.org JSON-LD graph. Ties the MCP server + REST API + Rate Index to the
 // TempGuru entity for knowledge-graph / AI-search grounding.
+import { APPROVED_CLAIMS } from "@/lib/public-facts";
+
+const SCALE_CLAIMS = [
+  APPROVED_CLAIMS.markets,
+  APPROVED_CLAIMS.events,
+  APPROVED_CLAIMS.completedShifts,
+] as const;
+
 const JSON_LD = {
   "@context": "https://schema.org",
   "@graph": [
@@ -17,8 +25,15 @@ const JSON_LD = {
       url: "https://tempguru.co",
       logo: "https://mcp.tempguru.co/logo.svg",
       description:
-        "W-2 compliant temporary event staffing backed by 345 configured US and Canadian market entries, with catalog matching, tier-based lead-time guidance, and coordinator-confirmed order coverage: brand ambassadors, registration, hospitality, ushers, crowd control, setup/breakdown, and team leads.",
+        `W-2 compliant temporary event staffing in ${APPROVED_CLAIMS.markets.publicFigure}, backed by ${APPROVED_CLAIMS.events.publicFigure} and ${APPROVED_CLAIMS.completedShifts.publicFigure}. Availability is confirmed per order.`,
       areaServed: ["US", "CA"],
+      additionalProperty: SCALE_CLAIMS.map((claim) => ({
+        "@type": "PropertyValue",
+        propertyID: claim.claimId,
+        name: claim.unit,
+        value: claim.publicFigure,
+        description: claim.definition,
+      })),
       sameAs: [
         "https://github.com/Tempguru-co/tempguru-mcp",
         "https://www.npmjs.com/package/tempguru-mcp",
@@ -144,7 +159,9 @@ export default function Home() {
     <main style={{ maxWidth: 760, margin: "0 auto", padding: "60px 24px" }}>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(JSON_LD).replace(/</g, "\\u003c"),
+        }}
       />
       <h1 style={{ fontSize: 32, fontWeight: 600, marginBottom: 8 }}>
         TempGuru MCP Server
@@ -156,6 +173,28 @@ export default function Home() {
         non-destructive planner that may save a 30-day non-PII snapshot, an
         explicit non-destructive save tool.
       </p>
+
+      <section style={sectionStyle}>
+        <h2 style={{ fontSize: 18, marginBottom: 12 }}>Evidence-verified public scale</h2>
+        <ul style={{ listStyle: "none", padding: 0 }}>
+          {SCALE_CLAIMS.map((claim) => (
+            <li key={claim.claimId} style={cardStyle}>
+              <strong style={{ color: "#e6edf3", fontSize: 18 }}>
+                {claim.publicFigure}
+              </strong>
+              <div style={descStyle}>{claim.definition}</div>
+              <code style={{ ...codeNameStyle, display: "block", marginTop: 6 }}>
+                {claim.claimId}
+              </code>
+            </li>
+          ))}
+        </ul>
+        <p style={descStyle}>
+          The completed-shift figure counts worker-shift assignments, not
+          unique people, workers, placements, or network size. Availability is
+          confirmed per order.
+        </p>
+      </section>
 
       <section style={sectionStyle}>
         <h2 style={{ fontSize: 18, marginBottom: 12 }}>MCP Endpoint</h2>

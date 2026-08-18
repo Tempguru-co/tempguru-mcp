@@ -40,6 +40,31 @@ const publicFacts = JSON.parse(
   readFileSync(join(repoRoot, "content", "public-facts.json"), "utf8"),
 );
 
+const approvedClaims = publicFacts.approvedClaims;
+const requiredApprovedClaims = ["markets", "events", "completedShifts"];
+for (const key of requiredApprovedClaims) {
+  if (!approvedClaims?.[key]?.claimId || approvedClaims[key].status !== "evidence_verified") {
+    throw new Error(`Missing evidence-verified public claim: ${key}`);
+  }
+}
+
+const scaleClaims = [
+  approvedClaims.markets,
+  approvedClaims.events,
+  approvedClaims.completedShifts,
+];
+const scaleClaimIds = scaleClaims.map((claim) => claim.claimId);
+const publicScaleSummary =
+  `TempGuru's evidence-verified public scale is ${approvedClaims.markets.publicFigure}, ` +
+  `${approvedClaims.events.publicFigure}, and ${approvedClaims.completedShifts.publicFigure}. ` +
+  "Availability is confirmed per order.";
+const publicScaleBullets = scaleClaims
+  .map(
+    (claim) =>
+      `- **${claim.publicFigure}** (claim ID: \`${claim.claimId}\`). ${claim.definition}`,
+  )
+  .join("\n");
+
 const load = (f) => JSON.parse(readFileSync(join(dataDir, f), "utf8"));
 const cities = load("cities.json");
 const roles = load("roles.json");
@@ -180,6 +205,7 @@ const BUILD_NOTE =
 // Freshness: derive from the source data, never from the clock, so regeneration
 // is reproducible and the timestamp reflects when the knowledge actually changed.
 const DATA_DATE = [
+  publicFacts.reviewedAt,
   cities._meta.updated,
   roles._meta.updated,
   pricing._meta.updated,
@@ -398,13 +424,21 @@ write("index.md", rootDoc(
   `# TempGuru Event Staffing Knowledge
 
 This is the canonical Open Knowledge Format (OKF) bundle for **TempGuru**, managed
-**W-2 event staffing** backed by **${cities.cities.length} configured market entries** (${countryCounts.US} US, ${countryCounts.CA ?? 0} Canada). A catalog match is not live inventory or confirmed order coverage; a TempGuru coordinator confirms the specific order and final lead time after buyer submission. It is the
+**W-2 event staffing** in **${approvedClaims.markets.publicFigure}**. A catalog match is not live inventory or confirmed order coverage; a TempGuru coordinator confirms the specific order and final lead time after buyer submission. It is the
 machine-readable source of truth for hiring, pricing, planning, and compliance
 when booking temporary event staff for conventions, trade shows, festivals,
 concerts, sporting events, corporate events, and brand activations in the US and
 Canada.
 
 _Publisher: ${PUBLISHER}. Canonical site: ${SITE}. Data version ${cities._meta.version}, updated ${DATA_DATE}._
+
+## Evidence-verified public scale
+
+${publicScaleBullets}
+
+The completed-shift figure counts worker-shift assignments, not unique people,
+workers, placements, or network size. The configured city dataset is a planning
+catalog, not a separate public coverage claim.
 
 Every rate here is an **${ALL_INCLUSIVE}**. Workers are W-2 employees, never 1099
 contractors. Brand Ambassadors never bill below $40/hour in any market.
@@ -425,7 +459,7 @@ same data for offline reading, indexing, and citation.
 - [Staffing roles](roles/index.md), the ${roles.roles.length} roles you can hire, with skill tiers
 - [Pricing](pricing/index.md), rate matrix, market tiers, and methodology
 - [Rate Index](rate-index.md), the citable benchmark of W-2 hourly rates by role and tier
-- [Configured market catalog](cities/index.md), the ${cities.cities.length} entries, by tier
+- [Configured market catalog](cities/index.md), planning records by tier
 - [State compliance](compliance/index.md), minimum wage, overtime, and quirks for all 51 US jurisdictions
 - [Booking and procurement policies](policies.md), confirmed terms plus explicit coordinator-confirmation gaps
 - [Workflows](workflows/index.md), all ${SKILLS.length} canonical agent skills plus plan and quote-submission flows
@@ -461,7 +495,8 @@ file's \`timestamp\` frontmatter field.
 - First publication of the TempGuru knowledge bundle in Open Knowledge Format v0.1.
 - Generated from \`content/mcp-data/\` (cities, roles, role-pricing, state-compliance, city-rates, policies), data version ${cities._meta.version}, updated ${DATA_DATE}.
 - Rate Index figures computed with the same logic as the live \`get_rate_benchmark\` MCP tool, so the bundle and the API stay in lockstep.
-- Configured market catalog: ${cities.cities.length} entries (${countryCounts.US} US, ${countryCounts.CA ?? 0} Canada). Rate Index measured across ${measuredTotal} cities with vetted per-city rate cards.`
+- Evidence-verified public scale: ${approvedClaims.markets.publicFigure}, ${approvedClaims.events.publicFigure}, and ${approvedClaims.completedShifts.publicFigure}.
+- Configured city data and the dated Rate Report study remain separate technical datasets; neither defines a second public coverage claim.`
 ));
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -475,6 +510,7 @@ write("company.md", doc(
     publisher: PUBLISHER,
     resource: SITE,
     tags: ["company", "event-staffing", "w2-employment"],
+    claim_ids: scaleClaimIds,
     timestamp: TS,
   },
   `# TempGuru, Company Profile
@@ -486,9 +522,17 @@ control, guest services, setup/breakdown crews, and team leads for conventions,
 conferences, trade shows, festivals, concerts, sporting and stadium events,
 corporate events, and brand activations.
 
+## Evidence-verified public scale
+
+${publicScaleBullets}
+
+The completed-shift figure counts worker-shift assignments, not unique people,
+workers, placements, or network size.
+
 ## Configured Market Catalog
 
-- **${cities.cities.length} configured market entries**, ${countryCounts.US} in the United States, ${countryCounts.CA ?? 0} in Canada. A match selects planning data; it does not confirm live inventory or order coverage. A TempGuru coordinator confirms the specific order after buyer submission.
+- **${approvedClaims.markets.publicFigure}.** Availability is confirmed per order.
+- The planning dataset is a configured catalog, not a separate coverage claim. A match selects planning data; it does not confirm live inventory or order coverage.
 - Three tiers: **${tierCounts.hub} hub**, **${tierCounts.mid} mid**, **${tierCounts.small} small** markets. See the [configured market catalog](cities/index.md).
 - Hub markets: ${hubNames.join(", ")}.
 - Delivered through vetted local W-2 staffing partners. Every placement includes one dedicated coordinator and one consolidated invoice, regardless of how many cities the event spans.
@@ -618,7 +662,7 @@ Rate bands below are **all-inclusive W-2 hourly bill rates** (USD) from TempGuru
 published per-role rate card, distinct per role. See
 [pricing/rate-matrix.md](../pricing/rate-matrix.md) for the full card and
 [pricing/market-tiers.md](../pricing/market-tiers.md) for what the tiers mean. For the
-measured market benchmark (what the 7,900-shift Rate Report observed across cities),
+measured market benchmark from the separate dated Rate Report study sample,
 see the [Rate Index](../rate-index.md).
 
 | Role | Skill tier | Typical shift | Small market | Mid market | Hub market |
@@ -709,7 +753,7 @@ payroll taxes, workers' compensation, general liability, and coordinator support
 Canadian markets bill in CAD at parity.
 
 This is the **rate card** (what TempGuru bills per role). For the **measured market
-benchmark**, what the 7,900-shift Rate Report actually observed across cities, see
+benchmark** from the separate dated Rate Report study sample, see
 the [Rate Index](../rate-index.md). They answer different questions ("what will this
 role cost" vs "what does the market pay") and are not expected to be identical.
 
@@ -740,7 +784,8 @@ write("pricing/market-tiers.md", doc(
   },
   `# Market Tiers
 
-TempGuru groups its ${cities.cities.length} markets into three tiers. Tier affects the rate band and
+TempGuru supports staffing in ${approvedClaims.markets.publicFigure}. The configured
+planning dataset groups its city records into three tiers. Tier affects the rate band and
 the typical [lead time](../reference/lead-time-model.md).
 
 | Tier | Cities | Definition |
@@ -760,7 +805,7 @@ write("pricing/methodology.md", doc(
     type: "Pricing Methodology",
     title: "Bill-Rate Methodology",
     description: "How TempGuru derives its all-inclusive W-2 hourly bill rates from measured shift data.",
-    basis: "TempGuru Rate Report 2026, per-city actual-paid weighted averages (7,900+ shifts)",
+    basis: "TempGuru Rate Report 2026, separate pricing-study sample of 7,900+ shift records",
     tags: ["pricing", "methodology", "rates"],
     timestamp: TS,
   },
@@ -770,13 +815,18 @@ Every rate traces to TempGuru's own data or stated policy; nothing is invented.
 
 TempGuru publishes two complementary pricing artifacts: the **per-role rate card**
 ([rate-matrix.md](rate-matrix.md)), a distinct rate per role, what TempGuru bills, and the **measured market benchmark** (the [Rate Index](../rate-index.md)), what the
-7,900-shift Rate Report observed per city. The card answers "what will this role
+separate dated Rate Report study sample observed per city. The card answers "what will this role
 cost"; the benchmark answers "what does the market pay." They are derived
 differently and are not expected to be identical.
 
+The rate study's 7,900+ records are a pricing-methodology sample, not TempGuru's
+overall completed-shift count. The evidence-verified company scale claim is
+**${approvedClaims.completedShifts.publicFigure}** (claim ID:
+\`${approvedClaims.completedShifts.claimId}\`).
+
 ## Sources
 
-- **Base rates:** per-city actual-paid weighted averages from the **Rate Report 2026** (7,900+ measured shifts).
+- **Base rates:** per-city actual-paid weighted averages from the separate **Rate Report 2026** pricing-study sample (7,900+ shift records).
 - **Card floor $30 / ceiling $85:** the published rate card spans $30–$85; the $30 small-market floor reflects real measured market conditions.
 - **Brand Ambassador $40-everywhere floor:** standing brand policy. BA is tiered: small $40 / mid $47 / hub $55 floor.
 - **All-inclusive basis:** ${ALL_INCLUSIVE}.
@@ -819,8 +869,10 @@ write("rate-index.md", doc(
   `# TempGuru Event Staffing Rate Index 2026
 
 The citable benchmark of **all-inclusive W-2 hourly bill rates** for event staff in
-the US and Canada, measured across **${measuredTotal} cities** with vetted per-city rate
-cards (small ${measured.small}, mid ${measured.mid}, hub ${measured.hub}). Built from the same data as the live
+the US and Canada. This is a separate dated Rate Report study dataset, not a
+service-coverage count. TempGuru's approved coverage claim remains
+**${approvedClaims.markets.publicFigure}**. The benchmark uses vetted per-city rate
+cards from the July 16, 2026 study dataset (small ${measured.small}, mid ${measured.mid}, hub ${measured.hub}). Built from the same data as the live
 \`get_rate_benchmark\` MCP tool and the website's city pages, so the Index cannot
 drift from what the market actually paid.
 
@@ -849,8 +901,8 @@ ${TIERS.map(baTierRow).join("\n")}
 
 ## Methodology
 
-Per-city actual-paid weighted averages from the **TempGuru Rate Report 2026**
-(7,900+ measured shifts). Each tier figure is the honest min-to-max **span** across
+Per-city actual-paid weighted averages from the separate **TempGuru Rate Report 2026**
+study sample. Each tier figure is the observed min-to-max **span** across
 that tier's measured cities, not a midpoint. Full method: [pricing/methodology.md](pricing/methodology.md).
 Methodology page: ${SITE}/event-staffing-rate-index.
 
@@ -866,7 +918,7 @@ write("cities/index.md", plainDoc(
   `# Configured Market Catalog
 
 ${publicFacts.catalog.markets.publicDescription}
-The catalog has ${countryCounts.US} entries in the United States and ${countryCounts.CA ?? 0} in Canada across three tiers. Each entry links to its detail page.
+The separate configured planning dataset has ${countryCounts.US} entries in the United States and ${countryCounts.CA ?? 0} in Canada across three tiers. Those records support lookup and do not define a second coverage claim. Each entry links to its detail page.
 
 | Tier | Cities | List |
 |---|---|---|
@@ -1307,7 +1359,9 @@ This bundle and the live tools are generated from these canonical datasets
 
 ## City \`{ slug, name, state, state_abbr, country, tier }\`
 
-\`tier\` is one of \`hub\` | \`mid\` | \`small\`. ${cities.cities.length} cities total.
+\`tier\` is one of \`hub\` | \`mid\` | \`small\`. The configured planning dataset has
+city records for lookup and planning; catalog size is not the public
+service-coverage claim.
 
 ## Role \`{ slug, name, description, skill_tier, typical_shift_length_hours }\`
 
@@ -1325,8 +1379,10 @@ the measured benchmark behind the [Rate Index](../rate-index.md).
 
 ## Per-city rate card \`{ tier, name, event_staff, ushers, crowd, asst_lead, team_lead, brand_amb, overall, avg_staff }\`
 
-Each role key is a \`[low, high]\` pair in USD/hour. ${measuredTotal} measured cities feed
-the [Rate Index](../rate-index.md). See [MCP tools](mcp-tools.md).
+Each role key is a \`[low, high]\` pair in USD/hour. The separate July 16, 2026
+Rate Report pricing-study dataset has ${measuredTotal} measured city records.
+That study universe is not the public service-coverage claim. See the
+[Rate Index](../rate-index.md) and [MCP tools](mcp-tools.md).
 
 ## Policy \`{ topic, title, confirmed_claims[], confirm_with_coordinator, todo_for_megan[], sources[], code?, discount_percent?, cap_usd?, expires?, scope? }\`
 
@@ -1377,6 +1433,14 @@ const llmsTxt = `# TempGuru, Event Staffing Knowledge
 
 > ${publicFacts.catalog.markets.publicDescription} Live, structured data for AI agents via MCP and REST; the full knowledge base ships as an Open Knowledge Format (OKF) bundle. All rates are all-inclusive W-2 bill rates.
 
+## Evidence-verified public scale
+${publicScaleBullets}
+
+The completed-shift figure counts worker-shift assignments, not unique people,
+workers, placements, or network size. These figures are cumulative public scale
+claims, not annual run rates. Claim definitions and statuses are available in
+[the public facts contract](${PUBLIC_FACTS_URL}).
+
 ## Knowledge bundle (Open Knowledge Format v0.1)
 - [Complete single-file knowledge export](${LLMS_FULL_URL}): deterministic concatenation of every OKF Markdown document
 - [OKF bundle root](${BUNDLE_URL}/index.md): canonical event-staffing knowledge, roles, pricing, configured market catalog, compliance, workflows
@@ -1385,7 +1449,7 @@ const llmsTxt = `# TempGuru, Event Staffing Knowledge
 - [Staffing roles](${BUNDLE_URL}/roles/index.md): canonical ${roles.roles.length}-role catalog with skill tiers and rate bands
 - [Rate card](${BUNDLE_URL}/pricing/rate-matrix.md): published per-role rates by market tier
 - Published role-rate planning envelope: $30-$85/hour; call live pricing tools for the exact role and configured market entry
-- [Market catalog](${BUNDLE_URL}/cities/index.md): ${cities.cities.length} configured market entries by tier; a match is not inventory or confirmed coverage, and a coordinator confirms each order after buyer submission
+- [Market catalog](${BUNDLE_URL}/cities/index.md): configured planning records by tier; TempGuru's public coverage claim is ${approvedClaims.markets.publicFigure}, and a coordinator confirms availability per order
 - [State compliance](${BUNDLE_URL}/compliance/index.md): minimum wage and overtime for all 51 US jurisdictions
 - [Booking and procurement policies](${BUNDLE_URL}/policies.md): confirmed terms plus explicit coordinator-confirmation gaps
 - [Workflows](${BUNDLE_URL}/workflows/index.md): all ${SKILLS.length} canonical agent skills plus plan and quote-submission flows
@@ -1445,7 +1509,7 @@ writeFileSync(
 const okfDiscoveryBase = {
   okf_version: OKF_VERSION,
   name: "TempGuru Event Staffing Knowledge",
-  description: `Canonical OKF v0.1 knowledge bundle for W-2 event staffing planning against ${cities.cities.length} configured US and Canadian market entries.`,
+  description: `Canonical OKF v0.1 knowledge bundle for W-2 event staffing in ${approvedClaims.markets.publicFigure}, backed by ${approvedClaims.events.publicFigure} and ${approvedClaims.completedShifts.publicFigure}.`,
   publisher: PUBLISHER,
   domain: "event-staffing-us-canada",
   canonical_site: SITE,
@@ -1458,6 +1522,7 @@ const okfDiscoveryBase = {
   agent_card: AGENT_CARD_URL,
   authentication_guide: AUTH_GUIDE_URL,
   public_facts: PUBLIC_FACTS_URL,
+  approved_claim_ids: scaleClaimIds,
   documentation: AGENT_DOCS_URL,
   tools: TOOLS.map((t) => t.name),
   skills: SKILLS,

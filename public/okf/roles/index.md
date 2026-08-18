@@ -7,7 +7,7 @@ Rate bands below are **all-inclusive W-2 hourly bill rates** (USD) from TempGuru
 published per-role rate card, distinct per role. See
 [pricing/rate-matrix.md](../pricing/rate-matrix.md) for the full card and
 [pricing/market-tiers.md](../pricing/market-tiers.md) for what the tiers mean. For the
-measured market benchmark (what the 7,900-shift Rate Report observed across cities),
+measured market benchmark from the separate dated Rate Report study sample,
 see the [Rate Index](../rate-index.md).
 
 | Role | Skill tier | Typical shift | Small market | Mid market | Hub market |

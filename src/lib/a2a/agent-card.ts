@@ -1,11 +1,11 @@
-import { A2A_INTERFACE, MARKET_CATALOG_DESCRIPTION } from "../public-facts";
+import { A2A_INTERFACE, APPROVED_SCALE_DESCRIPTION } from "../public-facts";
 
 export function buildAgentCard(version: string) {
   return {
     name: "TempGuru Event Staffing",
     description:
       "A deterministic A2A adapter for TempGuru's public event-staffing planner and catalog. " +
-      MARKET_CATALOG_DESCRIPTION +
+      APPROVED_SCALE_DESCRIPTION +
       " Text messages return invocation help; application/json data parts execute the advertised planning and lookup skills.",
     supportedInterfaces: [
       {

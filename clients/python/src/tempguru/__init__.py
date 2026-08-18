@@ -1,8 +1,8 @@
 """TempGuru: event staffing data for AI agents and apps.
 
-Live W-2 event staffing rates, 345 configured US/Canada market entries, saved plans,
-booking policies, quote status, and state compliance from TempGuru's API.
-No API key required.
+Live W-2 event staffing rates across 300+ U.S. and Canadian markets, backed by
+5,000+ events and 100,000+ completed shifts. Saved plans, booking policies,
+quote status, and state compliance come from TempGuru's API. No API key required.
 """
 
 from .client import TempGuru, TempGuruError

@@ -2,7 +2,7 @@
   "name": "tempguru-mcp",
   "version": "1.7.2",
   "private": true,
-  "description": "TempGuru MCP server for planning against a 345-entry configured US/CA market catalog, with tier-based lead-time guidance, coordinator-confirmed order coverage, ten read-only tools, a non-PII buyer handoff, and non-contact plan persistence.",
+  "description": "TempGuru MCP server for W-2 event staffing in 300+ U.S. and Canadian markets, backed by 5,000+ events and 100,000+ completed shifts, with coordinator-confirmed availability per order.",
   "scripts": {
     "dev": "next dev",
     "build": "npm run build:okf && next build",

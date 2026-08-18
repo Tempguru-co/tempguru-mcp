@@ -1,9 +1,11 @@
 // Drift gate for the submission / distribution artifacts (MCP registry manifest,
 // Docker MCP catalog, Postman collection, Context7, Dockerfile, Glama). These are
 // hand-maintained and have no generator, so they silently fell behind the live
-// server (345 markets, all 12 tools). This script fails if any of them drift
+// server (300+ public coverage claim, 345 technical catalog rows, all 12 tools).
+// This script fails if any of them drift
 // from the canonical sources:
-//   - market count: content/mcp-data/cities.json
+//   - approved public claims: content/public-facts.json
+//   - technical market-row count: content/mcp-data/cities.json
 //   - MCP tool set:  src/lib/mcp/register-tools.ts
 //   - Rate Index phrasing: bans the stale "by role and market tier" on the agent-
 //     facing surfaces that describe the Index (only Brand Ambassadors are tiered)
@@ -29,6 +31,18 @@ const sameStringSet = (left, right) =>
 // ── canonical facts (derived, never hard-coded) ──────────────────────────────
 const CITIES_DATA = JSON.parse(read("content/mcp-data/cities.json"));
 const MARKET_COUNT = CITIES_DATA.cities.length;
+const PUBLIC_FACTS_DATA = JSON.parse(read("content/public-facts.json"));
+const APPROVED_PUBLIC_CLAIMS = PUBLIC_FACTS_DATA.approvedClaims;
+const APPROVED_PUBLIC_FIGURES = [
+  APPROVED_PUBLIC_CLAIMS.markets.publicFigure,
+  APPROVED_PUBLIC_CLAIMS.events.publicFigure,
+  APPROVED_PUBLIC_CLAIMS.completedShifts.publicFigure,
+];
+const APPROVED_PUBLIC_CLAIM_IDS = [
+  APPROVED_PUBLIC_CLAIMS.markets.claimId,
+  APPROVED_PUBLIC_CLAIMS.events.claimId,
+  APPROVED_PUBLIC_CLAIMS.completedShifts.claimId,
+];
 const TIER_COUNTS = CITIES_DATA.cities.reduce(
   (counts, city) => ({ ...counts, [city.tier]: (counts[city.tier] ?? 0) + 1 }),
   { hub: 0, mid: 0, small: 0 },
@@ -163,13 +177,126 @@ for (const tier of ["hub", "mid", "small"]) {
 
 for (const { path, mcpTools } of FILES) {
   const body = read(path);
-  if (/\b300\+/.test(body)) {
-    errors.push(`${path}: contains "300+" (canonical market count is ${MARKET_COUNT})`);
-  }
   if (mcpTools) {
     const missing = TOOLS.filter((t) => !body.includes(t));
     if (missing.length) {
       errors.push(`${path}: enumerates MCP tools but is missing ${missing.join(", ")}`);
+    }
+  }
+}
+
+// Public scale and technical catalog size are different facts. Public narrative
+// must use the approved threshold wording; only schemas, list constraints, and
+// catalog mechanics should expose the exact row count.
+if (
+  PUBLIC_FACTS_DATA.catalog.markets.value !== "300+" ||
+  MARKET_COUNT < 300
+) {
+  errors.push(
+    `public market claim must remain 300+ and be backed by at least 300 technical rows; got ${PUBLIC_FACTS_DATA.catalog.markets.value} and ${MARKET_COUNT}`,
+  );
+}
+if (
+  new Set(APPROVED_PUBLIC_CLAIM_IDS).size !== 3 ||
+  APPROVED_PUBLIC_CLAIM_IDS.some((claimId) => !claimId)
+) {
+  errors.push("content/public-facts.json: approved public claim IDs must be present and unique");
+}
+
+const PUBLIC_SCALE_SURFACES = [
+  "server.json",
+  "context7.json",
+  "package.json",
+  "cli/package.json",
+  "gemini-extension.json",
+  "README.md",
+  "llms-install.md",
+  "Dockerfile",
+  "cli/README.md",
+  "clients/python/README.md",
+  "clients/python/pyproject.toml",
+  "clients/python/src/tempguru/__init__.py",
+  "clients/python/src/tempguru/llamaindex.py",
+  "content/mcp-data/openapi.json",
+  "distribution/docker-mcp-catalog.yaml",
+  "distribution/ai-agents-page.html",
+  "distribution/anthropic-directory-update.md",
+  "distribution/langchain-docs-pr.md",
+  "distribution/langchain-docs-pr-body.md",
+  "distribution/assistants/README.md",
+  "distribution/assistants/chatgpt-app.md",
+  "distribution/assistants/chatgpt-custom-gpt.md",
+  "distribution/assistants/coze-bot.md",
+  "distribution/assistants/gemini-gem.md",
+  "distribution/assistants/hermes/SKILL.md",
+  "distribution/assistants/knowledge/tempguru-company-overview.md",
+  "distribution/assistants/microsoft/ai-plugin.json",
+  "distribution/assistants/microsoft/declarativeAgent.json",
+  "distribution/assistants/other-platforms.md",
+  "distribution/assistants/system-prompt.md",
+  "distribution/pi/package.json",
+  "distribution/postman-collection.json",
+  "distribution/toolbox/README.md",
+  "distribution/toolbox/huggingface/README.md",
+  "distribution/toolbox/open-webui/tempguru_event_staffing_tool.py",
+  "public/llms.txt",
+  "public/llms-full.txt",
+  "public/okf/index.md",
+  "public/okf/company.md",
+  "public/.well-known/okf.json",
+];
+for (const path of PUBLIC_SCALE_SURFACES) {
+  const body = read(path);
+  const normalizedBody = body.replace(/\s+/g, " ");
+  for (const figure of APPROVED_PUBLIC_FIGURES) {
+    if (!normalizedBody.includes(figure)) {
+      errors.push(`${path}: approved public figure missing: ${figure}`);
+    }
+  }
+}
+for (const path of [
+  "distribution/ai-agents-page.zh-CN.html",
+  "distribution/assistants/china-platforms.md",
+  "distribution/assistants/system-prompt.zh-CN.md",
+]) {
+  const body = read(path);
+  for (const figure of ["300+", "5,000+", "100,000+"]) {
+    if (!body.includes(figure)) {
+      errors.push(`${path}: translated approved public figure missing: ${figure}`);
+    }
+  }
+}
+for (const path of [
+  "content/mcp-data/openapi.json",
+  "distribution/postman-collection.json",
+  "public/llms.txt",
+  "public/llms-full.txt",
+  "public/okf/index.md",
+  "public/okf/company.md",
+]) {
+  const body = read(path);
+  for (const claimId of APPROVED_PUBLIC_CLAIM_IDS) {
+    if (!body.includes(claimId)) {
+      errors.push(`${path}: approved public claim ID missing: ${claimId}`);
+    }
+  }
+}
+for (const path of ["src/app/page.tsx", "src/app/layout.tsx", "src/lib/api/openapi.ts"]) {
+  if (!read(path).includes("APPROVED_CLAIMS")) {
+    errors.push(`${path}: public scale copy must be registry-driven through APPROVED_CLAIMS`);
+  }
+}
+for (const skill of SKILLS) {
+  const path = `content/skills/${skill}.md`;
+  const body = read(path);
+  for (const figure of APPROVED_PUBLIC_FIGURES) {
+    if (!body.includes(figure)) {
+      errors.push(`${path}: approved public figure missing: ${figure}`);
+    }
+  }
+  for (const claimId of APPROVED_PUBLIC_CLAIM_IDS) {
+    if (!body.includes(claimId)) {
+      errors.push(`${path}: approved public claim ID missing: ${claimId}`);
     }
   }
 }
@@ -1540,7 +1667,7 @@ try {
 }
 
 console.log(
-  `Canonical: ${MARKET_COUNT} markets, ${ROLE_COUNT} roles, ${TOOLS.length} MCP tools, ` +
+  `Canonical: ${MARKET_COUNT} configured market rows, ${ROLE_COUNT} roles, ${TOOLS.length} MCP tools, ` +
     `${EXPECTED_DEMAND_SKILL_COUNT} demand-layer skills + compliance, v${PKG_VERSION}.`,
 );
 if (errors.length) {

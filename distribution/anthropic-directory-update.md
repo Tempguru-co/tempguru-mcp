@@ -35,9 +35,13 @@ Inventory summary: **12 tools, 2 prompts, 8 resources**.
 > terms; it only improves policy-topic discovery, aliases, and clean-miss
 > telemetry.
 
+Approved scale claim IDs: `tg-claim-markets-300-plus-v1`,
+`tg-claim-events-5000-plus-v1`, and
+`tg-claim-completed-shifts-100000-plus-v1`.
+
 ### Detail-card description
 
-TempGuru helps planners build W-2 staffing plans from 345 configured US/Canada entries. Claude can turn an event brief into a plan; match the configured market catalog; return tier-based lead-time guidance, roles, all-inclusive hourly rates, crew totals, and state/provincial compliance; retrieve booking and procurement policies; save or resume a non-contact plan; and prepare a buyer-operated quote-form handoff. Catalog matching and lead-time guidance do not confirm coverage or inventory; a TempGuru coordinator confirms the order after buyer submission. TempGuru supports trade shows, conferences, festivals, concerts, sporting events, corporate events, brand activations, and multi-city programs. Placements use W-2 employees through vetted staffing-agency partners, not 1099 gig workers.
+TempGuru plans W-2 event staffing across 300+ U.S. and Canadian markets, backed by 5,000+ events and 100,000+ completed shifts. Claude can turn an event brief into a plan; match the configured market catalog; return tier-based lead-time guidance, roles, all-inclusive hourly rates, crew totals, and state/provincial compliance; retrieve booking and procurement policies; save or resume a non-contact plan; and prepare a buyer-operated quote-form handoff. Catalog matching and lead-time guidance do not confirm coverage or inventory; a TempGuru coordinator confirms the order after buyer submission. TempGuru supports trade shows, conferences, festivals, concerts, sporting events, corporate events, brand activations, and multi-city programs. Placements use W-2 employees, not 1099 gig workers.
 
 The connector exposes 12 tools, 2 prompts and 8 skill resources. Ten tools are read-only. It is read_write because plan_staffing may save a 30-day non-PII plan and save_staffing_plan explicitly saves one. Those bounded writes exclude names, email addresses, phone numbers, companies, and free-text contact details. request_quote is read-only and idempotent. It accepts a saved non-PII plan ID plus allowlisted attribution, restores the plan, and returns a prefilled form on TempGuru's mcp.tempguru.co origin. It does not collect or transmit contact information, call the CRM, create a lead, or issue a TG reference. The buyer opens the form, reviews or edits staffing details, enters their own contact details, and submits it. Only that separate website submission creates a lead and reference for a TempGuru coordinator.
 

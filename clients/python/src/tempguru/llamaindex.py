@@ -27,9 +27,10 @@ except ImportError as _exc:  # pragma: no cover
 
 class TempGuruToolSpec(BaseToolSpec):
     """TempGuru event staffing tools: eight read operations plus opt-in quote
-    submission against 345 configured US/CA market entries, with catalog
-    matching and tier-based lead-time guidance. A coordinator confirms each
-    specific order after buyer submission.
+    submission across 300+ U.S. and Canadian markets, backed by 5,000+ events
+    and 100,000+ completed shifts, with catalog matching and tier-based
+    lead-time guidance. A coordinator confirms each specific order after buyer
+    submission.
 
     Pass ``include_quote_submission=False`` for a strictly read-only set.
     """
@@ -59,7 +60,7 @@ class TempGuruToolSpec(BaseToolSpec):
             ]
 
     def event_staffing_cities(self, state: str = "", tier: str = "") -> dict:
-        """List TempGuru's 345 configured US and Canadian market entries.
+        """List TempGuru's catalog for 300+ U.S. and Canadian markets.
         Use to select a planning tier, not to promise coverage; a TempGuru
         coordinator confirms the specific order after buyer submission.
         Optional: state (two-letter code or full name), tier ('hub', 'mid',

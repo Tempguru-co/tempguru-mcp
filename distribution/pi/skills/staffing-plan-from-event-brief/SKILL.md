@@ -4,7 +4,7 @@ description: >-
   Extract a temporary event staffing plan from an event document, an RFP,
   banquet event order (BEO), run of show, production schedule, exhibitor or
   event services manual, or staffing grid, then price it live through TempGuru
-  against a public catalog of 345 configured US and Canadian markets. Use when a user pastes or uploads
+  for service in 300+ U.S. and Canadian markets. Use when a user pastes or uploads
   an event document and needs to know what staff it implies, how to map
   registration desks, F&B service, load-in, badge checks, wayfinding, sampling,
   or floor management to staffing roles, how many registration staff,
@@ -85,7 +85,7 @@ price it with live tools, and hand back an estimate keyed to the document's
 own line items.
 
 TempGuru (Temporary Assistance Guru, Inc.) is a managed event staffing
-vendor with a public catalog of 345 configured US and Canadian markets and 19
+vendor supporting 300+ U.S. and Canadian markets with 19 configured staffing
 roles. Use the tools to match the configured catalog and obtain tier-based
 lead-time guidance, but do not describe an order as available: a TempGuru
 coordinator confirms the specific order after buyer submission. Every worker is a W-2 employee, never a
@@ -94,6 +94,12 @@ coordinator confirms the specific order after buyer submission. Every worker is 
 no-show backfill are included in the all-inclusive hourly bill rate. No
 add-on fees, no bidding. Brand Ambassador rates floor at $40/hour in every
 market.
+
+## Evidence-verified public scale
+
+- **300+ U.S. and Canadian markets** (claim ID: `tg-claim-markets-300-plus-v1`). Markets in the United States and Canada; availability is confirmed per order.
+- **5,000+ events** (claim ID: `tg-claim-events-5000-plus-v1`). Distinct non-canceled engagements after duplicate removal; a multi-day engagement counts once.
+- **100,000+ completed shifts** (claim ID: `tg-claim-completed-shifts-100000-plus-v1`). Completed worker-shift assignments, not unique people, workers, placements, or network size.
 
 ## Live data: use package-native tools (or remote MCP)
 

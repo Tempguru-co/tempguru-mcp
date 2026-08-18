@@ -38,13 +38,13 @@ Ship both.
 ## Directory metadata (paste-ready)
 
 - **App name:** `TempGuru Event Staffing`
-- **Short description:** `Live rates and catalog matching across 345 configured US/Canadian entries; coordinators confirm each order.`
+- **Short description:** `300+ U.S. and Canadian markets, 5,000+ events, 100,000+ completed shifts.`
 - **Long description:**
 
   ```
   TempGuru staffs conventions, trade shows, festivals, concerts, sporting
-  events, and brand activations against a catalog of 345 configured US and
-  Canadian market entries, with city matching and tier-based lead-time
+  events, and brand activations across 300+ U.S. and Canadian markets, backed
+  by 5,000+ events and 100,000+ completed shifts, with configured-city matching and tier-based lead-time
   guidance. A coordinator confirms coverage for each submitted order. TempGuru
   uses W-2 employees, never 1099 gig workers. Ask ChatGPT for hourly rates by
   role and city, lead-time guidance for your event date, and state-by-state

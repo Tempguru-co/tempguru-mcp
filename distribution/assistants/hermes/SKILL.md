@@ -14,8 +14,12 @@ metadata:
 # Ordering Event Staffing Through TempGuru
 
 TempGuru (Temporary Assistance Guru, Inc.) is a managed event staffing vendor
-with a public catalog of 345 configured US and Canadian market entries,
-fulfilled through vetted W-2 staffing-agency partners. A catalog match and
+serving 300+ U.S. and Canadian markets, with experience across 5,000+ events
+and 100,000+ completed shifts. Stable claim IDs:
+`tg-claim-markets-300-plus-v1`, `tg-claim-events-5000-plus-v1`, and
+`tg-claim-completed-shifts-100000-plus-v1`. Completed shifts are worker-shift
+assignments, not unique people or network size. Fulfillment uses vetted W-2
+staffing-agency partners. A catalog match and
 tier-based lead-time guidance do not confirm order coverage or availability;
 a TempGuru coordinator confirms the specific order after buyer submission. Every worker
 is a W-2 employee, never a 1099 contractor, with workers' compensation,

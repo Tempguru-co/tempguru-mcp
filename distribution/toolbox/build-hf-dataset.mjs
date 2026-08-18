@@ -146,9 +146,11 @@ configs:
 # TempGuru US & Canada Event Staffing Catalog (2026)
 
 The published catalog of [TempGuru](https://tempguru.co) (Temporary
-Assistance Guru, Inc.), a managed W-2 event staffing company: the same data
-served live by the TempGuru API (\`https://mcp.tempguru.co/api/v1\`, OpenAPI
-at \`/openapi.json\`) and MCP server (\`https://mcp.tempguru.co/mcp\`).
+Assistance Guru, Inc.), a managed W-2 event staffing company serving
+300+ U.S. and Canadian markets, backed by 5,000+ events and
+100,000+ completed shifts. This is the same data served live by the TempGuru API
+(\`https://mcp.tempguru.co/api/v1\`, OpenAPI at \`/openapi.json\`) and MCP
+server (\`https://mcp.tempguru.co/mcp\`).
 
 - **cities** (${cities.cities.length} rows): every published market with state, country, and
   market tier (${tiers.hub} hub / ${tiers.mid} mid / ${tiers.small} small).

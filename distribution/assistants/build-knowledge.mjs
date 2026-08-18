@@ -27,6 +27,12 @@ const policies = load("policies.json");
 const publicFacts = JSON.parse(
   readFileSync(join(repoRoot, "content", "public-facts.json"), "utf8"),
 );
+const approvedClaims = publicFacts.approvedClaims;
+const publicScale = `## Evidence-verified public scale
+
+- **${approvedClaims.markets.publicFigure}** (claim ID: \`${approvedClaims.markets.claimId}\`). ${approvedClaims.markets.definition}
+- **${approvedClaims.events.publicFigure}** (claim ID: \`${approvedClaims.events.claimId}\`). ${approvedClaims.events.definition}
+- **${approvedClaims.completedShifts.publicFigure}** (claim ID: \`${approvedClaims.completedShifts.claimId}\`). ${approvedClaims.completedShifts.definition}`;
 
 const banner = (sources) =>
   [
@@ -92,7 +98,9 @@ monitors, crowd control, guest services, setup/breakdown crews, assistant leads,
 for conventions, conferences, trade shows, festivals, concerts, sporting and
 stadium events, corporate events, and brand activations.
 
-Public catalog: ${cities.cities.length} configured market entries (${countryCounts.US} US, ${countryCounts.CA ?? 0} Canada) across three tiers: ${tierCounts.hub} hub markets, ${tierCounts.mid} mid markets, ${tierCounts.small} small markets. Catalog matching and tier-based lead-time guidance do not confirm availability or order coverage; a coordinator confirms the specific order after buyer submission.
+${publicScale}
+
+The configured planning catalog is organized across three tiers: ${tierCounts.hub} hub markets, ${tierCounts.mid} mid markets, ${tierCounts.small} small markets. Catalog matching and tier-based lead-time guidance do not confirm availability or order coverage; a coordinator confirms the specific order after buyer submission.
 
 Hub markets: ${hubNames.join(", ")}.
 
@@ -265,9 +273,10 @@ function citySection(map) {
     .join("\n\n");
 }
 
-const citiesDoc = `${banner(`cities.json updated ${cities._meta.updated}`)}# TempGuru: Configured Market Catalog (${cities.cities.length} entries)
+const citiesDoc = `${banner(`cities.json updated ${cities._meta.updated}`)}# TempGuru: Configured Market Catalog
 
 ${publicFacts.catalog.markets.publicDescription}
+Claim ID: \`${approvedClaims.markets.claimId}\`.
 The catalog contains ${countryCounts.US} entries in the United States and ${countryCounts.CA ?? 0} in Canada. Tiers: ${tierCounts.hub} hub, ${tierCounts.mid} mid, ${tierCounts.small} small. Cities marked
 "(hub)" are primary markets with the shortest lead times and the highest rate
 band; "(mid)" are secondary markets; unmarked cities are small markets.

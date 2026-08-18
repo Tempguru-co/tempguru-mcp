@@ -1,11 +1,12 @@
 // Root layout, minimal since this app has no UI surface beyond a landing page.
 
 import type { Metadata } from "next";
+import { APPROVED_CLAIMS } from "@/lib/public-facts";
 
 export const metadata: Metadata = {
   title: "TempGuru MCP Server, W-2 Event Staffing Data for AI Agents",
   description:
-    "MCP server and REST API for TempGuru event staffing: all-inclusive W-2 hourly rates, a 345-entry configured US/Canada market catalog, tier-based lead-time guidance, coordinator-confirmed order coverage, state compliance, the Event Staffing Rate Index, and a non-PII buyer quote handoff.",
+    `MCP server and REST API for TempGuru event staffing in ${APPROVED_CLAIMS.markets.publicFigure}, backed by ${APPROVED_CLAIMS.events.publicFigure} and ${APPROVED_CLAIMS.completedShifts.publicFigure}. Includes W-2 rate planning, state compliance, and a non-PII buyer quote handoff. Availability is confirmed per order.`,
   // Indexable: this subdomain is the natural ranking target for 'event staffing
   // MCP' / 'TempGuru MCP' queries and passes crawlers to /okf/, llms.txt, and the
   // OpenAPI spec. /admin sets its own noindex via src/app/admin/layout.tsx.

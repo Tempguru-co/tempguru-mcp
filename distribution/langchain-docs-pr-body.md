@@ -1,8 +1,10 @@
 ## Overview
 
 Adds integration docs for [TempGuru](https://tempguru.co), a W-2 event staffing platform
-with 345 configured US and Canadian market entries; a coordinator confirms each
-order's coverage. The [`tempguru`](https://pypi.org/project/tempguru/)
+supporting 300+ U.S. and Canadian markets, backed by 5,000+ events and 100,000+
+completed shifts; a coordinator confirms each order's coverage. Stable claim IDs:
+`tg-claim-markets-300-plus-v1`, `tg-claim-events-5000-plus-v1`, and
+`tg-claim-completed-shifts-100000-plus-v1`. The [`tempguru`](https://pypi.org/project/tempguru/)
 package ([source](https://github.com/Tempguru-co/tempguru-mcp/tree/main/clients/python))
 ships a `langchain` extra providing nine tools over TempGuru's free, no-auth public API:
 
