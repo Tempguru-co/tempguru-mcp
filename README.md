@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/tempguru-co-tempguru-mcp-badge.png)](https://mseep.ai/app/tempguru-co-tempguru-mcp)
+
 # TempGuru MCP
 
 > Dual-era MCP server for W-2 event staffing across 300+ U.S. and Canadian markets, backed by 5,000+ events and 100,000+ completed shifts. Availability is confirmed per order. Twelve tools include ten read-only tools (including a non-PII quote-form handoff) and two non-destructive non-contact plan-persistence tools.
