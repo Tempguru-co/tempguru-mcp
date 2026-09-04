@@ -139,7 +139,7 @@ export default function (pi: any) {
     name: "tempguru_get_role_pricing",
     label: "TempGuru: Pricing",
     description:
-      "All-inclusive hourly W-2 bill-rate range for one role in one city (worker pay, payroll taxes, workers' comp, general liability, coordinator support). Present results as planning estimates, never binding quotes. Brand Ambassadors floor at $40/hour everywhere.",
+      "All-inclusive hourly W-2 bill-rate range for one role in one city (worker pay, payroll taxes, workers' comp, general liability, TempGuru coordination). Present results as planning estimates, never binding quotes. Brand Ambassadors floor at $40/hour everywhere.",
     parameters: Type.Object({
       role: Type.String(),
       city: Type.String(),

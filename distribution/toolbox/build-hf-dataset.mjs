@@ -62,7 +62,7 @@ for (const r of roles.roles) {
       hourly_rate_low_usd: p[tier].low,
       hourly_rate_high_usd: p[tier].high,
       rate_basis:
-        "All-inclusive W-2 bill rate: worker pay + employer payroll taxes (FICA/FUTA/SUTA) + workers' compensation + general liability + coordinator support. Planning estimate, not a binding quote.",
+        "All-inclusive W-2 bill rate: worker pay + employer payroll taxes (FICA/FUTA/SUTA) + workers' compensation + general liability + TempGuru coordination. Planning estimate, not a binding quote.",
     });
   }
 }

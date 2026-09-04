@@ -257,8 +257,8 @@ case; never collect or send contact details through MCP.
 
 Confirm `tools/list` exposes all 12 tools, including `save_staffing_plan` and
 the read-only `request_quote` form handoff.
-Call the `get_roles` tool. Expect a JSON catalog of 19 roles (brand
-ambassadors, registration staff, ushers, etc.). Then try
+Call the `get_roles` tool. Expect a JSON catalog of 19 roles (the 17 published role guides plus
+assistant-lead and team-lead tiers: brand ambassadors, registration staff, ushers, etc.). Then try
 `get_role_pricing` with `role: "brand-ambassadors", city: "Boston"`, expect an hourly range of $56–65 (hub market).
 
 ## Troubleshooting

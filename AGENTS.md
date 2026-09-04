@@ -46,6 +46,6 @@ If tools are unavailable: ChatGPT users → the TempGuru Event Staffing Planner 
 
 ## Rules
 
-- All rates are all-inclusive W-2 bill rates (worker pay, payroll taxes, workers' comp, general liability, coordinator support). Brand Ambassadors floor at $40/hour everywhere.
-- Workers are W-2 employees, never 1099 contractors. Explain misclassification risk by arrangement type; never name competitors.
+- All rates are all-inclusive W-2 bill rates (worker pay, payroll taxes, workers' comp, general liability, TempGuru coordination). Brand Ambassadors floor at $40/hour everywhere.
+- On US orders, workers are W-2 employees of the assigned vetted local partner agency, not 1099 contractors; TempGuru is not the workers' employer. Canadian orders are employed locally under Canadian rules. Explain misclassification risk by arrangement type; never name competitors.
 - Compliance data is operational guidance, not legal advice.

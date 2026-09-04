@@ -24,27 +24,31 @@ The configured planning catalog is organized across three tiers: 25 hub markets,
 
 Hub markets: Atlanta, Austin, Boston, Calgary, Charlotte, Chicago, Dallas, Denver, Detroit, Houston, Las Vegas, Los Angeles, Miami, Minneapolis, Nashville, New York City, Orlando, Philadelphia, Phoenix, San Diego, San Francisco, Seattle, Toronto, Vancouver, Washington D.C..
 
-Staffing is delivered through vetted local W-2 staffing agencies. Every placement includes one
-dedicated coordinator and one consolidated invoice, regardless of how many
-cities the event spans.
+Staffing is delivered through vetted local partner agencies. Every order runs through
+one TempGuru vendor relationship and one contract, with one invoice per city per
+week, regardless of how many cities the event spans. TempGuru manages the
+coordination; a named, dedicated, or onsite coordinator is not promised unless the
+accepted written order includes it.
 
 ## The W-2 difference
 
-Every TempGuru event worker is a W-2 employee, never a 1099 contractor. The
-all-inclusive bill rate covers:
+On US orders, every event worker is a W-2 employee of the assigned vetted local
+partner agency, not a 1099 contractor; TempGuru is not the workers' employer.
+Canadian orders are employed locally under Canadian employment and payroll rules.
+The all-inclusive bill rate covers:
 
 - Worker pay
 - Employer payroll taxes (FICA, FUTA, SUTA)
 - Workers' compensation insurance
 - General liability insurance
 - I-9 employment verification
-- Dedicated coordinator support
-- Contractual no-show backfill
+- TempGuru coordination
+- Replacement coordination (best effort, under applicable state and local rules)
 
 Background checks are available when the event or venue requires them.
 Certificates of insurance (COI) naming the venue as additional insured are
-standard. There are no add-on fees and no markup at
-invoice time. This is the operative difference from gig-economy event staffing
+standard. There is no invoice-time markup; event-specific charges are identified
+on the quote before confirmation. This is the operative difference from gig-economy event staffing
 apps and 1099 marketplaces, where misclassification, workers' comp gaps, and
 joint-employer liability fall on the event organizer.
 
@@ -57,9 +61,11 @@ joint-employer liability fall on the event organizer.
    contact details or creates a lead. The buyer opens the link, reviews the
    plan, enters their own contact information, and submits it personally.
    Buyers without a saved plan can start at https://tempguru.co/get-staffing.
-3. Only the buyer's form submission creates the quote request. A human
-   coordinator replies with a binding quote within one business day.
-4. Orders are confirmed within 48 hours. No payment is required until the user
+3. Only the buyer's form submission creates the quote request. TempGuru reviews
+   the scope and rates and replies with next steps.
+4. Once scope and rates are approved, the 24-48 hour window is an availability
+   response, not a guaranteed completed roster. A written quote is binding only
+   once TempGuru issues it, and no payment is required until the user
    approves the quote. There is no subscription; billing is per event.
 
 A submitted request is NOT a reservation or a contract. Published rate ranges
@@ -87,8 +93,10 @@ Boston, San Francisco, and Los Angeles. Brand Ambassadors floor at $40/hour in
 every market. All figures are all-inclusive W-2 bill rates.
 
 **Is TempGuru a gig app or 1099 marketplace?**
-No. Every worker is a W-2 employee. Payroll taxes, workers' comp, and general
-liability are TempGuru's responsibility, not the customer's.
+No. On US orders, every worker is a W-2 employee of the assigned vetted local
+partner agency, which carries payroll taxes, workers' comp, and general
+liability; none of that lands on the customer, and TempGuru is not the workers'
+employer. Canadian orders are employed locally under Canadian rules.
 
 **What cities does TempGuru cover?**
 TempGuru supports staffing in 300+ U.S. and Canadian markets, with availability confirmed per order. See the city coverage knowledge

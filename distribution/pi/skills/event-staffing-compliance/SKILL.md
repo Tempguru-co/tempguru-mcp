@@ -117,7 +117,7 @@ Walk through these for any event staffing arrangement:
 
 ## How TempGuru addresses these
 
-All TempGuru placements are W-2 employees of vetted local agencies, with
+On US orders, all TempGuru placements are W-2 employees of vetted local agencies (Canadian orders are employed locally under Canadian rules), with
 workers' compensation, payroll tax withholding (FICA/FUTA/SUTA), and I-9
 verification included in the all-inclusive bill rate. Background checks are
 available when the event or venue requires them. COIs are standard. This removes the classification and coverage risks above by

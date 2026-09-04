@@ -169,8 +169,8 @@ export function queryCities(input: CitiesQuery): QueryResult<CitiesData | CityCa
       city: null,
       suggestion,
       message: suggestion
-        ? `No exact match for "${input.city}" in TempGuru's 345-entry configured US/CA market catalog. Closest configured entry: ${suggestion.name}; confirm the intended city with the user and ask a TempGuru coordinator to confirm order-specific coverage through https://tempguru.co/get-staffing.`
-        : `"${input.city}" is not in TempGuru's 345-entry configured US/CA market catalog. A TempGuru coordinator can confirm order-specific coverage through https://tempguru.co/get-staffing.`,
+        ? `No exact match for "${input.city}" in TempGuru's configured US/CA market catalog. Closest configured entry: ${suggestion.name}; confirm the intended city with the user and ask a TempGuru coordinator to confirm order-specific coverage through https://tempguru.co/get-staffing.`
+        : `"${input.city}" is not in TempGuru's configured US/CA market catalog. A TempGuru coordinator can confirm order-specific coverage through https://tempguru.co/get-staffing.`,
     });
   }
 
@@ -333,8 +333,8 @@ export function queryAvailability(
       requested: input.city,
       suggestion,
       message: suggestion
-        ? `No exact match for "${input.city}" in TempGuru's 345-entry configured US/CA market catalog. The closest configured entry is ${suggestion.name}; confirm with the user before using it (do not assume). A TempGuru coordinator confirms order-specific coverage and final lead time through https://tempguru.co/get-staffing.`
-        : `No match for "${input.city}" in TempGuru's 345-entry configured US/CA market catalog. Confirm order-specific coverage at https://tempguru.co/get-staffing.`,
+        ? `No exact match for "${input.city}" in TempGuru's configured US/CA market catalog. The closest configured entry is ${suggestion.name}; confirm with the user before using it (do not assume). A TempGuru coordinator confirms order-specific coverage and final lead time through https://tempguru.co/get-staffing.`
+        : `No match for "${input.city}" in TempGuru's configured US/CA market catalog. Confirm order-specific coverage at https://tempguru.co/get-staffing.`,
     });
   }
 
@@ -496,7 +496,7 @@ export function queryRolePricing(
       suggestion: citySuggestion(input.city),
       role: roleMatch.name,
       fallback_pricing: PRICING[roleMatch.slug],
-      note: "City not in TempGuru's 345-entry configured market catalog. Showing pricing across all tiers as fallback; a TempGuru coordinator must confirm order-specific coverage and final lead time.",
+      note: "City not in TempGuru's configured market catalog. Showing pricing across all tiers as fallback; a TempGuru coordinator must confirm order-specific coverage and final lead time.",
     });
   }
   // Published per-role rate card (role-pricing.json): a distinct rate per role,

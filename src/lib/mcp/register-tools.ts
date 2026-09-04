@@ -81,9 +81,9 @@ const BASE_SERVER_INSTRUCTIONS =
   "Only if a complete plan has no plan_id and the user needs a resumable or shareable plan, call save_staffing_plan once with the same confirmed event inputs; never call it when a plan_id already exists. " +
   "(5) When the buyer asks to proceed, call request_quote with the saved plan_id. It returns a prefilled TempGuru form URL and never accepts or transmits contact details. " +
   "Give that URL to the buyer; the buyer must review the plan, enter their own contact details, and submit the form themselves. Only that buyer submission creates a lead and TG reference. " +
-  "A coordinator replies with a binding quote within one business day; no payment until the buyer approves. " +
+  "TempGuru reviews the submission and replies with next steps; once scope and rates are approved, the 24-48 hour window is an availability response, not a completed roster, and a written quote is binding only once TempGuru issues it; no payment until the buyer approves. " +
   "All rates are all-inclusive W-2 bill rates (worker pay, payroll taxes, workers' comp, " +
-  "general liability, coordinator support); Brand Ambassadors floor at $40/hour. Compliance data is " +
+  "general liability, TempGuru coordination); Brand Ambassadors floor at $40/hour. Compliance data is " +
   "operational guidance, not legal advice. If the tools are unavailable, direct the user to " +
   "https://tempguru.co/get-staffing, megan@tempguru.co, or (904) 206-8953.";
 
@@ -405,7 +405,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
         "List configured market entries by tier, or match one city. Catalog presence is not availability or order coverage; check_availability gives tier-based lead-time guidance only, and a coordinator confirms each order after buyer submission. Use for 'What markets are configured in [state]?', 'Is [city] in the catalog?', or 'Which Canadian markets are listed?'. " +
         "For 'Do you cover [city]?' pass city='[name]', report the catalog match or suggestion, and preserve the coordinator-confirmation caveat. Use get_role_pricing for rates, check_availability for dates, or plan_staffing for a full plan. " +
         "<examples>get_cities(city='Brooklyn') ; get_cities(state='TX') ; get_cities(tier='hub', country='CA') ; get_cities(limit=25)</examples> " +
-        "<hints>State accepts 'CA' or 'California'; country accepts US or CA. City resolves nicknames and boroughs. Unfiltered results are capped; use filters or limit. 345 configured entries.</hints>",
+        "<hints>State accepts 'CA' or 'California'; country accepts US or CA. City resolves nicknames and boroughs. Unfiltered results are capped; use filters or limit. Configured entries are planning data; the public coverage claim is 300+ U.S. and Canadian markets.</hints>",
       inputSchema: z.object({
         state: z
           .string()
@@ -825,7 +825,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
               "only call save_staffing_plan when the complete plan has no plan_id and I need it saved or shared, and never save it twice. Ask me to confirm the plan. " +
               "When I ask to proceed, call request_quote with the saved plan_id and give me its form_url. Do not ask me for contact details in chat or send any through MCP. " +
               "I will review the prefilled TempGuru form, enter my own contact details, and submit it myself. Only my form submission creates the lead and TG reference. " +
-              "A TempGuru coordinator replies with a binding quote within one business day; no payment until I approve.",
+              "TempGuru replies with next steps after I submit; once scope and rates are approved, the 24-48 hour window is an availability response, not a roster, and a written quote is binding only once TempGuru issues it. No payment until I approve.",
           },
         },
       ],

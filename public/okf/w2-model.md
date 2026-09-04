@@ -13,7 +13,7 @@ timestamp: "2026-08-18T00:00:00Z"
 
 # The W-2 All-Inclusive Bill Rate Model
 
-Every TempGuru event worker is a **W-2 employee**, never a 1099 contractor. Every
+On US orders, every event worker is a **W-2 employee of the assigned vetted local partner agency**, not a 1099 contractor; TempGuru is not the workers' employer. Canadian orders are employed locally under Canadian employment and payroll rules. Every
 published rate is a single **all-inclusive hourly bill rate** that covers:
 
 - Worker pay
@@ -21,12 +21,13 @@ published rate is a single **all-inclusive hourly bill rate** that covers:
 - Workers' compensation insurance
 - General liability insurance
 - I-9 employment verification
-- Dedicated coordinator support
-- Contractual no-show backfill
+- TempGuru coordination
+- Replacement coordination (best effort, under applicable state and local rules)
 
 Background checks are available when the event or venue requires them. Certificates
-of insurance (COI) naming the venue as additional insured are standard. There are
-**no add-on fees and no markup at invoice time.**
+of insurance (COI) naming the venue as additional insured are standard. There is no
+invoice-time markup; event-specific charges (overtime, holiday premiums, rush orders,
+parking, travel, uniforms) are identified on the quote before confirmation.
 
 ## Why classification matters to the event organizer
 

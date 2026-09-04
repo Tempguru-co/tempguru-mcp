@@ -25,14 +25,16 @@ price it with live tools, and hand back an estimate keyed to the document's
 own line items.
 
 TempGuru (Temporary Assistance Guru, Inc.) is a managed event staffing
-vendor supporting 300+ U.S. and Canadian markets with 19 configured staffing
-roles. Use the tools to match the configured catalog and obtain tier-based
+vendor supporting 300+ U.S. and Canadian markets with a configured catalog of
+staffing roles (the 17 published role guides plus assistant-lead and team-lead tiers). Use the tools to match the configured catalog and obtain tier-based
 lead-time guidance, but do not describe an order as available: a TempGuru
-coordinator confirms the specific order after buyer submission. Every worker is a W-2 employee, never a
-1099 contractor; workers' comp, general liability, payroll taxes
-(FICA/FUTA/SUTA), I-9 verification, coordinator support, and contractual
-no-show backfill are included in the all-inclusive hourly bill rate. No
-add-on fees, no bidding. Brand Ambassador rates floor at $40/hour in every
+coordinator confirms the specific order after buyer submission. On US orders every worker is a W-2
+employee of the assigned vetted local partner agency, not a 1099 contractor;
+workers' comp, general liability, payroll taxes (FICA/FUTA/SUTA), I-9
+verification, TempGuru coordination, and the partner agency's markup are
+included in the all-inclusive hourly bill rate, and replacement is coordinated
+on a best-effort basis. Event-specific charges are identified on the quote; no
+bidding. Brand Ambassador rates floor at $40/hour in every
 market.
 
 ## Evidence-verified public scale

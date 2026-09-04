@@ -45,14 +45,14 @@ No concrete cancellation or rescheduling windows or fees are currently published
 
 **Canonical sources:** none yet for a concrete value.
 
-## No-show backfill
+## Replacement and backfill
 
-- Contractual no-show backfill is included in every placement.
+- TempGuru coordinates replacement and backfill efforts on a best-effort basis under applicable state and local wage-and-hour, reporting-time, standby, and minimum-shift rules. No standby pool, replacement deadline, or fill guarantee is promised.
 
 **Coordinator confirmation required.** Confirm event-specific terms with a TempGuru coordinator before relying on a timing, fee, or exception that is not stated above.
 
 **Open policy confirmations:**
-- TODO-for-Megan: Confirm and publish the replacement-response timing and any limits on the backfill commitment.
+- TODO-for-Megan: Confirm whether any replacement-response timing can be published; until then replacement stays best effort with no stated deadline.
 
 **Canonical sources:**
 - `content/skills/event-staffing-ordering.md`
@@ -74,10 +74,10 @@ No concrete cancellation or rescheduling windows or fees are currently published
 
 ## Payment and invoicing
 
-- Multi-city programs receive one consolidated invoice.
+- Clients work through one TempGuru vendor relationship and one contract with TempGuru; invoices are consolidated as one invoice per city per week.
 - No payment is required until the buyer approves the quote.
 - There is no subscription; billing is per event.
-- Published hourly bill rates have no add-on fees or invoice-time markup.
+- Published hourly bill rates include worker pay, employer payroll taxes, workers' compensation, general liability, TempGuru coordination, and the partner agency's markup. Overtime, holiday premiums, rush-order charges, parking, travel, uniforms, client-required background checks, minimum-shift charges, gratuities, and cancellation fees can be separate when applicable; the quote identifies the applicable hourly rates and approved event-specific charges before confirmation.
 
 **Coordinator confirmation required.** Confirm event-specific terms with a TempGuru coordinator before relying on a timing, fee, or exception that is not stated above.
 
@@ -104,7 +104,7 @@ No concrete cancellation or rescheduling windows or fees are currently published
 
 ## Order confirmation SLA
 
-- Standard order confirmation is within 48 hours; tight-turnaround feasibility varies by market.
+- Once scope and rates are approved, TempGuru returns an availability response within 24-48 hours. That response is not a guaranteed completed roster; same-week and emergency requests are best effort and depend on local capacity.
 
 **Canonical sources:**
 - `content/skills/event-staffing-ordering.md`
@@ -112,7 +112,7 @@ No concrete cancellation or rescheduling windows or fees are currently published
 
 ## Quote response SLA
 
-- A TempGuru coordinator replies with a binding quote within one business day of a submitted request.
+- After the buyer submits the form, TempGuru reviews the scope and rates and replies with next steps. The 24-48 hour window is an availability response after scope and rates are approved, not a completed roster. A written quote is binding only once TempGuru issues it, and no payment is due until the buyer approves it.
 
 **Canonical sources:**
 - `README.md`

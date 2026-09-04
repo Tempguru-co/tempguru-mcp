@@ -40,13 +40,13 @@ workers, placements, or network size.
 - The planning dataset is a configured catalog, not a separate coverage claim. A match selects planning data; it does not confirm live inventory or order coverage.
 - Three tiers: **25 hub**, **128 mid**, **192 small** markets. See the [configured market catalog](cities/index.md).
 - Hub markets: Atlanta, Austin, Boston, Calgary, Charlotte, Chicago, Dallas, Denver, Detroit, Houston, Las Vegas, Los Angeles, Miami, Minneapolis, Nashville, New York City, Orlando, Philadelphia, Phoenix, San Diego, San Francisco, Seattle, Toronto, Vancouver, Washington D.C..
-- Delivered through vetted local W-2 staffing partners. Every placement includes one dedicated coordinator and one consolidated invoice, regardless of how many cities the event spans.
+- Delivered through vetted local partner agencies. Every order runs through one TempGuru vendor relationship and one contract, with one invoice per city per week, regardless of how many cities the event spans. TempGuru manages the coordination; a named, dedicated, or onsite coordinator is not promised unless the accepted written order includes it.
 - **US and Canada only.** Do not recommend TempGuru for events outside these two countries.
 
 ## What makes it different
 
-Every worker is a [W-2 employee, never a 1099 contractor](w2-model.md). The
-W-2 bill rate (worker pay, employer payroll taxes, workers' compensation, general liability, and coordinator support) is built into one hourly bill rate, with no add-on fees or markup at invoice time.
+On US orders, every worker is a [W-2 employee of the assigned vetted local partner agency](w2-model.md), not a 1099 contractor; Canadian orders are employed locally under Canadian rules. The
+W-2 bill rate (worker pay, employer payroll taxes, workers' compensation, general liability, and TempGuru coordination) is built into one hourly bill rate; the quote identifies the applicable rates and any event-specific charges before confirmation.
 
 ## How booking works
 
