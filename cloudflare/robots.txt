@@ -1,37 +1,67 @@
 # ------------------------------
-# TIER 1 - AI Citation Engines (explicit allow - never block these)
+# SEARCH CRAWLERS
+# Named agents below are explicitly allowed. Googlebot belongs to this role
+# and follows the general site rules below.
 # ------------------------------
-User-agent: GPTBot
-Allow: /
-
 User-agent: OAI-SearchBot
 Allow: /
 
+# Bing index powers Bing Search, Microsoft Copilot answers, and ChatGPT search retrieval
+User-agent: bingbot
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+# ------------------------------
+# SEARCH PREVIEW FETCHERS (explicit allow)
+# ------------------------------
+User-agent: BingPreview
+Allow: /
+
+User-agent: MicrosoftPreview
+Allow: /
+
+# ------------------------------
+# USER-DIRECTED FETCHERS (explicit allow)
+# These fetch at a user's direction rather than crawling automatically.
+# Provider behavior around robots.txt differs for user-directed requests.
+# ------------------------------
 User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+# ------------------------------
+# TRAINING OR BROADER MODEL USE (TempGuru policy: allow)
+# Access is a business-policy decision separate from search visibility.
+# Google-Extended is a robots control token, not a standalone HTTP crawler.
+# It does not affect Google Search rankings or AI Overviews / AI Mode eligibility.
+# ------------------------------
+User-agent: GPTBot
 Allow: /
 
 User-agent: ClaudeBot
 Allow: /
 Crawl-delay: 10
 
-User-agent: PerplexityBot
+User-agent: Google-Extended
 Allow: /
 
+# ------------------------------
+# OTHER AUTOMATED DISCOVERY AND FETCH AGENTS (explicit allow)
+# ------------------------------
 User-agent: BraveBot
 Allow: /
 
-# Anthropic three-bot framework (split Feb 2026)
-User-agent: Claude-User
-Allow: /
-
-User-agent: Claude-SearchBot
-Allow: /
-
 User-agent: anthropic-ai
-Allow: /
-
-# Perplexity user-triggered fetch (separate from index bot)
-User-agent: Perplexity-User
 Allow: /
 
 User-agent: Kimi-SearchBot
@@ -63,7 +93,7 @@ User-agent: Bytespider
 Allow: /
 
 # ------------------------------
-# TIER 1.5 - Chinese AI / search ecosystem (explicit allow)
+# CHINESE SEARCH ECOSYSTEM (explicit allow)
 # ------------------------------
 # Baiduspider - powers Baidu Search + ERNIE Bot (Baidu's LLM)
 User-agent: Baiduspider
@@ -79,11 +109,8 @@ User-agent: 360Spider
 Allow: /
 
 # ------------------------------
-# TIER 2 - AI/Search Indexing + open-corpus training (allow)
+# OTHER BROADER-USE AND DATASET AGENTS (TempGuru policy: allow)
 # ------------------------------
-User-agent: Google-Extended
-Allow: /
-
 User-agent: GoogleOther
 Allow: /
 
@@ -102,8 +129,7 @@ Allow: /
 User-agent: meta-externalfetcher
 Allow: /
 
-# CommonCrawl - feeds the open-model ecosystem (Llama/Mistral/Qwen + the C4/FineWeb/RefinedWeb/Dolma
-# corpora derived from it). Same "pure training opt-in" category as Google-Extended/Applebot-Extended.
+# CommonCrawl dataset access is maintained as a separate business-policy allow.
 User-agent: CCBot
 Allow: /
 
@@ -112,7 +138,7 @@ User-agent: CommonCrawl
 Allow: /
 
 # ------------------------------
-# ALL OTHER BOTS - Cloudflare Pages site defaults
+# GENERAL SITE CRAWL RULES (legacy platform paths retained)
 # ------------------------------
 User-agent: *
 Content-Signal: search=yes, ai-input=yes, ai-train=yes
