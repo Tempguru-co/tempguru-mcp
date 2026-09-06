@@ -1,3 +1,5 @@
+# Named groups do not inherit the general rules below, so each one repeats
+# the one path that must stay closed: /api/ (form and telemetry endpoints).
 # ------------------------------
 # SEARCH CRAWLERS
 # Named agents below are explicitly allowed. Googlebot belongs to this role
@@ -5,25 +7,31 @@
 # ------------------------------
 User-agent: OAI-SearchBot
 Allow: /
+Disallow: /api/
 
 # Bing index powers Bing Search, Microsoft Copilot answers, and ChatGPT search retrieval
 User-agent: bingbot
 Allow: /
+Disallow: /api/
 
 User-agent: Claude-SearchBot
 Allow: /
+Disallow: /api/
 
 User-agent: PerplexityBot
 Allow: /
+Disallow: /api/
 
 # ------------------------------
 # SEARCH PREVIEW FETCHERS (explicit allow)
 # ------------------------------
 User-agent: BingPreview
 Allow: /
+Disallow: /api/
 
 User-agent: MicrosoftPreview
 Allow: /
+Disallow: /api/
 
 # ------------------------------
 # USER-DIRECTED FETCHERS (explicit allow)
@@ -32,12 +40,15 @@ Allow: /
 # ------------------------------
 User-agent: ChatGPT-User
 Allow: /
+Disallow: /api/
 
 User-agent: Claude-User
 Allow: /
+Disallow: /api/
 
 User-agent: Perplexity-User
 Allow: /
+Disallow: /api/
 
 # ------------------------------
 # TRAINING OR BROADER MODEL USE (TempGuru policy: allow)
@@ -47,50 +58,64 @@ Allow: /
 # ------------------------------
 User-agent: GPTBot
 Allow: /
+Disallow: /api/
 
 User-agent: ClaudeBot
 Allow: /
+Disallow: /api/
 Crawl-delay: 10
 
 User-agent: Google-Extended
 Allow: /
+Disallow: /api/
 
 # ------------------------------
 # OTHER AUTOMATED DISCOVERY AND FETCH AGENTS (explicit allow)
 # ------------------------------
 User-agent: BraveBot
 Allow: /
+Disallow: /api/
 
 User-agent: anthropic-ai
 Allow: /
+Disallow: /api/
 
 User-agent: Kimi-SearchBot
 Allow: /
+Disallow: /api/
 
 User-agent: Kimi-User
 Allow: /
+Disallow: /api/
 
 User-agent: MistralAI-Index
 Allow: /
+Disallow: /api/
 
 User-agent: MistralAI-User
 Allow: /
+Disallow: /api/
 
 User-agent: Qwantbot
 Allow: /
+Disallow: /api/
 
 User-agent: MojeekBot
 Allow: /
+Disallow: /api/
 
 User-agent: SeznamBot
 Allow: /
+Disallow: /api/
 
 User-agent: YandexBot
 Allow: /
+Disallow: /api/
 
 # Bytespider (ByteDance/TikTok)
 User-agent: Bytespider
 Allow: /
+Disallow: /api/
 
 # ------------------------------
 # CHINESE SEARCH ECOSYSTEM (explicit allow)
@@ -98,70 +123,64 @@ Allow: /
 # Baiduspider - powers Baidu Search + ERNIE Bot (Baidu's LLM)
 User-agent: Baiduspider
 Allow: /
+Disallow: /api/
 # YisouSpider - Shenma/UC/Quark (Alibaba ecosystem) - relevant for Qwen / DashScope discoverability
 User-agent: YisouSpider
 Allow: /
+Disallow: /api/
 # Sogou web spider - Tencent ecosystem (powers Yuanbao)
 User-agent: Sogou web spider
 Allow: /
+Disallow: /api/
 # 360Spider - Qihoo 360 Search
 User-agent: 360Spider
 Allow: /
+Disallow: /api/
 
 # ------------------------------
 # OTHER BROADER-USE AND DATASET AGENTS (TempGuru policy: allow)
 # ------------------------------
 User-agent: GoogleOther
 Allow: /
+Disallow: /api/
 
 User-agent: Applebot-Extended
 Allow: /
+Disallow: /api/
 
 User-agent: Amazonbot
 Allow: /
+Disallow: /api/
 
 User-agent: FacebookBot
 Allow: /
+Disallow: /api/
 
 User-agent: meta-externalagent
 Allow: /
+Disallow: /api/
 
 User-agent: meta-externalfetcher
 Allow: /
+Disallow: /api/
 
 # CommonCrawl dataset access is maintained as a separate business-policy allow.
 User-agent: CCBot
 Allow: /
+Disallow: /api/
 
 # Inert alias (real UA is CCBot/2.0) - kept to document intent.
 User-agent: CommonCrawl
 Allow: /
+Disallow: /api/
 
 # ------------------------------
-# GENERAL SITE CRAWL RULES (legacy platform paths retained)
+# GENERAL SITE CRAWL RULES
+# Googlebot and every unnamed agent follow this group.
 # ------------------------------
 User-agent: *
 Content-Signal: search=yes, ai-input=yes, ai-train=yes
-Disallow: /config
-Disallow: /search
-Disallow: /account$
-Disallow: /account/
-Disallow: /commerce/digital-download/
 Disallow: /api/
-Allow: /api/ui-extensions/
-Disallow: /static/
-Disallow: /*?format=json
-Disallow: /*&format=json
-Disallow: /*?format=page-context
-Disallow: /*&format=page-context
-Disallow: /*?format=main-content
-Disallow: /*&format=main-content
-Disallow: /*?format=json-pretty
-Disallow: /*&format=json-pretty
-Disallow: /*?format=ical
-Disallow: /*&format=ical
-Disallow: /*?reversePaginate=*
-Disallow: /*&reversePaginate=*
 
 # ------------------------------
 Sitemap: https://tempguru.co/sitemap.xml
