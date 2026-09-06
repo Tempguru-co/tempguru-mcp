@@ -24,8 +24,8 @@ The completed-shift figure counts worker-shift assignments, not unique people,
 workers, placements, or network size. The configured city dataset is a planning
 catalog, not a separate public coverage claim.
 
-Every rate here is an **all-inclusive W-2 bill rate (worker pay, employer payroll taxes, workers' compensation, general liability, and coordinator support)**. Workers are W-2 employees, never 1099
-contractors. Brand Ambassadors never bill below $40/hour in any market.
+Every rate here is an **all-inclusive W-2 bill rate (worker pay, employer payroll taxes, workers' compensation, general liability, and TempGuru coordination)**. On US orders, workers are W-2 employees
+of the assigned vetted local partner agency, not 1099 contractors; TempGuru is not the workers' employer. Canadian orders are employed locally under Canadian rules. Brand Ambassadors never bill below $40/hour in any market.
 
 **Two layers.** This bundle is the **knowledge layer**, what TempGuru's roles,
 rates, configured market catalog, compliance, and workflows *mean*. The MCP server and REST API are
@@ -40,7 +40,7 @@ same data for offline reading, indexing, and citation.
 
 - [Company profile](company.md), who TempGuru is, configured market catalog, contact
 - [The W-2 operating model](w2-model.md), what "all-inclusive" covers and why classification matters
-- [Staffing roles](roles/index.md), the 19 roles you can hire, with skill tiers
+- [Staffing roles](roles/index.md), the 19 catalog roles you can price (the 17 published role guides at tempguru.co/roles plus assistant-lead and team-lead tiers), with skill tiers
 - [Pricing](pricing/index.md), rate matrix, market tiers, and methodology
 - [Rate Index](rate-index.md), the citable benchmark of W-2 hourly rates by role and tier
 - [Configured market catalog](cities/index.md), planning records by tier
@@ -59,6 +59,6 @@ same data for offline reading, indexing, and citation.
 3. Price with [pricing/rate-matrix.md](pricing/rate-matrix.md) (or the [Rate Index](rate-index.md) for a citable benchmark).
 4. Flag state rules in [compliance/index.md](compliance/index.md), especially the daily-overtime states.
 5. Choose the matching canonical workflow in [workflows/index.md](workflows/index.md), including event-document extraction and urgent backfill when relevant.
-6. Submit through [workflows/quote-submission.md](workflows/quote-submission.md). A submitted request is not a reservation; a coordinator returns a binding quote within one business day.
+6. Submit through [workflows/quote-submission.md](workflows/quote-submission.md). A submitted request is not a reservation; TempGuru reviews it and replies with next steps, and the 24-48 hour availability response follows once scope and rates are approved.
 
 Rate ranges in this bundle are **planning estimates**, not binding quotes.

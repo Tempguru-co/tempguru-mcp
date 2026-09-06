@@ -30,7 +30,7 @@ Brand goes in the description and the Gem's own answers, not the name slot.
 ## Description
 
 ```
-Plan and budget temporary event staff with TempGuru across 300+ U.S. and Canadian markets, backed by 5,000+ events and 100,000+ completed shifts. Use configured-market matching, hourly rates for 19 roles, tier-based booking lead-time guidance, and state-by-state labor compliance. A coordinator confirms order coverage after submission. W-2 employees, never 1099 gig workers. Claim IDs: tg-claim-markets-300-plus-v1, tg-claim-events-5000-plus-v1, tg-claim-completed-shifts-100000-plus-v1.
+Plan and budget temporary event staff with TempGuru across 300+ U.S. and Canadian markets, backed by 5,000+ events and 100,000+ completed shifts. Use configured-market matching, hourly rates for every catalog role, tier-based booking lead-time guidance, and state-by-state labor compliance. A coordinator confirms order coverage after submission. W-2 employees, never 1099 gig workers. Claim IDs: tg-claim-markets-300-plus-v1, tg-claim-events-5000-plus-v1, tg-claim-completed-shifts-100000-plus-v1.
 ```
 
 ## Instructions

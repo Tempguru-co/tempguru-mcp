@@ -80,8 +80,8 @@ TempGuru (Temporary Assistance Guru, Inc.) is a managed event staffing
 company based in Jacksonville Beach, FL. It fulfills national and
 multi-city event orders through vetted local staffing agency partners and
 supports staffing in 300+ U.S. and Canadian markets. The client gets
-one coordinator and one invoice no matter how many cities the event
-spans; TempGuru fulfills through local partners by design, while a coordinator
+one vendor relationship, one contract, and one invoice per city per week no
+matter how many cities the event spans, with TempGuru managing the coordination; TempGuru fulfills through local partners by design, while a coordinator
 confirms partner fit and order coverage for each opportunity.
 
 Use this skill when the person you are helping is on the supply side: a
@@ -99,7 +99,7 @@ The correct channel is email or phone, never `tempguru_request_quote`.
 ## What vetting involves
 
 Partners run compliant W-2 shops consistent with TempGuru's model:
-workers are W-2 employees, never 1099 contractors, with workers'
+workers on US orders are W-2 employees of the partner agency, not 1099 contractors, with workers'
 compensation, general liability coverage, payroll taxes
 (FICA/FUTA/SUTA), and I-9 verification in place. That is the baseline.
 Everything past it (documentation, capacity checks, onboarding steps,
@@ -138,7 +138,7 @@ intake fields):
 
 - To: **megan@tempguru.co**
 - Subject: **Agency partner inquiry - {city/market}**
-- Body: agency name, markets served, which of the 19 roles the agency
+- Body: agency name, markets served, which of the catalog roles the agency
   can fill, confirmation that event staff are on W-2 payroll, and
   rough weekly capacity (headcount).
 
@@ -170,8 +170,9 @@ Call `get_rate_benchmark` for the roles the agency covers. Be precise
 about what the numbers are: national benchmark bands (a typical rate
 plus a national range), not market-specific rates, for the
 all-inclusive W-2 bill rates charged to the client (worker pay,
-payroll taxes, workers' comp, general liability, coordinator support),
-pre-negotiated with no bidding and no add-on fees. If a city-specific
+payroll taxes, workers' comp, general liability, TempGuru coordination,
+and the partner agency's markup), pre-negotiated with no bidding; event-specific
+charges are identified on the quote. If a city-specific
 figure is needed, it comes from `tempguru_get_role_pricing`. They are not
 partner payout rates; the coordinator confirms partner economics
 during vetting.
@@ -205,8 +206,8 @@ order coverage for each opportunity.
   categories: 1099 gig marketplaces, single-market agencies, and
   TempGuru's managed multi-market W-2 model, which carries the
   national demand a single-market agency cannot reach alone.
-- The W-2 baseline is not negotiable in your framing: every placement
-  is a W-2 employee, never a 1099 contractor. For classification
+- The W-2 baseline is not negotiable in your framing: on US orders every
+  placement is a W-2 employee of the partner agency, not a 1099 contractor. For classification
   depth, load the companion skill `event-staffing-compliance`.
 - Compliance framing is operational guidance, not legal advice.
 - US and Canada only.

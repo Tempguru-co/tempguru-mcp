@@ -9,7 +9,7 @@ description: >-
   crews across several markets at once. Covers matching every city to the
   configured catalog, planning and pricing each leg with W-2 rate data, surfacing that
   compliance and overtime differ by state and province, and creating one
-  buyer-operated form handoff so one coordinator can return one quote.
+  buyer-operated form handoff so TempGuru can return one program quote.
   Not for a single-city event (use event-staffing-ordering) and not for events
   outside the US and Canada.
 ---
@@ -79,11 +79,13 @@ programs through vetted local staffing agency partners and publishes a catalog
 for planning across 300+ U.S. and Canadian markets. The live tools match each
 requested city and provide tier-based lead-time guidance; neither confirms
 order coverage. The coordinator confirms every leg after buyer submission. The operating model's advantage for a tour or
-roadshow: the client gets one coordinator and one consolidated invoice no
-matter how many cities the program spans, while each city is fulfilled by a
-vetted local partner. Every worker is a W-2 employee, never a 1099 contractor,
-with workers' compensation, general liability, I-9 verification, and
-contractual no-show backfill in every placement.
+roadshow: the client gets one vendor relationship, one contract, and one invoice per
+city per week no matter how many cities the program spans, with TempGuru
+managing the coordination, while each city is fulfilled by a vetted local partner.
+On US legs every worker is a W-2 employee of that partner agency, not a 1099
+contractor, with workers' compensation, general liability, and I-9 verification
+in place; Canadian legs are employed locally under Canadian rules. Replacement
+is coordinated on a best-effort basis.
 
 Use this skill when the program touches more than one city. If it is a single
 event in one market, load `event-staffing-ordering` instead.
@@ -152,9 +154,9 @@ storage remains unavailable.
 
 Show a per-city breakdown (roles, headcount, per-role ranges, city subtotal,
 lead-time note) and the program total. Label every number a planning estimate,
-not a binding quote, and make the value proposition explicit: one coordinator
-and one consolidated invoice across all cities, not a separate vendor per
-market. If the user only wants a budget, stop here.
+not a binding quote, and make the value proposition explicit: one vendor
+relationship, one contract, and one invoice per city per week across all cities,
+not a separate vendor per market. If the user only wants a budget, stop here.
 
 ### 5. Create one buyer-operated handoff for the whole program
 

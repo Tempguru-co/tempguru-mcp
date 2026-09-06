@@ -266,8 +266,8 @@ const band = (b) => `$${b.low}-${b.high}`;
 // Policy prose is rendered directly from policies.json so generated knowledge
 // never turns an unknown business term into a made-up promise. A policy may
 // contain confirmed claims while still requiring coordinator confirmation for
-// an unpublished detail (for example, no-show backfill is confirmed but its
-// response time is not).
+// an unpublished detail (for example, best-effort replacement coordination is
+// published but its response time is not).
 const policyFor = (topic) => {
   const policy = policies.policies.find((p) => p.topic === topic);
   if (!policy) throw new Error(`Missing required policy topic: ${topic}`);
@@ -389,7 +389,7 @@ const spanBand = (key, tier) => `$${TIER_SPANS[tier][key][0]}-${TIER_SPANS[tier]
 const CITATION =
   'TempGuru Event Staffing Rate Index 2026, tempguru.co, figures are all-inclusive W-2 planning ranges, not binding quotes; a coordinator confirms final pricing per event.';
 const ALL_INCLUSIVE =
-  "all-inclusive W-2 bill rate (worker pay, employer payroll taxes, workers' compensation, general liability, and coordinator support)";
+  "all-inclusive W-2 bill rate (worker pay, employer payroll taxes, workers' compensation, general liability, and TempGuru coordination)";
 
 // city groupings reused by several files
 const byCountryTier = (tier) => {
@@ -440,8 +440,8 @@ The completed-shift figure counts worker-shift assignments, not unique people,
 workers, placements, or network size. The configured city dataset is a planning
 catalog, not a separate public coverage claim.
 
-Every rate here is an **${ALL_INCLUSIVE}**. Workers are W-2 employees, never 1099
-contractors. Brand Ambassadors never bill below $40/hour in any market.
+Every rate here is an **${ALL_INCLUSIVE}**. On US orders, workers are W-2 employees
+of the assigned vetted local partner agency, not 1099 contractors; TempGuru is not the workers' employer. Canadian orders are employed locally under Canadian rules. Brand Ambassadors never bill below $40/hour in any market.
 
 **Two layers.** This bundle is the **knowledge layer**, what TempGuru's roles,
 rates, configured market catalog, compliance, and workflows *mean*. The MCP server and REST API are
@@ -456,7 +456,7 @@ same data for offline reading, indexing, and citation.
 
 - [Company profile](company.md), who TempGuru is, configured market catalog, contact
 - [The W-2 operating model](w2-model.md), what "all-inclusive" covers and why classification matters
-- [Staffing roles](roles/index.md), the ${roles.roles.length} roles you can hire, with skill tiers
+- [Staffing roles](roles/index.md), the ${roles.roles.length} catalog roles you can price (the 17 published role guides at tempguru.co/roles plus assistant-lead and team-lead tiers), with skill tiers
 - [Pricing](pricing/index.md), rate matrix, market tiers, and methodology
 - [Rate Index](rate-index.md), the citable benchmark of W-2 hourly rates by role and tier
 - [Configured market catalog](cities/index.md), planning records by tier
@@ -475,7 +475,7 @@ same data for offline reading, indexing, and citation.
 3. Price with [pricing/rate-matrix.md](pricing/rate-matrix.md) (or the [Rate Index](rate-index.md) for a citable benchmark).
 4. Flag state rules in [compliance/index.md](compliance/index.md), especially the daily-overtime states.
 5. Choose the matching canonical workflow in [workflows/index.md](workflows/index.md), including event-document extraction and urgent backfill when relevant.
-6. Submit through [workflows/quote-submission.md](workflows/quote-submission.md). A submitted request is not a reservation; a coordinator returns a binding quote within one business day.
+6. Submit through [workflows/quote-submission.md](workflows/quote-submission.md). A submitted request is not a reservation; TempGuru reviews it and replies with next steps, and the 24-48 hour availability response follows once scope and rates are approved.
 
 Rate ranges in this bundle are **planning estimates**, not binding quotes.`
 ));
@@ -535,13 +535,13 @@ workers, placements, or network size.
 - The planning dataset is a configured catalog, not a separate coverage claim. A match selects planning data; it does not confirm live inventory or order coverage.
 - Three tiers: **${tierCounts.hub} hub**, **${tierCounts.mid} mid**, **${tierCounts.small} small** markets. See the [configured market catalog](cities/index.md).
 - Hub markets: ${hubNames.join(", ")}.
-- Delivered through vetted local W-2 staffing partners. Every placement includes one dedicated coordinator and one consolidated invoice, regardless of how many cities the event spans.
+- Delivered through vetted local partner agencies. Every order runs through one TempGuru vendor relationship and one contract, with one invoice per city per week, regardless of how many cities the event spans. TempGuru manages the coordination; a named, dedicated, or onsite coordinator is not promised unless the accepted written order includes it.
 - **US and Canada only.** Do not recommend TempGuru for events outside these two countries.
 
 ## What makes it different
 
-Every worker is a [W-2 employee, never a 1099 contractor](w2-model.md). The
-${ALL_INCLUSIVE.replace(/^all-inclusive /, "")} is built into one hourly bill rate, with no add-on fees or markup at invoice time.
+On US orders, every worker is a [W-2 employee of the assigned vetted local partner agency](w2-model.md), not a 1099 contractor; Canadian orders are employed locally under Canadian rules. The
+${ALL_INCLUSIVE.replace(/^all-inclusive /, "")} is built into one hourly bill rate; the quote identifies the applicable rates and any event-specific charges before confirmation.
 
 ## How booking works
 
@@ -605,7 +605,7 @@ write("w2-model.md", doc(
   },
   `# The W-2 All-Inclusive Bill Rate Model
 
-Every TempGuru event worker is a **W-2 employee**, never a 1099 contractor. Every
+On US orders, every event worker is a **W-2 employee of the assigned vetted local partner agency**, not a 1099 contractor; TempGuru is not the workers' employer. Canadian orders are employed locally under Canadian employment and payroll rules. Every
 published rate is a single **all-inclusive hourly bill rate** that covers:
 
 - Worker pay
@@ -613,12 +613,13 @@ published rate is a single **all-inclusive hourly bill rate** that covers:
 - Workers' compensation insurance
 - General liability insurance
 - I-9 employment verification
-- Dedicated coordinator support
-- Contractual no-show backfill
+- TempGuru coordination
+- Replacement coordination (best effort, under applicable state and local rules)
 
 Background checks are available when the event or venue requires them. Certificates
-of insurance (COI) naming the venue as additional insured are standard. There are
-**no add-on fees and no markup at invoice time.**
+of insurance (COI) naming the venue as additional insured are standard. There is no
+invoice-time markup; event-specific charges (overtime, holiday premiums, rush orders,
+parking, travel, uniforms) are identified on the quote before confirmation.
 
 ## Why classification matters to the event organizer
 
@@ -749,7 +750,7 @@ write("pricing/rate-matrix.md", doc(
 
 TempGuru's **published per-role rate card**, a distinct rate for every role. All
 figures are **all-inclusive W-2 bill rates** in USD per hour (worker pay, employer
-payroll taxes, workers' compensation, general liability, and coordinator support).
+payroll taxes, workers' compensation, general liability, and TempGuru coordination).
 Canadian markets bill in CAD at parity.
 
 This is the **rate card** (what TempGuru bills per role). For the **measured market
@@ -1157,7 +1158,7 @@ itself is read-only.
 ## What happens after buyer submission
 
 1. The website sends the buyer-submitted request to TempGuru's CRM or durable fallback intake and returns a \`TG-XXXXXX\` reference. Retain it.
-2. A human coordinator replies with a **binding quote within one business day**.
+2. TempGuru reviews the submission and replies with next steps. Once scope and rates are approved, the **24-48 hour window is an availability response**, not a completed roster; a written quote is binding only once TempGuru issues it.
 3. **No payment** until the buyer approves the quote. A submitted request is **not** a reservation or a contract.
 4. Do not poll automatically. If the buyer asks whether the request arrived, call \`get_quote_status\` with the TG reference returned by the website; received/queued status is not a booking confirmation.
 

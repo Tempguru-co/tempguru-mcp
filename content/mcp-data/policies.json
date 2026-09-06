@@ -29,13 +29,13 @@
     },
     {
       "topic": "no-show-backfill",
-      "title": "No-show backfill",
+      "title": "Replacement and backfill",
       "confirmed_claims": [
-        "Contractual no-show backfill is included in every placement."
+        "TempGuru coordinates replacement and backfill efforts on a best-effort basis under applicable state and local wage-and-hour, reporting-time, standby, and minimum-shift rules. No standby pool, replacement deadline, or fill guarantee is promised."
       ],
       "confirm_with_coordinator": true,
       "todo_for_megan": [
-        "TODO-for-Megan: Confirm and publish the replacement-response timing and any limits on the backfill commitment."
+        "TODO-for-Megan: Confirm whether any replacement-response timing can be published; until then replacement stays best effort with no stated deadline."
       ],
       "sources": [
         "content/skills/event-staffing-ordering.md",
@@ -62,10 +62,10 @@
       "topic": "payment-terms",
       "title": "Payment and invoicing",
       "confirmed_claims": [
-        "Multi-city programs receive one consolidated invoice.",
+        "Clients work through one TempGuru vendor relationship and one contract with TempGuru; invoices are consolidated as one invoice per city per week.",
         "No payment is required until the buyer approves the quote.",
         "There is no subscription; billing is per event.",
-        "Published hourly bill rates have no add-on fees or invoice-time markup."
+        "Published hourly bill rates include worker pay, employer payroll taxes, workers' compensation, general liability, TempGuru coordination, and the partner agency's markup. Overtime, holiday premiums, rush-order charges, parking, travel, uniforms, client-required background checks, minimum-shift charges, gratuities, and cancellation fees can be separate when applicable; the quote identifies the applicable hourly rates and approved event-specific charges before confirmation."
       ],
       "confirm_with_coordinator": true,
       "todo_for_megan": [
@@ -96,7 +96,7 @@
       "topic": "order-confirmation",
       "title": "Order confirmation SLA",
       "confirmed_claims": [
-        "Standard order confirmation is within 48 hours; tight-turnaround feasibility varies by market."
+        "Once scope and rates are approved, TempGuru returns an availability response within 24-48 hours. That response is not a guaranteed completed roster; same-week and emergency requests are best effort and depend on local capacity."
       ],
       "confirm_with_coordinator": false,
       "todo_for_megan": [],
@@ -109,7 +109,7 @@
       "topic": "quote-response",
       "title": "Quote response SLA",
       "confirmed_claims": [
-        "A TempGuru coordinator replies with a binding quote within one business day of a submitted request."
+        "After the buyer submits the form, TempGuru reviews the scope and rates and replies with next steps. The 24-48 hour window is an availability response after scope and rates are approved, not a completed roster. A written quote is binding only once TempGuru issues it, and no payment is due until the buyer approves it."
       ],
       "confirm_with_coordinator": false,
       "todo_for_megan": [],

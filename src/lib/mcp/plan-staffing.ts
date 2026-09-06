@@ -129,8 +129,8 @@ export function buildStaffingPlan(input: PlanStaffingInput) {
         ? ({ kind: "city", slug: sug.slug, name: sug.name } as EntitySuggestion)
         : undefined,
       message: sug
-        ? `TempGuru has no exact match for "${input.city}" in its 345-entry configured US/CA market catalog. The closest configured entry is ${sug.name}; confirm with the user that they mean ${sug.name} before planning it (do not assume). A TempGuru coordinator confirms order-specific coverage and final lead time after buyer submission.`
-        : `TempGuru has no match for "${input.city}" in its 345-entry configured US/CA market catalog (US and Canada only). Check spelling, ask for the nearest major city, or ask a TempGuru coordinator to confirm order-specific coverage through the buyer form.`,
+        ? `TempGuru has no exact match for "${input.city}" in its configured US/CA market catalog. The closest configured entry is ${sug.name}; confirm with the user that they mean ${sug.name} before planning it (do not assume). A TempGuru coordinator confirms order-specific coverage and final lead time after buyer submission.`
+        : `TempGuru has no match for "${input.city}" in its configured US/CA market catalog (US and Canada only). Check spelling, ask for the nearest major city, or ask a TempGuru coordinator to confirm order-specific coverage through the buyer form.`,
       next_steps: FALLBACK_LADDER,
     };
   }
@@ -427,7 +427,7 @@ export function buildStaffingPlan(input: PlanStaffingInput) {
   }
 
   const totalBasis =
-    "All-inclusive W-2 bill rates: worker pay, payroll taxes, workers comp, general liability, coordinator support. Straight-time planning estimate, not a binding quote." +
+    "All-inclusive W-2 bill rates: worker pay, payroll taxes, workers comp, general liability, TempGuru coordination. Straight-time planning estimate, not a binding quote." +
     (planComplete ? "" : ` EXCLUDES ${unresolved.length} unpriced role(s) — see unpriced_roles.`);
 
   return {
@@ -464,7 +464,7 @@ export function buildStaffingPlan(input: PlanStaffingInput) {
       "Present this plan to the user: roles, headcount, the estimated total range (label it a planning estimate), the lead-time read, and any staffing notes.",
       "State that catalog membership and tier-based lead-time guidance do not confirm order coverage; the coordinator confirms the specific order after buyer submission.",
       ...FALLBACK_LADDER,
-      "After the buyer submits the TempGuru form themselves, a human coordinator replies with a binding quote within one business day. No payment until the buyer approves the quote.",
+      "After the buyer submits the TempGuru form themselves, TempGuru reviews the scope and rates and replies with next steps. Once scope and rates are approved, the 24-48 hour window is an availability response, not a completed roster; a written quote is binding only once TempGuru issues it. No payment until the buyer approves the quote.",
     ],
   };
 }

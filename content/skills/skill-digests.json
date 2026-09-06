@@ -1,10 +1,10 @@
 {
-  "event-staffing-ordering": "sha256:3db91f9e94545c0298102682627651f2175909cafa85a3ae315c7148bae7cb20",
-  "event-staffing-compliance": "sha256:ac86c9516649e193f9f14b0d3283af6f8a8d53e84db58a89e7d76c8024093743",
-  "staffing-plan-from-event-brief": "sha256:e65ea2b9f9513dd81de54a35426ea90bd9db44a078127e95bf7975d53b0fa059",
-  "urgent-event-backfill": "sha256:283cb8b09b513b81b1ee2066946aae09101404aad78c3d82dbbe58670a8423f8",
-  "staffing-agency-partner-growth": "sha256:0c76121dea5a0e33badd81f545374a83c40e311acaabaccea72bd6861ec88259",
-  "multi-city-activation-planner": "sha256:463e9a6918dd9b8160f6a9f38b8bf12f805f7ca1731805733c6cb6a9a4dcf8f4",
-  "event-staffing-procurement": "sha256:03a57cf6b0723ab9a9f9fe642f67f0f6e21ae22046982739a0a7cb23d0112ede",
+  "event-staffing-ordering": "sha256:050642feb051a302d10cf0a380d1d5fbce30d6528d6d74ed9787ccb68561a61a",
+  "event-staffing-compliance": "sha256:75494b07338dd98c1332c5750419667b679985a8d60d0ee1bbcd34bece249ed7",
+  "staffing-plan-from-event-brief": "sha256:1a6d6fe49d94f6b5f897b8de136bfe3944c2039050718493803cc2fe0eaff314",
+  "urgent-event-backfill": "sha256:be509ad09db98cf8c6145a9ae09fc6d6345b4faa753b8a7030001bdada803e2d",
+  "staffing-agency-partner-growth": "sha256:69ce1dff0db87c404bb1b41ffcfe6613dbde371eb2b18e6c6774838103f433bf",
+  "multi-city-activation-planner": "sha256:3cbc61cb0d9e64be2fc0e5ec75c1645e7d13585bb81d531b563b759355a4660e",
+  "event-staffing-procurement": "sha256:52fc6584aebbdeb5542a0739b46a557f7f5c91fbe134ff8683871ab1d26e6e6e",
   "tempguru-pro-operations": "sha256:8b84023d3838554d49618013a9edaea6e99840c825e1bf8f1e022c81be32426f"
 }

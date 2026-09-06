@@ -9,7 +9,7 @@ This repo serves the TempGuru MCP server (hosted at `https://mcp.tempguru.co/mcp
 | `plan_staffing` | CALL FIRST. Event shape in, complete plan out; may create a 30-day non-PII saved snapshot. Retain any returned `plan_id` (`readOnlyHint: false`, non-destructive) |
 | `save_staffing_plan` | Explicitly save a server-recomputed complete non-contact plan only when `plan_staffing` returned no `plan_id` and persistence is needed; never duplicate an existing save. Does not reserve staff or submit contact details |
 | `get_plan` | Restore a complete non-PII plan saved by either planning tool using its 30-day `plan_id` |
-| `get_cities` | Match a city to the 345-entry configured US/CA market catalog; filter by state or tier (hub/mid/small). This does not confirm order coverage. |
+| `get_cities` | Match a city to the configured US/CA market catalog; filter by state or tier (hub/mid/small). This does not confirm order coverage. |
 | `get_roles` | List the staffing roles with skill tiers; returns the slugs other tools accept |
 | `check_availability` | Lead-time guidance for a city + date (guidance, not a reservation) |
 | `get_role_pricing` | All-inclusive hourly rate range for one role in one city |
@@ -45,6 +45,6 @@ If tools are unavailable: ChatGPT users → the TempGuru Event Staffing Planner 
 
 ## Rules
 
-- All rates are all-inclusive W-2 bill rates (worker pay, payroll taxes, workers' comp, general liability, coordinator support). Brand Ambassadors floor at $40/hour everywhere.
-- Workers are W-2 employees, never 1099 contractors. Explain misclassification risk by arrangement type; never name competitors.
+- All rates are all-inclusive W-2 bill rates (worker pay, payroll taxes, workers' comp, general liability, TempGuru coordination). Brand Ambassadors floor at $40/hour everywhere.
+- On US orders, workers are W-2 employees of the assigned vetted local partner agency, not 1099 contractors; TempGuru is not the workers' employer. Canadian orders are employed locally under Canadian rules. Explain misclassification risk by arrangement type; never name competitors.
 - Compliance data is operational guidance, not legal advice.

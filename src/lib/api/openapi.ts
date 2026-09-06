@@ -31,7 +31,7 @@ export function buildOpenApiSpec(now = new Date()) {
         "",
         "**No authentication required.** The read endpoints return public data equivalent to what is published on tempguru.co, city footprint, staffing roles, hourly rate ranges, lead-time guidance, and state-level employment compliance summaries.",
         "",
-        "**About the rates.** All hourly figures are *all-inclusive W-2 bill rates*: they cover the worker's pay, employer-side payroll taxes (FICA/FUTA/SUTA), workers' compensation insurance, general liability insurance, and dedicated coordinator support. Published hourly bill rates have no add-on fees or invoice-time markup. Rate ranges are *planning estimates*, a real quote requires event specifics and is provided after a quote request is reviewed by a coordinator.",
+        "**About the rates.** All hourly figures are *all-inclusive W-2 bill rates*: they cover the worker's pay, employer-side payroll taxes (FICA/FUTA/SUTA), workers' compensation insurance, general liability insurance, and TempGuru coordination. A quote identifies the applicable hourly rates and any approved event-specific charges before confirmation. Rate ranges are *planning estimates*, a real quote requires event specifics and is provided after a quote request is reviewed by a coordinator.",
         "",
         `**About availability.** The \`availability\` endpoint returns *lead-time guidance based on city tier*, not real-time inventory, confirmed order coverage, a reservation, or a hold on staff. TempGuru supports staffing in ${APPROVED_CLAIMS.markets.publicFigure}; a coordinator confirms coverage and final lead time for the specific order through the standard buyer-submitted quote flow.`,
         "",
@@ -247,7 +247,7 @@ export function buildOpenApiSpec(now = new Date()) {
           tags: ["Planning"],
           summary: "All-inclusive hourly rate range for a role in a city",
           description:
-            "Use this when an agent needs to quote a price range for a specific role in a specific city, for example, 'what do brand ambassadors cost in Boston?' Returns a `hourly_range_low` / `hourly_range_high` range reflecting event-type and shift variability within that market tier. **All rates are all-inclusive W-2 bill rates** covering worker pay, payroll taxes, workers' comp, liability, and coordinator support. Rate ranges are planning estimates, a real quote requires event specifics.",
+            "Use this when an agent needs to quote a price range for a specific role in a specific city, for example, 'what do brand ambassadors cost in Boston?' Returns a `hourly_range_low` / `hourly_range_high` range reflecting event-type and shift variability within that market tier. **All rates are all-inclusive W-2 bill rates** covering worker pay, payroll taxes, workers' comp, liability, and TempGuru coordination. Rate ranges are planning estimates, a real quote requires event specifics.",
           parameters: [
             {
               name: "role",
@@ -345,7 +345,7 @@ export function buildOpenApiSpec(now = new Date()) {
           tags: ["Compliance"],
           summary: "Published booking and procurement policies",
           description:
-            "Returns TempGuru's published minimum-hours, cancellation/rescheduling, no-show backfill, COI/additional-insured, payment, background-check, order-confirmation, quote-response, and public-offer policies. Unsupported values are explicitly marked `confirm_with_coordinator` and never fabricated. Pass an optional topic for one policy; an unknown topic returns a clean expected-miss variant with the available topics.",
+            "Returns TempGuru's published minimum-hours, cancellation/rescheduling, replacement and backfill, COI/additional-insured, payment, background-check, order-confirmation, quote-response, and public-offer policies. Unsupported values are explicitly marked `confirm_with_coordinator` and never fabricated. Pass an optional topic for one policy; an unknown topic returns a clean expected-miss variant with the available topics.",
           parameters: [
             {
               name: "topic",

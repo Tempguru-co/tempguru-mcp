@@ -43,7 +43,7 @@ collection.info.description =
   `Claim IDs: ${approvedClaims.markets.claimId}, ${approvedClaims.events.claimId}, ` +
   `${approvedClaims.completedShifts.claimId}. Includes eight read-only business operations, one health probe, ` +
   "and one opt-in quote-request submission. No authentication required. All rates are all-inclusive W-2 " +
-  "bill rates (worker pay, payroll taxes, workers' comp, general liability, coordinator support).\n\n" +
+  "bill rates (worker pay, payroll taxes, workers' comp, general liability, TempGuru coordination).\n\n" +
   "MCP server: https://mcp.tempguru.co/mcp\n" +
   "OpenAPI 3.1: https://mcp.tempguru.co/openapi.json\n" +
   "Website: https://tempguru.co";

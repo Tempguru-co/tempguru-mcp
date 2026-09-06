@@ -17,7 +17,7 @@
 
 ## What this is
 
-TempGuru is a W-2 event staffing company based in Jacksonville Beach, FL. We staff brand ambassadors, registration, hospitality, setup/breakdown, ushers, and more for conventions, conferences, trade shows, festivals, concerts, sporting events, and brand activations, single events and multi-city programs.
+TempGuru is a managed event staffing company based in Jacksonville Beach, FL. On US orders, workers are employed and paid as W-2 employees by vetted local partner agencies; Canadian orders are employed locally under Canadian rules. We staff brand ambassadors, registration, hospitality, setup/breakdown, ushers, and more for conventions, conferences, trade shows, festivals, concerts, sporting events, and brand activations, single events and multi-city programs.
 
 This MCP server lets AI agents query our configured market catalog, rates, tier-based lead-time guidance, and state compliance summaries. Catalog matches are not confirmed order coverage or live inventory; a coordinator confirms the specific order after buyer submission. It's a thin wrapper over the same data that powers tempguru.co. No authentication, no API key, no per-client setup.
 
@@ -262,7 +262,7 @@ It cannot book staff or submit contact details. After a buyer confirms a saved p
 
 ### Is TempGuru a gig app or a 1099 marketplace?
 
-No. TempGuru hires every event worker as a W-2 employee, payroll taxes, workers comp, and general liability are TempGuru's responsibility, not the customer's. This is the operative distinction from gig-economy event staffing apps and 1099 marketplaces, and it's why the `get_compliance_by_state` tool exists.
+No. On US orders, the assigned vetted local partner agency employs and pays every event worker as a W-2 employee and carries payroll taxes, workers' comp, and general liability; none of that lands on the customer, and TempGuru is not the workers' employer. Canadian orders are employed locally under Canadian rules. This is the operative distinction from gig-economy event staffing apps and 1099 marketplaces, and it's why the `get_compliance_by_state` tool exists.
 
 ### What cities does TempGuru cover?
 
@@ -276,7 +276,7 @@ after buyer submission. The catalog is the same data published on tempguru.co.
 
 ### What kinds of events does TempGuru staff?
 
-Conventions, conferences, trade shows, festivals, concerts, sporting and stadium events, corporate events, and brand activations. Single events and multi-city programs both supported, multi-city gets one vendor, one coordinator, one invoice. Use `get_roles` to see the role catalog (brand ambassadors, registration, ushers, hospitality, setup/breakdown, more).
+Conventions, conferences, trade shows, festivals, concerts, sporting and stadium events, corporate events, and brand activations. Single events and multi-city programs both supported, multi-city gets one vendor relationship, one contract, and one invoice per city per week, with TempGuru managing the coordination. Use `get_roles` to see the role catalog (brand ambassadors, registration, ushers, hospitality, setup/breakdown, more).
 
 ### Does TempGuru handle international events?
 

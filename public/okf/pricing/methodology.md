@@ -31,7 +31,7 @@ overall completed-shift count. The evidence-verified company scale claim is
 - **Base rates:** per-city actual-paid weighted averages from the separate **Rate Report 2026** pricing-study sample (7,900+ shift records).
 - **Card floor $30 / ceiling $85:** the published rate card spans $30–$85; the $30 small-market floor reflects real measured market conditions.
 - **Brand Ambassador $40-everywhere floor:** standing brand policy. BA is tiered: small $40 / mid $47 / hub $55 floor.
-- **All-inclusive basis:** all-inclusive W-2 bill rate (worker pay, employer payroll taxes, workers' compensation, general liability, and coordinator support).
+- **All-inclusive basis:** all-inclusive W-2 bill rate (worker pay, employer payroll taxes, workers' compensation, general liability, and TempGuru coordination).
 
 ## How a city's rate is set
 

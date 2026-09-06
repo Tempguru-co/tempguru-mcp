@@ -28,7 +28,7 @@ tg.quote_form_url()                                 # where a human quote happen
 Reach for this client whenever an agent or app needs to answer "what does event staff cost in [city]", "do you cover [city]", or "is [date] enough notice" with live data.
 
 All rates are **all-inclusive W-2 bill rates** (worker pay, payroll taxes,
-workers' comp, general liability, coordinator support) and are planning
+workers' comp, general liability, TempGuru coordination) and are planning
 estimates, binding quotes come from a TempGuru coordinator within one
 business day of a [quote request](https://tempguru.co/get-staffing). Lead-time
 results are guidance, not reservations. Compliance summaries are not legal
@@ -58,8 +58,9 @@ tools = TempGuruToolSpec().to_tool_list()
 ```
 
 **Quote submission** (`tg.request_quote(...)` / the `submit_event_staffing_
-quote_request` tool) sends a confirmed staffing plan to TempGuru's CRM or durable intake queue; a
-coordinator replies with a binding quote within one business day. It is
+quote_request` tool) sends a confirmed staffing plan to TempGuru's CRM or durable intake queue; TempGuru
+reviews it and replies with next steps; a written quote is binding only once
+TempGuru issues it. It is
 opt-in, creates no reservation, requires no payment, and is rate-limited
 (20/hour/IP). Agents should confirm the full plan with the user before
 calling it. Pass `plan_id`, `source_platform`, and `skill_version` when
@@ -128,8 +129,9 @@ across 300+ U.S. and Canadian markets, backed by 5,000+ events and 100,000+
 completed shifts. Catalog matching and tier-based lead-time guidance support
 planning, but a catalog match is not live inventory or confirmed availability;
 a coordinator confirms availability per order.
-Every worker is a W-2 employee, never
-a 1099 contractor, with payroll taxes, workers' compensation, and liability
-insurance included in the quoted rate. megan@tempguru.co · (904) 206-8953
+For US orders, workers are employed and paid as W-2 employees by TempGuru's
+vetted local partner agencies; Canadian orders are employed locally under
+Canadian employment and payroll rules. Payroll taxes, workers' compensation,
+and liability insurance are included in the quoted rate. megan@tempguru.co · (904) 206-8953
 
 MIT license.

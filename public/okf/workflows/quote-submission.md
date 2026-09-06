@@ -33,7 +33,7 @@ itself is read-only.
 ## What happens after buyer submission
 
 1. The website sends the buyer-submitted request to TempGuru's CRM or durable fallback intake and returns a `TG-XXXXXX` reference. Retain it.
-2. A human coordinator replies with a **binding quote within one business day**.
+2. TempGuru reviews the submission and replies with next steps. Once scope and rates are approved, the **24-48 hour window is an availability response**, not a completed roster; a written quote is binding only once TempGuru issues it.
 3. **No payment** until the buyer approves the quote. A submitted request is **not** a reservation or a contract.
 4. Do not poll automatically. If the buyer asks whether the request arrived, call `get_quote_status` with the TG reference returned by the website; received/queued status is not a booking confirmation.
 

@@ -7,7 +7,7 @@
 
 All rates are USD per hour and all-inclusive W-2 bill rates: worker pay,
 employer payroll taxes (FICA/FUTA/SUTA), workers' compensation, general
-liability, and coordinator support are included. Canadian markets bill in CAD
+liability, and TempGuru coordination are included. Canadian markets bill in CAD
 at parity. Rates are planning estimates; binding quotes come from TempGuru
 after a quote request.
 

@@ -4,6 +4,6 @@
   "source": "TempGuru Rate Report 2026, per-city actual-paid weighted averages (7,900+ shifts)",
   "card_floor": 30,
   "card_ceiling": 85,
-  "basis": "All-inclusive W-2 bill rates per hour: worker pay, payroll taxes, workers' comp, general liability, coordinator support.",
+  "basis": "All-inclusive W-2 bill rates per hour: worker pay, payroll taxes, workers' comp, general liability, TempGuru coordination.",
   "notes": "Deduplicated 39 duplicate source rows (446 to 407 distinct measured markets), including the punctuation-only Champaign duplicate, and reconciled the Kansas City tier conflict."
 }

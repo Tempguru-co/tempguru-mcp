@@ -16,7 +16,7 @@ timestamp: "2026-08-18T00:00:00Z"
 
 TempGuru's **published per-role rate card**, a distinct rate for every role. All
 figures are **all-inclusive W-2 bill rates** in USD per hour (worker pay, employer
-payroll taxes, workers' compensation, general liability, and coordinator support).
+payroll taxes, workers' compensation, general liability, and TempGuru coordination).
 Canadian markets bill in CAD at parity.
 
 This is the **rate card** (what TempGuru bills per role). For the **measured market

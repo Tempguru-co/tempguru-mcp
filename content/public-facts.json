@@ -18,13 +18,14 @@
       "status": "verified_from_repository",
       "value": 19,
       "unit": "event staffing roles",
-      "source": "content/mcp-data/roles.json"
+      "source": "content/mcp-data/roles.json",
+      "publicDescription": "19 catalog roles: the 17 published TempGuru role guides at tempguru.co/roles plus assistant-lead and team-lead tiers priced in the catalog."
     }
   },
   "servicePolicies": {
     "workerClassification": {
       "status": "published_policy",
-      "value": "TempGuru fulfills event staffing orders with W-2 employees, not 1099 independent contractors."
+      "value": "For US orders, workers are employed and paid as W-2 employees by TempGuru's vetted local partner agencies; TempGuru is not the workers' employer. For Canadian orders, workers are employed locally by the assigned partner agency under applicable Canadian employment and payroll rules."
     },
     "pricing": {
       "status": "repository_backed",
