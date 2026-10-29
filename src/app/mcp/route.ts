@@ -129,8 +129,10 @@ const handler = createMcpHandler(
 // Origin continue to work. Add owned/approved browser hosts at deploy time with
 // MCP_ALLOWED_ORIGIN_HOSTNAMES (comma-separated hostnames, no schemes/ports).
 
+const MCP_ALLOWED_METHODS = "POST, DELETE, OPTIONS";
+
 const MCP_CORS = {
-  methods: "GET, POST, DELETE, OPTIONS",
+  methods: MCP_ALLOWED_METHODS,
   allowHeaders:
     "Content-Type, Accept, MCP-Protocol-Version, Mcp-Method, Mcp-Name, Mcp-Session-Id, Last-Event-ID, Authorization, X-TempGuru-Source",
   exposeHeaders: "Mcp-Session-Id, WWW-Authenticate",
@@ -159,6 +161,17 @@ async function withAcceptNormalization(request: Request): Promise<Response> {
   // through the MCP handler.
   if (request.method === "OPTIONS") {
     return withMcpCors(new Response(null, { status: 204 }), request);
+  }
+
+  // The server is stateless, so a GET stream never carries server-initiated
+  // messages; it only idles until maxDuration. Clients that auto-open one
+  // (copilot-cli, 2026-10-29) reconnect every 60s and burned 27x the normal
+  // function duration. The spec lets servers decline the stream with a 405.
+  if (request.method === "GET") {
+    return withMcpCors(
+      new Response(null, { status: 405, headers: { Allow: MCP_ALLOWED_METHODS } }),
+      request,
+    );
   }
 
   // Bind per-request context (User-Agent + Vercel IP-country header) so

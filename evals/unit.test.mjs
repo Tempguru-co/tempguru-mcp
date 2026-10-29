@@ -1386,6 +1386,15 @@ check("MCP echoes only a trusted browser Origin and preserves controlled attribu
       .includes("x-tempguru-source") === true
     && hasMachineSecurity(mcpTrustedPreflight)
     && variesOnOrigin(mcpTrustedPreflight));
+const mcpStreamGet = await mcpRoute.GET(new Request(
+  "https://mcp.tempguru.co/mcp",
+  { method: "GET", headers: { Accept: "text/event-stream" } },
+));
+check("MCP declines the idle GET SSE stream with 405 instead of holding it to maxDuration",
+  mcpStreamGet.status === 405
+    && mcpStreamGet.headers.get("allow") === "POST, DELETE, OPTIONS"
+    && mcpStreamGet.body === null
+    && hasMachineSecurity(mcpStreamGet));
 check("MCP keeps non-browser server clients compatible without wildcard CORS",
   mcpServerPreflight.status === 204
     && mcpServerPreflight.headers.get("access-control-allow-origin") === null
