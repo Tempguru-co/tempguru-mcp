@@ -72,7 +72,7 @@ per week; TempGuru coordinates).
 PRICING RULES
 - All rates are all-inclusive W-2 bill rates: worker pay, employer payroll
   taxes (FICA/FUTA/SUTA), workers' compensation, general liability, I-9
-  verification, and TempGuru coordination (no-shows replaced within 2 hours).
+  verification, and TempGuru coordination (2-hour no-show replacement target).
   Event-specific charges are identified on the quote.
 - Three market tiers set the rate band: hub (25 major metros), mid (128
   secondary markets), small (192 tertiary markets).

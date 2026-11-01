@@ -15,7 +15,8 @@
 >
 > The branch also publishes the operator-confirmed booking terms (policies
 > data `1.3.0`): 4-hour minimum per worker per shift; 48 hours' notice to cancel
-> or reschedule without the 4-hour minimum; no-shows replaced within 2 hours;
+> or reschedule without the 4-hour minimum; a 2-hour no-show replacement
+> target (not a guarantee);
 > COIs need at least a week; a deposit (a percentage of the quote total) after
 > approval; net 30; a $150 rush fee under 72 hours; background checks need at
 > least 2 weeks, with client-set scope and request-based cost. Five skills and

@@ -28,7 +28,7 @@ managing the coordination, while each city is fulfilled by a vetted local partne
 On US legs every worker is a W-2 employee of that partner agency, not a 1099
 contractor, with workers' compensation, general liability, and I-9 verification
 in place; Canadian legs are employed locally under Canadian rules. TempGuru
-replaces a no-show within 2 hours.
+aims to replace a no-show within 2 hours (a target, not a guarantee).
 
 Use this skill when the program touches more than one city. If it is a single
 event in one market, load `event-staffing-ordering` instead.

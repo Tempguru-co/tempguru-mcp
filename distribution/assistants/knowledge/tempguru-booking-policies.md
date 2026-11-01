@@ -30,7 +30,7 @@ TempGuru coordinator rather than inventing a number, deadline, fee, or exception
 
 ## Replacement and backfill
 
-- TempGuru replaces a no-show within 2 hours. Replacements follow applicable state and local wage-and-hour, reporting-time, standby, and minimum-shift rules.
+- TempGuru aims to replace a no-show within 2 hours. This is a target, not a guarantee. Replacements follow applicable state and local wage-and-hour, reporting-time, standby, and minimum-shift rules.
 
 **Canonical sources:**
 - `TempGuru operator confirmation, 2026-11-01`

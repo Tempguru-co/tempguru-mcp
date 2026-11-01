@@ -422,16 +422,18 @@
     ]
   },
   {
-    "name": "get_policies: no-show replacement is published as within 2 hours",
+    "name": "get_policies: no-show replacement is a 2-hour target, not a guarantee",
     "tool": "get_policies",
     "arguments": {
       "topic": "no-show"
     },
     "expect": [
       "\"topic\":\"no-show-backfill\"",
-      "TempGuru replaces a no-show within 2 hours."
+      "TempGuru aims to replace a no-show within 2 hours.",
+      "This is a target, not a guarantee."
     ],
     "absent": [
+      "TempGuru replaces a no-show",
       "best-effort",
       "No standby pool",
       "TODO-for-Megan"

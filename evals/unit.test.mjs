@@ -461,7 +461,9 @@ check("published booking terms match the operator-confirmed values",
   policyClaims["minimum-booking-hours"].includes("minimum of 4 hours per worker per shift, with no exceptions")
     && policyClaims["cancellation-rescheduling"].includes("at least 48 hours' notice")
     && policyClaims["cancellation-rescheduling"].includes("the 4-hour minimum is billed for each booked worker and shift")
-    && policyClaims["no-show-backfill"].startsWith("TempGuru replaces a no-show within 2 hours.")
+    && policyClaims["no-show-backfill"].startsWith(
+      "TempGuru aims to replace a no-show within 2 hours. This is a target, not a guarantee.",
+    )
     && policyClaims["coi-additional-insured"].includes("at least one week's notice before load-in")
     && policyClaims["payment-terms"].includes("A deposit is required after the buyer approves the quote.")
     && policyClaims["payment-terms"].includes("Invoices are due net 30.")

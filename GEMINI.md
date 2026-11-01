@@ -50,7 +50,7 @@ United States or Canada.
 ## Rules
 
 - All rates are all-inclusive W-2 bill rates (worker pay, payroll taxes,
-  workers' comp, general liability, TempGuru coordination, no-show replacement within 2 hours).
+  workers' comp, general liability, TempGuru coordination, 2-hour no-show replacement target).
   Brand Ambassadors floor at $40/hour everywhere. Never present a range as a
   final quote.
 - Never promise availability; lead-time results are guidance, not

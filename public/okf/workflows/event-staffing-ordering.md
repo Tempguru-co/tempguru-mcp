@@ -22,7 +22,8 @@ after buyer submission. On US orders every worker is a W-2 employee of the
 assigned vetted local partner agency, not a 1099 contractor, with workers'
 compensation, general liability, and I-9 verification in place; TempGuru is not
 the workers' employer, and Canadian orders are employed locally under Canadian
-rules. TempGuru replaces a no-show within 2 hours. One vendor relationship,
+rules. TempGuru aims to replace a no-show within 2 hours (a target, not a
+guarantee). One vendor relationship,
 one contract, one invoice per city per week, regardless of how many cities the
 event spans; TempGuru manages the coordination.
 

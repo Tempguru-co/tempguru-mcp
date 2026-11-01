@@ -22,7 +22,7 @@ published rate is a single **all-inclusive hourly bill rate** that covers:
 - General liability insurance
 - I-9 employment verification
 - TempGuru coordination
-- No-show replacement within 2 hours (under applicable state and local rules)
+- No-show replacement, with a 2-hour target (not a guarantee; under applicable state and local rules)
 
 Background checks are available when the event or venue requires them. Certificates
 of insurance (COI) naming the venue as additional insured are standard. There is no
