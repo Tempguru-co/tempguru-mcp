@@ -49,12 +49,27 @@ export type PlanStaffingInput = {
   description?: string;
 };
 
-// Neutral, factual fallback. Deliberately no cross-platform (ChatGPT GPT)
-// steering in tool output; platform-specific fallbacks live in the docs/skills.
-const FALLBACK_LADDER = [
+// Neutral, factual next steps for the two no-plan outcomes. Deliberately no
+// cross-platform (ChatGPT GPT) steering in tool output; platform-specific
+// fallbacks live in the docs/skills. These results carry no plan_id and no
+// continuation, so they must not point the agent at request_quote or at a
+// continuation.form_url that does not exist (they previously did).
+const DIRECT_HELP_STEP = "For direct or urgent help, use megan@tempguru.co or (904) 206-8953.";
+// Plan results (status "plan") can carry a plan_id or continuation, so the
+// handoff ladder applies to them unchanged.
+const PLAN_HANDOFF_LADDER = [
   "When the buyer asks to proceed, call request_quote with the saved plan_id and give them its prefilled form_url. Never collect or transmit contact details through MCP.",
   "If no plan_id was saved, give the buyer continuation.form_url directly. The buyer reviews the plan, enters their own contact details, and submits the TempGuru form themselves.",
-  "For direct or urgent help, use megan@tempguru.co or (904) 206-8953.",
+  DIRECT_HELP_STEP,
+];
+const CITY_NOT_FOUND_NEXT_STEPS = [
+  "No plan was created, so there is no plan_id or continuation.form_url and request_quote cannot run yet. Confirm the event city with the user, then call plan_staffing again.",
+  "TempGuru staffs events in the US and Canada only. For a US or Canadian location outside the configured catalog, the buyer can ask a TempGuru coordinator to review it at https://tempguru.co/get-staffing.",
+  DIRECT_HELP_STEP,
+];
+const ROLES_NOT_FOUND_NEXT_STEPS = [
+  "No plan was created, so there is no plan_id or continuation.form_url and request_quote cannot run yet. Choose roles from available_roles (or confirm each unresolved role's suggestion with the user), then call plan_staffing again.",
+  DIRECT_HELP_STEP,
 ];
 
 function isPricing(d: unknown): d is RolePricingData {
@@ -131,7 +146,7 @@ export function buildStaffingPlan(input: PlanStaffingInput) {
       message: sug
         ? `TempGuru has no exact match for "${input.city}" in its configured US/CA market catalog. The closest configured entry is ${sug.name}; confirm with the user that they mean ${sug.name} before planning it (do not assume). A TempGuru coordinator confirms order-specific coverage and final lead time after buyer submission.`
         : `TempGuru has no match for "${input.city}" in its configured US/CA market catalog (US and Canada only). Check spelling, ask for the nearest major city, or ask a TempGuru coordinator to confirm order-specific coverage through the buyer form.`,
-      next_steps: FALLBACK_LADDER,
+      next_steps: CITY_NOT_FOUND_NEXT_STEPS,
     };
   }
   const cityMeta = {
@@ -225,7 +240,7 @@ export function buildStaffingPlan(input: PlanStaffingInput) {
       unresolved_roles: unresolved,
       available_roles: roles.ok ? roles.data : null,
       message: `${cityMeta.city} matches the configured market catalog (not confirmed order coverage), but none of the requested roles matched TempGuru's role catalog. Pick roles from the list below (or use each unresolved role's suggestion) and call plan_staffing again.`,
-      next_steps: FALLBACK_LADDER,
+      next_steps: ROLES_NOT_FOUND_NEXT_STEPS,
     };
   }
 
@@ -463,7 +478,7 @@ export function buildStaffingPlan(input: PlanStaffingInput) {
           ]),
       "Present this plan to the user: roles, headcount, the estimated total range (label it a planning estimate), the lead-time read, and any staffing notes.",
       "State that catalog membership and tier-based lead-time guidance do not confirm order coverage; the coordinator confirms the specific order after buyer submission.",
-      ...FALLBACK_LADDER,
+      ...PLAN_HANDOFF_LADDER,
       "After the buyer submits the TempGuru form themselves, TempGuru reviews the scope and rates and replies with next steps. Once scope and rates are approved, the 24-48 hour window is an availability response, not a completed roster; a written quote is binding only once TempGuru issues it. No payment until the buyer approves the quote.",
     ],
   };

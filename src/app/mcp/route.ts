@@ -4,8 +4,8 @@
 // in @/lib/mcp/register-tools, so this hosted endpoint and the stdio binary
 // (src/mcp-stdio.ts) expose byte-identical tools, no behavior drift between the
 // remote server and a local/Docker build. This file owns only what is
-// HTTP-specific: per-request telemetry context, Accept-header normalization,
-// CORS, and the streamable-HTTP handler wiring.
+// HTTP-specific: per-request telemetry context, a request-size/batch guard,
+// Accept-header normalization, CORS, and the streamable-HTTP handler wiring.
 //
 //   - plan_staffing              build a complete plan from city/date/roles
 //   - save_staffing_plan         explicitly save a complete non-contact plan
@@ -39,7 +39,15 @@ import { SKILL_SLUGS, type SkillSlug } from "@/lib/mcp/register-tools";
 import { runWithContext, currentContext } from "@/lib/telemetry/context";
 import { classifyUserAgent } from "@/lib/telemetry/classify-ua";
 import { normalizeSourcePlatform } from "@/lib/telemetry/source-tags";
-import { track } from "@/lib/telemetry/track";
+import {
+  classifySourceNetwork,
+  clientIpFromHeaders,
+} from "@/lib/telemetry/source-network";
+import {
+  track,
+  trackGuardRejection,
+  type GuardRejectionReason,
+} from "@/lib/telemetry/track";
 import {
   configuredVercelOriginHostnames,
   DEFAULT_MCP_ORIGIN_HOSTNAMES,
@@ -64,6 +72,43 @@ const SKILL_BODIES = Object.fromEntries(
   SKILL_SLUGS.map((slug) => [slug, readFileSync(join(SKILLS_DIR, `${slug}.md`), "utf-8")]),
 ) as Record<SkillSlug, string>;
 
+// ─── Request-size guard ──────────────────────────────────────────────────
+//
+// The endpoint is public and unauthenticated, and every tools/call writes
+// about twenty telemetry commands to Upstash. A legacy JSON-RPC batch array
+// fans out into one tool execution per element, so before this guard a single
+// 20 KB POST could run hundreds of tool calls (thousands of Redis writes) and
+// read as hundreds of "invocations" on the dashboard. The pinned SDK (2.4.0)
+// caps batches at 100 messages and bodies at 4 MiB by default; this route
+// holds a tighter line. The largest legitimate request (a 50-role plan with a 2,000-character
+// description) is roughly 10 KB, and the 2025-06-18 protocol removed batching,
+// so mainstream clients send one message per POST.
+const MAX_MCP_BODY_BYTES = 64 * 1024;
+const MAX_MCP_BATCH_MESSAGES = 10;
+
+// Only a top-level JSON array is a batch. Anything else, including invalid
+// JSON (which the transport answers with -32700), counts as one message.
+function jsonRpcBatchLength(body: string): number {
+  if (!body.trimStart().startsWith("[")) return 1;
+  try {
+    const parsed: unknown = JSON.parse(body);
+    return Array.isArray(parsed) ? parsed.length : 1;
+  } catch {
+    return 1;
+  }
+}
+
+function guardRejection(reason: GuardRejectionReason): Response {
+  const [status, code, message] =
+    reason === "body_too_large"
+      ? [413, -32000, `Payload Too Large: Request body must not exceed ${MAX_MCP_BODY_BYTES} bytes`]
+      : [400, -32600, `Invalid Request: Batch must not exceed ${MAX_MCP_BATCH_MESSAGES} messages`];
+  return new Response(
+    JSON.stringify({ jsonrpc: "2.0", error: { code, message }, id: null }),
+    { status, headers: { "Content-Type": "application/json" } },
+  );
+}
+
 // ─── Handler ──────────────────────────────────────────────────────────────
 
 const handler = createMcpHandler(
@@ -71,8 +116,9 @@ const handler = createMcpHandler(
     createTempGuruMcpServer({
       // Tools + resources come from the shared module. The HTTP route's only
       // addition is telemetry: enrich each record with the request context
-      // bound in withAcceptNormalization (User-Agent + Vercel IP-country),
-      // then write to Redis. The stdio binary omits onTrack entirely.
+      // bound in withAcceptNormalization (User-Agent, Vercel IP-country, and
+      // the verified source-network label), then write to Redis. The stdio
+      // binary omits onTrack entirely.
       onTrack: async (record) => {
         const ctx = currentContext();
         await track({
@@ -80,6 +126,7 @@ const handler = createMcpHandler(
           channel: "mcp",
           userAgent: ctx.userAgent,
           ipCountry: ctx.ipCountry,
+          network: ctx.network,
           source: ctx.source,
           sourcePlatform: record.sourcePlatform || ctx.platform,
         });
@@ -91,6 +138,9 @@ const handler = createMcpHandler(
     // same factory also serves the 2026-07-28 per-request protocol.
     legacy: "stateless",
     responseMode: "auto",
+    // Same bound the route enforces below, kept here so the transport still
+    // holds it if the route guard is ever bypassed or refactored.
+    maxRequestBodySize: MAX_MCP_BODY_BYTES,
     onerror: (error) => {
       console.error("[tempguru-mcp] HTTP transport error:", error);
     },
@@ -177,15 +227,39 @@ async function withAcceptNormalization(request: Request): Promise<Response> {
   // Bind per-request context (User-Agent + Vercel IP-country header) so
   // each tool handler can record telemetry without threading the request.
   const userAgent = request.headers.get("user-agent") ?? "";
+  const ipCountry = request.headers.get("x-vercel-ip-country") ?? "";
+  // Client IP for bounded public read/save/status rate limits (never stored
+  // raw). Vercel sets x-forwarded-for with the real client first.
+  const ip = clientIpFromHeaders(request.headers);
+  // Verified Anthropic/OpenAI egress label, the only dependable "is this really
+  // Claude or ChatGPT?" signal (user agents are not). Label only, never the IP.
+  const network = classifySourceNetwork(ip);
+
+  // Read the body once, bounded, so batch length is known before the
+  // transport dispatches anything. GET returned above; HEAD carries no body.
+  let body: string | null = null;
+  if (request.method !== "HEAD") {
+    const refuse = async (reason: GuardRejectionReason) => {
+      await trackGuardRejection({ reason, userAgent, ipCountry, network });
+      return withMcpCors(guardRejection(reason), request);
+    };
+    const declared = Number(request.headers.get("content-length") ?? 0);
+    if (declared > MAX_MCP_BODY_BYTES) return refuse("body_too_large");
+    body = await request.text();
+    if (Buffer.byteLength(body, "utf8") > MAX_MCP_BODY_BYTES) {
+      return refuse("body_too_large");
+    }
+    if (jsonRpcBatchLength(body) > MAX_MCP_BATCH_MESSAGES) {
+      return refuse("batch_too_large");
+    }
+  }
+
   const classifiedPlatform = normalizeSourcePlatform(classifyUserAgent(userAgent));
   const ctx = {
     userAgent,
-    ipCountry: request.headers.get("x-vercel-ip-country") ?? "",
-    // Client IP for bounded public read/save/status rate limits (never stored
-    // raw). Vercel sets x-forwarded-for with the real client first.
-    ip:
-      (request.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() ||
-      (request.headers.get("x-real-ip") ?? ""),
+    ipCountry,
+    network,
+    ip,
     // Attribution tag from a surface we control. Header first, `?source=` param
     // as a fallback for clients that can't set custom headers.
     source:
@@ -199,30 +273,25 @@ async function withAcceptNormalization(request: Request): Promise<Response> {
   };
 
   return runWithContext(ctx, async () => {
+    // The body was consumed by the guard above (Request bodies are one-shot
+    // streams under Node's fetch), so forward a rebuilt request carrying the
+    // same text, with the Accept header normalized when a client sent only one
+    // of the two required content types.
     const accept = request.headers.get("accept") ?? "";
-
-    if (accept.includes("application/json") && accept.includes("text/event-stream")) {
-      return withMcpCors(await handler.fetch(request), request);
+    const headers = new Headers(request.headers);
+    if (!(accept.includes("application/json") && accept.includes("text/event-stream"))) {
+      headers.set("accept", "application/json, text/event-stream");
     }
 
-    // Clone the request with a normalized Accept header. Body must be read first
-    // because Request bodies are one-shot streams under Node's fetch.
-    const normalizedHeaders = new Headers(request.headers);
-    normalizedHeaders.set("accept", "application/json, text/event-stream");
-
-    let body: BodyInit | null = null;
-    if (request.method !== "GET" && request.method !== "HEAD") {
-      body = await request.text();
-    }
-
-    const normalized = new Request(request.url, {
+    const forwarded = new Request(request.url, {
       method: request.method,
-      headers: normalizedHeaders,
-      body,
+      headers,
+      // An empty body (e.g. a bare DELETE) stays bodiless, as before the guard.
+      body: body ? body : null,
       signal: request.signal,
     });
 
-    return withMcpCors(await handler.fetch(normalized), request);
+    return withMcpCors(await handler.fetch(forwarded), request);
   });
 }
 

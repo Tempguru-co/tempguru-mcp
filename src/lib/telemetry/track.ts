@@ -6,6 +6,11 @@
 //   uas:{date}                   HASH  ua_class → invocation count
 //   ua:unclassified:{date}       HASH  fixed "unclassified" bucket → count
 //   countries:{date}             HASH  iso2_country → invocation count
+//   origin:{date}                HASH  "iso2|network|ua_class" → invocation count, where
+//                                      network is the verified AI-platform source network
+//                                      (anthropic/openai by published egress IP, else other)
+//   guard:{date}                 HASH  "reason|iso2|network|ua_class" → /mcp requests
+//                                      refused before any tool ran (oversized body or batch)
 //   status:{date}                HASH  "success"|"error" → count
 //   sources:{date}               HASH  attribution tag → count (our controlled surfaces)
 //   funnel:{date}                HASH  "channel:event" → lifecycle count
@@ -26,6 +31,7 @@ import { classifyUserAgent, type UaClass } from "./classify-ua";
 import { findCity, findRole, findState } from "../mcp/data";
 import { normalizeControlledSource, normalizeSourcePlatform } from "./source-tags";
 import { QUOTE_SKILL_IDS, type QuoteSkillId } from "../mcp/quote";
+import { SOURCE_NETWORKS, type SourceNetwork } from "./source-network";
 
 const TTL_SECONDS = 60 * 60 * 24 * 90; // 90 days
 const RECENT_LIMIT = 200;
@@ -58,6 +64,15 @@ export interface TrackInput {
   // Canonical TempGuru skill that produced a successful quote lead. Closed
   // enum only; arbitrary public strings never become telemetry dimensions.
   sourceSkill?: QuoteSkillId;
+  // Verified AI-platform source network (classifySourceNetwork). The caller
+  // passes only the label; track() never sees or stores the client IP.
+  network?: SourceNetwork;
+}
+
+const SOURCE_NETWORK_SET = new Set<string>(SOURCE_NETWORKS);
+
+export function canonicalTelemetryNetwork(value: string | undefined): SourceNetwork {
+  return value && SOURCE_NETWORK_SET.has(value) ? (value as SourceNetwork) : "unknown";
 }
 
 export type FunnelEvent =
@@ -115,6 +130,13 @@ export async function track(input: TrackInput): Promise<void> {
   const canonicalRole = canonicalTelemetryRole(input.role);
   const canonicalState = canonicalTelemetryState(input.state);
   const canonicalCountry = canonicalTelemetryCountry(input.ipCountry);
+  // Country, verified source network, and UA class are also counted together.
+  // Separate per-dimension hashes cannot answer "is the Hong Kong volume
+  // scripted, or real agents?", and the UA alone cannot say whether a call
+  // really came from Claude or ChatGPT; the cross-tab answers both, storing
+  // nothing beyond three closed labels.
+  const network = canonicalTelemetryNetwork(input.network);
+  const originField = `${canonicalCountry ?? "unknown"}|${network}|${ua}`;
 
   // Attribution tag from a controlled surface (custom_gpt / website_widget /
   // manual_test / team_demo / ...). Sanitized to [a-z0-9_-], capped. Only our
@@ -135,6 +157,7 @@ export async function track(input: TrackInput): Promise<void> {
     ua,
     channel,
     country: canonicalCountry,
+    network,
     status: input.status,
     city: canonicalCity,
     role: canonicalRole,
@@ -201,6 +224,8 @@ export async function track(input: TrackInput): Promise<void> {
       canonicalCountry
         ? r.hincrby(`countries:${date}`, canonicalCountry, 1)
         : Promise.resolve(),
+      r.hincrby(`origin:${date}`, originField, 1),
+      r.expire(`origin:${date}`, TTL_SECONDS),
       sourceTag ? r.hincrby(`sources:${date}`, sourceTag, 1) : Promise.resolve(),
       funnelWrite,
       // Real markets feed the sorted demand chart; unrecognized inputs land in
@@ -239,10 +264,46 @@ export async function track(input: TrackInput): Promise<void> {
     ]);
   });
 
-  // Await the write, but never let it hold up (or break) the tool response for
-  // more than WRITE_CAP_MS. In the normal case the write completes in well under
-  // the cap and is durably persisted; in the pathological slow-Redis case we
-  // drop the datapoint rather than degrade the agent's call.
+  await capped(write);
+}
+
+export type GuardRejectionReason = "body_too_large" | "batch_too_large";
+
+/**
+ * Count one /mcp request the route refused before any tool ran. Rejected
+ * requests never reach track(), so without this they would vanish from the
+ * dashboard instead of showing who sent them. Two Redis commands, closed
+ * labels only (reason, ISO country, source network, UA class); the raw UA and
+ * IP are never stored.
+ */
+export async function trackGuardRejection(input: {
+  reason: GuardRejectionReason;
+  userAgent: string;
+  ipCountry: string;
+  network?: SourceNetwork;
+}): Promise<void> {
+  const date = utcDate();
+  const field = [
+    input.reason,
+    canonicalTelemetryCountry(input.ipCountry) ?? "unknown",
+    canonicalTelemetryNetwork(input.network),
+    classifyUserAgent(input.userAgent),
+  ].join("|");
+  await capped(
+    exec(async (r) => {
+      await Promise.allSettled([
+        r.hincrby(`guard:${date}`, field, 1),
+        r.expire(`guard:${date}`, TTL_SECONDS),
+      ]);
+    }),
+  );
+}
+
+// Await a telemetry write, but never let it hold up (or break) the response
+// for more than WRITE_CAP_MS. In the normal case the write completes in well
+// under the cap and is durably persisted; in the pathological slow-Redis case
+// we drop the datapoint rather than degrade the agent's call.
+async function capped(write: Promise<unknown>): Promise<void> {
   let timer: ReturnType<typeof setTimeout> | undefined;
   try {
     await Promise.race([

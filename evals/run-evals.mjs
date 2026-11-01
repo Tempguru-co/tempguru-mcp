@@ -269,6 +269,10 @@ try {
 } catch (err) {
   console.error("eval run crashed:", err);
   fail++;
+  // Record the crash as a failure so the run exits non-zero. Counting it in
+  // `fail` alone printed "0 passed, 1 failed" and still exited 0, so a stdio
+  // server that failed to start would have passed CI.
+  failures.push(`eval run crashed: ${err?.message ?? err}`);
 } finally {
   server.kill();
 }

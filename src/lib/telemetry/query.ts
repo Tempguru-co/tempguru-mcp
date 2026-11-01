@@ -58,6 +58,15 @@ export interface DashboardMetrics {
   byUa: Record<string, number>;
   unclassifiedUas: Array<{ member: string; count: number }>;
   byCountry: Record<string, number>;
+  // "ISO2|network|ua_class" → calls. Answers "what kind of client is the
+  // traffic from country X, and is any of it really Claude or ChatGPT?", which
+  // the independent per-dimension hashes above cannot.
+  byOrigin: Array<{ member: string; count: number }>;
+  // Calls per verified source network (anthropic / openai by published egress
+  // IP; other; unknown), summed from the origin cross-tab.
+  byNetwork: Record<string, number>;
+  // "reason|ISO2|network|ua_class" → /mcp requests refused before any tool ran.
+  guardRejections: Array<{ member: string; count: number }>;
   // Attribution tags from surfaces we control (custom_gpt, website_widget,
   // manual_test, team_demo). Subtract these from the total to isolate organic
   // candidate-real traffic. Empty for untagged/organic calls.
@@ -83,6 +92,8 @@ export interface DashboardMetrics {
     source: string | null;
     source_platform?: string | null;
     source_skill?: string | null;
+    // Absent on events recorded before source-network labelling shipped.
+    network?: string | null;
   }>;
   dailyTotals: Array<{ date: string; count: number }>;
 }
@@ -98,6 +109,9 @@ export async function getMetrics(windowDays = 7): Promise<DashboardMetrics> {
       byUa: {},
       unclassifiedUas: [],
       byCountry: {},
+      byOrigin: [],
+      byNetwork: {},
+      guardRejections: [],
       bySource: {},
       funnelByChannel: {},
       bySourcePlatform: {},
@@ -118,6 +132,8 @@ export async function getMetrics(windowDays = 7): Promise<DashboardMetrics> {
     byUa,
     byStatus,
     byCountry,
+    originHash,
+    guardHash,
     bySource,
     funnelByChannel,
     bySourcePlatform,
@@ -133,6 +149,8 @@ export async function getMetrics(windowDays = 7): Promise<DashboardMetrics> {
     aggregateHash("uas", dates),
     aggregateHash("status", dates),
     aggregateHash("countries", dates),
+    aggregateHash("origin", dates),
+    aggregateHash("guard", dates),
     aggregateHash("sources", dates),
     aggregateHash("funnel", dates),
     aggregateHash("source-platforms", dates),
@@ -156,6 +174,19 @@ export async function getMetrics(windowDays = 7): Promise<DashboardMetrics> {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 25)
     .map(([member, count]) => ({ member, count }));
+
+  const topEntries = (hash: Record<string, number>, n: number) =>
+    Object.entries(hash)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, n)
+      .map(([member, count]) => ({ member, count }));
+  const byOrigin = topEntries(originHash, 40);
+  const guardRejections = topEntries(guardHash, 25);
+  const byNetwork: Record<string, number> = {};
+  for (const [member, count] of Object.entries(originHash)) {
+    const network = member.split("|")[1] ?? "unknown";
+    byNetwork[network] = (byNetwork[network] ?? 0) + count;
+  }
 
   const totalRequests = Object.values(byTool).reduce((a, b) => a + b, 0);
   const totalErrors = byStatus.error ?? 0;
@@ -198,6 +229,9 @@ export async function getMetrics(windowDays = 7): Promise<DashboardMetrics> {
     byUa,
     unclassifiedUas,
     byCountry,
+    byOrigin,
+    byNetwork,
+    guardRejections,
     bySource,
     funnelByChannel,
     bySourcePlatform,

@@ -32,7 +32,7 @@ async function loadTelemetryHarness() {
   const result = await build({
     stdin: {
       contents: `
-        export { track } from "./src/lib/telemetry/track.ts";
+        export { track, trackGuardRejection } from "./src/lib/telemetry/track.ts";
         export { exec as redisExec } from "./src/lib/telemetry/redis.ts";
       `,
       resolveDir: repoRoot,
@@ -985,6 +985,22 @@ check("Toronto: compliance is provincial (Ontario), wage deferred to coordinator
 // ── plan_staffing: city validated before needs_roles; crew-size + security notes ──
 check("city-only call with unknown city returns city_not_found (not the catalog)",
   buildStaffingPlan({ city: "Paris" }).status === "city_not_found");
+// No-plan outcomes carry no plan_id or continuation, so their next steps must
+// not send the agent to request_quote or a nonexistent continuation.form_url.
+const noPlanResults = [
+  buildStaffingPlan({ city: "Hong Kong", event_date: "2027-03-10" }),
+  buildStaffingPlan({ city: "Chicago", roles: [{ role: "astronaut", headcount: 2 }] }),
+];
+check("no-plan outcomes never point the agent at a quote handoff that cannot exist",
+  noPlanResults[0].status === "city_not_found"
+    && noPlanResults[1].status === "roles_not_found"
+    && noPlanResults.every((r) =>
+      r.plan_id === undefined
+        && r.continuation === undefined
+        && r.next_steps[0].startsWith("No plan was created")
+        && !r.next_steps.some((s) => /call request_quote with the saved plan_id|give the buyer continuation\.form_url/.test(s)))
+    && noPlanResults[0].next_steps.some((s) => s.includes("US and Canada only")),
+  JSON.stringify(noPlanResults.map((r) => r.next_steps)));
 const crew = buildStaffingPlan({
   city: "Austin",
   roles: [
@@ -1401,6 +1417,66 @@ check("MCP keeps non-browser server clients compatible without wildcard CORS",
     && hasMachineSecurity(mcpServerPreflight)
     && variesOnOrigin(mcpServerPreflight));
 
+// ── /mcp request guard: one HTTP request must not fan out into many tool calls ──
+const mcpPost = (body, headers = {}) => mcpRoute.POST(new Request(
+  "https://mcp.tempguru.co/mcp",
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json, text/event-stream",
+      "MCP-Protocol-Version": "2025-06-18",
+      ...headers,
+    },
+    body,
+  },
+));
+const rpcCall = (id, method, params = {}) => ({ jsonrpc: "2.0", id, method, params });
+// Parse defensively: without the guard these come back as SSE tool results,
+// which must fail the check below rather than crash the suite.
+const jsonOrEmpty = async (response) => {
+  try {
+    return JSON.parse(await response.text());
+  } catch {
+    return {};
+  }
+};
+const oversizedBatch = await mcpPost(JSON.stringify(
+  Array.from({ length: 11 }, (_, i) => rpcCall(i + 1, "tools/call", { name: "get_roles", arguments: {} })),
+));
+const oversizedBatchBody = await jsonOrEmpty(oversizedBatch);
+check("MCP refuses a JSON-RPC batch over 10 messages before any tool runs",
+  oversizedBatch.status === 400
+    && oversizedBatchBody.error?.code === -32600
+    && /Batch must not exceed 10/.test(oversizedBatchBody.error?.message ?? "")
+    && hasMachineSecurity(oversizedBatch),
+  JSON.stringify({ status: oversizedBatch.status, oversizedBatchBody }));
+const oversizedBody = await mcpPost(JSON.stringify({
+  ...rpcCall(1, "tools/call", { name: "get_roles", arguments: {} }),
+  padding: "x".repeat(64 * 1024),
+}));
+const oversizedBodyJson = await jsonOrEmpty(oversizedBody);
+check("MCP refuses a body over 64 KiB with 413",
+  oversizedBody.status === 413
+    && oversizedBodyJson.error?.code === -32000
+    && hasMachineSecurity(oversizedBody),
+  JSON.stringify({ status: oversizedBody.status, oversizedBodyJson }));
+const smallBatch = await mcpPost(JSON.stringify([
+  rpcCall(1, "tools/list"),
+  rpcCall(2, "prompts/list"),
+]));
+const smallBatchText = await smallBatch.text();
+check("MCP still serves a small legacy batch within the cap",
+  smallBatch.status === 200 && (smallBatchText.match(/"result":/g) ?? []).length === 2,
+  `${smallBatch.status} ${smallBatchText.slice(0, 200)}`);
+const jsonOnlyList = await mcpPost(JSON.stringify(rpcCall(1, "tools/list")), {
+  Accept: "application/json",
+});
+const jsonOnlyListText = await jsonOnlyList.text();
+check("MCP forwards the guarded body intact and still normalizes a JSON-only Accept",
+  jsonOnlyList.status === 200 && (jsonOnlyListText.match(/"inputSchema":/g) ?? []).length === 12,
+  `${jsonOnlyList.status} ${jsonOnlyListText.slice(0, 200)}`);
+
 const quoteRoute = await load("src/app/api/v1/quote-requests/route.ts");
 const quoteAttackerPost = await quoteRoute.POST(new Request(
   "https://mcp.tempguru.co/api/v1/quote-requests",
@@ -1805,6 +1881,73 @@ check("handoff telemetry stays separate from buyer-submitted lead attribution",
     && funnelAttribution?.["rest:quotes_submitted"] === 1
     && !("mcp:quotes_submitted" in (funnelAttribution ?? {})),
   JSON.stringify({ skillAttribution, platformAttribution, funnelAttribution }));
+await telemetryHarness.track({
+  tool: "get_cities",
+  status: "success",
+  channel: "mcp",
+  userAgent: "python-httpx/0.28.1",
+  ipCountry: "hk",
+  network: "other",
+});
+// Real claude.ai traffic has been observed with a python-httpx UA: the
+// verified network keeps it from reading as an anonymous script.
+await telemetryHarness.track({
+  tool: "get_roles",
+  status: "success",
+  channel: "mcp",
+  userAgent: "python-httpx/0.28.1",
+  ipCountry: "US",
+  network: "anthropic",
+});
+await telemetryHarness.track({
+  tool: "get_roles",
+  status: "success",
+  channel: "mcp",
+  userAgent: "Claude-User",
+  ipCountry: "",
+  network: "not-a-network",
+});
+await telemetryHarness.trackGuardRejection({
+  reason: "batch_too_large",
+  userAgent: "curl/8.7.1",
+  ipCountry: "HK",
+  network: "other",
+});
+const [originHash, guardHash] = await Promise.all([
+  telemetryHarness.redisExec((redis) => redis.get(`origin:${telemetryDate}`)),
+  telemetryHarness.redisExec((redis) => redis.get(`guard:${telemetryDate}`)),
+]);
+check("telemetry cross-tabs country, verified network, and UA class, and counts guard refusals, using closed labels only",
+  originHash?.["HK|other|scripted"] === 1
+    && originHash?.["US|anthropic|scripted"] === 1
+    && originHash?.["unknown|unknown|claude-ai"] === 1
+    && originHash?.["US|unknown|other"] === 2
+    && guardHash?.["batch_too_large|HK|other|scripted"] === 1
+    && !JSON.stringify({ originHash, guardHash }).includes("httpx")
+    && !JSON.stringify({ originHash, guardHash }).includes("curl")
+    && !JSON.stringify({ originHash, guardHash }).includes("not-a-network"),
+  JSON.stringify({ originHash, guardHash }));
+
+// ── verified source network: published Anthropic/OpenAI egress ranges ──
+const sourceNetwork = await load("src/lib/telemetry/source-network.ts");
+const egressRanges = JSON.parse(
+  readFileSync(join(repoRoot, "src/lib/telemetry/ai-egress-ranges.json"), "utf8"),
+);
+const firstOpenAiAddress = egressRanges.networks.openai.prefixes[0].split("/")[0];
+check("source network labels published Anthropic and OpenAI egress IPs, and nothing else",
+  sourceNetwork.classifySourceNetwork("160.79.104.1") === "anthropic"
+    && sourceNetwork.classifySourceNetwork("160.79.111.254") === "anthropic"
+    && sourceNetwork.classifySourceNetwork("::ffff:160.79.106.20") === "anthropic"
+    && sourceNetwork.classifySourceNetwork("160.79.112.1") === "other"
+    && sourceNetwork.classifySourceNetwork(firstOpenAiAddress) === "openai"
+    && sourceNetwork.classifySourceNetwork("43.198.1.1") === "other"
+    && sourceNetwork.classifySourceNetwork("2001:db8::1") === "other"
+    && sourceNetwork.classifySourceNetwork("") === "unknown"
+    && sourceNetwork.classifySourceNetwork("not-an-ip") === "unknown"
+    && sourceNetwork.clientIpFromHeaders(
+      new Headers({ "x-forwarded-for": "160.79.104.9, 10.0.0.1" }),
+    ) === "160.79.104.9",
+  `openai sample ${firstOpenAiAddress}`);
 const savedPlanSource = { source: "pi" };
 check("lead source precedence is explicit platform, current runtime, then saved plan",
   queueModule.resolveEffectiveSourcePlatform(

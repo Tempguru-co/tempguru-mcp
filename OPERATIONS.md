@@ -82,6 +82,8 @@ carries a **90-day TTL**. Non-daily operational keys list their retention below.
 | `uas:{date}` | HASH | `ua_class → count` |
 | `ua:unclassified:{date}` | HASH | fixed `unclassified` bucket only; raw user-agent discarded |
 | `countries:{date}` | HASH | `iso2 → count` |
+| `origin:{date}` | HASH | `iso2\|network\|ua_class → count`; network is the verified source-network label (see below), never the IP |
+| `guard:{date}` | HASH | `reason\|iso2\|network\|ua_class → count` for `/mcp` requests refused before any tool ran (`body_too_large` over 64 KiB, `batch_too_large` over 10 JSON-RPC messages) |
 | `status:{date}` | HASH | `success`/`error` → count |
 | `channels:{date}` | HASH | `mcp`/`rest` invocation count |
 | `sources:{date}` | HASH | allowlisted controlled-source tag → count |
@@ -130,8 +132,29 @@ route many users through shared egress IPs.
 - **Directory probes**, glama-probe, smithery-probe, modelscope-probe, mcp-inspector
 - **Search crawlers**, baidu-spider, yisou-spider, sogou-spider, _360-spider, bing-bot, google-bot, yandex-bot, applebot, common-crawl
 - **Browser**, `browser` (Mozilla/AppleWebKit/Chrome/Safari/Firefox/Edge UAs = a human in a browser, or a browser-context probe)
-- **Scripted clients**, curl/wget/python-requests/httpx/axios/node-fetch/undici/go-http-client/okhttp/got/bare-node. Genuine third-party scripts only (our own tests are `internal-test`).
+- **Scripted clients**, curl/wget/python-requests/httpx/axios/node-fetch/undici/go-http-client/okhttp/got/bare-node. Our own tests are `internal-test`, but this bucket is *not* only hand-written scripts: the official Python MCP SDK sends httpx's default `python-httpx/<version>` (so Qwen-Agent, LangChain MCP adapters, and the Python OpenAI Agents SDK land here), claude.ai has been observed calling MCP servers as `python-httpx`, and a ChatGPT MCP validation request as `curl`. Read it as "no branded user agent", and use the source network below to tell real platform traffic apart.
 - **Catchall**, `other` (when nothing matches)
+
+### Source network (verified AI-platform traffic)
+
+A user agent can be absent, generic, or spoofed, so it cannot prove a call came
+from Claude or ChatGPT. `src/lib/telemetry/source-network.ts` labels each MCP and
+REST call by checking the client IP (Vercel's anti-spoofing `x-forwarded-for`)
+against the egress ranges each company publishes:
+
+- `anthropic`: `160.79.104.0/21`, Anthropic's documented outbound block for MCP
+  tool calls from claude.ai, Claude Desktop, Cowork, and the mobile apps
+  (https://platform.claude.com/docs/en/api/ip-addresses).
+- `openai`: `https://openai.com/chatgpt-connectors.json` (ChatGPT plugins,
+  connectors, and GPT Actions).
+- `other` for any other IP; `unknown` when no usable IP is present.
+
+Only the label is written (in `origin:{date}`, `guard:{date}`, and each recent
+event); the IP is never stored. The ranges are a committed snapshot in
+`src/lib/telemetry/ai-egress-ranges.json`; OpenAI's list changes, so refresh it
+with `npm run sync:ai-egress` (and update the Anthropic constant in
+`scripts/sync-ai-egress.mjs` if Anthropic's page changes). Neither company
+publishes an egress range in Hong Kong.
 
 ### Adding a new UA class
 
@@ -157,10 +180,13 @@ Top right: 1d / 7d / 30d / 90d. URL is `?days=N`. Maximum window is 90 days (mat
 - **Buyer-submitted quote leads by platform and canonical skill**, which runtime and workflow produced each successful new REST lead
 - **Top cities / roles / states**, top 20 each, demand signal from queries
 - **By country**, Vercel edge geolocation
-- **Recent invocations**, last 50 events with timestamps, tool, UA class, country, status, and canonical catalog dimensions
+- **Verified AI-platform calls**, tool calls whose source IP is in Anthropic's or OpenAI's published egress ranges (the dependable "real Claude / real ChatGPT" count)
+- **By origin**, country · source network · UA class cross-tab (tool calls, not distinct clients)
+- **Refused by the /mcp request guard**, oversized bodies and batches, by country · network · UA class
+- **Recent invocations**, last 50 events with timestamps, tool, UA class, country, source network, status, and canonical catalog dimensions
 
 ### What's NOT captured in telemetry
-- No raw IPs
+- No raw IPs (the source-network label is computed in memory; only the label is stored)
 - No request bodies or response bodies
 - No request/response content or lifecycle identifiers
 - No PII

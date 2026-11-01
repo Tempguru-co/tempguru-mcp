@@ -260,6 +260,43 @@ function Dashboard({ m }: { m: DashboardMetrics }) {
         </Card>
       )}
 
+      {/* Verified platform traffic: source IP inside Anthropic's or OpenAI's
+          published egress ranges. User agents cannot establish this (claude.ai
+          has called as python-httpx; any script can claim to be Claude). */}
+      <Card title="Verified AI-platform calls (by published egress IP)">
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+            gap: 12,
+          }}
+        >
+          <Stat label="Anthropic (Claude)" value={(m.byNetwork.anthropic ?? 0).toLocaleString()} />
+          <Stat label="OpenAI (ChatGPT)" value={(m.byNetwork.openai ?? 0).toLocaleString()} />
+          <Stat label="Everything else" value={(m.byNetwork.other ?? 0).toLocaleString()} />
+        </div>
+        <p style={{ color: "#94a8c4", fontSize: 12, margin: "12px 0 0" }}>
+          Counted from this release on. Ranges refresh with npm run sync:ai-egress.
+        </p>
+      </Card>
+
+      {/* Country x network x UA class. Counts are tool invocations, not
+          distinct clients. */}
+      <Card title="By origin: country · network · client type (tool calls, not distinct clients)">
+        <KeyValueTable
+          rows={m.byOrigin.map((c) => [c.member.replaceAll("|", " · "), c.count])}
+          emptyMessage="No origin data yet (recorded from this release on)."
+        />
+      </Card>
+
+      {/* Requests the /mcp route refused before any tool ran. */}
+      <Card title="Refused by the /mcp request guard (oversized body or batch)">
+        <KeyValueTable
+          rows={m.guardRejections.map((c) => [c.member.replaceAll("|", " · "), c.count])}
+          emptyMessage="No oversized or batched requests refused in this window."
+        />
+      </Card>
+
       {/* Recent activity */}
       <Card title="Recent invocations (last 50)">
         <RecentTable rows={m.recent} />
@@ -433,6 +470,7 @@ function RecentTable({ rows }: { rows: DashboardMetrics["recent"] }) {
             <th style={{ padding: "6px 8px" }}>Tool</th>
             <th style={{ padding: "6px 8px" }}>UA class</th>
             <th style={{ padding: "6px 8px" }}>Country</th>
+            <th style={{ padding: "6px 8px" }}>Network</th>
             <th style={{ padding: "6px 8px" }}>Status</th>
             <th style={{ padding: "6px 8px" }}>Params</th>
             <th style={{ padding: "6px 8px" }}>Attribution</th>
@@ -447,6 +485,7 @@ function RecentTable({ rows }: { rows: DashboardMetrics["recent"] }) {
               <td style={{ padding: "6px 8px" }}>{r.tool}</td>
               <td style={{ padding: "6px 8px" }}>{r.ua}</td>
               <td style={{ padding: "6px 8px" }}>{r.country ?? "-"}</td>
+              <td style={{ padding: "6px 8px" }}>{r.network ?? "-"}</td>
               <td
                 style={{
                   padding: "6px 8px",

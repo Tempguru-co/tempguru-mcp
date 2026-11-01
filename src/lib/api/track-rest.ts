@@ -9,6 +9,10 @@
 
 import { track } from "@/lib/telemetry/track";
 import type { FunnelEvent } from "@/lib/telemetry/track";
+import {
+  classifySourceNetwork,
+  clientIpFromHeaders,
+} from "@/lib/telemetry/source-network";
 
 export function trackRest(
   request: Request,
@@ -28,6 +32,8 @@ export function trackRest(
     channel: "rest",
     userAgent: request.headers.get("user-agent") ?? "",
     ipCountry: request.headers.get("x-vercel-ip-country") ?? "",
+    // GPT Actions call from OpenAI's published connector ranges; label only.
+    network: classifySourceNetwork(clientIpFromHeaders(request.headers)),
     source: request.headers.get("x-tempguru-source") ?? url.searchParams.get("source") ?? "",
   });
 }

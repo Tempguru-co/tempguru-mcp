@@ -7,10 +7,15 @@
 // from inside tool handlers without threading the Request through.
 
 import { AsyncLocalStorage } from "node:async_hooks";
+import type { SourceNetwork } from "./source-network";
 
 export interface RequestContext {
   userAgent: string;
   ipCountry: string;
+  // Verified AI-platform source network derived from the client IP against
+  // published egress ranges ("anthropic" / "openai" / "other" / "unknown").
+  // A label only; the IP itself is never recorded.
+  network: SourceNetwork;
   // Client IP (x-forwarded-for first hop), used ONLY for the request_quote
   // rate limiter, which stores a truncated hash, never the raw IP. Empty under
   // stdio, where the limiter fails open.
@@ -36,6 +41,7 @@ export function currentContext(): RequestContext {
   return storage.getStore() ?? {
     userAgent: "",
     ipCountry: "",
+    network: "unknown",
     ip: "",
     source: "",
     platform: "",
