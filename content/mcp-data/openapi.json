@@ -369,7 +369,7 @@
           "Compliance"
         ],
         "summary": "Published booking and procurement policies",
-        "description": "Returns TempGuru's published minimum-hours, cancellation/rescheduling, replacement and backfill, COI/additional-insured, payment, background-check, order-confirmation, quote-response, and public-offer policies. Unsupported values are explicitly marked `confirm_with_coordinator` and never fabricated. Pass an optional topic for one policy; an unknown topic returns a clean expected-miss variant with the available topics.",
+        "description": "Returns TempGuru's published minimum-hours, cancellation/rescheduling, replacement and backfill, COI/additional-insured, payment, background-check, order-confirmation, and quote-response policies. Unsupported values are explicitly marked `confirm_with_coordinator` and never fabricated. Pass an optional topic for one policy; an unknown topic returns a clean expected-miss variant with the available topics.",
         "parameters": [
           {
             "name": "topic",
@@ -386,8 +386,7 @@
                 "payment-terms",
                 "background-checks",
                 "order-confirmation",
-                "quote-response",
-                "offers"
+                "quote-response"
               ]
             },
             "description": "Optional canonical policy topic. Choose an enum value; omit for all policies or a broader question."
@@ -1265,8 +1264,7 @@
               "payment-terms",
               "background-checks",
               "order-confirmation",
-              "quote-response",
-              "offers"
+              "quote-response"
             ]
           },
           "title": {
@@ -1292,22 +1290,6 @@
             "items": {
               "type": "string"
             }
-          },
-          "code": {
-            "type": "string"
-          },
-          "discount_percent": {
-            "type": "number"
-          },
-          "cap_usd": {
-            "type": "number"
-          },
-          "expires": {
-            "type": "string",
-            "format": "date"
-          },
-          "scope": {
-            "type": "string"
           }
         },
         "additionalProperties": false
@@ -1410,8 +1392,7 @@
                 "payment-terms",
                 "background-checks",
                 "order-confirmation",
-                "quote-response",
-                "offers"
+                "quote-response"
               ]
             }
           },

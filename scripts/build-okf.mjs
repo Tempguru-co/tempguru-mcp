@@ -302,18 +302,10 @@ const policySections = policies.policies
   .map((policy) => `## ${policy.title}\n\n${policyBody(policy)}`)
   .join("\n\n");
 const cancellationPolicy = policyFor("cancellation-rescheduling");
-const offerPolicy = policyFor("offers");
-const offerTerms = offerPolicy.confirmed_claims[0];
-if (
-  offerPolicy.confirmed_claims.length !== 1 ||
-  offerPolicy.code !== "AGENT5" ||
-  offerPolicy.discount_percent !== 5 ||
-  offerPolicy.cap_usd !== 500 ||
-  offerPolicy.expires !== "2026-12-31" ||
-  offerPolicy.scope !== "first order, new clients" ||
-  !offerTerms
-) {
-  throw new Error("The canonical AGENT5 offer record is incomplete");
+// Generated knowledge is model-readable, so it carries no promotional offers
+// (codes, discounts). scripts/check-submissions.mjs enforces the absence.
+if (policies.policies.some((policy) => policy.topic === "offers")) {
+  throw new Error("policies.json must not publish an offers topic to agent-facing knowledge");
 }
 
 // ─── Rate Index math, mirrors src/lib/mcp/city-rates.ts exactly ──────────────
@@ -483,6 +475,10 @@ Rate ranges in this bundle are **planning estimates**, not binding quotes.`
 // ══════════════════════════════════════════════════════════════════════════
 // ROOT: log.md  (reserved, no frontmatter, §7)
 // ══════════════════════════════════════════════════════════════════════════
+// The bundle first shipped in #1 (2026-06-13). The entry heading used to say
+// "Initial" with the latest DATA_DATE, so every data refresh moved the
+// first-publication date forward; the real date is pinned here instead.
+const OKF_FIRST_PUBLISHED = "2026-06-13";
 write("log.md", plainDoc(
   `# Change Log
 
@@ -490,9 +486,9 @@ This bundle is generated from TempGuru's canonical datasets. Each entry records 
 data or structure change. Content freshness for any concept is carried in that
 file's \`timestamp\` frontmatter field.
 
-## ${DATA_DATE}, Initial OKF v0.1 bundle
+## ${DATA_DATE}, Current OKF v0.1 bundle
 
-- First publication of the TempGuru knowledge bundle in Open Knowledge Format v0.1.
+- First published ${OKF_FIRST_PUBLISHED} as the TempGuru knowledge bundle in Open Knowledge Format v0.1; this entry describes the current regeneration.
 - Generated from \`content/mcp-data/\` (cities, roles, role-pricing, state-compliance, city-rates, policies), data version ${cities._meta.version}, updated ${DATA_DATE}.
 - Rate Index figures computed with the same logic as the live \`get_rate_benchmark\` MCP tool, so the bundle and the API stay in lockstep.
 - Evidence-verified public scale: ${approvedClaims.markets.publicFigure}, ${approvedClaims.events.publicFigure}, and ${approvedClaims.completedShifts.publicFigure}.
@@ -1454,9 +1450,6 @@ claims, not annual run rates. Claim definitions and statuses are available in
 - [State compliance](${BUNDLE_URL}/compliance/index.md): minimum wage and overtime for all 51 US jurisdictions
 - [Booking and procurement policies](${BUNDLE_URL}/policies.md): confirmed terms plus explicit coordinator-confirmation gaps
 - [Workflows](${BUNDLE_URL}/workflows/index.md): all ${SKILLS.length} canonical agent skills plus plan and quote-submission flows
-
-## Published first-order offer
-${offerTerms}
 
 ## Agent interfaces and live tools (action layer)
 - MCP Server (no auth, dual-era HTTP; preferred MCP 2026-07-28 with 2025-era compatibility): ${MCP_ENDPOINT}, ${TOOLS.length} tools (${TOOLS.map((t) => t.name).join(", ")}); call plan_staffing first, retain any plan_id, call save_staffing_plan only when a complete plan has no plan_id, and never duplicate a planner save

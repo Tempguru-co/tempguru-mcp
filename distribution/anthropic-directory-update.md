@@ -34,6 +34,13 @@ Inventory summary: **12 tools, 2 prompts, 8 resources**.
 > not mean Anthropic approved the offer. Version `1.7.2` does not change its
 > terms; it only improves policy-topic discovery, aliases, and clean-miss
 > telemetry.
+>
+> **Removal (the release after `1.7.2`):** AGENT5 is removed from every
+> model-readable surface: server instructions, `get_policies` and its REST and
+> OpenAPI mirrors, the `plan_staffing` and `get_plan` notes, and the generated
+> OKF and llms knowledge. The code survives only as an editable prefill on the
+> human buyer form, which the model never sees. Drift gates now fail if offer
+> copy reappears in agent-facing text. See the optional removal note below.
 
 Approved scale claim IDs: `tg-claim-markets-300-plus-v1`,
 `tg-claim-events-5000-plus-v1`, and
@@ -186,6 +193,33 @@ Suggested end-to-end review:
 5. Open the link only to inspect the buyer form. A reviewer does not need to
    enter contact information or submit a live lead to validate the MCP
    connector.
+
+## Optional AGENT5 removal note (for the release after `1.7.2`)
+
+Send after that release is live, on the original AGENT5 disclosure thread.
+Replace `<release version>` with the published version first.
+
+**To:** `mcp-review@anthropic.com`
+**Subject:** TempGuru Event Staffing connector: promotional offer removed from model-readable text
+
+Hello Anthropic MCP Review,
+
+Following up on our 2026-08-14 disclosure about the AGENT5 first-order offer:
+TempGuru MCP `<release version>` removes it from everything the model reads.
+Server instructions, `get_policies`, the `plan_staffing` and `get_plan`
+results, and our published agent knowledge no longer mention any offer, code,
+or discount. The only remaining use is an editable prefill on the
+TempGuru-hosted buyer form, which the buyer sees and the model does not.
+
+There is no change to the connector's permissions, inventory, authentication,
+or non-PII buyer-form handoff. It remains `read_write` with 12 tools, 2
+prompts, 8 resources, and allowed link origin `https://mcp.tempguru.co`.
+
+Thank you,
+
+Megan Hayward
+
+Temporary Assistance Guru, Inc.
 
 ## Optional `1.7.2` status email
 

@@ -14,6 +14,7 @@ import {
   PRICING_META,
   STATES,
   STATE_META,
+  POLICIES,
   POLICIES_META,
   findCity,
   findRole,
@@ -31,7 +32,6 @@ import {
   type Policy,
 } from "./data";
 import { parseEventStart } from "../dates/parse-event-start";
-import { getPublishedPolicies } from "./published-offer";
 
 // Re-export shared types so REST/MCP route files can import everything
 // query-related from one place.
@@ -642,8 +642,9 @@ const normalizePolicyTopic = (value: string) =>
 
 // Backward-compatible lexical aliases only. Do not map broad procurement
 // concepts (W-9, MSA, vendor onboarding, workers' comp) to a policy that does
-// not actually answer them. Alias targets are still matched only against the
-// currently published set, so `agent5` cannot revive an expired offer row.
+// not actually answer them. Promotional offers are not a policy topic here:
+// they stay out of every model-readable surface (see published-offer.ts), so
+// "offer" or "agent5" returns the clean available-topics miss.
 const POLICY_TOPIC_ALIASES: Readonly<Record<string, string>> = Object.freeze({
   "minimum-hours": "minimum-booking-hours",
   cancellation: "cancellation-rescheduling",
@@ -658,15 +659,10 @@ const POLICY_TOPIC_ALIASES: Readonly<Record<string, string>> = Object.freeze({
   invoicing: "payment-terms",
   "payment-invoicing": "payment-terms",
   "background-check": "background-checks",
-  offer: "offers",
-  agent5: "offers",
 });
 
-export function queryPolicies(
-  input: PoliciesQuery = {},
-  now = new Date(),
-): PolicyQueryResult {
-  const publishedPolicies = getPublishedPolicies(now);
+export function queryPolicies(input: PoliciesQuery = {}): PolicyQueryResult {
+  const publishedPolicies = POLICIES;
   let selected = publishedPolicies;
   if (input.topic?.trim()) {
     const requested = normalizePolicyTopic(input.topic);

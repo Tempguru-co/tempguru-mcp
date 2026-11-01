@@ -384,18 +384,13 @@ const expectedPolicyTopics = [
   "background-checks",
   "order-confirmation",
   "quote-response",
-  "offers",
 ];
+const allPoliciesResult = queryPolicies({});
 check("canonical policy topics are derived from policies.json without drift",
-  JSON.stringify(offerContract.getPublishedPolicyTopics(
-    new Date("2026-08-14T12:00:00Z"),
-  )) === JSON.stringify(expectedPolicyTopics)
-    && !offerContract.getPublishedPolicyTopics(
-      new Date("2027-01-01T05:00:00Z"),
-    ).includes("offers"),
-  JSON.stringify(offerContract.getPublishedPolicyTopics(
-    new Date("2026-08-14T12:00:00Z"),
-  )));
+  allPoliciesResult.ok
+    && JSON.stringify(allPoliciesResult.data.policies.map((policy) => policy.topic))
+      === JSON.stringify(expectedPolicyTopics),
+  JSON.stringify(allPoliciesResult.ok && allPoliciesResult.data.policies.map((policy) => policy.topic)));
 const unknownPolicyResult = queryPolicies(
   { topic: "x".repeat(80) },
   new Date("2026-08-14T12:00:00Z"),
@@ -426,8 +421,6 @@ for (const [alias, topic] of [
   ["invoicing", "payment-terms"],
   ["payment invoicing", "payment-terms"],
   ["background check", "background-checks"],
-  ["offer", "offers"],
-  ["AGENT5", "offers"],
 ]) {
   const aliasResult = queryPolicies(
     { topic: alias },
@@ -439,71 +432,39 @@ for (const [alias, topic] of [
       && aliasResult.data.policies[0]?.topic === topic,
     JSON.stringify(aliasResult));
 }
-const expiredAgent5Alias = queryPolicies(
-  { topic: "AGENT5" },
-  new Date("2027-01-01T05:00:00Z"),
-);
-check("get_policies aliases cannot revive an expired offer",
-  expiredAgent5Alias.ok
-    && expiredAgent5Alias.data.policy_found === false
-    && !expiredAgent5Alias.data.available_topics.includes("offers"),
-  JSON.stringify(expiredAgent5Alias));
-
-const AGENT5_CANONICAL_TERMS =
-  "New TempGuru clients receive 5% off their first order, capped at $500, when the staffing request mentions the code AGENT5 in the event details. The offer is valid for first orders submitted through https://tempguru.co/get-staffing by December 31, 2026. The discount is applied by the TempGuru coordinator after the quote is approved; published city-guide planning rates are unchanged. The code is public and any buyer may use it.";
-const activeOfferResult = queryPolicies(
-  { topic: "offers" },
-  new Date("2026-12-31T23:59:59.000-05:00"),
-);
-const activeOffer = activeOfferResult.ok && activeOfferResult.data.policy_found
-  ? activeOfferResult.data.policies[0]
-  : null;
-check("get_policies returns the canonical AGENT5 terms and structured fields verbatim",
-  activeOffer?.confirmed_claims?.[0] === AGENT5_CANONICAL_TERMS
-    && activeOffer?.code === "AGENT5"
-    && activeOffer?.discount_percent === 5
-    && activeOffer?.cap_usd === 500
-    && activeOffer?.expires === "2026-12-31"
-    && activeOffer?.scope === "first order, new clients",
-  JSON.stringify(activeOffer));
-const expiredOfferResult = queryPolicies(
-  { topic: "offers" },
-  new Date("2027-01-01T00:00:00.000-05:00"),
-);
-check("get_policies removes the offer immediately after 2026-12-31",
-  expiredOfferResult.ok
-    && expiredOfferResult.data.policy_found === false
-    && !expiredOfferResult.data.available_topics.includes("offers"),
-  JSON.stringify(expiredOfferResult));
+// Promotional offers (AGENT5) stay out of everything a model reads; the only
+// sanctioned use is the human quote-form prefill tested below.
+const PROMOTIONAL_OFFER_COPY = /\bAGENT5\b|first-order offer|% off (?:their|your) first order/i;
+const offerTopicMisses = ["offers", "offer", "AGENT5"].map((topic) => queryPolicies({ topic }));
+check("get_policies never serves a promotional offer to agents",
+  offerTopicMisses.every((result) =>
+    result.ok
+      && result.data.policy_found === false
+      && !result.data.available_topics.includes("offers"))
+    && !PROMOTIONAL_OFFER_COPY.test(JSON.stringify(allPoliciesResult)),
+  JSON.stringify(offerTopicMisses));
+const coiPolicyResult = queryPolicies({ topic: "COI" });
 check("get_policies output schema accepts a clean miss and rejects contradictory discriminators",
   outputSchemas.GET_POLICIES_SCHEMA.safeParse(unknownPolicyResult.data).success
     && !outputSchemas.GET_POLICIES_SCHEMA.safeParse({
       ...unknownPolicyResult.data,
       status: "policies",
     }).success
-    && activeOfferResult.ok
+    && coiPolicyResult.ok
+    && outputSchemas.GET_POLICIES_SCHEMA.safeParse(coiPolicyResult.data).success
     && !outputSchemas.GET_POLICIES_SCHEMA.safeParse({
-      ...activeOfferResult.data,
+      ...coiPolicyResult.data,
       status: "policy_not_found",
     }).success);
 
 const { getServerInstructions } = await load("src/lib/mcp/register-tools.ts");
-check("all AGENT5 runtime surfaces share the same inclusive expiry gate",
+check("the human quote-form prefill keeps its inclusive 2026-12-31 expiry gate",
   offerContract.isAgent5OfferActive(new Date("2027-01-01T04:59:59.999Z"))
-    && !offerContract.isAgent5OfferActive(new Date("2027-01-01T05:00:00.000Z"))
-    && offerContract.getAgent5ServerInstruction(new Date("2026-12-31T23:59:59.000-05:00"))
-      === "A published first-order offer (code AGENT5) exists; get_policies returns its exact terms."
-    && offerContract.getAgent5ServerInstruction(new Date("2027-01-01T00:00:00.000-05:00")) === null);
-check("REST policy caching cannot carry a pre-expiry offer past the cutoff",
-  offerContract.getPublishedPolicyCacheMaxAge(new Date("2027-01-01T03:00:00.000Z")) === 3_600
-    && offerContract.getPublishedPolicyCacheMaxAge(new Date("2027-01-01T04:59:58.000Z")) === 2
-    && offerContract.getPublishedPolicyCacheMaxAge(new Date("2027-01-01T04:59:59.999Z")) === 0
-    && offerContract.getPublishedPolicyCacheMaxAge(new Date("2027-01-01T05:00:00.000Z")) === 3_600);
-check("server instructions drop the AGENT5 sentence after the shared expiry boundary",
-  getServerInstructions(new Date("2026-12-31T23:59:59.000-05:00"))
-    .includes("A published first-order offer (code AGENT5) exists; get_policies returns its exact terms.")
-    && !getServerInstructions(new Date("2027-01-01T00:00:00.000-05:00"))
-      .includes("AGENT5"));
+    && !offerContract.isAgent5OfferActive(new Date("2027-01-01T05:00:00.000Z")));
+check("server instructions carry no promotional offer copy",
+  !PROMOTIONAL_OFFER_COPY.test(getServerInstructions())
+    && !/discount|promo/i.test(getServerInstructions()),
+  getServerInstructions());
 check("AGENT5 details prefill is bounded, idempotent, and expiry-aware",
   offerContract.appendAgent5ToDetails("", new Date("2026-08-14T12:00:00Z")) === "AGENT5"
     && offerContract.appendAgent5ToDetails("Needs ADA access", new Date("2026-08-14T12:00:00Z"))
@@ -574,7 +535,7 @@ const offerBaselinePlan = buildStaffingPlan({
     { role: "team-leads", headcount: 1 },
   ],
 });
-check("AGENT5 does not discount or alter the canonical Chicago planning totals",
+check("canonical Chicago planning totals stay undiscounted",
   offerBaselinePlan.status === "plan"
     && offerBaselinePlan.estimated_total_range.low === 5_360
     && offerBaselinePlan.estimated_total_range.high === 6_248
@@ -584,7 +545,7 @@ const bowlingGreenOfferBaseline = buildStaffingPlan({
   city: "Bowling Green",
   roles: [{ role: "brand-ambassadors", headcount: 1, hours_per_shift: 8, days: 1 }],
 });
-check("AGENT5 leaves the $40/hour Brand Ambassador floor and totals undiscounted",
+check("the $40/hour Brand Ambassador floor and totals stay undiscounted",
   bowlingGreenOfferBaseline.status === "plan"
     && bowlingGreenOfferBaseline.plan_lines[0]?.hourly_range.low === 40
     && bowlingGreenOfferBaseline.plan_lines[0]?.hourly_range.high === 48
@@ -1621,7 +1582,6 @@ check("public read REST data remains openly reusable but gains machine security 
 
 const { buildOpenApiSpec } = await load("src/lib/api/openapi.ts");
 const hardenedOpenApi = buildOpenApiSpec();
-const expiredOfferOpenApi = buildOpenApiSpec(new Date("2027-01-01T05:00:00Z"));
 const quoteResponses = hardenedOpenApi.paths["/api/v1/quote-requests"].post.responses;
 const errorCodes = hardenedOpenApi.components.schemas.Error.properties.error
   .properties.code.enum;
@@ -1633,8 +1593,7 @@ check("OpenAPI advertises the canonical get_policies topic enum",
   JSON.stringify(
     hardenedOpenApi.paths["/api/v1/policies"].get.parameters[0].schema.enum,
   ) === JSON.stringify(expectedPolicyTopics)
-    && !expiredOfferOpenApi.paths["/api/v1/policies"].get.parameters[0].schema.enum
-      .includes("offers"));
+    && !PROMOTIONAL_OFFER_COPY.test(JSON.stringify(hardenedOpenApi)));
 const policyResponseBranches = hardenedOpenApi.components.schemas.PoliciesResponse.oneOf;
 check("OpenAPI pins get_policies status and policy_found to consistent response branches",
   policyResponseBranches?.some((branch) =>
@@ -1769,16 +1728,13 @@ const restOfferResponse = await policiesRoute.GET(
   new Request("https://mcp.tempguru.co/api/v1/policies?topic=offers"),
 );
 const restOfferBody = await restOfferResponse.json();
-const restOfferMaxAge = Number(
-  restOfferResponse.headers.get("cache-control")?.match(/^public, max-age=(\d+)$/)?.[1],
-);
-check("REST get_policies serves the exact AGENT5 policy with expiry-bounded caching",
+check("REST get_policies serves no promotional offer and caches for the standard hour",
   restOfferResponse.status === 200
-    && Number.isInteger(restOfferMaxAge)
-    && restOfferMaxAge >= 0
-    && restOfferMaxAge <= 3_600
-    && restOfferBody.policies?.[0]?.confirmed_claims?.[0] === AGENT5_CANONICAL_TERMS
-    && restOfferBody.policies?.[0]?.code === "AGENT5");
+    && restOfferResponse.headers.get("cache-control") === "public, max-age=3600"
+    && restOfferBody.policy_found === false
+    && !restOfferBody.available_topics?.includes("offers")
+    && !PROMOTIONAL_OFFER_COPY.test(JSON.stringify(restOfferBody)),
+  JSON.stringify(restOfferBody));
 
 // ── quote status stub lifecycle: queued -> received, 90-day TTL ──
 const {

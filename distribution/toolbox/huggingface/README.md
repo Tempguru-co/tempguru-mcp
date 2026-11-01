@@ -42,7 +42,7 @@ server (`https://mcp.tempguru.co/mcp`).
   support included). Brand Ambassadors floor at $40/hour in every market.
 - **state_compliance** (51 rows): 2026 minimum wage, weekly/daily overtime
   thresholds, and notable state rules relevant to temporary event staff.
-- **policies** (9 rows): confirmed booking and procurement terms, explicit
+- **policies** (8 rows): confirmed booking and procurement terms, explicit
   coordinator-confirmation flags, open TODO-for-Megan items, and canonical source citations.
 
 ## Intended use
@@ -54,7 +54,7 @@ https://tempguru.co/get-staffing within one business day. Compliance rows
 are operational guidance, not legal advice.
 
 For live queries prefer the API or MCP server (no auth, free); this dataset
-is a point-in-time snapshot (source data updated 2026-08-14).
+is a point-in-time snapshot (source data updated 2026-11-01).
 
 ## Provenance & contact
 

@@ -1,5 +1,18 @@
 # TempGuru MCP 1.7.2 hotfix release runbook
 
+> **Unreleased on this branch (cut as the next version, not as `1.7.2`):**
+> AGENT5 is removed from every model-readable surface (server instructions,
+> `get_policies` with its REST/OpenAPI mirrors, `plan_staffing`/`get_plan`
+> notes, OKF/llms knowledge); only the human quote-form prefill remains. The
+> same branch upgrades the MCP SDK (2.4.0), Next.js (16.4.3), and zod, caps
+> `/mcp` request bodies and JSON-RPC batches, and labels telemetry by verified
+> source network. When releasing: bump the version everywhere the drift gates
+> require, deploy, run `deploy-apex-agent-readiness.yml` (the apex worker's
+> embedded schema changed), re-upload `distribution/assistants/knowledge/` to
+> each assistant platform, republish the Hugging Face dataset, remove AGENT5
+> from the website-owned `tempguru.co/llms.txt` and `llms-full.txt`, and
+> optionally send the removal note in `distribution/anthropic-directory-update.md`.
+
 Use this runbook for the `get_policies` topic-discovery and telemetry hotfix.
 `tempguru-mcp@1.7.1` is already released and immutable; do not try to
 overwrite or republish it. The server/CLI release candidate in this branch is

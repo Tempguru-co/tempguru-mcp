@@ -9,14 +9,16 @@
 
 import pkg from "../../../package.json";
 import { RequestQuoteSchema } from "../mcp/quote";
-import { getPublishedPolicyTopics } from "../mcp/published-offer";
+import { POLICIES } from "../mcp/data";
 import {
   APPROVED_CLAIMS,
   APPROVED_SCALE_CLAIM_IDS,
   APPROVED_SCALE_DESCRIPTION,
 } from "../public-facts";
 
-export function buildOpenApiSpec(now = new Date()) {
+const POLICY_TOPICS = POLICIES.map((policy) => policy.topic);
+
+export function buildOpenApiSpec() {
   return {
     openapi: "3.1.0",
     info: {
@@ -345,7 +347,7 @@ export function buildOpenApiSpec(now = new Date()) {
           tags: ["Compliance"],
           summary: "Published booking and procurement policies",
           description:
-            "Returns TempGuru's published minimum-hours, cancellation/rescheduling, replacement and backfill, COI/additional-insured, payment, background-check, order-confirmation, quote-response, and public-offer policies. Unsupported values are explicitly marked `confirm_with_coordinator` and never fabricated. Pass an optional topic for one policy; an unknown topic returns a clean expected-miss variant with the available topics.",
+            "Returns TempGuru's published minimum-hours, cancellation/rescheduling, replacement and backfill, COI/additional-insured, payment, background-check, order-confirmation, and quote-response policies. Unsupported values are explicitly marked `confirm_with_coordinator` and never fabricated. Pass an optional topic for one policy; an unknown topic returns a clean expected-miss variant with the available topics.",
           parameters: [
             {
               name: "topic",
@@ -354,7 +356,7 @@ export function buildOpenApiSpec(now = new Date()) {
               schema: {
                 type: "string",
                 maxLength: 80,
-                enum: getPublishedPolicyTopics(now),
+                enum: POLICY_TOPICS,
               },
               description:
                 "Optional canonical policy topic. Choose an enum value; omit for all policies or a broader question.",
@@ -878,17 +880,12 @@ export function buildOpenApiSpec(now = new Date()) {
             "sources",
           ],
           properties: {
-            topic: { type: "string", enum: getPublishedPolicyTopics(now) },
+            topic: { type: "string", enum: POLICY_TOPICS },
             title: { type: "string" },
             confirmed_claims: { type: "array", items: { type: "string" } },
             confirm_with_coordinator: { type: "boolean" },
             todo_for_megan: { type: "array", items: { type: "string" } },
             sources: { type: "array", items: { type: "string" } },
-            code: { type: "string" },
-            discount_percent: { type: "number" },
-            cap_usd: { type: "number" },
-            expires: { type: "string", format: "date" },
-            scope: { type: "string" },
           },
           additionalProperties: false,
         },
@@ -933,7 +930,7 @@ export function buildOpenApiSpec(now = new Date()) {
             requested: { type: "string" },
             available_topics: {
               type: "array",
-              items: { type: "string", enum: getPublishedPolicyTopics(now) },
+              items: { type: "string", enum: POLICY_TOPICS },
             },
             message: { type: "string" },
           },

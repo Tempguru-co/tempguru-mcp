@@ -46,13 +46,13 @@
   ],
   "license": "MIT",
   "data_version": "1.0.0",
-  "updated": "2026-08-18",
+  "updated": "2026-11-01",
   "bundle": {
     "root": "https://mcp.tempguru.co/okf/",
     "index": "https://mcp.tempguru.co/okf/index.md",
     "tarball": "https://mcp.tempguru.co/okf.tar.gz",
     "file_count": 106,
-    "sha256": "11bddb41ff3603a99988d4b43665e20e8e7ebfd8ec5ff3e8127ac030bac422c9",
-    "bytes": 344624
+    "sha256": "77317ceeeb05703d49d3359ce98c7827f07db05259db823b4233ee8d68fcca7d",
+    "bytes": 344112
   }
 }

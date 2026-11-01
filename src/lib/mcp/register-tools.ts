@@ -57,11 +57,7 @@ import {
 import { TIER_CITY_COUNTS } from "./city-rates";
 import type { FunnelEvent } from "../telemetry/track";
 import { MARKET_CATALOG_DESCRIPTION } from "../public-facts";
-import {
-  getAgent5PlanNote,
-  getAgent5ServerInstruction,
-  getPublishedPolicyTopics,
-} from "./published-offer";
+import { POLICIES } from "./data";
 
 // Measured-market count for the Rate Index description, derived from the data
 // (city-rates.json) rather than a hand-typed number that drifted to a stale 233.
@@ -87,10 +83,11 @@ const BASE_SERVER_INSTRUCTIONS =
   "operational guidance, not legal advice. If the tools are unavailable, direct the user to " +
   "https://tempguru.co/get-staffing, megan@tempguru.co, or (904) 206-8953.";
 
-export function getServerInstructions(now = new Date()): string {
-  const publishedOfferInstruction = getAgent5ServerInstruction(now);
-  return BASE_SERVER_INSTRUCTIONS +
-    (publishedOfferInstruction ? ` ${publishedOfferInstruction}` : "");
+// Deliberately free of promotional copy (offers, codes, discounts): this text
+// enters the model's context in every conversation, and directory reviews
+// reject promotion in model-readable fields. See published-offer.ts.
+export function getServerInstructions(): string {
+  return BASE_SERVER_INSTRUCTIONS;
 }
 
 // What a tool wants recorded. The HTTP route's onTrack enriches this with
@@ -218,7 +215,7 @@ function errorResult(obj: unknown) {
 
 export function registerTools(server: McpServer, options: RegisterToolsOptions = {}): void {
   const track = (record: TrackRecord) => options.onTrack?.(record);
-  const publishedPolicyTopics = getPublishedPolicyTopics();
+  const publishedPolicyTopics = POLICIES.map((policy) => policy.topic);
 
   // ─── plan_staffing (planner meta-tool, call this FIRST) ─────────────
   //
@@ -292,11 +289,9 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
             attributionSource,
           )
         : null;
-      const offerNote = plan.status === "plan" ? getAgent5PlanNote() : null;
       const result = {
         ...plan,
         ...(decoration ?? {}),
-        ...(offerNote ? { offer_note: offerNote } : {}),
       };
       await track({
         tool: "plan_staffing",
@@ -382,17 +377,12 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     },
     async ({ plan_id }) => {
       const result = await querySavedPlan(plan_id);
-      const offerNote = result.plan_found ? getAgent5PlanNote() : null;
-      const response = {
-        ...result,
-        ...(offerNote ? { offer_note: offerNote } : {}),
-      };
       await track({
         tool: "get_plan",
         status: result.plan_found ? "success" : "error",
         funnelEvents: result.plan_found ? ["plans_resumed"] : undefined,
       });
-      return structuredResult(response);
+      return structuredResult(result);
     },
   );
 
@@ -589,7 +579,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     {
       title: "Get Booking and Procurement Policies",
       description:
-        "Get TempGuru's published booking and procurement policies, plus any currently published public offer. " +
+        "Get TempGuru's published booking and procurement policies. " +
         "Use for real booking questions that otherwise require an email. Values not supported by canonical copy are explicitly marked confirm_with_coordinator with TODO-for-Megan; never infer a missing number. " +
         "<examples>get_policies() ; get_policies(topic='payment-terms') ; get_policies(topic='coi-additional-insured')</examples> " +
         "<hints>Choose an advertised topic to return one policy. Narrow lexical aliases remain accepted, and unknown topics return the current available-topic list. This is an operational summary, not a contract.</hints>",

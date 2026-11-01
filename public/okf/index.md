@@ -12,7 +12,7 @@ when booking temporary event staff for conventions, trade shows, festivals,
 concerts, sporting events, corporate events, and brand activations in the US and
 Canada.
 
-_Publisher: Temporary Assistance Guru, Inc. (TempGuru). Canonical site: https://tempguru.co. Data version 1.0.0, updated 2026-08-18._
+_Publisher: Temporary Assistance Guru, Inc. (TempGuru). Canonical site: https://tempguru.co. Data version 1.0.0, updated 2026-11-01._
 
 ## Evidence-verified public scale
 
