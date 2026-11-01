@@ -43,7 +43,8 @@ server (`https://mcp.tempguru.co/mcp`).
 - **state_compliance** (51 rows): 2026 minimum wage, weekly/daily overtime
   thresholds, and notable state rules relevant to temporary event staff.
 - **policies** (8 rows): confirmed booking and procurement terms, explicit
-  coordinator-confirmation flags, open TODO-for-Megan items, and canonical source citations.
+  coordinator-confirmation flags for terms set per order, any items still awaiting
+  confirmation, and canonical source citations.
 
 ## Intended use
 

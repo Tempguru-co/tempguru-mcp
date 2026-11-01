@@ -420,6 +420,9 @@ for (const [alias, topic] of [
   ["payment", "payment-terms"],
   ["invoicing", "payment-terms"],
   ["payment invoicing", "payment-terms"],
+  ["deposit", "payment-terms"],
+  ["rush", "payment-terms"],
+  ["rush fee", "payment-terms"],
   ["background check", "background-checks"],
 ]) {
   const aliasResult = queryPolicies(
@@ -443,6 +446,28 @@ check("get_policies never serves a promotional offer to agents",
       && !result.data.available_topics.includes("offers"))
     && !PROMOTIONAL_OFFER_COPY.test(JSON.stringify(allPoliciesResult)),
   JSON.stringify(offerTopicMisses));
+// Operator-confirmed terms (2026-11-01): every topic is answered, no open
+// TODO items remain, and the published values are the ones confirmed.
+const policyClaims = Object.fromEntries(
+  allPoliciesResult.data.policies.map((policy) => [policy.topic, policy.confirmed_claims.join(" ")]),
+);
+check("every published policy topic carries confirmed terms and no open TODO items",
+  allPoliciesResult.data.policies.every((policy) =>
+    policy.confirmed_claims.length > 0 && policy.todo_for_megan.length === 0)
+    && allPoliciesResult.data.todo_for_megan.length === 0
+    && !/TODO-for-Megan/.test(JSON.stringify(allPoliciesResult)),
+  JSON.stringify(allPoliciesResult.data.todo_for_megan));
+check("published booking terms match the operator-confirmed values",
+  policyClaims["minimum-booking-hours"].includes("minimum of 4 hours per worker per shift, with no exceptions")
+    && policyClaims["cancellation-rescheduling"].includes("at least 48 hours' notice")
+    && policyClaims["cancellation-rescheduling"].includes("the 4-hour minimum is billed for each booked worker and shift")
+    && policyClaims["no-show-backfill"].startsWith("TempGuru replaces a no-show within 2 hours.")
+    && policyClaims["coi-additional-insured"].includes("at least one week's notice before load-in")
+    && policyClaims["payment-terms"].includes("A deposit is required after the buyer approves the quote.")
+    && policyClaims["payment-terms"].includes("Invoices are due net 30.")
+    && policyClaims["payment-terms"].includes("less than 72 hours before the event carry a $150 rush fee")
+    && policyClaims["background-checks"].includes("at least 2 weeks' lead time"),
+  JSON.stringify(policyClaims));
 const coiPolicyResult = queryPolicies({ topic: "COI" });
 check("get_policies output schema accepts a clean miss and rejects contradictory discriminators",
   outputSchemas.GET_POLICIES_SCHEMA.safeParse(unknownPolicyResult.data).success

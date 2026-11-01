@@ -92,8 +92,8 @@ coordinator confirms the specific order after buyer submission. On US orders eve
 employee of the assigned vetted local partner agency, not a 1099 contractor;
 workers' comp, general liability, payroll taxes (FICA/FUTA/SUTA), I-9
 verification, TempGuru coordination, and the partner agency's markup are
-included in the all-inclusive hourly bill rate, and replacement is coordinated
-on a best-effort basis. Event-specific charges are identified on the quote; no
+included in the all-inclusive hourly bill rate, and TempGuru replaces a no-show
+within 2 hours. Event-specific charges are identified on the quote; no
 bidding. Brand Ambassador rates floor at $40/hour in every
 market.
 

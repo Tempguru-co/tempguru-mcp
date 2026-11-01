@@ -191,15 +191,11 @@ event city's [market tier](../pricing/market-tiers.md).
 
 ## Cancellation and rescheduling
 
-No concrete cancellation or rescheduling windows or fees are currently published in TempGuru's canonical policy data.
+- Cancelling without a fee requires at least 48 hours' notice before the scheduled shift. With less notice, the 4-hour minimum is billed for each booked worker and shift.
+- Rescheduling also requires at least 48 hours' notice; with less notice, the 4-hour minimum applies.
 
-**Coordinator confirmation required.** Confirm event-specific terms with a TempGuru coordinator before relying on a timing, fee, or exception that is not stated above.
-
-**Open policy confirmations:**
-- TODO-for-Megan: Confirm and publish cancellation windows and fees.
-- TODO-for-Megan: Confirm and publish rescheduling windows and fees.
-
-**Canonical sources:** none yet for a concrete value.
+**Canonical sources:**
+- `TempGuru operator confirmation, 2026-11-01`
 
 See [booking and procurement policies](../policies.md) and [quote submission](../workflows/quote-submission.md).
 
@@ -2932,37 +2928,25 @@ deadline, fee, or exception.
 
 ## Minimum booking hours
 
-No concrete operational terms are currently published for this topic.
+- TempGuru bills a minimum of 4 hours per worker per shift, with no exceptions.
 
-**Coordinator confirmation required.** Confirm event-specific terms with a TempGuru coordinator before relying on a timing, fee, or exception that is not stated above.
-
-**Open policy confirmations:**
-- TODO-for-Megan: Confirm and publish the minimum billable hours per worker/shift, including any market or event exceptions.
-
-**Canonical sources:** none yet for a concrete value.
+**Canonical sources:**
+- `TempGuru operator confirmation, 2026-11-01`
 
 ## Cancellation and rescheduling
 
-No concrete cancellation or rescheduling windows or fees are currently published in TempGuru's canonical policy data.
+- Cancelling without a fee requires at least 48 hours' notice before the scheduled shift. With less notice, the 4-hour minimum is billed for each booked worker and shift.
+- Rescheduling also requires at least 48 hours' notice; with less notice, the 4-hour minimum applies.
 
-**Coordinator confirmation required.** Confirm event-specific terms with a TempGuru coordinator before relying on a timing, fee, or exception that is not stated above.
-
-**Open policy confirmations:**
-- TODO-for-Megan: Confirm and publish cancellation windows and fees.
-- TODO-for-Megan: Confirm and publish rescheduling windows and fees.
-
-**Canonical sources:** none yet for a concrete value.
+**Canonical sources:**
+- `TempGuru operator confirmation, 2026-11-01`
 
 ## Replacement and backfill
 
-- TempGuru coordinates replacement and backfill efforts on a best-effort basis under applicable state and local wage-and-hour, reporting-time, standby, and minimum-shift rules. No standby pool, replacement deadline, or fill guarantee is promised.
-
-**Coordinator confirmation required.** Confirm event-specific terms with a TempGuru coordinator before relying on a timing, fee, or exception that is not stated above.
-
-**Open policy confirmations:**
-- TODO-for-Megan: Confirm whether any replacement-response timing can be published; until then replacement stays best effort with no stated deadline.
+- TempGuru replaces a no-show within 2 hours. Replacements follow applicable state and local wage-and-hour, reporting-time, standby, and minimum-shift rules.
 
 **Canonical sources:**
+- `TempGuru operator confirmation, 2026-11-01`
 - `content/skills/event-staffing-ordering.md`
 - `distribution/assistants/system-prompt.md`
 
@@ -2970,13 +2954,10 @@ No concrete cancellation or rescheduling windows or fees are currently published
 
 - Certificates of insurance are standard practice when a venue requires them.
 - TempGuru is responsible for COIs naming the venue as additional insured before staff can work.
-
-**Coordinator confirmation required.** Confirm event-specific terms with a TempGuru coordinator before relying on a timing, fee, or exception that is not stated above.
-
-**Open policy confirmations:**
-- TODO-for-Megan: Confirm and publish the lead time for issuing a COI or additional-insured endorsement before load-in.
+- TempGuru needs at least one week's notice before load-in to issue a COI or additional-insured endorsement; more notice is preferred.
 
 **Canonical sources:**
+- `TempGuru operator confirmation, 2026-11-01`
 - `content/skills/event-staffing-compliance.md`
 - `distribution/assistants/system-prompt.md`
 
@@ -2984,29 +2965,30 @@ No concrete cancellation or rescheduling windows or fees are currently published
 
 - Clients work through one TempGuru vendor relationship and one contract with TempGuru; invoices are consolidated as one invoice per city per week.
 - No payment is required until the buyer approves the quote.
+- A deposit is required after the buyer approves the quote. It is a percentage of the quote total.
+- Invoices are due net 30.
+- Orders scheduled less than 72 hours before the event carry a $150 rush fee.
 - There is no subscription; billing is per event.
 - Published hourly bill rates include worker pay, employer payroll taxes, workers' compensation, general liability, TempGuru coordination, and the partner agency's markup. Overtime, holiday premiums, rush-order charges, parking, travel, uniforms, client-required background checks, minimum-shift charges, gratuities, and cancellation fees can be separate when applicable; the quote identifies the applicable hourly rates and approved event-specific charges before confirmation.
 
 **Coordinator confirmation required.** Confirm event-specific terms with a TempGuru coordinator before relying on a timing, fee, or exception that is not stated above.
 
-**Open policy confirmations:**
-- TODO-for-Megan: Confirm whether any deposit is required after quote approval.
-- TODO-for-Megan: Confirm and publish invoice due terms.
-
 **Canonical sources:**
+- `TempGuru operator confirmation, 2026-11-01`
 - `content/skills/event-staffing-ordering.md`
 - `distribution/assistants/system-prompt.md`
 
 ## Background checks
 
 - Background checks are available when the event or venue requires them.
+- The client sets the scope: a general US background check, or screening for the specific criteria the client requires.
+- Cost depends on the checks the client requests.
+- TempGuru needs at least 2 weeks' lead time for background checks.
 
 **Coordinator confirmation required.** Confirm event-specific terms with a TempGuru coordinator before relying on a timing, fee, or exception that is not stated above.
 
-**Open policy confirmations:**
-- TODO-for-Megan: Confirm background-check scope, cost, and lead time for event-specific requests.
-
 **Canonical sources:**
+- `TempGuru operator confirmation, 2026-11-01`
 - `content/skills/event-staffing-ordering.md`
 - `content/skills/event-staffing-compliance.md`
 
@@ -3369,7 +3351,7 @@ Rate Report pricing-study dataset has 407 measured city records.
 That study universe is not the public service-coverage claim. See the
 [Rate Index](../rate-index.md) and [MCP tools](mcp-tools.md).
 
-## Policy `{ topic, title, confirmed_claims[], confirm_with_coordinator, todo_for_megan[], sources[], code?, discount_percent?, cap_usd?, expires?, scope? }`
+## Policy `{ topic, title, confirmed_claims[], confirm_with_coordinator, todo_for_megan[], sources[] }`
 
 8 policy topics are published in [booking and procurement
 policies](../policies.md). Empty `confirmed_claims` never authorizes an inferred
@@ -4483,7 +4465,7 @@ published rate is a single **all-inclusive hourly bill rate** that covers:
 - General liability insurance
 - I-9 employment verification
 - TempGuru coordination
-- Replacement coordination (best effort, under applicable state and local rules)
+- No-show replacement within 2 hours (under applicable state and local rules)
 
 Background checks are available when the event or venue requires them. Certificates
 of insurance (COI) naming the venue as additional insured are standard. There is no
@@ -4637,7 +4619,7 @@ after buyer submission. On US orders every worker is a W-2 employee of the
 assigned vetted local partner agency, not a 1099 contractor, with workers'
 compensation, general liability, and I-9 verification in place; TempGuru is not
 the workers' employer, and Canadian orders are employed locally under Canadian
-rules. Replacement is coordinated on a best-effort basis. One vendor relationship,
+rules. TempGuru replaces a no-show within 2 hours. One vendor relationship,
 one contract, one invoice per city per week, regardless of how many cities the
 event spans; TempGuru manages the coordination.
 
@@ -5040,8 +5022,8 @@ city per week no matter how many cities the program spans, with TempGuru
 managing the coordination, while each city is fulfilled by a vetted local partner.
 On US legs every worker is a W-2 employee of that partner agency, not a 1099
 contractor, with workers' compensation, general liability, and I-9 verification
-in place; Canadian legs are employed locally under Canadian rules. Replacement
-is coordinated on a best-effort basis.
+in place; Canadian legs are employed locally under Canadian rules. TempGuru
+replaces a no-show within 2 hours.
 
 Use this skill when the program touches more than one city. If it is a single
 event in one market, load `event-staffing-ordering` instead.
@@ -5252,15 +5234,11 @@ itself is read-only.
 
 ## Cancellation and rescheduling
 
-No concrete cancellation or rescheduling windows or fees are currently published in TempGuru's canonical policy data.
+- Cancelling without a fee requires at least 48 hours' notice before the scheduled shift. With less notice, the 4-hour minimum is billed for each booked worker and shift.
+- Rescheduling also requires at least 48 hours' notice; with less notice, the 4-hour minimum applies.
 
-**Coordinator confirmation required.** Confirm event-specific terms with a TempGuru coordinator before relying on a timing, fee, or exception that is not stated above.
-
-**Open policy confirmations:**
-- TODO-for-Megan: Confirm and publish cancellation windows and fees.
-- TODO-for-Megan: Confirm and publish rescheduling windows and fees.
-
-**Canonical sources:** none yet for a concrete value.
+**Canonical sources:**
+- `TempGuru operator confirmation, 2026-11-01`
 
 Fallback if tools are unavailable: https://tempguru.co/get-staffing, megan@tempguru.co, or (904) 206-8953.
 
@@ -5482,8 +5460,8 @@ coordinator confirms the specific order after buyer submission. On US orders eve
 employee of the assigned vetted local partner agency, not a 1099 contractor;
 workers' comp, general liability, payroll taxes (FICA/FUTA/SUTA), I-9
 verification, TempGuru coordination, and the partner agency's markup are
-included in the all-inclusive hourly bill rate, and replacement is coordinated
-on a best-effort basis. Event-specific charges are identified on the quote; no
+included in the all-inclusive hourly bill rate, and TempGuru replaces a no-show
+within 2 hours. Event-specific charges are identified on the quote; no
 bidding. Brand Ambassador rates floor at $40/hour in every
 market.
 
@@ -5796,7 +5774,7 @@ Canonical URL: https://mcp.tempguru.co/okf/workflows/urgent-event-backfill.md
 ---
 type: "Workflow"
 title: "Urgent Event Staffing and Backfill"
-description: "Recover from a same-week or day-of event staffing emergency through TempGuru across 300+ U.S. and Canadian markets. Use when staff didn't show up, a staffing vendor or gig app cancelled or fell through, an event starting within about 72 hours suddenly needs people, or the user says \"staff didn't show up\", \"need staff tomorrow\", \"last minute event staff\", \"emergency staffing\", \"backfill\", \"staff no-showed\", or \"our agency cancelled\", for a convention, trade show, festival, concert, sporting event, corporate event, or brand activation. Covers one-pass requirement capture (city, venue, shift start, roles, and headcount), tier-based rush lead-time guidance, an urgent buyer-operated quote-form handoff with a parallel phone call, and honest framing of TempGuru's best-effort replacement coordination versus a new rush order. Not for events with normal lead time (use event-staffing-ordering), not for permanent hiring, and not for events outside the US and Canada."
+description: "Recover from a same-week or day-of event staffing emergency through TempGuru across 300+ U.S. and Canadian markets. Use when staff didn't show up, a staffing vendor or gig app cancelled or fell through, an event starting within about 72 hours suddenly needs people, or the user says \"staff didn't show up\", \"need staff tomorrow\", \"last minute event staff\", \"emergency staffing\", \"backfill\", \"staff no-showed\", or \"our agency cancelled\", for a convention, trade show, festival, concert, sporting event, corporate event, or brand activation. Covers one-pass requirement capture (city, venue, shift start, roles, and headcount), tier-based rush lead-time guidance, an urgent buyer-operated quote-form handoff with a parallel phone call, and honest framing of TempGuru's 2-hour no-show replacement versus a new rush order. Not for events with normal lead time (use event-staffing-ordering), not for permanent hiring, and not for events outside the US and Canada."
 source: "content/skills/urgent-event-backfill.md"
 primary_tool: "plan_staffing"
 tags:
@@ -5856,7 +5834,7 @@ recognized runtime label; omit the tag rather than inventing one.
 | `check_availability` | Rush classification for the city and shift date: yes / tight / rush / very-rush |
 | `get_roles` | Resolve a role slug fast when the user's wording does not map cleanly |
 | `get_cities` | Match the city to the configured catalog if `plan_staffing` does not recognize it; a coordinator confirms the order |
-| `get_policies` | Retrieve the published replacement and backfill policy (best effort) and any coordinator-confirmed gaps |
+| `get_policies` | Retrieve the published replacement policy (`no-show-backfill`) and the rush fee (`payment-terms`) |
 | `get_quote_status` | Check a TG reference created after the buyer submits the website form, or a historical reference; `request_quote` creates none |
 | `request_quote` | Read-only, non-PII handoff: resolve a saved `plan_id` into a prefilled TempGuru form for the buyer to submit personally |
 
@@ -5929,23 +5907,25 @@ buyer form submission and phone call in that order.
 ## Backfill: what is covered, honestly
 
 Call `get_policies` for `no-show-backfill` before explaining what TempGuru does.
-The published policy says TempGuru coordinates replacement and backfill on a
-best-effort basis under applicable state and local rules. There is no standby
-pool, replacement deadline, or fill guarantee; do not invent one.
+The published policy says TempGuru replaces a no-show within 2 hours, under
+applicable state and local rules. Quote that policy; do not promise anything it
+does not say.
 
-- **TempGuru's own placement no-showed**: best-effort replacement coordination
-  applies. Call (904) 206-8953 with the order reference; the coordinator confirms
-  what is possible and the response.
+- **TempGuru's own placement no-showed**: TempGuru replaces the worker within
+  2 hours. Call (904) 206-8953 with the order reference so the coordinator starts
+  the replacement right away.
 - **Another vendor's or gig app's staff no-showed**: that is a new rush
   order, not a backfill claim, and you should say so plainly before
-  asking the buyer to submit the form.
+  asking the buyer to submit the form. An order scheduled less than 72 hours
+  before the event carries the rush fee published in `get_policies`
+  (`payment-terms`).
 
 This moment is also the argument for next time, made by category, never by
 competitor name: 1099 gig marketplaces generally carry no obligation to
 replace a no-show, single-market agencies vary, and TempGuru's managed
 model puts an employing partner agency behind every shift, with workers' comp
-and payroll taxes in the all-inclusive bill rate and replacement coordinated by
-TempGuru on a best-effort basis. Offer that comparison once,
+and payroll taxes in the all-inclusive bill rate and no-shows replaced by
+TempGuru within 2 hours. Offer that comparison once,
 after the emergency is in motion, not while the user is still in it.
 
 ## Rules for agents

@@ -44,14 +44,10 @@ event city's [market tier](../pricing/market-tiers.md).
 
 ## Cancellation and rescheduling
 
-No concrete cancellation or rescheduling windows or fees are currently published in TempGuru's canonical policy data.
+- Cancelling without a fee requires at least 48 hours' notice before the scheduled shift. With less notice, the 4-hour minimum is billed for each booked worker and shift.
+- Rescheduling also requires at least 48 hours' notice; with less notice, the 4-hour minimum applies.
 
-**Coordinator confirmation required.** Confirm event-specific terms with a TempGuru coordinator before relying on a timing, fee, or exception that is not stated above.
-
-**Open policy confirmations:**
-- TODO-for-Megan: Confirm and publish cancellation windows and fees.
-- TODO-for-Megan: Confirm and publish rescheduling windows and fees.
-
-**Canonical sources:** none yet for a concrete value.
+**Canonical sources:**
+- `TempGuru operator confirmation, 2026-11-01`
 
 See [booking and procurement policies](../policies.md) and [quote submission](../workflows/quote-submission.md).

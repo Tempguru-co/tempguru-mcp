@@ -404,14 +404,36 @@
     ]
   },
   {
-    "name": "get_policies: returns sourced payment policy plus explicit TODOs",
+    "name": "get_policies: returns the published payment terms (deposit, net 30, rush fee)",
     "tool": "get_policies",
     "arguments": {
       "topic": "payment-terms"
     },
     "expect": [
       "policy_found",
-      "No payment is required",
+      "No payment is required until the buyer approves the quote.",
+      "A deposit is required after the buyer approves the quote. It is a percentage of the quote total.",
+      "Invoices are due net 30.",
+      "Orders scheduled less than 72 hours before the event carry a $150 rush fee.",
+      "\"confirm_with_coordinator\":true"
+    ],
+    "absent": [
+      "TODO-for-Megan"
+    ]
+  },
+  {
+    "name": "get_policies: no-show replacement is published as within 2 hours",
+    "tool": "get_policies",
+    "arguments": {
+      "topic": "no-show"
+    },
+    "expect": [
+      "\"topic\":\"no-show-backfill\"",
+      "TempGuru replaces a no-show within 2 hours."
+    ],
+    "absent": [
+      "best-effort",
+      "No standby pool",
       "TODO-for-Megan"
     ]
   },

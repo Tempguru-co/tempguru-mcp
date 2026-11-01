@@ -43,7 +43,7 @@ Rate Report pricing-study dataset has 407 measured city records.
 That study universe is not the public service-coverage claim. See the
 [Rate Index](../rate-index.md) and [MCP tools](mcp-tools.md).
 
-## Policy `{ topic, title, confirmed_claims[], confirm_with_coordinator, todo_for_megan[], sources[], code?, discount_percent?, cap_usd?, expires?, scope? }`
+## Policy `{ topic, title, confirmed_claims[], confirm_with_coordinator, todo_for_megan[], sources[] }`
 
 8 policy topics are published in [booking and procurement
 policies](../policies.md). Empty `confirmed_claims` never authorizes an inferred

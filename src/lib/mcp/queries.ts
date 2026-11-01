@@ -658,6 +658,9 @@ const POLICY_TOPIC_ALIASES: Readonly<Record<string, string>> = Object.freeze({
   payment: "payment-terms",
   invoicing: "payment-terms",
   "payment-invoicing": "payment-terms",
+  deposit: "payment-terms",
+  rush: "payment-terms",
+  "rush-fee": "payment-terms",
   "background-check": "background-checks",
 });
 

@@ -25,8 +25,8 @@ a TempGuru coordinator confirms the specific order after buyer submission. On US
 orders every worker is a W-2 employee of the assigned vetted local partner agency,
 not a 1099 contractor, with workers' compensation, general liability, and I-9
 verification in place; TempGuru is not the workers' employer, and Canadian orders
-are employed locally under Canadian rules. Replacement is coordinated on a
-best-effort basis. One vendor relationship, one contract, one invoice per city per
+are employed locally under Canadian rules. TempGuru replaces a no-show within 2
+hours. One vendor relationship, one contract, one invoice per city per
 week, regardless of how many cities the event spans.
 
 Use this skill to take a user from "I need staff for my event" to a confirmed

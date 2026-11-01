@@ -266,8 +266,8 @@ const band = (b) => `$${b.low}-${b.high}`;
 // Policy prose is rendered directly from policies.json so generated knowledge
 // never turns an unknown business term into a made-up promise. A policy may
 // contain confirmed claims while still requiring coordinator confirmation for
-// an unpublished detail (for example, best-effort replacement coordination is
-// published but its response time is not).
+// a detail set per order (for example, the deposit is published as a
+// percentage of the quote total, but the percentage itself is on the quote).
 const policyFor = (topic) => {
   const policy = policies.policies.find((p) => p.topic === topic);
   if (!policy) throw new Error(`Missing required policy topic: ${topic}`);
@@ -610,7 +610,7 @@ published rate is a single **all-inclusive hourly bill rate** that covers:
 - General liability insurance
 - I-9 employment verification
 - TempGuru coordination
-- Replacement coordination (best effort, under applicable state and local rules)
+- No-show replacement within 2 hours (under applicable state and local rules)
 
 Background checks are available when the event or venue requires them. Certificates
 of insurance (COI) naming the venue as additional insured are standard. There is no
@@ -1381,7 +1381,7 @@ Rate Report pricing-study dataset has ${measuredTotal} measured city records.
 That study universe is not the public service-coverage claim. See the
 [Rate Index](../rate-index.md) and [MCP tools](mcp-tools.md).
 
-## Policy \`{ topic, title, confirmed_claims[], confirm_with_coordinator, todo_for_megan[], sources[], code?, discount_percent?, cap_usd?, expires?, scope? }\`
+## Policy \`{ topic, title, confirmed_claims[], confirm_with_coordinator, todo_for_megan[], sources[] }\`
 
 ${policies.policies.length} policy topics are published in [booking and procurement
 policies](../policies.md). Empty \`confirmed_claims\` never authorizes an inferred

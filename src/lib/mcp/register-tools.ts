@@ -580,7 +580,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
       title: "Get Booking and Procurement Policies",
       description:
         "Get TempGuru's published booking and procurement policies. " +
-        "Use for real booking questions that otherwise require an email. Values not supported by canonical copy are explicitly marked confirm_with_coordinator with TODO-for-Megan; never infer a missing number. " +
+        "Use for real booking questions that otherwise require an email: minimums, cancellation and rescheduling, no-show replacement, COIs, deposits and invoice terms, rush fees, and background checks. Terms set per order (such as a deposit percentage) are marked confirm_with_coordinator; never infer a missing number. " +
         "<examples>get_policies() ; get_policies(topic='payment-terms') ; get_policies(topic='coi-additional-insured')</examples> " +
         "<hints>Choose an advertised topic to return one policy. Narrow lexical aliases remain accepted, and unknown topics return the current available-topic list. This is an operational summary, not a contract.</hints>",
       inputSchema: z.object({
