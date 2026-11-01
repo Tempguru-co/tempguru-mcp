@@ -61,9 +61,9 @@ deadline, fee, or exception.
 
 - Clients work through one TempGuru vendor relationship and one contract with TempGuru; invoices are consolidated as one invoice per city per week.
 - No payment is required until the buyer approves the quote.
-- A deposit is required after the buyer approves the quote. It is a percentage of the quote total.
+- A deposit is required after the buyer approves the quote. It is a percentage of the quote total, set on each quote; there is no standard percentage.
 - Invoices are due net 30.
-- Orders scheduled less than 72 hours before the event carry a $150 rush fee.
+- Orders scheduled less than 72 hours before the event carry a $150 rush fee per order.
 - There is no subscription; billing is per event.
 - Published hourly bill rates include worker pay, employer payroll taxes, workers' compensation, general liability, TempGuru coordination, and the partner agency's markup. Overtime, holiday premiums, rush-order charges, parking, travel, uniforms, client-required background checks, minimum-shift charges, gratuities, and cancellation fees can be separate when applicable; the quote identifies the applicable hourly rates and approved event-specific charges before confirmation.
 

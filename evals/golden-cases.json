@@ -412,9 +412,9 @@
     "expect": [
       "policy_found",
       "No payment is required until the buyer approves the quote.",
-      "A deposit is required after the buyer approves the quote. It is a percentage of the quote total.",
+      "A deposit is required after the buyer approves the quote. It is a percentage of the quote total, set on each quote; there is no standard percentage.",
       "Invoices are due net 30.",
-      "Orders scheduled less than 72 hours before the event carry a $150 rush fee.",
+      "Orders scheduled less than 72 hours before the event carry a $150 rush fee per order.",
       "\"confirm_with_coordinator\":true"
     ],
     "absent": [

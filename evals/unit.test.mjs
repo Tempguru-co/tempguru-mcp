@@ -466,8 +466,9 @@ check("published booking terms match the operator-confirmed values",
     )
     && policyClaims["coi-additional-insured"].includes("at least one week's notice before load-in")
     && policyClaims["payment-terms"].includes("A deposit is required after the buyer approves the quote.")
+    && policyClaims["payment-terms"].includes("set on each quote; there is no standard percentage")
     && policyClaims["payment-terms"].includes("Invoices are due net 30.")
-    && policyClaims["payment-terms"].includes("less than 72 hours before the event carry a $150 rush fee")
+    && policyClaims["payment-terms"].includes("less than 72 hours before the event carry a $150 rush fee per order")
     && policyClaims["background-checks"].includes("at least 2 weeks' lead time"),
   JSON.stringify(policyClaims));
 const coiPolicyResult = queryPolicies({ topic: "COI" });

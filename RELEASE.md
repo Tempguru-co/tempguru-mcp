@@ -14,11 +14,12 @@
 > optionally send the removal note in `distribution/anthropic-directory-update.md`.
 >
 > The branch also publishes the operator-confirmed booking terms (policies
-> data `1.3.0`): 4-hour minimum per worker per shift; 48 hours' notice to cancel
+> data `1.3.1`): 4-hour minimum per worker per shift; 48 hours' notice to cancel
 > or reschedule without the 4-hour minimum; a 2-hour no-show replacement
 > target (not a guarantee);
-> COIs need at least a week; a deposit (a percentage of the quote total) after
-> approval; net 30; a $150 rush fee under 72 hours; background checks need at
+> COIs need at least a week; a deposit (a percentage of the quote total, set per
+> quote, no standard rate) after approval; net 30; a $150 per-order rush fee
+> under 72 hours; background checks need at
 > least 2 weeks, with client-set scope and request-based cost. Five skills and
 > both system prompts changed to match (best-effort replacement wording
 > removed), so also bump the quote skills' shared `skill_version`, republish
