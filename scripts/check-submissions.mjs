@@ -70,8 +70,6 @@ const SERVER_VERSION = SERVER_JSON.version;
 const ROLE_COUNT = JSON.parse(read("content/mcp-data/roles.json")).roles.length;
 const POLICIES_DATA = JSON.parse(read("content/mcp-data/policies.json"));
 const POLICY_TOPICS = POLICIES_DATA.policies.map((policy) => policy.topic);
-const AGENT5_OFFER = POLICIES_DATA.policies.find((policy) => policy.topic === "offers");
-const AGENT5_TERMS = AGENT5_OFFER?.confirmed_claims?.[0];
 const CLAUDE_PLUGIN = JSON.parse(read("plugins/tempguru/.claude-plugin/plugin.json"));
 const CLAUDE_MARKETPLACE = JSON.parse(read(".claude-plugin/marketplace.json"));
 const CLI_PKG = JSON.parse(read("cli/package.json"));
@@ -142,20 +140,50 @@ if (!SKILL_ATTRIBUTION_VERSION || !/^\d+\.\d+\.\d+$/.test(SKILL_ATTRIBUTION_VERS
   errors.push("canonical quote skills must declare one valid SemVer skill_version");
 }
 
-if (
-  AGENT5_OFFER?.confirmed_claims?.length !== 1 ||
-  AGENT5_OFFER?.code !== "AGENT5" ||
-  AGENT5_OFFER?.discount_percent !== 5 ||
-  AGENT5_OFFER?.cap_usd !== 500 ||
-  AGENT5_OFFER?.expires !== "2026-12-31" ||
-  AGENT5_OFFER?.scope !== "first order, new clients" ||
-  !AGENT5_TERMS
-) {
-  errors.push("content/mcp-data/policies.json: canonical AGENT5 offer is missing or incomplete");
-}
-if (Date.now() >= Date.parse("2027-01-01T05:00:00.000Z") && AGENT5_OFFER) {
+// Promotional offers (codes, discounts) stay out of everything a model reads:
+// Anthropic's connector review rejects tool text that promotes products and
+// services, and OpenAI's plugin guidelines forbid advertising discounts or
+// promotions. The only sanctioned AGENT5 use is the human quote-form prefill
+// in src/lib/mcp/published-offer.ts. Runtime text (server instructions, tool
+// descriptions and results) is covered by the unit tests and evals; this gate
+// scans the generated and uploaded agent knowledge.
+if (POLICY_TOPICS.includes("offers")) {
   errors.push(
-    "AGENT5 expired after 2026-12-31: remove it from policies, server instructions, plan notes, quote prefill, generated llms artifacts, and the dated checks in one change",
+    "content/mcp-data/policies.json: promotional offers must not be published as an agent-facing policy topic",
+  );
+}
+const PROMOTIONAL_OFFER_COPY = /\bAGENT5\b|first-order offer|% off (?:their|your) first order/i;
+const agentKnowledgeFiles = [
+  "content/mcp-data/policies.json",
+  "content/mcp-data/openapi.json",
+  "public/llms.txt",
+  "public/llms-full.txt",
+  "distribution/toolbox/huggingface/data/policies.jsonl",
+];
+for (const directory of [
+  "public/okf",
+  "content/skills",
+  "skills",
+  "plugins/tempguru/skills",
+  "distribution/assistants/knowledge",
+]) {
+  for (const entry of readdirSync(join(root, directory), { recursive: true, withFileTypes: true })) {
+    if (entry.isFile() && /\.(md|txt|json|jsonl|ya?ml)$/.test(entry.name)) {
+      agentKnowledgeFiles.push(join(entry.parentPath ?? entry.path, entry.name).slice(root.length + 1));
+    }
+  }
+}
+for (const path of agentKnowledgeFiles) {
+  if (PROMOTIONAL_OFFER_COPY.test(read(path))) {
+    errors.push(`${path}: promotional offer copy (AGENT5) in agent-facing knowledge`);
+  }
+}
+if (
+  Date.now() >= Date.parse("2027-01-01T05:00:00.000Z") &&
+  existsSync(join(root, "src/lib/mcp/published-offer.ts"))
+) {
+  errors.push(
+    "AGENT5 expired after 2026-12-31: delete src/lib/mcp/published-offer.ts and its quote-form prefill caller in src/app/request-quote/page.tsx in one change",
   );
 }
 
@@ -1128,7 +1156,6 @@ const requiredMcpLlmsFragments = [
   ROLE_RATE_ENVELOPE,
   `canonical ${ROLE_COUNT}-role catalog`,
   ...SKILLS,
-  ...(AGENT5_TERMS ? [AGENT5_TERMS] : []),
 ];
 for (const path of ["public/llms.txt", "public/llms-full.txt"]) {
   const body = read(path);

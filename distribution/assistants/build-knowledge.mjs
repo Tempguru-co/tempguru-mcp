@@ -123,7 +123,7 @@ The all-inclusive bill rate covers:
 - General liability insurance
 - I-9 employment verification
 - TempGuru coordination
-- Replacement coordination (best effort, under applicable state and local rules)
+- No-show replacement, with a 2-hour target (not a guarantee; under applicable state and local rules)
 
 Background checks are available when the event or venue requires them.
 Certificates of insurance (COI) naming the venue as additional insured are

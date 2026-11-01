@@ -4,7 +4,6 @@ import {
   policyQueryTelemetryStatus,
   queryPolicies,
 } from "@/lib/mcp/queries";
-import { getPublishedPolicyCacheMaxAge } from "@/lib/mcp/published-offer";
 import {
   jsonBadRequest,
   jsonError,
@@ -21,8 +20,7 @@ export async function GET(request: Request) {
     await trackRest(request, { tool: "get_policies", status: "error" });
     return jsonBadRequest("topic must be at most 80 characters.", "topic");
   }
-  const now = new Date();
-  const result = queryPolicies({ topic }, now);
+  const result = queryPolicies({ topic });
   if (!result.ok) {
     await trackRest(request, { tool: "get_policies", status: "error" });
     return jsonError(result.error);
@@ -32,7 +30,7 @@ export async function GET(request: Request) {
     status: policyQueryTelemetryStatus(result),
   });
   return jsonOk({ topic: topic ?? null }, result.data, {
-    cacheControl: `public, max-age=${getPublishedPolicyCacheMaxAge(now)}`,
+    cacheControl: "public, max-age=3600",
   });
 }
 

@@ -32,7 +32,7 @@ async function loadTelemetryHarness() {
   const result = await build({
     stdin: {
       contents: `
-        export { track } from "./src/lib/telemetry/track.ts";
+        export { track, trackGuardRejection } from "./src/lib/telemetry/track.ts";
         export { exec as redisExec } from "./src/lib/telemetry/redis.ts";
       `,
       resolveDir: repoRoot,
@@ -384,18 +384,13 @@ const expectedPolicyTopics = [
   "background-checks",
   "order-confirmation",
   "quote-response",
-  "offers",
 ];
+const allPoliciesResult = queryPolicies({});
 check("canonical policy topics are derived from policies.json without drift",
-  JSON.stringify(offerContract.getPublishedPolicyTopics(
-    new Date("2026-08-14T12:00:00Z"),
-  )) === JSON.stringify(expectedPolicyTopics)
-    && !offerContract.getPublishedPolicyTopics(
-      new Date("2027-01-01T05:00:00Z"),
-    ).includes("offers"),
-  JSON.stringify(offerContract.getPublishedPolicyTopics(
-    new Date("2026-08-14T12:00:00Z"),
-  )));
+  allPoliciesResult.ok
+    && JSON.stringify(allPoliciesResult.data.policies.map((policy) => policy.topic))
+      === JSON.stringify(expectedPolicyTopics),
+  JSON.stringify(allPoliciesResult.ok && allPoliciesResult.data.policies.map((policy) => policy.topic)));
 const unknownPolicyResult = queryPolicies(
   { topic: "x".repeat(80) },
   new Date("2026-08-14T12:00:00Z"),
@@ -425,9 +420,10 @@ for (const [alias, topic] of [
   ["payment", "payment-terms"],
   ["invoicing", "payment-terms"],
   ["payment invoicing", "payment-terms"],
+  ["deposit", "payment-terms"],
+  ["rush", "payment-terms"],
+  ["rush fee", "payment-terms"],
   ["background check", "background-checks"],
-  ["offer", "offers"],
-  ["AGENT5", "offers"],
 ]) {
   const aliasResult = queryPolicies(
     { topic: alias },
@@ -439,71 +435,64 @@ for (const [alias, topic] of [
       && aliasResult.data.policies[0]?.topic === topic,
     JSON.stringify(aliasResult));
 }
-const expiredAgent5Alias = queryPolicies(
-  { topic: "AGENT5" },
-  new Date("2027-01-01T05:00:00Z"),
+// Promotional offers (AGENT5) stay out of everything a model reads; the only
+// sanctioned use is the human quote-form prefill tested below.
+const PROMOTIONAL_OFFER_COPY = /\bAGENT5\b|first-order offer|% off (?:their|your) first order/i;
+const offerTopicMisses = ["offers", "offer", "AGENT5"].map((topic) => queryPolicies({ topic }));
+check("get_policies never serves a promotional offer to agents",
+  offerTopicMisses.every((result) =>
+    result.ok
+      && result.data.policy_found === false
+      && !result.data.available_topics.includes("offers"))
+    && !PROMOTIONAL_OFFER_COPY.test(JSON.stringify(allPoliciesResult)),
+  JSON.stringify(offerTopicMisses));
+// Operator-confirmed terms (2026-11-01): every topic is answered, no open
+// TODO items remain, and the published values are the ones confirmed.
+const policyClaims = Object.fromEntries(
+  allPoliciesResult.data.policies.map((policy) => [policy.topic, policy.confirmed_claims.join(" ")]),
 );
-check("get_policies aliases cannot revive an expired offer",
-  expiredAgent5Alias.ok
-    && expiredAgent5Alias.data.policy_found === false
-    && !expiredAgent5Alias.data.available_topics.includes("offers"),
-  JSON.stringify(expiredAgent5Alias));
-
-const AGENT5_CANONICAL_TERMS =
-  "New TempGuru clients receive 5% off their first order, capped at $500, when the staffing request mentions the code AGENT5 in the event details. The offer is valid for first orders submitted through https://tempguru.co/get-staffing by December 31, 2026. The discount is applied by the TempGuru coordinator after the quote is approved; published city-guide planning rates are unchanged. The code is public and any buyer may use it.";
-const activeOfferResult = queryPolicies(
-  { topic: "offers" },
-  new Date("2026-12-31T23:59:59.000-05:00"),
-);
-const activeOffer = activeOfferResult.ok && activeOfferResult.data.policy_found
-  ? activeOfferResult.data.policies[0]
-  : null;
-check("get_policies returns the canonical AGENT5 terms and structured fields verbatim",
-  activeOffer?.confirmed_claims?.[0] === AGENT5_CANONICAL_TERMS
-    && activeOffer?.code === "AGENT5"
-    && activeOffer?.discount_percent === 5
-    && activeOffer?.cap_usd === 500
-    && activeOffer?.expires === "2026-12-31"
-    && activeOffer?.scope === "first order, new clients",
-  JSON.stringify(activeOffer));
-const expiredOfferResult = queryPolicies(
-  { topic: "offers" },
-  new Date("2027-01-01T00:00:00.000-05:00"),
-);
-check("get_policies removes the offer immediately after 2026-12-31",
-  expiredOfferResult.ok
-    && expiredOfferResult.data.policy_found === false
-    && !expiredOfferResult.data.available_topics.includes("offers"),
-  JSON.stringify(expiredOfferResult));
+check("every published policy topic carries confirmed terms and no open TODO items",
+  allPoliciesResult.data.policies.every((policy) =>
+    policy.confirmed_claims.length > 0 && policy.todo_for_megan.length === 0)
+    && allPoliciesResult.data.todo_for_megan.length === 0
+    && !/TODO-for-Megan/.test(JSON.stringify(allPoliciesResult)),
+  JSON.stringify(allPoliciesResult.data.todo_for_megan));
+check("published booking terms match the operator-confirmed values",
+  policyClaims["minimum-booking-hours"].includes("minimum of 4 hours per worker per shift, with no exceptions")
+    && policyClaims["cancellation-rescheduling"].includes("at least 48 hours' notice")
+    && policyClaims["cancellation-rescheduling"].includes("the 4-hour minimum is billed for each booked worker and shift")
+    && policyClaims["no-show-backfill"].startsWith(
+      "TempGuru aims to replace a no-show within 2 hours. This is a target, not a guarantee.",
+    )
+    && policyClaims["coi-additional-insured"].includes("at least one week's notice before load-in")
+    && policyClaims["payment-terms"].includes("A deposit is required after the buyer approves the quote.")
+    && policyClaims["payment-terms"].includes("set on each quote; there is no standard percentage")
+    && policyClaims["payment-terms"].includes("Invoices are due net 30.")
+    && policyClaims["payment-terms"].includes("less than 72 hours before the event carry a $150 rush fee per order")
+    && policyClaims["background-checks"].includes("at least 2 weeks' lead time"),
+  JSON.stringify(policyClaims));
+const coiPolicyResult = queryPolicies({ topic: "COI" });
 check("get_policies output schema accepts a clean miss and rejects contradictory discriminators",
   outputSchemas.GET_POLICIES_SCHEMA.safeParse(unknownPolicyResult.data).success
     && !outputSchemas.GET_POLICIES_SCHEMA.safeParse({
       ...unknownPolicyResult.data,
       status: "policies",
     }).success
-    && activeOfferResult.ok
+    && coiPolicyResult.ok
+    && outputSchemas.GET_POLICIES_SCHEMA.safeParse(coiPolicyResult.data).success
     && !outputSchemas.GET_POLICIES_SCHEMA.safeParse({
-      ...activeOfferResult.data,
+      ...coiPolicyResult.data,
       status: "policy_not_found",
     }).success);
 
 const { getServerInstructions } = await load("src/lib/mcp/register-tools.ts");
-check("all AGENT5 runtime surfaces share the same inclusive expiry gate",
+check("the human quote-form prefill keeps its inclusive 2026-12-31 expiry gate",
   offerContract.isAgent5OfferActive(new Date("2027-01-01T04:59:59.999Z"))
-    && !offerContract.isAgent5OfferActive(new Date("2027-01-01T05:00:00.000Z"))
-    && offerContract.getAgent5ServerInstruction(new Date("2026-12-31T23:59:59.000-05:00"))
-      === "A published first-order offer (code AGENT5) exists; get_policies returns its exact terms."
-    && offerContract.getAgent5ServerInstruction(new Date("2027-01-01T00:00:00.000-05:00")) === null);
-check("REST policy caching cannot carry a pre-expiry offer past the cutoff",
-  offerContract.getPublishedPolicyCacheMaxAge(new Date("2027-01-01T03:00:00.000Z")) === 3_600
-    && offerContract.getPublishedPolicyCacheMaxAge(new Date("2027-01-01T04:59:58.000Z")) === 2
-    && offerContract.getPublishedPolicyCacheMaxAge(new Date("2027-01-01T04:59:59.999Z")) === 0
-    && offerContract.getPublishedPolicyCacheMaxAge(new Date("2027-01-01T05:00:00.000Z")) === 3_600);
-check("server instructions drop the AGENT5 sentence after the shared expiry boundary",
-  getServerInstructions(new Date("2026-12-31T23:59:59.000-05:00"))
-    .includes("A published first-order offer (code AGENT5) exists; get_policies returns its exact terms.")
-    && !getServerInstructions(new Date("2027-01-01T00:00:00.000-05:00"))
-      .includes("AGENT5"));
+    && !offerContract.isAgent5OfferActive(new Date("2027-01-01T05:00:00.000Z")));
+check("server instructions carry no promotional offer copy",
+  !PROMOTIONAL_OFFER_COPY.test(getServerInstructions())
+    && !/discount|promo/i.test(getServerInstructions()),
+  getServerInstructions());
 check("AGENT5 details prefill is bounded, idempotent, and expiry-aware",
   offerContract.appendAgent5ToDetails("", new Date("2026-08-14T12:00:00Z")) === "AGENT5"
     && offerContract.appendAgent5ToDetails("Needs ADA access", new Date("2026-08-14T12:00:00Z"))
@@ -574,7 +563,7 @@ const offerBaselinePlan = buildStaffingPlan({
     { role: "team-leads", headcount: 1 },
   ],
 });
-check("AGENT5 does not discount or alter the canonical Chicago planning totals",
+check("canonical Chicago planning totals stay undiscounted",
   offerBaselinePlan.status === "plan"
     && offerBaselinePlan.estimated_total_range.low === 5_360
     && offerBaselinePlan.estimated_total_range.high === 6_248
@@ -584,7 +573,7 @@ const bowlingGreenOfferBaseline = buildStaffingPlan({
   city: "Bowling Green",
   roles: [{ role: "brand-ambassadors", headcount: 1, hours_per_shift: 8, days: 1 }],
 });
-check("AGENT5 leaves the $40/hour Brand Ambassador floor and totals undiscounted",
+check("the $40/hour Brand Ambassador floor and totals stay undiscounted",
   bowlingGreenOfferBaseline.status === "plan"
     && bowlingGreenOfferBaseline.plan_lines[0]?.hourly_range.low === 40
     && bowlingGreenOfferBaseline.plan_lines[0]?.hourly_range.high === 48
@@ -985,6 +974,22 @@ check("Toronto: compliance is provincial (Ontario), wage deferred to coordinator
 // ── plan_staffing: city validated before needs_roles; crew-size + security notes ──
 check("city-only call with unknown city returns city_not_found (not the catalog)",
   buildStaffingPlan({ city: "Paris" }).status === "city_not_found");
+// No-plan outcomes carry no plan_id or continuation, so their next steps must
+// not send the agent to request_quote or a nonexistent continuation.form_url.
+const noPlanResults = [
+  buildStaffingPlan({ city: "Hong Kong", event_date: "2027-03-10" }),
+  buildStaffingPlan({ city: "Chicago", roles: [{ role: "astronaut", headcount: 2 }] }),
+];
+check("no-plan outcomes never point the agent at a quote handoff that cannot exist",
+  noPlanResults[0].status === "city_not_found"
+    && noPlanResults[1].status === "roles_not_found"
+    && noPlanResults.every((r) =>
+      r.plan_id === undefined
+        && r.continuation === undefined
+        && r.next_steps[0].startsWith("No plan was created")
+        && !r.next_steps.some((s) => /call request_quote with the saved plan_id|give the buyer continuation\.form_url/.test(s)))
+    && noPlanResults[0].next_steps.some((s) => s.includes("US and Canada only")),
+  JSON.stringify(noPlanResults.map((r) => r.next_steps)));
 const crew = buildStaffingPlan({
   city: "Austin",
   roles: [
@@ -1401,6 +1406,66 @@ check("MCP keeps non-browser server clients compatible without wildcard CORS",
     && hasMachineSecurity(mcpServerPreflight)
     && variesOnOrigin(mcpServerPreflight));
 
+// ── /mcp request guard: one HTTP request must not fan out into many tool calls ──
+const mcpPost = (body, headers = {}) => mcpRoute.POST(new Request(
+  "https://mcp.tempguru.co/mcp",
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json, text/event-stream",
+      "MCP-Protocol-Version": "2025-06-18",
+      ...headers,
+    },
+    body,
+  },
+));
+const rpcCall = (id, method, params = {}) => ({ jsonrpc: "2.0", id, method, params });
+// Parse defensively: without the guard these come back as SSE tool results,
+// which must fail the check below rather than crash the suite.
+const jsonOrEmpty = async (response) => {
+  try {
+    return JSON.parse(await response.text());
+  } catch {
+    return {};
+  }
+};
+const oversizedBatch = await mcpPost(JSON.stringify(
+  Array.from({ length: 11 }, (_, i) => rpcCall(i + 1, "tools/call", { name: "get_roles", arguments: {} })),
+));
+const oversizedBatchBody = await jsonOrEmpty(oversizedBatch);
+check("MCP refuses a JSON-RPC batch over 10 messages before any tool runs",
+  oversizedBatch.status === 400
+    && oversizedBatchBody.error?.code === -32600
+    && /Batch must not exceed 10/.test(oversizedBatchBody.error?.message ?? "")
+    && hasMachineSecurity(oversizedBatch),
+  JSON.stringify({ status: oversizedBatch.status, oversizedBatchBody }));
+const oversizedBody = await mcpPost(JSON.stringify({
+  ...rpcCall(1, "tools/call", { name: "get_roles", arguments: {} }),
+  padding: "x".repeat(64 * 1024),
+}));
+const oversizedBodyJson = await jsonOrEmpty(oversizedBody);
+check("MCP refuses a body over 64 KiB with 413",
+  oversizedBody.status === 413
+    && oversizedBodyJson.error?.code === -32000
+    && hasMachineSecurity(oversizedBody),
+  JSON.stringify({ status: oversizedBody.status, oversizedBodyJson }));
+const smallBatch = await mcpPost(JSON.stringify([
+  rpcCall(1, "tools/list"),
+  rpcCall(2, "prompts/list"),
+]));
+const smallBatchText = await smallBatch.text();
+check("MCP still serves a small legacy batch within the cap",
+  smallBatch.status === 200 && (smallBatchText.match(/"result":/g) ?? []).length === 2,
+  `${smallBatch.status} ${smallBatchText.slice(0, 200)}`);
+const jsonOnlyList = await mcpPost(JSON.stringify(rpcCall(1, "tools/list")), {
+  Accept: "application/json",
+});
+const jsonOnlyListText = await jsonOnlyList.text();
+check("MCP forwards the guarded body intact and still normalizes a JSON-only Accept",
+  jsonOnlyList.status === 200 && (jsonOnlyListText.match(/"inputSchema":/g) ?? []).length === 12,
+  `${jsonOnlyList.status} ${jsonOnlyListText.slice(0, 200)}`);
+
 const quoteRoute = await load("src/app/api/v1/quote-requests/route.ts");
 const quoteAttackerPost = await quoteRoute.POST(new Request(
   "https://mcp.tempguru.co/api/v1/quote-requests",
@@ -1545,7 +1610,6 @@ check("public read REST data remains openly reusable but gains machine security 
 
 const { buildOpenApiSpec } = await load("src/lib/api/openapi.ts");
 const hardenedOpenApi = buildOpenApiSpec();
-const expiredOfferOpenApi = buildOpenApiSpec(new Date("2027-01-01T05:00:00Z"));
 const quoteResponses = hardenedOpenApi.paths["/api/v1/quote-requests"].post.responses;
 const errorCodes = hardenedOpenApi.components.schemas.Error.properties.error
   .properties.code.enum;
@@ -1557,8 +1621,7 @@ check("OpenAPI advertises the canonical get_policies topic enum",
   JSON.stringify(
     hardenedOpenApi.paths["/api/v1/policies"].get.parameters[0].schema.enum,
   ) === JSON.stringify(expectedPolicyTopics)
-    && !expiredOfferOpenApi.paths["/api/v1/policies"].get.parameters[0].schema.enum
-      .includes("offers"));
+    && !PROMOTIONAL_OFFER_COPY.test(JSON.stringify(hardenedOpenApi)));
 const policyResponseBranches = hardenedOpenApi.components.schemas.PoliciesResponse.oneOf;
 check("OpenAPI pins get_policies status and policy_found to consistent response branches",
   policyResponseBranches?.some((branch) =>
@@ -1693,16 +1756,13 @@ const restOfferResponse = await policiesRoute.GET(
   new Request("https://mcp.tempguru.co/api/v1/policies?topic=offers"),
 );
 const restOfferBody = await restOfferResponse.json();
-const restOfferMaxAge = Number(
-  restOfferResponse.headers.get("cache-control")?.match(/^public, max-age=(\d+)$/)?.[1],
-);
-check("REST get_policies serves the exact AGENT5 policy with expiry-bounded caching",
+check("REST get_policies serves no promotional offer and caches for the standard hour",
   restOfferResponse.status === 200
-    && Number.isInteger(restOfferMaxAge)
-    && restOfferMaxAge >= 0
-    && restOfferMaxAge <= 3_600
-    && restOfferBody.policies?.[0]?.confirmed_claims?.[0] === AGENT5_CANONICAL_TERMS
-    && restOfferBody.policies?.[0]?.code === "AGENT5");
+    && restOfferResponse.headers.get("cache-control") === "public, max-age=3600"
+    && restOfferBody.policy_found === false
+    && !restOfferBody.available_topics?.includes("offers")
+    && !PROMOTIONAL_OFFER_COPY.test(JSON.stringify(restOfferBody)),
+  JSON.stringify(restOfferBody));
 
 // ── quote status stub lifecycle: queued -> received, 90-day TTL ──
 const {
@@ -1805,6 +1865,73 @@ check("handoff telemetry stays separate from buyer-submitted lead attribution",
     && funnelAttribution?.["rest:quotes_submitted"] === 1
     && !("mcp:quotes_submitted" in (funnelAttribution ?? {})),
   JSON.stringify({ skillAttribution, platformAttribution, funnelAttribution }));
+await telemetryHarness.track({
+  tool: "get_cities",
+  status: "success",
+  channel: "mcp",
+  userAgent: "python-httpx/0.28.1",
+  ipCountry: "hk",
+  network: "other",
+});
+// Real claude.ai traffic has been observed with a python-httpx UA: the
+// verified network keeps it from reading as an anonymous script.
+await telemetryHarness.track({
+  tool: "get_roles",
+  status: "success",
+  channel: "mcp",
+  userAgent: "python-httpx/0.28.1",
+  ipCountry: "US",
+  network: "anthropic",
+});
+await telemetryHarness.track({
+  tool: "get_roles",
+  status: "success",
+  channel: "mcp",
+  userAgent: "Claude-User",
+  ipCountry: "",
+  network: "not-a-network",
+});
+await telemetryHarness.trackGuardRejection({
+  reason: "batch_too_large",
+  userAgent: "curl/8.7.1",
+  ipCountry: "HK",
+  network: "other",
+});
+const [originHash, guardHash] = await Promise.all([
+  telemetryHarness.redisExec((redis) => redis.get(`origin:${telemetryDate}`)),
+  telemetryHarness.redisExec((redis) => redis.get(`guard:${telemetryDate}`)),
+]);
+check("telemetry cross-tabs country, verified network, and UA class, and counts guard refusals, using closed labels only",
+  originHash?.["HK|other|scripted"] === 1
+    && originHash?.["US|anthropic|scripted"] === 1
+    && originHash?.["unknown|unknown|claude-ai"] === 1
+    && originHash?.["US|unknown|other"] === 2
+    && guardHash?.["batch_too_large|HK|other|scripted"] === 1
+    && !JSON.stringify({ originHash, guardHash }).includes("httpx")
+    && !JSON.stringify({ originHash, guardHash }).includes("curl")
+    && !JSON.stringify({ originHash, guardHash }).includes("not-a-network"),
+  JSON.stringify({ originHash, guardHash }));
+
+// ── verified source network: published Anthropic/OpenAI egress ranges ──
+const sourceNetwork = await load("src/lib/telemetry/source-network.ts");
+const egressRanges = JSON.parse(
+  readFileSync(join(repoRoot, "src/lib/telemetry/ai-egress-ranges.json"), "utf8"),
+);
+const firstOpenAiAddress = egressRanges.networks.openai.prefixes[0].split("/")[0];
+check("source network labels published Anthropic and OpenAI egress IPs, and nothing else",
+  sourceNetwork.classifySourceNetwork("160.79.104.1") === "anthropic"
+    && sourceNetwork.classifySourceNetwork("160.79.111.254") === "anthropic"
+    && sourceNetwork.classifySourceNetwork("::ffff:160.79.106.20") === "anthropic"
+    && sourceNetwork.classifySourceNetwork("160.79.112.1") === "other"
+    && sourceNetwork.classifySourceNetwork(firstOpenAiAddress) === "openai"
+    && sourceNetwork.classifySourceNetwork("43.198.1.1") === "other"
+    && sourceNetwork.classifySourceNetwork("2001:db8::1") === "other"
+    && sourceNetwork.classifySourceNetwork("") === "unknown"
+    && sourceNetwork.classifySourceNetwork("not-an-ip") === "unknown"
+    && sourceNetwork.clientIpFromHeaders(
+      new Headers({ "x-forwarded-for": "160.79.104.9, 10.0.0.1" }),
+    ) === "160.79.104.9",
+  `openai sample ${firstOpenAiAddress}`);
 const savedPlanSource = { source: "pi" };
 check("lead source precedence is explicit platform, current runtime, then saved plan",
   queueModule.resolveEffectiveSourcePlatform(

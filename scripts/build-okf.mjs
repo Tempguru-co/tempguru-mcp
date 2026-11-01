@@ -266,8 +266,8 @@ const band = (b) => `$${b.low}-${b.high}`;
 // Policy prose is rendered directly from policies.json so generated knowledge
 // never turns an unknown business term into a made-up promise. A policy may
 // contain confirmed claims while still requiring coordinator confirmation for
-// an unpublished detail (for example, best-effort replacement coordination is
-// published but its response time is not).
+// a detail set per order (for example, the deposit is published as a
+// percentage of the quote total, but the percentage itself is on the quote).
 const policyFor = (topic) => {
   const policy = policies.policies.find((p) => p.topic === topic);
   if (!policy) throw new Error(`Missing required policy topic: ${topic}`);
@@ -302,18 +302,10 @@ const policySections = policies.policies
   .map((policy) => `## ${policy.title}\n\n${policyBody(policy)}`)
   .join("\n\n");
 const cancellationPolicy = policyFor("cancellation-rescheduling");
-const offerPolicy = policyFor("offers");
-const offerTerms = offerPolicy.confirmed_claims[0];
-if (
-  offerPolicy.confirmed_claims.length !== 1 ||
-  offerPolicy.code !== "AGENT5" ||
-  offerPolicy.discount_percent !== 5 ||
-  offerPolicy.cap_usd !== 500 ||
-  offerPolicy.expires !== "2026-12-31" ||
-  offerPolicy.scope !== "first order, new clients" ||
-  !offerTerms
-) {
-  throw new Error("The canonical AGENT5 offer record is incomplete");
+// Generated knowledge is model-readable, so it carries no promotional offers
+// (codes, discounts). scripts/check-submissions.mjs enforces the absence.
+if (policies.policies.some((policy) => policy.topic === "offers")) {
+  throw new Error("policies.json must not publish an offers topic to agent-facing knowledge");
 }
 
 // ─── Rate Index math, mirrors src/lib/mcp/city-rates.ts exactly ──────────────
@@ -483,6 +475,10 @@ Rate ranges in this bundle are **planning estimates**, not binding quotes.`
 // ══════════════════════════════════════════════════════════════════════════
 // ROOT: log.md  (reserved, no frontmatter, §7)
 // ══════════════════════════════════════════════════════════════════════════
+// The bundle first shipped in #1 (2026-06-13). The entry heading used to say
+// "Initial" with the latest DATA_DATE, so every data refresh moved the
+// first-publication date forward; the real date is pinned here instead.
+const OKF_FIRST_PUBLISHED = "2026-06-13";
 write("log.md", plainDoc(
   `# Change Log
 
@@ -490,9 +486,9 @@ This bundle is generated from TempGuru's canonical datasets. Each entry records 
 data or structure change. Content freshness for any concept is carried in that
 file's \`timestamp\` frontmatter field.
 
-## ${DATA_DATE}, Initial OKF v0.1 bundle
+## ${DATA_DATE}, Current OKF v0.1 bundle
 
-- First publication of the TempGuru knowledge bundle in Open Knowledge Format v0.1.
+- First published ${OKF_FIRST_PUBLISHED} as the TempGuru knowledge bundle in Open Knowledge Format v0.1; this entry describes the current regeneration.
 - Generated from \`content/mcp-data/\` (cities, roles, role-pricing, state-compliance, city-rates, policies), data version ${cities._meta.version}, updated ${DATA_DATE}.
 - Rate Index figures computed with the same logic as the live \`get_rate_benchmark\` MCP tool, so the bundle and the API stay in lockstep.
 - Evidence-verified public scale: ${approvedClaims.markets.publicFigure}, ${approvedClaims.events.publicFigure}, and ${approvedClaims.completedShifts.publicFigure}.
@@ -614,7 +610,7 @@ published rate is a single **all-inclusive hourly bill rate** that covers:
 - General liability insurance
 - I-9 employment verification
 - TempGuru coordination
-- Replacement coordination (best effort, under applicable state and local rules)
+- No-show replacement, with a 2-hour target (not a guarantee; under applicable state and local rules)
 
 Background checks are available when the event or venue requires them. Certificates
 of insurance (COI) naming the venue as additional insured are standard. There is no
@@ -1385,7 +1381,7 @@ Rate Report pricing-study dataset has ${measuredTotal} measured city records.
 That study universe is not the public service-coverage claim. See the
 [Rate Index](../rate-index.md) and [MCP tools](mcp-tools.md).
 
-## Policy \`{ topic, title, confirmed_claims[], confirm_with_coordinator, todo_for_megan[], sources[], code?, discount_percent?, cap_usd?, expires?, scope? }\`
+## Policy \`{ topic, title, confirmed_claims[], confirm_with_coordinator, todo_for_megan[], sources[] }\`
 
 ${policies.policies.length} policy topics are published in [booking and procurement
 policies](../policies.md). Empty \`confirmed_claims\` never authorizes an inferred
@@ -1454,9 +1450,6 @@ claims, not annual run rates. Claim definitions and statuses are available in
 - [State compliance](${BUNDLE_URL}/compliance/index.md): minimum wage and overtime for all 51 US jurisdictions
 - [Booking and procurement policies](${BUNDLE_URL}/policies.md): confirmed terms plus explicit coordinator-confirmation gaps
 - [Workflows](${BUNDLE_URL}/workflows/index.md): all ${SKILLS.length} canonical agent skills plus plan and quote-submission flows
-
-## Published first-order offer
-${offerTerms}
 
 ## Agent interfaces and live tools (action layer)
 - MCP Server (no auth, dual-era HTTP; preferred MCP 2026-07-28 with 2025-era compatibility): ${MCP_ENDPOINT}, ${TOOLS.length} tools (${TOOLS.map((t) => t.name).join(", ")}); call plan_staffing first, retain any plan_id, call save_staffing_plan only when a complete plan has no plan_id, and never duplicate a planner save

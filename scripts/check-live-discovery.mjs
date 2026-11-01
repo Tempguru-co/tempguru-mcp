@@ -22,20 +22,12 @@ const POLICIES = JSON.parse(
   readFileSync(new URL("../content/mcp-data/policies.json", import.meta.url), "utf8"),
 );
 const POLICY_TOPICS = POLICIES.policies.map((policy) => policy.topic);
-const AGENT5_OFFER = POLICIES.policies.find((policy) => policy.topic === "offers");
-const AGENT5_TERMS = AGENT5_OFFER?.confirmed_claims?.[0];
-const AGENT5_SERVER_INSTRUCTION =
-  "A published first-order offer (code AGENT5) exists; get_policies returns its exact terms.";
-if (
-  AGENT5_OFFER?.confirmed_claims?.length !== 1 ||
-  AGENT5_OFFER?.code !== "AGENT5" ||
-  AGENT5_OFFER?.discount_percent !== 5 ||
-  AGENT5_OFFER?.cap_usd !== 500 ||
-  AGENT5_OFFER?.expires !== "2026-12-31" ||
-  AGENT5_OFFER?.scope !== "first order, new clients" ||
-  !AGENT5_TERMS
-) {
-  throw new Error("canonical AGENT5 offer record is missing or incomplete");
+// Promotional offers (codes, discounts) stay out of everything a model reads;
+// the only sanctioned AGENT5 use is the human quote-form prefill. See
+// src/lib/mcp/published-offer.ts and scripts/check-submissions.mjs.
+const PROMOTIONAL_OFFER_COPY = /\bAGENT5\b|first-order offer|% off (?:their|your) first order/i;
+if (POLICY_TOPICS.includes("offers")) {
+  throw new Error("policies.json publishes a promotional offers topic to agents");
 }
 const A2A_ENDPOINT = PUBLIC_FACTS.agentInterfaces.a2a.url;
 const MODERN_VERSION = "2026-07-28";
@@ -66,6 +58,10 @@ if (TOOLS.length !== 12 || !TOOLS.includes("save_staffing_plan")) {
 async function fetchOk(url, init = {}) {
   const response = await fetch(url, {
     ...init,
+    // OPERATIONS.md convention: internal checks identify as TempGuru-SmokeTest,
+    // so this daily canary lands in `internal-test` telemetry. Node's default
+    // "node" user agent classified it as third-party "scripted" traffic.
+    headers: { "user-agent": "TempGuru-SmokeTest/live-discovery", ...(init.headers ?? {}) },
     signal: AbortSignal.timeout(15_000),
   });
   if (!response.ok) throw new Error(`${url}: HTTP ${response.status}`);
@@ -310,8 +306,8 @@ for (const path of ["/llms.txt", "/llms-full.txt"]) {
       }
     }
   }
-  if (!body.includes(AGENT5_TERMS)) {
-    throw new Error(`${path}: canonical AGENT5 offer terms are missing`);
+  if (PROMOTIONAL_OFFER_COPY.test(body)) {
+    throw new Error(`${path}: promotional offer copy (AGENT5) is published to agents`);
   }
   const inventories = [...body.matchAll(/^- Canonical Agent Skills \((\d+)\):[^\n]*$/gm)];
   if (inventories.length !== 1 || Number(inventories[0][1]) !== SKILLS.length) {
@@ -410,8 +406,8 @@ if (legacyInitialize.protocolVersion !== LEGACY_VERSION) {
     `${MCP_ENDPOINT}: legacy initialize negotiated ${legacyInitialize.protocolVersion}, expected ${LEGACY_VERSION}`,
   );
 }
-if (!legacyInitialize.instructions?.includes(AGENT5_SERVER_INSTRUCTION)) {
-  throw new Error(`${MCP_ENDPOINT}: initialize instructions omit the AGENT5 offer pointer`);
+if (PROMOTIONAL_OFFER_COPY.test(legacyInitialize.instructions ?? "")) {
+  throw new Error(`${MCP_ENDPOINT}: initialize instructions carry promotional offer copy (AGENT5)`);
 }
 const legacyTools = await postRpc(
   {
@@ -429,6 +425,9 @@ assertExactSet(
     : [],
   TOOLS,
 );
+if (PROMOTIONAL_OFFER_COPY.test(JSON.stringify(legacyTools.tools))) {
+  throw new Error(`${MCP_ENDPOINT}: tools/list carries promotional offer copy (AGENT5)`);
+}
 const livePoliciesTool = legacyTools.tools.find((tool) => tool.name === "get_policies");
 if (
   JSON.stringify(livePoliciesTool?.inputSchema?.properties?.topic?.enum) !==
@@ -448,27 +447,24 @@ if (JSON.stringify(liveOpenApiPolicyTopics) !== JSON.stringify(POLICY_TOPICS)) {
 const liveOfferResult = await postRpc(
   {
     jsonrpc: "2.0",
-    id: "live-legacy-agent5-offer",
+    id: "live-legacy-no-offer-topic",
     method: "tools/call",
     params: {
       name: "get_policies",
-      arguments: { topic: "offers" },
+      arguments: { topic: "AGENT5" },
     },
   },
   { "mcp-protocol-version": LEGACY_VERSION },
 );
-const liveOffer = liveOfferResult.structuredContent?.policies?.[0];
 if (
   liveOfferResult.isError === true ||
-  liveOfferResult.structuredContent?.policy_found !== true ||
-  liveOffer?.confirmed_claims?.[0] !== AGENT5_TERMS ||
-  liveOffer?.code !== "AGENT5" ||
-  liveOffer?.discount_percent !== 5 ||
-  liveOffer?.cap_usd !== 500 ||
-  liveOffer?.expires !== "2026-12-31" ||
-  liveOffer?.scope !== "first order, new clients"
+  liveOfferResult.structuredContent?.policy_found !== false ||
+  liveOfferResult.structuredContent?.available_topics?.includes("offers") !== false ||
+  PROMOTIONAL_OFFER_COPY.test(
+    JSON.stringify(liveOfferResult.structuredContent?.available_topics ?? []),
+  )
 ) {
-  throw new Error(`${MCP_ENDPOINT}: live AGENT5 policy drifted from canonical data`);
+  throw new Error(`${MCP_ENDPOINT}: get_policies still serves a promotional offer to agents`);
 }
 const liveAliasResult = await postRpc(
   {

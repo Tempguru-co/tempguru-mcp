@@ -1,5 +1,32 @@
 # TempGuru MCP 1.7.2 hotfix release runbook
 
+> **Unreleased on this branch (cut as the next version, not as `1.7.2`):**
+> AGENT5 is removed from every model-readable surface (server instructions,
+> `get_policies` with its REST/OpenAPI mirrors, `plan_staffing`/`get_plan`
+> notes, OKF/llms knowledge); only the human quote-form prefill remains. The
+> same branch upgrades the MCP SDK (2.4.0), Next.js (16.4.3), and zod, caps
+> `/mcp` request bodies and JSON-RPC batches, and labels telemetry by verified
+> source network. When releasing: bump the version everywhere the drift gates
+> require, deploy, run `deploy-apex-agent-readiness.yml` (the apex worker's
+> embedded schema changed), re-upload `distribution/assistants/knowledge/` to
+> each assistant platform, republish the Hugging Face dataset, remove AGENT5
+> from the website-owned `tempguru.co/llms.txt` and `llms-full.txt`, and
+> optionally send the removal note in `distribution/anthropic-directory-update.md`.
+>
+> The branch also publishes the operator-confirmed booking terms (policies
+> data `1.3.1`): 4-hour minimum per worker per shift; 48 hours' notice to cancel
+> or reschedule without the 4-hour minimum; a 2-hour no-show replacement
+> target (not a guarantee);
+> COIs need at least a week; a deposit (a percentage of the quote total, set per
+> quote, no standard rate) after approval; net 30; a $150 per-order rush fee
+> under 72 hours; background checks need at
+> least 2 weeks, with client-set scope and request-based cost. Five skills and
+> both system prompts changed to match (best-effort replacement wording
+> removed), so also bump the quote skills' shared `skill_version`, republish
+> them to Hermes, ClawHub, and Pi, and re-paste the system prompt and
+> `microsoft/declarativeAgent.json` (now 7,992 of Microsoft's 8,000
+> instruction characters) on each assistant platform.
+
 Use this runbook for the `get_policies` topic-discovery and telemetry hotfix.
 `tempguru-mcp@1.7.1` is already released and immutable; do not try to
 overwrite or republish it. The server/CLI release candidate in this branch is

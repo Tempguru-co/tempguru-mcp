@@ -682,6 +682,13 @@ const blockedScalePatterns = [
   /零用工风险/i,
   /覆盖(?:美加|美国和加拿大)\s*345\s*个(?:城市|市场)/i,
   /使用工具确认[^\n。]*(?:覆盖|提前期)/i,
+  // No-show replacement within 2 hours is a published target, not a guarantee
+  // (operator confirmation, 2026-11-01). Block promise phrasings everywhere.
+  /\bTempGuru\s+replaces\s+(?:a|the|any)\s+(?:no-show|worker)/i,
+  /\bno-shows?\s+(?:are\s+|is\s+)?replaced\s+(?:by\s+TempGuru\s+)?within\b/i,
+  /\bno-show\s+replacement\s+within\s+\d/i,
+  /\bguaranteed\s+(?:no-show\s+)?replacements?\b/i,
+  /缺勤替补由\s*TempGuru\s*在\s*\d+\s*小时内完成/,
 ];
 for (const path of publicSurfaceFiles) {
   const body = read(path);

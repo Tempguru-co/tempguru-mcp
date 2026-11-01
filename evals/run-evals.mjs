@@ -20,10 +20,12 @@ const cases = JSON.parse(readFileSync(join(here, "golden-cases.json"), "utf-8"))
 const canonicalPolicyRows = JSON.parse(
   readFileSync(join(here, "..", "content", "mcp-data", "policies.json"), "utf-8"),
 ).policies;
-const canonicalPolicyTopics = canonicalPolicyRows
-  .filter((policy) =>
-    policy.topic !== "offers" || Date.now() < Date.parse("2027-01-01T05:00:00.000Z"))
-  .map((policy) => policy.topic);
+const canonicalPolicyTopics = canonicalPolicyRows.map((policy) => policy.topic);
+// Promotional offers (AGENT5) stay out of everything a model reads; only the
+// human quote-form prefill uses the code. See src/lib/mcp/published-offer.ts.
+const PROMOTIONAL_OFFER_COPY = /\bAGENT5\b|first-order offer|% off (?:their|your) first order/i;
+// Golden cases may list `absent` markers that must NOT appear in the result.
+const presentMarkers = (c, text) => (c.absent ?? []).filter((marker) => text.includes(marker));
 
 const server = spawn("node", [join(here, "..", "dist", "mcp-stdio.mjs")], {
   stdio: ["pipe", "pipe", "inherit"],
@@ -97,15 +99,18 @@ try {
   });
   notify("notifications/initialized");
   check(
-    "server instructions advertise the exact published AGENT5 policy pointer",
-    initialized.result?.instructions?.includes(
-      "A published first-order offer (code AGENT5) exists; get_policies returns its exact terms.",
-    ) === true,
+    "server instructions carry no promotional offer copy",
+    typeof initialized.result?.instructions === "string" &&
+      !PROMOTIONAL_OFFER_COPY.test(initialized.result.instructions),
     initialized.result?.instructions ?? "missing instructions",
   );
 
   // Surface checks: the full tool + prompt inventory must be advertised.
   const tools = await rpc("tools/list", {});
+  check(
+    "tools/list carries no promotional offer copy",
+    !PROMOTIONAL_OFFER_COPY.test(JSON.stringify(tools.result?.tools ?? [])),
+  );
   const toolNames = (tools.result?.tools ?? []).map((t) => t.name).sort();
   check(
     "tools/list advertises all 12 tools",
@@ -237,11 +242,9 @@ try {
         : null;
       const text = JSON.stringify({ plan, savedPlan, restored, quoted });
       const missing = c.expect.filter((marker) => !text.includes(marker));
-      const expectedOfferNote =
-        "First-order offer AGENT5 may apply (5% off, $500 cap, expires 2026-12-31); see get_policies. Not reflected in the totals above.";
+      for (const marker of presentMarkers(c, text)) missing.push(`absence of ${marker}`);
       const restoredPlan = restored?.result?.structuredContent;
-      if (plan?.offer_note !== expectedOfferNote) missing.push("exact plan_staffing offer_note");
-      if (restoredPlan?.offer_note !== expectedOfferNote) missing.push("exact get_plan offer_note");
+      if (PROMOTIONAL_OFFER_COPY.test(text)) missing.push("no promotional offer copy in plan, restore, or handoff");
       if (
         JSON.stringify(restoredPlan?.snapshot?.estimated_total_range) !==
         JSON.stringify(plan?.estimated_total_range)
@@ -264,11 +267,16 @@ try {
     const res = await rpc("tools/call", { name: c.tool, arguments: c.arguments });
     const text = JSON.stringify(res.result ?? res.error ?? {});
     const missing = c.expect.filter((marker) => !text.includes(marker));
+    for (const marker of presentMarkers(c, text)) missing.push(`absence of ${marker}`);
     check(c.name, missing.length === 0, missing.length ? `missing: ${missing.join(" | ")}` : "");
   }
 } catch (err) {
   console.error("eval run crashed:", err);
   fail++;
+  // Record the crash as a failure so the run exits non-zero. Counting it in
+  // `fail` alone printed "0 passed, 1 failed" and still exited 0, so a stdio
+  // server that failed to start would have passed CI.
+  failures.push(`eval run crashed: ${err?.message ?? err}`);
 } finally {
   server.kill();
 }

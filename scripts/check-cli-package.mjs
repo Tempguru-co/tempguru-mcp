@@ -44,10 +44,7 @@ const expectedToolNames = [
 ].sort();
 const expectedPolicyTopics = JSON.parse(
   readFileSync(join(root, "content", "mcp-data", "policies.json"), "utf8"),
-).policies
-  .filter((policy) =>
-    policy.topic !== "offers" || Date.now() < Date.parse("2027-01-01T05:00:00.000Z"))
-  .map((policy) => policy.topic);
+).policies.map((policy) => policy.topic);
 if (
   expectedToolNames.length !== 12 ||
   !expectedToolNames.includes("save_staffing_plan")

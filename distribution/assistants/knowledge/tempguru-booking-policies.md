@@ -1,11 +1,11 @@
 <!--
   GENERATED FILE. Do not hand-edit.
-  Source: content/mcp-data/ (policies.json updated 2026-08-14)
+  Source: content/mcp-data/ (policies.json updated 2026-11-01)
   Regenerate: node distribution/assistants/build-knowledge.mjs
 -->
 # TempGuru: Booking and Procurement Policies
 
-Published TempGuru event-staffing booking, procurement, and public-offer policies. Unpublished values are explicitly deferred to a coordinator.
+Published TempGuru event-staffing booking and procurement policies. Unpublished values are explicitly deferred to a coordinator.
 
 > Operational policy summary, not a contract. A coordinator confirms event-specific terms on the binding quote and order documentation.
 
@@ -15,37 +15,25 @@ TempGuru coordinator rather than inventing a number, deadline, fee, or exception
 
 ## Minimum booking hours
 
-No concrete operational terms are currently published for this topic.
+- TempGuru bills a minimum of 4 hours per worker per shift, with no exceptions.
 
-**Coordinator confirmation required.** Do not infer a timing, fee, minimum, or exception that is not stated above.
-
-**Open policy confirmations:**
-- TODO-for-Megan: Confirm and publish the minimum billable hours per worker/shift, including any market or event exceptions.
-
-**Canonical sources:** none yet for a concrete value.
+**Canonical sources:**
+- `TempGuru operator confirmation, 2026-11-01`
 
 ## Cancellation and rescheduling
 
-No concrete cancellation or rescheduling windows or fees are currently published in TempGuru's canonical policy data.
+- Cancelling without a fee requires at least 48 hours' notice before the scheduled shift. With less notice, the 4-hour minimum is billed for each booked worker and shift.
+- Rescheduling also requires at least 48 hours' notice; with less notice, the 4-hour minimum applies.
 
-**Coordinator confirmation required.** Do not infer a timing, fee, minimum, or exception that is not stated above.
-
-**Open policy confirmations:**
-- TODO-for-Megan: Confirm and publish cancellation windows and fees.
-- TODO-for-Megan: Confirm and publish rescheduling windows and fees.
-
-**Canonical sources:** none yet for a concrete value.
+**Canonical sources:**
+- `TempGuru operator confirmation, 2026-11-01`
 
 ## Replacement and backfill
 
-- TempGuru coordinates replacement and backfill efforts on a best-effort basis under applicable state and local wage-and-hour, reporting-time, standby, and minimum-shift rules. No standby pool, replacement deadline, or fill guarantee is promised.
-
-**Coordinator confirmation required.** Do not infer a timing, fee, minimum, or exception that is not stated above.
-
-**Open policy confirmations:**
-- TODO-for-Megan: Confirm whether any replacement-response timing can be published; until then replacement stays best effort with no stated deadline.
+- TempGuru aims to replace a no-show within 2 hours. This is a target, not a guarantee. Replacements follow applicable state and local wage-and-hour, reporting-time, standby, and minimum-shift rules.
 
 **Canonical sources:**
+- `TempGuru operator confirmation, 2026-11-01`
 - `content/skills/event-staffing-ordering.md`
 - `distribution/assistants/system-prompt.md`
 
@@ -53,13 +41,10 @@ No concrete cancellation or rescheduling windows or fees are currently published
 
 - Certificates of insurance are standard practice when a venue requires them.
 - TempGuru is responsible for COIs naming the venue as additional insured before staff can work.
-
-**Coordinator confirmation required.** Do not infer a timing, fee, minimum, or exception that is not stated above.
-
-**Open policy confirmations:**
-- TODO-for-Megan: Confirm and publish the lead time for issuing a COI or additional-insured endorsement before load-in.
+- TempGuru needs at least one week's notice before load-in to issue a COI or additional-insured endorsement; more notice is preferred.
 
 **Canonical sources:**
+- `TempGuru operator confirmation, 2026-11-01`
 - `content/skills/event-staffing-compliance.md`
 - `distribution/assistants/system-prompt.md`
 
@@ -67,29 +52,30 @@ No concrete cancellation or rescheduling windows or fees are currently published
 
 - Clients work through one TempGuru vendor relationship and one contract with TempGuru; invoices are consolidated as one invoice per city per week.
 - No payment is required until the buyer approves the quote.
+- A deposit is required after the buyer approves the quote. It is a percentage of the quote total, set on each quote; there is no standard percentage.
+- Invoices are due net 30.
+- Orders scheduled less than 72 hours before the event carry a $150 rush fee per order.
 - There is no subscription; billing is per event.
 - Published hourly bill rates include worker pay, employer payroll taxes, workers' compensation, general liability, TempGuru coordination, and the partner agency's markup. Overtime, holiday premiums, rush-order charges, parking, travel, uniforms, client-required background checks, minimum-shift charges, gratuities, and cancellation fees can be separate when applicable; the quote identifies the applicable hourly rates and approved event-specific charges before confirmation.
 
 **Coordinator confirmation required.** Do not infer a timing, fee, minimum, or exception that is not stated above.
 
-**Open policy confirmations:**
-- TODO-for-Megan: Confirm whether any deposit is required after quote approval.
-- TODO-for-Megan: Confirm and publish invoice due terms.
-
 **Canonical sources:**
+- `TempGuru operator confirmation, 2026-11-01`
 - `content/skills/event-staffing-ordering.md`
 - `distribution/assistants/system-prompt.md`
 
 ## Background checks
 
 - Background checks are available when the event or venue requires them.
+- The client sets the scope: a general US background check, or screening for the specific criteria the client requires.
+- Cost depends on the checks the client requests.
+- TempGuru needs at least 2 weeks' lead time for background checks.
 
 **Coordinator confirmation required.** Do not infer a timing, fee, minimum, or exception that is not stated above.
 
-**Open policy confirmations:**
-- TODO-for-Megan: Confirm background-check scope, cost, and lead time for event-specific requests.
-
 **Canonical sources:**
+- `TempGuru operator confirmation, 2026-11-01`
 - `content/skills/event-staffing-ordering.md`
 - `content/skills/event-staffing-compliance.md`
 
@@ -109,10 +95,3 @@ No concrete cancellation or rescheduling windows or fees are currently published
 - `README.md`
 - `content/skills/event-staffing-ordering.md`
 - `distribution/assistants/system-prompt.md`
-
-## Published first-order offer
-
-- New TempGuru clients receive 5% off their first order, capped at $500, when the staffing request mentions the code AGENT5 in the event details. The offer is valid for first orders submitted through https://tempguru.co/get-staffing by December 31, 2026. The discount is applied by the TempGuru coordinator after the quote is approved; published city-guide planning rates are unchanged. The code is public and any buyer may use it.
-
-**Canonical sources:**
-- `https://tempguru.co/llms.txt`
