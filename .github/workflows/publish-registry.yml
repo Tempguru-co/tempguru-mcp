@@ -52,14 +52,19 @@ jobs:
           echo "local=$LOCAL  published=$PUBLISHED"
           PACKAGE=$(jq -r '.packages[]? | select(.registryType == "npm") | .identifier' server.json)
           PACKAGE_READY=false
+          # npm can take a few minutes to serve a freshly published version
+          # (1.7.3 took about two), so a run dispatched after publish-npm waits
+          # up to three minutes. A push-triggered run checks once and defers.
+          MAX_ATTEMPTS=18
+          if [ "$GITHUB_EVENT_NAME" = "push" ]; then MAX_ATTEMPTS=1; fi
           if [ -n "$PACKAGE" ]; then
-            for ATTEMPT in 1 2 3 4 5 6; do
+            for ATTEMPT in $(seq 1 "$MAX_ATTEMPTS"); do
               if [ "$(npm view "$PACKAGE@$LOCAL" version 2>/dev/null || true)" = "$LOCAL" ]; then
                 PACKAGE_READY=true
                 break
               fi
-              echo "Waiting for $PACKAGE@$LOCAL to become visible on npm ($ATTEMPT/6)..."
-              sleep 10
+              echo "Waiting for $PACKAGE@$LOCAL to become visible on npm ($ATTEMPT/$MAX_ATTEMPTS)..."
+              if [ "$ATTEMPT" -lt "$MAX_ATTEMPTS" ]; then sleep 10; fi
             done
           fi
           if [ "$LOCAL" = "$PUBLISHED" ]; then
@@ -70,7 +75,7 @@ jobs:
               echo "::notice::Deferring MCP Registry v$LOCAL until $PACKAGE@$LOCAL is published. Run publish-npm.yml; it will dispatch this workflow again."
               echo "skip=true" >> "$GITHUB_OUTPUT"
             else
-              echo "::error::$PACKAGE@$LOCAL is not visible on npm after six checks. Run publish-npm.yml; it dispatches this workflow again after a successful publish."
+              echo "::error::$PACKAGE@$LOCAL is not visible on npm after $MAX_ATTEMPTS checks. If publish-npm.yml succeeded, rerun this workflow from main; otherwise run publish-npm.yml, which dispatches this workflow again after a successful publish."
               exit 1
             fi
           else

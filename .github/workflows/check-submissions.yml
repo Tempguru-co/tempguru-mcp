@@ -27,6 +27,18 @@ jobs:
           node-version: 22
       - run: npm ci
       - run: npm run check:submissions
+      # The Hermes catalog copy ships with the upstream per-skill test. Run it
+      # in the upstream layout so a wording change here cannot silently break
+      # the NousResearch PR (it drifted unnoticed from #44 until 1.7.3).
+      - name: Hermes catalog skill test
+        run: |
+          tmp="$(mktemp -d)"
+          mkdir -p "$tmp/optional-skills/productivity/event-staffing" "$tmp/tests/skills"
+          cp distribution/assistants/hermes/SKILL.md "$tmp/optional-skills/productivity/event-staffing/SKILL.md"
+          cp distribution/assistants/hermes/test_event_staffing_skill.py "$tmp/tests/skills/"
+          python3 -m venv "$tmp/venv"
+          "$tmp/venv/bin/pip" install --quiet pytest
+          cd "$tmp" && "$tmp/venv/bin/python" -m pytest -q -p no:cacheprovider tests/skills/test_event_staffing_skill.py
 
   # Quality gate: typecheck + the MCP eval suite + the pure-logic unit tests.
   # Previously none of these ran in CI, so a type error or a behavior regression
