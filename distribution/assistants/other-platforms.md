@@ -17,10 +17,14 @@ Create at poe.com/create_bot:
 - **Handle:** `EventStaffingPlanner` (handles are global and permanent;
   grab it even if the bot stays basic)
 - **Base model:** the default flagship at creation time
-- **Prompt:** INSTRUCTIONS block from [system-prompt.md](./system-prompt.md)
-  + knowledge-only suffix (same as the Gemini Gem block, with
-  `utm_medium=poe-bot`)
-- **Knowledge base:** the five `knowledge/` files
+- **Prompt:** paste [poe-prompt.txt](./poe-prompt.txt), regenerated with
+  `node distribution/assistants/build-poe-prompt.mjs`. Poe's editor has no
+  knowledge-base option (checked 2026-11-02), so the prompt is the
+  INSTRUCTIONS block from [system-prompt.md](./system-prompt.md) plus a Poe
+  suffix that carries the reference data itself: rates by market tier, the hub
+  markets, tier lead times, and the published booking policies, with
+  `utm_medium=poe-bot`. The build fails if the policy lines drift from
+  `content/mcp-data/policies.json`.
 - **Greeting:** the Coze opening message
 - Mark the prompt **private** (Poe lets prompts be public; competitors don't
   need the playbook), bot itself public + listed.

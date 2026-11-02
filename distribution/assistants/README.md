@@ -21,6 +21,7 @@ packaging and store listings, not engineering.
 | [build-knowledge.mjs](./build-knowledge.mjs) | Generates `knowledge/` from `content/mcp-data/`, never hand-edit knowledge files |
 | [build-manifests.mjs](./build-manifests.mjs) | Generates the Copilot manifests from the canonical prompt |
 | [build-gpt-actions-schema.mjs](./build-gpt-actions-schema.mjs) | Generates [chatgpt-actions-openapi.json](./chatgpt-actions-openapi.json), the GPT Actions copy of the OpenAPI spec within OpenAI's 300-character endpoint-description limit |
+| [build-poe-prompt.mjs](./build-poe-prompt.mjs) | Generates [poe-prompt.txt](./poe-prompt.txt), the Poe prompt with the reference data embedded (Poe has no knowledge base) |
 | `knowledge/` (5 files, generated) | Company overview/FAQ with the approved 300+ U.S. and Canadian markets, 5,000+ events, and 100,000+ completed shifts; roles + full rate matrix; configured-market catalog; 50-state compliance; booking/procurement policies |
 | [chatgpt-custom-gpt.md](./chatgpt-custom-gpt.md) | GPT Store package + ranking playbook |
 | [chatgpt-app.md](./chatgpt-app.md) | ChatGPT app directory submission (MCP, the bigger prize) |
@@ -56,7 +57,7 @@ included for the full picture.)
 | **Gemini Gem (public)** | this kit | ⬜ build + share Public (~30m) |
 | **M365 Copilot agent** | this kit | ⬜ Partner Center verification first (slow), sideload test |
 | **Coze global bot** | this kit | 🟡 plugin ✅ published to Coze Plugin Store 2026-06-06 (TempGuru_Event_Staffing, 6 ops); companion BOT still to build per coze-bot.md |
-| **Poe bot** | this kit | ✅ LIVE 2026-06-06, https://poe.com/TempGuruStaffing (prompt bot, Claude base; knowledge files from this kit can be added later) |
+| **Poe bot** | this kit | ✅ LIVE 2026-06-06, https://poe.com/TempGuruStaffing (prompt bot, Claude base). Poe's editor has no knowledge-base option, so the prompt embeds the reference data; paste the generated `poe-prompt.txt` after any data or prompt change. |
 | **Perplexity Space** | this kit | ⬜ ~20m |
 | **Meta AI Studio persona** | this kit | ⬜ ~30m |
 | **HuggingChat assistant** | this kit | ⬜ ~10m |
@@ -139,10 +140,11 @@ When `content/mcp-data/` changes:
 node distribution/assistants/build-knowledge.mjs
 node distribution/assistants/build-manifests.mjs
 node distribution/assistants/build-gpt-actions-schema.mjs
+node distribution/assistants/build-poe-prompt.mjs
 ```
 
-then re-upload knowledge to: ChatGPT GPT, Gemini Gem, Coze, Poe, Perplexity,
-Le Chat, and any live China agents. When `system-prompt.md` changes, re-paste
+then re-upload knowledge to: ChatGPT GPT, Gemini Gem, Coze, Perplexity,
+Le Chat, and any live China agents, and re-paste the regenerated Poe prompt. When `system-prompt.md` changes, re-paste
 instructions everywhere; the ChatGPT instructions plus its suffix must stay
 under 8,000 characters. When OpenAPI operations or semantics change, re-import
 or inspect the configured Actions/plugins on every live surface and verify the
