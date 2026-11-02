@@ -541,7 +541,15 @@ canonical quote skills to `skill_version: 1.7.3`.
   the separate Hermes content agent runtime.
 - **ClawHub:** publish the canonical skills that changed since the `1.7.0`
   ClawHub copies (source commit `125ee8a`) at version `1.7.3` from the
-  operator's ClawHub account. No repository workflow covers ClawHub. ClawHub is
+  operator's ClawHub account. All eight changed; on 2026-11-02 ClawHub served
+  seven at `1.7.0` and compliance at `1.0.0`. No repository workflow covers
+  ClawHub. Publish each folder with
+  `npx --yes clawhub@0.25.0 skill publish skills/<folder> --slug tempguru-<slug> --name "<listed display name>" --version 1.7.3 --changelog "<text>"`
+  after a `--dry-run`. Always pass `--slug`: without it the CLI derives an
+  unprefixed slug from the folder name and creates a duplicate listing. The
+  CLI needs Node `^22.13.0 || >=24`; log in with
+  `npx --yes clawhub@0.25.0 login` as `kissmyabs32`, and verify with
+  `GET https://clawhub.ai/api/v1/skills/<slug>`. ClawHub is
   an independent catalog; do not SSH to or change the legacy OpenClaw VPS
   container at `/docker/openclaw-y5yb/`, edit `openclaw.json`, restart
   `openclaw-gateway`, or touch sibling agents.
@@ -564,7 +572,11 @@ prompt, knowledge file, or REST/OpenAPI Action. For `1.7.3`:
 - Re-import `distribution/assistants/microsoft/declarativeAgent.json` (its
   instructions are 7,993 of Microsoft's 8,000 characters).
 - Re-import REST/OpenAPI Actions where a live surface consumes the schema;
-  the `getPolicies.topic` enum no longer includes `offers`.
+  the `getPolicies.topic` enum no longer includes `offers`. For the ChatGPT
+  GPT, paste the output of
+  `node distribution/assistants/build-gpt-actions-schema.mjs` instead of
+  importing the URL, because GPT Actions cap endpoint descriptions at 300
+  characters.
 - Republish the Hugging Face dataset from `distribution/toolbox/huggingface`.
 - Remove AGENT5 from the website-owned `tempguru.co/llms.txt` and
   `llms-full.txt` (separate repository).

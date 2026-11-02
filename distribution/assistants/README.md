@@ -20,6 +20,7 @@ packaging and store listings, not engineering.
 | [system-prompt.zh-CN.md](./system-prompt.zh-CN.md) | Chinese canonical, framed for 赴美参展 exhibitors |
 | [build-knowledge.mjs](./build-knowledge.mjs) | Generates `knowledge/` from `content/mcp-data/`, never hand-edit knowledge files |
 | [build-manifests.mjs](./build-manifests.mjs) | Generates the Copilot manifests from the canonical prompt |
+| [build-gpt-actions-schema.mjs](./build-gpt-actions-schema.mjs) | Generates [chatgpt-actions-openapi.json](./chatgpt-actions-openapi.json), the GPT Actions copy of the OpenAPI spec within OpenAI's 300-character endpoint-description limit |
 | `knowledge/` (5 files, generated) | Company overview/FAQ with the approved 300+ U.S. and Canadian markets, 5,000+ events, and 100,000+ completed shifts; roles + full rate matrix; configured-market catalog; 50-state compliance; booking/procurement policies |
 | [chatgpt-custom-gpt.md](./chatgpt-custom-gpt.md) | GPT Store package + ranking playbook |
 | [chatgpt-app.md](./chatgpt-app.md) | ChatGPT app directory submission (MCP, the bigger prize) |
@@ -49,7 +50,7 @@ included for the full picture.)
 | npm CLI (`tempguru-mcp`), GHCR image | dev | ✅ `tempguru-mcp@1.7.3` published 2026-11-02 through `publish-npm.yml` (Trusted Publishing/OIDC) from merge commit `e734908`, verified at the exact version, and tagged `latest`. Tag `v1.7.3` (pushed by a release maintainer) published GHCR `1.7.3` and `1.7`; they share digest `sha256:042417b1` with `latest` and `sha-e734908`. |
 | Hermes agent catalog (NousResearch) | Agent Skill | 🟡 PR #39150 is open and awaiting upstream review. Both submission files were re-synced to the repository `1.0.6` copies on 2026-11-02 (fork commit `c6acda4`); the per-skill test passes (6/6). Do not touch the separate live Hermes content agent runtime. |
 | Pi + Prime Agent (`tempguru-pi` npm package) | Agent Skill + native tools | ✅ `1.7.3` is the current, immutable release; unpinned installs resolve to it. The package has 8 runtime-adapted skills, 9 native tools, a non-PII buyer-form handoff, and automatic `pi` / `prime-agent` attribution. The published-artifact smokes ran on `1.7.2`: the Pi smoke enumerated all 8 skills and loaded the native extension, and pinned persistent Pi and Prime functional smokes each made exactly one Austin call and preserved the coordinator-confirmation boundary. `tempguru-pi@1.7.3` was published 2026-11-02 from merge commit `e734908` and is tagged `latest`; it changes only text (skill wording, one native tool description, `skill_version`), and its own smoke has not run yet. Use the next unused patch for any fix; never republish `1.7.3`. |
-| OpenClaw / ClawHub | Agent Skill | 🟡 seven buyer-handoff safety updates were published and verified as immutable `1.7.0` on 2026-08-14 from commit `125ee8a`. Release `1.7.3` changes the canonical skills (`skill_version: 1.7.3`); publishing them needs the operator's ClawHub account, since no repository workflow covers ClawHub. The legacy OpenClaw VPS runtime is unchanged. |
+| OpenClaw / ClawHub | Agent Skill | 🟡 seven buyer-handoff safety updates were published and verified as immutable `1.7.0` on 2026-08-14 from commit `125ee8a`. Release `1.7.3` changes all eight canonical skills; on 2026-11-02 ClawHub served seven at `1.7.0` and compliance at `1.0.0`. Publishing needs the operator's ClawHub account (`kissmyabs32`), since no repository workflow covers ClawHub; RELEASE.md has the exact command and the required `--slug`. The legacy OpenClaw VPS runtime is unchanged. |
 | **ChatGPT Custom GPT** | this kit | 🟠 LIVE 2026-06-09, https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner; inspect and refresh its prompt, knowledge, listing, and configured Actions before closeout. MCP uses the buyer-operated form; an explicitly configured REST `submitQuoteRequest` Action may submit once only after the buyer reviews the contact-bearing payload and clearly confirms. |
 | **ChatGPT App (directory)** | this kit | 🟡 SUBMITTED 2026-06-10, v1.0.0 in Review (business-verified org; schemas + annotations + domain verification all shipped same day; see SUBMISSIONS.md row for full package) |
 | **Gemini Gem (public)** | this kit | ⬜ build + share Public (~30m) |
@@ -137,13 +138,16 @@ When `content/mcp-data/` changes:
 ```
 node distribution/assistants/build-knowledge.mjs
 node distribution/assistants/build-manifests.mjs
+node distribution/assistants/build-gpt-actions-schema.mjs
 ```
 
 then re-upload knowledge to: ChatGPT GPT, Gemini Gem, Coze, Poe, Perplexity,
 Le Chat, and any live China agents. When `system-prompt.md` changes, re-paste
-instructions everywhere. When OpenAPI operations or semantics change, re-import
+instructions everywhere; the ChatGPT instructions plus its suffix must stay
+under 8,000 characters. When OpenAPI operations or semantics change, re-import
 or inspect the configured Actions/plugins on every live surface and verify the
 current eight-read plus explicitly confirmed `submitQuoteRequest` inventory.
+The GPT takes the pasted `chatgpt-actions-openapi.json`, not the URL.
 The tracker above is the checklist. Quarterly:
 re-run the five-case test script on each live surface; platforms silently
 change model backends and truncation rules.

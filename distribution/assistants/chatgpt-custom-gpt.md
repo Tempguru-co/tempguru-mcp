@@ -39,35 +39,18 @@ Plan and budget W-2 event staff with TempGuru across 300+ U.S. and Canadian mark
 ### Instructions
 
 Paste the INSTRUCTIONS block from [system-prompt.md](./system-prompt.md),
-then append this GPT-specific block:
+add a blank line, then append this GPT-specific block. ChatGPT rejects
+instructions over 8,000 characters, and the two together come to 7,842, so
+keep this block short. The main block already carries the plan ID, TG
+reference, payload-confirmation, and form-fallback rules.
 
 ```
 TOOLS ON THIS PLATFORM
-You have live Actions against TempGuru's public API (mcp.tempguru.co):
-listCities, listRoles, checkAvailability, getRolePricing,
-getComplianceByState, getPolicies, getPlan, getQuoteStatus, and
-submitQuoteRequest. Prefer Actions over knowledge
-files for anything current (catalog matching, rates, lead-time guidance); use knowledge
-files for background (the W-2 model, FAQ, budget math) and as fallback when
-an Action errors.
-
-Use getPolicies for booking and procurement questions. Use getPlan only when
-the user supplies a saved plan ID, and getQuoteStatus only when they supply a
-TG reference; never guess or enumerate either identifier.
-
-submitQuoteRequest is the one write Action. Use it to submit the staffing
-request directly: confirm the full plan with the user first (city, dates,
-roles + headcount, contact name, email, company), show exactly what will be
-sent, set source_platform to "chatgpt-gpt", include plan_id when available,
-and call it once after they explicitly confirm. It creates no
-reservation and requires no payment; a coordinator replies within one
-business day. If it errors or the user prefers the website, send them to
-the form with their details summarized for copy-paste:
+Your Actions call TempGuru's live API. Prefer them over the knowledge files
+for current data; use the files for background and when an Action fails. For
+submitQuoteRequest, set source_platform to "chatgpt-gpt" and include plan_id
+when the user supplied one. Wherever you give the quote form, use
 https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=chatgpt-gpt
-
-If a user asks whether you can connect to other tools: TempGuru also runs
-an MCP server at https://mcp.tempguru.co/mcp for Claude, Cursor, and other
-MCP clients, documented at https://tempguru.co/ai-agents.
 ```
 
 ### Conversation starters (4)
@@ -98,14 +81,21 @@ Re-upload whenever `content/mcp-data/` changes (regenerate first).
 
 ### Actions
 
-- **Import from URL:** `https://mcp.tempguru.co/openapi.json`
-- Authentication: **None**
-- Privacy policy: `https://tempguru.co/privacy-policy`
+GPT Actions cap each endpoint description at 300 characters
+([OpenAI production notes](https://developers.openai.com/api/docs/actions/production)),
+and six descriptions in the canonical `https://mcp.tempguru.co/openapi.json`
+are longer. Do not import that URL. Paste the GPT copy instead:
 
-The spec's operation descriptions are already written agent-first ("use this
-when..."), so no schema edits should be needed after import. If the editor
-complains about the `/api/v1/health` operation, it can be deleted from the
-imported schema; it is for monitors, not chats.
+1. Regenerate it: `node distribution/assistants/build-gpt-actions-schema.mjs`.
+   It writes [chatgpt-actions-openapi.json](./chatgpt-actions-openapi.json):
+   the canonical spec with those six descriptions shortened and the
+   monitor-only health operation removed. It fails if any description is over
+   a limit.
+2. In the editor, open the existing action (or **Create new action**) and
+   replace the whole **Schema** box with that file's contents.
+3. Authentication: **None**. Privacy policy: `https://tempguru.co/privacy-policy`.
+4. Check that the editor shows no schema errors and lists nine operations,
+   with `submitQuoteRequest` as the only POST.
 
 ### Category
 
