@@ -9,7 +9,7 @@ https://claude.com/docs/connectors/building/submission.
 | Portal field | Value |
 |---|---|
 | Server name | TempGuru Event Staffing |
-| Release being reviewed | `1.7.2` |
+| Release being reviewed | `1.7.3` |
 | URL slug | `tempguru-event-staffing` |
 | Tagline | Plan W-2 event staffing across the US and Canada |
 | Connector access | `read_write` |
@@ -35,7 +35,7 @@ Inventory summary: **12 tools, 2 prompts, 8 resources**.
 > terms; it only improves policy-topic discovery, aliases, and clean-miss
 > telemetry.
 >
-> **Removal (the release after `1.7.2`):** AGENT5 is removed from every
+> **Removal (`1.7.3`):** AGENT5 is removed from every
 > model-readable surface: server instructions, `get_policies` and its REST and
 > OpenAPI mirrors, the `plan_staffing` and `get_plan` notes, and the generated
 > OKF and llms knowledge. The code survives only as an editable prefill on the
@@ -98,10 +98,10 @@ Permission summary for the portal: **10 read-only tools and 2
 non-destructive, non-contact write tools.** The write tools only persist
 allowlisted non-PII staffing plans.
 
-In `1.7.2`, the optional `get_policies.topic` schema advertises these current
+In `1.7.3`, the optional `get_policies.topic` schema advertises these current
 canonical values: `minimum-booking-hours`, `cancellation-rescheduling`,
 `no-show-backfill`, `coi-additional-insured`, `payment-terms`,
-`background-checks`, `order-confirmation`, `quote-response`, and `offers`.
+`background-checks`, `order-confirmation`, and `quote-response`.
 The runtime also normalizes a small set of unambiguous legacy aliases. A valid
 unknown topic returns a normal `policy_not_found` response with the available
 topics; it is not a tool failure. The `offers` topic disappears from advertised
@@ -194,10 +194,9 @@ Suggested end-to-end review:
    enter contact information or submit a live lead to validate the MCP
    connector.
 
-## Optional AGENT5 removal note (for the release after `1.7.2`)
+## Optional AGENT5 removal note (`1.7.3`)
 
-Send after that release is live, on the original AGENT5 disclosure thread.
-Replace `<release version>` with the published version first.
+Send after `1.7.3` is live, on the original AGENT5 disclosure thread.
 
 **To:** `mcp-review@anthropic.com`
 **Subject:** TempGuru Event Staffing connector: promotional offer removed from model-readable text
@@ -205,7 +204,7 @@ Replace `<release version>` with the published version first.
 Hello Anthropic MCP Review,
 
 Following up on our 2026-08-14 disclosure about the AGENT5 first-order offer:
-TempGuru MCP `<release version>` removes it from everything the model reads.
+TempGuru MCP `1.7.3` removes it from everything the model reads.
 Server instructions, `get_policies`, the `plan_staffing` and `get_plan`
 results, and our published agent knowledge no longer mention any offer, code,
 or discount. The only remaining use is an editable prefill on the
