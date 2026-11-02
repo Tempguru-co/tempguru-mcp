@@ -147,9 +147,9 @@ active workspace.
 
 **Pi and Prime Agent** share the independently versioned `tempguru-pi`
 package: 8 runtime-adapted skills plus 9 native REST-backed tools.
-`tempguru-pi@1.7.2` is live, current, and immutable; the unpinned install
-commands below resolve to `1.7.2`. Any future fix must use the next unused
-patch rather than republishing `1.7.2`. The native
+`tempguru-pi@1.7.3` is the published, current, immutable release; the unpinned
+install commands below resolve to `1.7.3`. Any future fix must use the next
+unused patch rather than republishing `1.7.3`. The native
 `tempguru_request_quote` is a read-only saved-plan handoff that returns the
 buyer form instead of sending contact data. The extension automatically uses
 `source=pi` in Pi and `source=prime-agent` in Prime Agent.
@@ -205,8 +205,8 @@ turn; each directory includes Codex `agents/openai.yaml` metadata.
 | Windsurf | ✅ Compatible | Streamable HTTP transport |
 | Hermes Agent | ✅ Verified | Native remote HTTP MCP plus separate well-known skill discovery |
 | OpenClaw | ✅ Compatible | Native `openclaw mcp add`; top-level `skills/` package included |
-| Pi | ✅ `1.7.2` live and verified | Published artifact exposes 8 runtime-adapted skills + 9 native tools; `tempguru_request_quote` returns the buyer-operated form and sends no contact data |
-| Prime Agent v0.7.0 | ✅ Published-artifact functional smoke passed | Uses the same `tempguru-pi@1.7.2` package contract: 8 skills + 9 native tools with automatic `source=prime-agent` attribution; its stock MCP integration cannot yet attach this authless server |
+| Pi | ✅ `1.7.3` current | Published artifact exposes 8 runtime-adapted skills + 9 native tools; `tempguru_request_quote` returns the buyer-operated form and sends no contact data; the published-artifact smoke last ran on `1.7.2` |
+| Prime Agent v0.7.0 | ✅ Published-artifact functional smoke passed on `1.7.2` | Uses the same `tempguru-pi` package contract: 8 skills + 9 native tools with automatic `source=prime-agent` attribution; its stock MCP integration cannot yet attach this authless server |
 | OpenAI Agents SDK | ✅ Compatible | Use MCP client with the URL above |
 | ChatGPT (Codex / Custom GPTs with MCP) | ✅ Compatible | Same as OpenAI Agents SDK |
 | Qwen-Agent / DashScope / ModelScope | ✅ Compatible | Qwen-Agent's `MCPManager` accepts a streamable-HTTP URL directly |
