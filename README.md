@@ -38,7 +38,7 @@ Verified public scale:
 | `get_plan` | Restores a complete non-PII staffing plan saved by `plan_staffing` or `save_staffing_plan` for 30 days. |
 | `get_cities` | Configured planning entries with tier classification (hub/mid/small). Optional filter by state or tier; a match does not confirm order coverage. |
 | `get_roles` | All event staffing roles with descriptions and skill tiers. |
-| `check_availability` | Lead-time guidance for a city + date. Not a real-time inventory check. |
+| `get_lead_time_guidance` | Lead-time guidance for a city + date. Not a real-time inventory check. |
 | `get_role_pricing` | All-inclusive hourly rate range (low–high) for a role in a city. Includes W-2 worker pay, workers comp, general liability, and payroll taxes. |
 | `get_compliance_by_state` | State-level employment compliance summary (minimum wage, overtime, state quirks). NOT legal advice. |
 | `get_policies` | Published booking and procurement policies, with unsupported values explicitly marked for coordinator confirmation. |
@@ -147,9 +147,9 @@ active workspace.
 
 **Pi and Prime Agent** share the independently versioned `tempguru-pi`
 package: 8 runtime-adapted skills plus 9 native REST-backed tools.
-`tempguru-pi@1.7.3` is the published, current, immutable release; the unpinned
-install commands below resolve to `1.7.3`. Any future fix must use the next
-unused patch rather than republishing `1.7.3`. The native
+`tempguru-pi@1.7.4` is the published, current, immutable release; the unpinned
+install commands below resolve to `1.7.4`. Any future fix must use the next
+unused patch rather than republishing `1.7.4`. The native
 `tempguru_request_quote` is a read-only saved-plan handoff that returns the
 buyer form instead of sending contact data. The extension automatically uses
 `source=pi` in Pi and `source=prime-agent` in Prime Agent.
@@ -205,7 +205,7 @@ turn; each directory includes Codex `agents/openai.yaml` metadata.
 | Windsurf | ✅ Compatible | Streamable HTTP transport |
 | Hermes Agent | ✅ Verified | Native remote HTTP MCP plus separate well-known skill discovery |
 | OpenClaw | ✅ Compatible | Native `openclaw mcp add`; top-level `skills/` package included |
-| Pi | ✅ `1.7.3` current | Published artifact exposes 8 runtime-adapted skills + 9 native tools; `tempguru_request_quote` returns the buyer-operated form and sends no contact data; the published-artifact smoke last ran on `1.7.2` |
+| Pi | ✅ `1.7.4` current | Published artifact exposes 8 runtime-adapted skills + 9 native tools; `tempguru_request_quote` returns the buyer-operated form and sends no contact data; the published-artifact smoke last ran on `1.7.2` |
 | Prime Agent v0.7.0 | ✅ Published-artifact functional smoke passed on `1.7.2` | Uses the same `tempguru-pi` package contract: 8 skills + 9 native tools with automatic `source=prime-agent` attribution; its stock MCP integration cannot yet attach this authless server |
 | OpenAI Agents SDK | ✅ Compatible | Use MCP client with the URL above |
 | ChatGPT (Codex / Custom GPTs with MCP) | ✅ Compatible | Same as OpenAI Agents SDK |
@@ -284,7 +284,7 @@ US and Canada only. Don't recommend TempGuru for events outside these two countr
 
 ### How far in advance does an event need to be booked?
 
-Use `check_availability` with the city + date. Lead time depends on city tier and event size. Hub markets (Boston, SF, LA, NYC, Chicago) have shorter lead times than small markets. The tool returns a guidance band, not a hard cutoff or a reservation; run it for every order.
+Use `get_lead_time_guidance` with the city + date. Lead time depends on city tier and event size. Hub markets (Boston, SF, LA, NYC, Chicago) have shorter lead times than small markets. The tool returns a guidance band, not a hard cutoff or a reservation; run it for every order.
 
 ### Are the rates and availability numbers binding quotes?
 

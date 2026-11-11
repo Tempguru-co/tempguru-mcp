@@ -155,7 +155,7 @@ export function queryCities(input: CitiesQuery): QueryResult<CitiesData | CityCa
         catalog_qualification:
           "A configured entry selects planning rates and lead-time guidance; it is not real-time inventory or confirmed order coverage.",
         city: cityRow(match),
-        message: `${match.name}, ${match.state_abbr} is a configured ${match.tier}-tier catalog entry. This match does not confirm staff availability or order coverage; use check_availability only for lead-time guidance, then have a TempGuru coordinator confirm the specific order through the buyer form.`,
+        message: `${match.name}, ${match.state_abbr} is a configured ${match.tier}-tier catalog entry. This match does not confirm staff availability or order coverage; use get_lead_time_guidance only for lead-time guidance, then have a TempGuru coordinator confirm the specific order through the buyer form.`,
       });
     }
     const suggestion = citySuggestion(input.city);

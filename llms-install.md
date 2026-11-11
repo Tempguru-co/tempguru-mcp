@@ -137,12 +137,12 @@ legacy OpenClaw VPS container.
 
 ## Pi
 
-The published `tempguru-pi@1.7.3` package is live, current, and immutable. An
-unpinned install resolves to `1.7.3`. It contains 8 skills plus 9 native
+The published `tempguru-pi@1.7.4` package is live, current, and immutable. An
+unpinned install resolves to `1.7.4`. It contains 8 skills plus 9 native
 read-only tools with `?source=pi` attribution. The native
 `tempguru_request_quote` tool accepts a saved plan ID and returns the
 buyer-operated form; it does not transmit contact details. Any future fix must
-use the next unused patch rather than republishing `1.7.3`. Attach the remote
+use the next unused patch rather than republishing `1.7.4`. Attach the remote
 MCP for the full planner, saved-plan write, and Rate Index:
 
 ```bash
@@ -162,7 +162,7 @@ install loaded all 8 TempGuru skills in Pi's RPC `get_commands` response and
 loaded the native extension without conflicts. Exactly one Austin
 `tempguru_get_cities` call returned HTTP 200 with `catalog_match=true` and
 `coverage_confirmation_required=true`, and the final wording did not imply
-confirmed coverage. Version `1.7.3` changes only text since that smoke (skill
+confirmed coverage. Version `1.7.4` changes only text since that smoke (skill
 wording, one native tool description, and `skill_version`); its own
 published-artifact smoke has not been run yet.
 
@@ -178,8 +178,8 @@ prime-agent package list
 ```
 
 Runtime-specific `source=prime-agent` attribution and the evidence-gated
-instructions and catalog semantics are live in `tempguru-pi@1.7.3`. An
-unpinned install resolves to `1.7.3`.
+instructions and catalog semantics are live in `tempguru-pi@1.7.4`. An
+unpinned install resolves to `1.7.4`.
 
 Restart Prime Agent and verify that all 8 TempGuru skills and the 9 native
 tools from `tempguru_get_cities` through `tempguru_request_quote` load. The

@@ -53,7 +53,7 @@ python gemini-tempguru-demo.py "Do you cover Chicago, and what's the registratio
 |---|---|
 | `get_cities` | "Do you cover Boston?" / "Which cities in California?" |
 | `get_roles` | "What kinds of event staff can I hire?" |
-| `check_availability` | "Can you staff June 15 in Austin?" |
+| `get_lead_time_guidance` | "Can you staff June 15 in Austin?" |
 | `get_role_pricing` | "What do brand ambassadors cost in Boston?" |
 | `get_compliance_by_state` | "W-2 vs 1099 rules for event staff in New York?" |
 | `request_quote` | "Prepare my saved staffing plan for a quote" (read-only; returns a prefilled form the buyer submits personally) |

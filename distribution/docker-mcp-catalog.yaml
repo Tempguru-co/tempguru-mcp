@@ -114,7 +114,7 @@ tools:
       List all event staffing roles with descriptions and skill tiers, brand ambassadors, registration, hospitality, setup/breakdown, ushers, and more.
     readOnly: true
 
-  - name: check_availability
+  - name: get_lead_time_guidance
     description: >
       Lead-time guidance for a city + date. Returns a recommendation (yes / tight /
       rush / very-rush) based on market tier and days until event. Planning guidance

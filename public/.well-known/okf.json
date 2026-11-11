@@ -26,7 +26,7 @@
     "get_plan",
     "get_cities",
     "get_roles",
-    "check_availability",
+    "get_lead_time_guidance",
     "get_role_pricing",
     "get_compliance_by_state",
     "get_policies",
@@ -52,7 +52,7 @@
     "index": "https://mcp.tempguru.co/okf/index.md",
     "tarball": "https://mcp.tempguru.co/okf.tar.gz",
     "file_count": 106,
-    "sha256": "3297aa7278a2535222b1fd2ce6d6b7ef0537316b4bdf69e1b7072f60187d051a",
+    "sha256": "0a17983f8a02eaedeec1b9791da5d1978edd3feda67284240e73c63ea8f1558a",
     "bytes": 343088
   }
 }

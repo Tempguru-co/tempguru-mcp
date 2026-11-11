@@ -133,7 +133,7 @@ export const GET_ROLES_OUTPUT = {
   ),
 };
 
-// ─── check_availability (3 variants: found / city-not-found / bad date) ──
+// ─── get_lead_time_guidance (3 variants: found / city-not-found / bad date) ──
 
 export const CHECK_AVAILABILITY_OUTPUT = {
   city_found: z

@@ -392,8 +392,8 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     {
       title: "Get Cities",
       description:
-        "List configured market entries by tier, or match one city. Catalog presence is not availability or order coverage; check_availability gives tier-based lead-time guidance only, and a coordinator confirms each order after buyer submission. Use for 'What markets are configured in [state]?', 'Is [city] in the catalog?', or 'Which Canadian markets are listed?'. " +
-        "For 'Do you cover [city]?' pass city='[name]', report the catalog match or suggestion, and preserve the coordinator-confirmation caveat. Use get_role_pricing for rates, check_availability for dates, or plan_staffing for a full plan. " +
+        "List configured market entries by tier, or match one city. Catalog presence is not availability or order coverage; get_lead_time_guidance gives tier-based lead-time guidance only, and a coordinator confirms each order after buyer submission. Use for 'What markets are configured in [state]?', 'Is [city] in the catalog?', or 'Which Canadian markets are listed?'. " +
+        "For 'Do you cover [city]?' pass city='[name]', report the catalog match or suggestion, and preserve the coordinator-confirmation caveat. Use get_role_pricing for rates, get_lead_time_guidance for dates, or plan_staffing for a plan. " +
         "<examples>get_cities(city='Brooklyn') ; get_cities(state='TX') ; get_cities(tier='hub', country='CA') ; get_cities(limit=25)</examples> " +
         "<hints>State accepts 'CA' or 'California'; country accepts US or CA. City resolves nicknames and boroughs. Unfiltered results are capped; use filters or limit. Configured entries are planning data; the public coverage claim is 300+ U.S. and Canadian markets.</hints>",
       inputSchema: z.object({
@@ -463,15 +463,15 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     },
   );
 
-  // ─── check_availability ───────────────────────────────────────────────
+  // ─── get_lead_time_guidance ───────────────────────────────────────────────
   server.registerTool(
-    "check_availability",
+    "get_lead_time_guidance",
     {
-      title: "Check Availability",
+      title: "Get Lead Time Guidance",
       description:
         "Return tier-based lead-time guidance for an event date and configured market. Use for 'What's the typical lead time for brand ambassadors in [city]?' or 'Is this date inside the usual planning window?'. This is not a real-time inventory or order-coverage check: a TempGuru coordinator confirms coverage and final lead time for the specific order after buyer submission. " +
         "DO NOT use for cost questions (use get_role_pricing) and never present the result as a reservation. " +
-        "<examples>check_availability(date='2026-08-14', city='Dallas') ; check_availability(date='2026-07-01', city='Boston', role='brand-ambassadors', count=6)</examples> " +
+        "<examples>get_lead_time_guidance(date='2026-08-14', city='Dallas') ; get_lead_time_guidance(date='2026-07-01', city='Boston', role='brand-ambassadors', count=6)</examples> " +
         "<hints>Even a 'rush' window is worth submitting, same-week backfills exist in select markets.</hints>",
       inputSchema: z.object({
         date: z
@@ -494,7 +494,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
       }),
       outputSchema: CHECK_AVAILABILITY_SCHEMA,
       annotations: {
-        title: "Check Availability",
+        title: "Get Lead Time Guidance",
         readOnlyHint: true,
         destructiveHint: false,
         openWorldHint: false,
@@ -502,7 +502,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     },
     async ({ date, city, role, count }) => {
       const result = queryAvailability({ date, city, role, headcount: count });
-      await track({ tool: "check_availability", status: result.ok ? "success" : "error", city, role });
+      await track({ tool: "get_lead_time_guidance", status: result.ok ? "success" : "error", city, role });
       if (!result.ok) return errorResult({ error: result.error.message });
       return structuredResult(result.data);
     },
@@ -515,7 +515,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
       title: "Get Role Pricing",
       description:
         "Get the all-inclusive hourly rate range for a specific role in a specific city. Perfect for 'What does it cost to hire brand ambassadors in [city]?', 'How much are registration workers in [city]?', or 'What's the rate for ushers at a [city] stadium event?' questions. All rates include W-2 worker pay, workers comp, general liability, and payroll taxes. " +
-        "DO NOT use for availability or dates (use check_availability) and never present the range as a binding quote. For a multi-role budget, use plan_staffing. " +
+        "DO NOT use for availability or dates (use get_lead_time_guidance) and never present the range as a binding quote. For a multi-role budget, use plan_staffing. " +
         "<examples>get_role_pricing(role='Brand Ambassadors', city='Boston') ; get_role_pricing(role='registration-staff', city='nashville-event-staffing')</examples> " +
         "<hints>Role and city accept names or slugs. Brand Ambassadors floor at $40/hour in every market.</hints>",
       inputSchema: z.object({
@@ -617,7 +617,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
   server.registerTool(
     "get_rate_benchmark",
     {
-      title: "Get Rate Benchmark (Rate Index)",
+      title: "Get Rate Benchmark",
       description:
         `The TempGuru Event Staffing Rate Index: all-inclusive W-2 hourly bill rates by role from ${MEASURED_MARKETS} measured US/Canada markets, as a typical rate plus the full national range (brand ambassadors shown by market tier), with methodology and a ready-to-use citation line. ` +
         "Perfect for 'What do event staff cost in 2026?', 'Industry benchmark for brand ambassador rates?', or any article, report, or comparison that needs citable staffing-rate data. " +
@@ -662,7 +662,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
   server.registerTool(
     "request_quote",
     {
-      title: "Request Quote",
+      title: "Prepare Quote Form",
       description:
         "Use only after the buyer reviews a staffing plan and asks to proceed. Requires the saved non-PII plan_id from plan_staffing or save_staffing_plan and returns a prefilled TempGuru-owned review form. This tool never accepts or transmits names, email, phone, company, or other contact details and never creates a CRM lead or quote reference. The buyer must open form_url, review the plan, enter their own details, and submit it; only that submission creates a lead. This is not a reservation and does not guarantee pricing or availability. If a complete plan has continuation.form_url but no plan_id, give that URL directly instead. Never collect contact details for an MCP call; re-run an expired plan.",
       inputSchema: RequestQuoteHandoffSchema,

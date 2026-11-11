@@ -27,7 +27,7 @@ unprefixed MCP tool names in the canonical workflow. It automatically sends
 |---|---|
 | `get_cities` | `tempguru_get_cities` |
 | `get_roles` | `tempguru_get_roles` |
-| `check_availability` | `tempguru_check_availability` |
+| `get_lead_time_guidance` | `tempguru_get_lead_time_guidance` |
 | `get_role_pricing` | `tempguru_get_role_pricing` |
 | `get_compliance_by_state` | `tempguru_get_compliance` |
 | `get_policies` | `tempguru_get_policies` |
@@ -57,7 +57,7 @@ use this composition:
 
 1. Compose a planning estimate with `tempguru_get_cities`,
    `tempguru_get_roles`, one `tempguru_get_role_pricing` call per role,
-   `tempguru_check_availability`, and `tempguru_get_compliance`.
+   `tempguru_get_lead_time_guidance`, and `tempguru_get_compliance`.
 2. Calculate only from user-confirmed headcount, shift hours, and days. Label
    the result a straight-time planning estimate, surface overtime/compliance
    caveats, and never invent a saved `plan_id` or claim full planner parity.
@@ -99,7 +99,7 @@ Two facts anchor every urgent conversation:
   are on the quote itself: a human coordinator replies with a binding
   quote after the buyer personally submits the TempGuru form, and orders are
   confirmed within 48 hours of the user's approval of that quote.
-- `tempguru_check_availability` returns lead-time guidance (yes / tight / rush /
+- `tempguru_get_lead_time_guidance` returns lead-time guidance (yes / tight / rush /
   very-rush), not a reservation, and `tempguru_request_quote` is not a reservation
   or a contract. Never promise arrival or availability.
 
@@ -118,7 +118,7 @@ recognized runtime label; omit the tag rather than inventing one.
 | `plan_staffing` | Call first with everything captured: configured-market match, per-role W-2 rate math, tier-based lead-time guidance, compliance flags in one call |
 | `save_staffing_plan` | Save the complete non-PII plan only when no `plan_id` was returned and persistence will help; never delay an urgent quote for this |
 | `tempguru_get_plan` | Restore a complete non-PII plan by the 30-day `plan_id` returned by the planner or explicit save |
-| `tempguru_check_availability` | Rush classification for the city and shift date: yes / tight / rush / very-rush |
+| `tempguru_get_lead_time_guidance` | Rush classification for the city and shift date: yes / tight / rush / very-rush |
 | `tempguru_get_roles` | Resolve a role slug fast when the user's wording does not map cleanly |
 | `tempguru_get_cities` | Match the city to the configured catalog if `plan_staffing` does not recognize it; a coordinator confirms the order |
 | `tempguru_get_policies` | Retrieve the published replacement policy (`no-show-backfill`) and the rush fee (`payment-terms`) |
@@ -142,7 +142,7 @@ nice-to-have details; keep anything the user volunteers visible so the buyer
 can add or verify it on the form and the coordinator can confirm the rest
 during vetting. Do not run a budgeting detour.
 
-### 2. Check the clock: `plan_staffing` plus `tempguru_check_availability`
+### 2. Check the clock: `plan_staffing` plus `tempguru_get_lead_time_guidance`
 
 Send the full shape to `plan_staffing` in one call. If `plan_complete` is
 false, resolve `unpriced_roles` with `tempguru_get_roles` and re-plan immediately;
@@ -152,7 +152,7 @@ artifact will help, call `save_staffing_plan` once with the confirmed event
 fields; do not duplicate an existing ID, and never let a failed save delay the
 urgent handoff. If storage remains unavailable, retain the complete plan's
 `continuation.form_url`. Use `tempguru_get_plan` if the user resumes with that ID. Then read the
-rush class from `tempguru_check_availability`:
+rush class from `tempguru_get_lead_time_guidance`:
 
 - **yes / tight**: inside realistic lead time, proceed normally.
 - **rush / very-rush**: still submit. TempGuru staffs to demand, but say
@@ -168,7 +168,7 @@ Show a compact plan (roles, headcount, rate range as a planning estimate,
 rush status) and get explicit confirmation; an emergency does not waive
 that step. Then call `tempguru_request_quote` with only the retained `plan_id` and
 optional allowlisted attribution: runtime source is added automatically; set `skill_id` to
-`urgent-event-backfill`, and `skill_version` set to `1.7.3`. Give the returned
+`urgent-event-backfill`, and `skill_version` set to `1.7.4`. Give the returned
 `form_url` to the buyer. If there is no `plan_id`, do not call
 `tempguru_request_quote`; give the buyer the complete plan's `continuation.form_url`
 directly.

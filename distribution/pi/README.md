@@ -36,7 +36,7 @@ the model sees it at runtime (the README is not relied on as hidden context):
 |---|---|
 | `get_cities` | `tempguru_get_cities` |
 | `get_roles` | `tempguru_get_roles` |
-| `check_availability` | `tempguru_check_availability` |
+| `get_lead_time_guidance` | `tempguru_get_lead_time_guidance` |
 | `get_role_pricing` | `tempguru_get_role_pricing` |
 | `get_compliance_by_state` | `tempguru_get_compliance` |
 | `get_policies` | `tempguru_get_policies` |

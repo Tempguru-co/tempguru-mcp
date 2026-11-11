@@ -110,7 +110,7 @@
     </div>
 
     <div class="tg-tool">
-      <div class="tg-tool-name">check_availability</div>
+      <div class="tg-tool-name">get_lead_time_guidance</div>
       <p>针对城市与日期的提前期建议，可选附岗位与人数。返回 yes / tight / rush / very-rush。不构成预订。</p>
     </div>
 
@@ -267,7 +267,7 @@ hermes mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=hermes"</div>
 
   <p class="tg-label">Pi</p>
   <div class="tg-code">pi install npm:tempguru-pi
-// 当前已发布版本为 1.7.3；未指定版本时会安装这个不可覆盖的版本。
+// 当前已发布版本为 1.7.4；未指定版本时会安装这个不可覆盖的版本。
 // tempguru_request_quote 只返回买家表单，不发送联系人信息。</div>
 
   <p class="tg-label">Prime Agent</p>
@@ -300,7 +300,7 @@ prime-agent package list
       </tr>
       <tr>
         <td>2. 校验</td>
-        <td>先调用 <code>plan_staffing</code>（一次调用得出完整方案），再用 <code>get_cities</code> 匹配已配置市场、<code>check_availability</code> 查按等级计算的提前期建议、<code>get_role_pricing</code> 逐岗位定价、<code>get_compliance_by_state</code> 查工资与加班规则；具体订单覆盖由协调员确认</td>
+        <td>先调用 <code>plan_staffing</code>（一次调用得出完整方案），再用 <code>get_cities</code> 匹配已配置市场、<code>get_lead_time_guidance</code> 查按等级计算的提前期建议、<code>get_role_pricing</code> 逐岗位定价、<code>get_compliance_by_state</code> 查工资与加班规则；具体订单覆盖由协调员确认</td>
       </tr>
       <tr>
         <td>3. 呈现</td>

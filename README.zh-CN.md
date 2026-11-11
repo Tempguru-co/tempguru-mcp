@@ -27,7 +27,7 @@ TempGuru 是一家总部位于美国佛罗里达州杰克逊维尔海滩（Jacks
 | `get_plan` | 使用 `plan_staffing` 或 `save_staffing_plan` 返回的 30 天有效 `plan_id`，恢复不含个人信息的完整人员配置方案。 |
 | `get_cities` | TempGuru 已配置市场目录中的条目，附带市场分级（hub/mid/small）。可选按州或分级过滤；匹配结果不确认订单覆盖。 |
 | `get_roles` | 所有活动用工岗位列表，包含岗位描述和技能等级。 |
-| `check_availability` | 根据城市分级和距活动日期的天数，返回预定提前期建议。**不是实时库存查询**。 |
+| `get_lead_time_guidance` | 根据城市分级和距活动日期的天数，返回预定提前期建议。**不是实时库存查询**。 |
 | `get_role_pricing` | 指定城市、指定岗位的全包小时费率区间（低–高）。已包含 W-2 员工工资、工伤保险、综合责任险和工资税。 |
 | `get_compliance_by_state` | 美国州级用工合规摘要（最低工资、加班规则、各州特殊条款）。**不构成法律意见**。 |
 | `get_policies` | 已发布的预订与采购政策；未确认的值会明确要求协调员确认。 |
@@ -96,7 +96,7 @@ claude plugin install tempguru@tempguru-mcp
 
 **OpenClaw**，技能与 MCP 工具也需要分别安装。先克隆本仓库并按 [llms-install.md](./llms-install.md) 中的 8 条 `openclaw skills install ./tempguru-mcp/skills/...` 命令安装技能；再执行 `openclaw mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=openclaw" --transport streamable-http`，最后用 `openclaw mcp doctor tempguru --probe` 验证。
 
-**Pi 与 Prime Agent** 共用 `tempguru-pi` 包。`tempguru-pi@1.7.3` 已正式发布，是当前版本且不可覆盖；不指定版本的安装命令会解析到 `1.7.3`。后续修复必须使用下一个尚未使用的补丁版本，不得重新发布 `1.7.3`。该包包含 8 个技能和 9 个原生工具；扩展在 Pi 中自动使用 `source=pi`，在 Prime Agent 中自动使用 `source=prime-agent`。分别执行 `pi install npm:tempguru-pi` 或 `prime-agent package install npm:tempguru-pi`。`tempguru_request_quote` 只使用已保存的 `plan_id` 返回买家报价表单，不接收联系人信息。Prime Agent v0.7.0 已实测加载全部技能和原生工具；`1.7.2` 发布产物也已分别在 Pi 和 Prime Agent 通过功能冒烟测试。但 Prime 的标准 MCP 集成目前要求 OAuth 或 bearer token，因此不能直接连接 TempGuru 的无认证远程 MCP，`plan_staffing`、`save_staffing_plan` 与 `get_rate_benchmark` 暂时无法在 Prime 中原生调用。完整说明见 [llms-install.md](./llms-install.md)。
+**Pi 与 Prime Agent** 共用 `tempguru-pi` 包。`tempguru-pi@1.7.4` 已正式发布，是当前版本且不可覆盖；不指定版本的安装命令会解析到 `1.7.4`。后续修复必须使用下一个尚未使用的补丁版本，不得重新发布 `1.7.4`。该包包含 8 个技能和 9 个原生工具；扩展在 Pi 中自动使用 `source=pi`，在 Prime Agent 中自动使用 `source=prime-agent`。分别执行 `pi install npm:tempguru-pi` 或 `prime-agent package install npm:tempguru-pi`。`tempguru_request_quote` 只使用已保存的 `plan_id` 返回买家报价表单，不接收联系人信息。Prime Agent v0.7.0 已实测加载全部技能和原生工具；`1.7.2` 发布产物也已分别在 Pi 和 Prime Agent 通过功能冒烟测试。但 Prime 的标准 MCP 集成目前要求 OAuth 或 bearer token，因此不能直接连接 TempGuru 的无认证远程 MCP，`plan_staffing`、`save_staffing_plan` 与 `get_rate_benchmark` 暂时无法在 Prime 中原生调用。完整说明见 [llms-install.md](./llms-install.md)。
 
 **Codex**，先执行 `codex mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=openai-codex"`；然后请 Codex 使用 `$skill-installer` 安装 `Tempguru-co/tempguru-mcp/skills` 下的 8 个技能。技能会在下一轮对话中可用。
 
@@ -139,7 +139,7 @@ mcp_manager.add_server({
 | Windsurf | ✅ 兼容 | Streamable HTTP 传输 |
 | Hermes Agent | ✅ 已验证 | 原生远程 HTTP MCP，技能通过 well-known 目录单独发现 |
 | OpenClaw | ✅ 兼容 | 原生 `openclaw mcp add`，并包含顶层 `skills/` 包 |
-| Pi | ✅ `1.7.3` 当前版本 | 当前不可覆盖的发布产物包含适配 Pi 工具名的 8 个技能 + 9 项只读原生工具；规划、保存和 Rate Index 路径仍通过远程 MCP 提供；发布产物冒烟测试最近一次在 `1.7.2` 上运行 |
+| Pi | ✅ `1.7.4` 当前版本 | 当前不可覆盖的发布产物包含适配 Pi 工具名的 8 个技能 + 9 项只读原生工具；规划、保存和 Rate Index 路径仍通过远程 MCP 提供；发布产物冒烟测试最近一次在 `1.7.2` 上运行 |
 | Prime Agent v0.7.0 | ✅ `1.7.2` 发布产物功能冒烟通过 | 使用同一个 `tempguru-pi` 包契约：8 个技能 + 9 个原生工具，并自动配置 `source=prime-agent` 归因；标准 MCP 集成暂不支持无认证服务器 |
 | OpenAI Agents SDK | ✅ 兼容 | 通过 MCP 客户端使用上述 URL |
 | ChatGPT（Codex / 支持 MCP 的自定义 GPT） | ✅ 兼容 | 同 OpenAI Agents SDK |
@@ -210,7 +210,7 @@ TempGuru 在 300 多个美国和加拿大市场提供活动人员配置，包括
 
 ### 活动需要提前多久预定?
 
-使用 `check_availability` 工具传入城市与日期。提前期取决于城市分级和活动规模。枢纽城市(波士顿、旧金山、洛杉矶、纽约、芝加哥)的提前期较短。该工具返回提前期建议区间,而非硬性截止日期或预订保证；每个订单都必须单独查询。
+使用 `get_lead_time_guidance` 工具传入城市与日期。提前期取决于城市分级和活动规模。枢纽城市(波士顿、旧金山、洛杉矶、纽约、芝加哥)的提前期较短。该工具返回提前期建议区间,而非硬性截止日期或预订保证；每个订单都必须单独查询。
 
 ### 费率与可用性数据是正式报价吗?
 

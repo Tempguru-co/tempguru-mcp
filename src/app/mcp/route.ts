@@ -12,7 +12,7 @@
 //   - get_plan                    restore a non-PII saved staffing plan
 //   - get_cities                 list/match configured market entries (with tier)
 //   - get_roles                  list all staffing roles with descriptions
-//   - check_availability         deterministic lead-time guidance for a city/date
+//   - get_lead_time_guidance         deterministic lead-time guidance for a city/date
 //   - get_role_pricing           rate range for a role in a specific city
 //   - get_compliance_by_state    state-level employment compliance summary
 //   - get_policies                published booking/procurement terms

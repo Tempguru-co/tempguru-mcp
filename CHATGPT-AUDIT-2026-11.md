@@ -254,6 +254,25 @@ TempGuru. The plugin (section 2) is still the mechanism that puts live rates
 into conversations; the Hub is the mechanism that makes the brand card and
 citations accurate when ChatGPT does mention TempGuru.
 
+## 4b. Follow-up, 2026-11-11 (after the upload)
+
+- The developer-dashboard package (`app-6a29a9e0634481919b7440b626b0e746`) is
+  **1.0.0 Approved and never published**: Review status "Ready to publish",
+  Publication "Not published". The June copy, no skills, no support URL. The
+  directory never showed TempGuru because nobody pressed Publish.
+- The 1.7.3 upload went to a separate dev plugin (`dev-6a29a4fac…`) on
+  chatgpt.com/plugins; it does not affect the directory package.
+- OpenAI's MCP scan flags `check_availability`: "This tool's name appears
+  promotional, exaggerated, or inconsistent with its behavior." Fair: the
+  description says three times it is not an availability check. Release
+  `1.7.4` renames it `get_lead_time_guidance` and aligns the `request_quote`
+  and `get_rate_benchmark` titles. The ChatGPT MCP configuration stays
+  "Unavailable" until the rename is deployed and rescanned.
+- Order of operations: merge and deploy `1.7.4` → MCPs tab → Rescan → Publish
+  plugin (1.0.0, so the listing exists) → Create draft from ZIP with the
+  `1.7.4` package built for the dashboard package's own name and `.app.json`
+  → paste `chatgpt-plugin-review.md` → Submit for review.
+
 ## 5. Prioritized action list
 
 | # | Action | Owner | Effort |

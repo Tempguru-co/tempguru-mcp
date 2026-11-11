@@ -116,9 +116,9 @@ try {
     "tools/list advertises all 12 tools",
     JSON.stringify(toolNames) ===
       JSON.stringify([
-        "check_availability",
         "get_cities",
         "get_compliance_by_state",
+        "get_lead_time_guidance",
         "get_plan",
         "get_policies",
         "get_quote_status",
@@ -166,7 +166,7 @@ try {
   const planInput = toolByName.get("plan_staffing")?.inputSchema?.properties ?? {};
   const saveInput = toolByName.get("save_staffing_plan")?.inputSchema?.properties ?? {};
   const availabilityInput =
-    toolByName.get("check_availability")?.inputSchema?.properties ?? {};
+    toolByName.get("get_lead_time_guidance")?.inputSchema?.properties ?? {};
   const policiesInput = toolByName.get("get_policies")?.inputSchema?.properties ?? {};
   check(
     "planning tools advertise the canonical event_type enum",

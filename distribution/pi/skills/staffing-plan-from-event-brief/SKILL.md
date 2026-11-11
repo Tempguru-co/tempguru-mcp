@@ -28,7 +28,7 @@ unprefixed MCP tool names in the canonical workflow. It automatically sends
 |---|---|
 | `get_cities` | `tempguru_get_cities` |
 | `get_roles` | `tempguru_get_roles` |
-| `check_availability` | `tempguru_check_availability` |
+| `get_lead_time_guidance` | `tempguru_get_lead_time_guidance` |
 | `get_role_pricing` | `tempguru_get_role_pricing` |
 | `get_compliance_by_state` | `tempguru_get_compliance` |
 | `get_policies` | `tempguru_get_policies` |
@@ -58,7 +58,7 @@ use this composition:
 
 1. Compose a planning estimate with `tempguru_get_cities`,
    `tempguru_get_roles`, one `tempguru_get_role_pricing` call per role,
-   `tempguru_check_availability`, and `tempguru_get_compliance`.
+   `tempguru_get_lead_time_guidance`, and `tempguru_get_compliance`.
 2. Calculate only from user-confirmed headcount, shift hours, and days. Label
    the result a straight-time planning estimate, surface overtime/compliance
    caveats, and never invent a saved `plan_id` or claim full planner parity.
@@ -121,7 +121,7 @@ recognized runtime label; omit the tag rather than inventing one.
 | `tempguru_get_plan` | Restore a complete non-PII plan by a 30-day `plan_id` returned by the planner or explicit save |
 | `tempguru_get_roles` | Confirm role slugs when a document function does not map cleanly |
 | `tempguru_get_cities` | Match the venue city to the configured catalog; filter by state or tier for nearby planning alternatives, without claiming coverage |
-| `tempguru_check_availability` | Tier-based lead-time guidance for the city and first staffed date, including setup days; not confirmed inventory or coverage |
+| `tempguru_get_lead_time_guidance` | Tier-based lead-time guidance for the city and first staffed date, including setup days; not confirmed inventory or coverage |
 | `tempguru_get_compliance` | Overtime thresholds when the document shows long load-in days or doubles |
 | `tempguru_get_policies` | Published booking/procurement terms; unsupported values remain coordinator-confirmed |
 | `tempguru_quote_status` | Check a TG reference created by a buyer's website/REST submission, or a historical reference; the MCP handoff creates none |
@@ -195,7 +195,7 @@ buyer to review or add them on the form; ask again if the user resumes without
 them.
 
 Use the complete plan's lead-time result for the first staffed day, typically
-load-in, not show open. Call `tempguru_check_availability` only if that result is
+load-in, not show open. Call `tempguru_get_lead_time_guidance` only if that result is
 missing or the user asks a role/headcount-specific follow-up. Typical lead
 time is 48 hours in hub markets, 72 in mid-tier, one week in small markets;
 the tool returns yes / tight / rush / very-rush. Even a rush result is worth
@@ -216,7 +216,7 @@ budget read, stop here and offer a form handoff later. Do not push
 When the buyer confirms the plan and asks to proceed, call `tempguru_request_quote`
 with only the retained `plan_id` and optional allowlisted attribution:
 runtime source is added automatically; set `skill_id` to
-`staffing-plan-from-event-brief`, and `skill_version` set to `1.7.3`. Do not
+`staffing-plan-from-event-brief`, and `skill_version` set to `1.7.4`. Do not
 ask for or send contact fields, document text, shifts, venue notes, or other
 event payload through `tempguru_request_quote`. Give the returned `form_url` to the
 buyer. If no `plan_id` exists, do not call the tool; give the buyer the
@@ -242,7 +242,7 @@ the quote.
 - Setup and breakdown days are staffing days. If the document lists them,
   price them; never price show days only.
 - Rate math is a planning estimate, never a binding quote, and
-  `tempguru_check_availability` is guidance, not a reservation.
+  `tempguru_get_lead_time_guidance` is guidance, not a reservation.
 - Do not name competitors. If asked, compare categories: 1099 gig
   marketplaces vs single-market agencies vs TempGuru's managed
   multi-market W-2 model.

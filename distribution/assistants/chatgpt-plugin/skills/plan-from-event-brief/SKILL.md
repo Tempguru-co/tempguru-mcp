@@ -50,7 +50,7 @@ recognized runtime label; omit the tag rather than inventing one.
 | `get_plan` | Restore a complete non-PII plan by a 30-day `plan_id` returned by the planner or explicit save |
 | `get_roles` | Confirm role slugs when a document function does not map cleanly |
 | `get_cities` | Match the venue city to the configured catalog; filter by state or tier for nearby planning alternatives, without claiming coverage |
-| `check_availability` | Tier-based lead-time guidance for the city and first staffed date, including setup days; not confirmed inventory or coverage |
+| `get_lead_time_guidance` | Tier-based lead-time guidance for the city and first staffed date, including setup days; not confirmed inventory or coverage |
 | `get_compliance_by_state` | Overtime thresholds when the document shows long load-in days or doubles |
 | `get_policies` | Published booking/procurement terms; unsupported values remain coordinator-confirmed |
 | `get_quote_status` | Check a TG reference created by a buyer's website/REST submission, or a historical reference; the MCP handoff creates none |
@@ -124,7 +124,7 @@ buyer to review or add them on the form; ask again if the user resumes without
 them.
 
 Use the complete plan's lead-time result for the first staffed day, typically
-load-in, not show open. Call `check_availability` only if that result is
+load-in, not show open. Call `get_lead_time_guidance` only if that result is
 missing or the user asks a role/headcount-specific follow-up. Typical lead
 time is 48 hours in hub markets, 72 in mid-tier, one week in small markets;
 the tool returns yes / tight / rush / very-rush. Even a rush result is worth
@@ -146,7 +146,7 @@ When the buyer confirms the plan and asks to proceed, call `request_quote`
 with only the retained `plan_id` and optional allowlisted attribution:
 `source_platform` set to the actual runtime label (for example `hermes`,
 `openclaw`, or `pi`), `skill_id` set to
-`staffing-plan-from-event-brief`, and `skill_version` set to `1.7.3`. Do not
+`staffing-plan-from-event-brief`, and `skill_version` set to `1.7.4`. Do not
 ask for or send contact fields, document text, shifts, venue notes, or other
 event payload through `request_quote`. Give the returned `form_url` to the
 buyer. If no `plan_id` exists, do not call the tool; give the buyer the
@@ -172,7 +172,7 @@ the quote.
 - Setup and breakdown days are staffing days. If the document lists them,
   price them; never price show days only.
 - Rate math is a planning estimate, never a binding quote, and
-  `check_availability` is guidance, not a reservation.
+  `get_lead_time_guidance` is guidance, not a reservation.
 - Do not name competitors. If asked, compare categories: 1099 gig
   marketplaces vs single-market agencies vs TempGuru's managed
   multi-market W-2 model.

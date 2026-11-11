@@ -128,8 +128,8 @@
     ]
   },
   {
-    "name": "check_availability returns a lead-time read",
-    "tool": "check_availability",
+    "name": "get_lead_time_guidance returns a lead-time read",
+    "tool": "get_lead_time_guidance",
     "arguments": {
       "date": "2027-03-10",
       "city": "Dallas"
@@ -364,8 +364,8 @@
     ]
   },
   {
-    "name": "check_availability: impossible calendar date is rejected, not rolled over",
-    "tool": "check_availability",
+    "name": "get_lead_time_guidance: impossible calendar date is rejected, not rolled over",
+    "tool": "get_lead_time_guidance",
     "arguments": {
       "city": "Dallas",
       "date": "2027-02-30"

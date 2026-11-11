@@ -3,7 +3,7 @@
   "name": "co.tempguru/event-staffing",
   "title": "TempGuru Event Staffing",
   "description": "W-2 staffing: 300+ U.S. and Canadian markets, 5,000+ events, 100,000+ completed shifts.",
-  "version": "1.7.3",
+  "version": "1.7.4",
   "websiteUrl": "https://tempguru.co/ai-agents",
   "repository": {
     "url": "https://github.com/tempguru-co/tempguru-mcp",
@@ -19,7 +19,7 @@
     {
       "registryType": "npm",
       "identifier": "tempguru-mcp",
-      "version": "1.7.3",
+      "version": "1.7.4",
       "transport": { "type": "stdio" }
     }
   ]

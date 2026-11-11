@@ -628,10 +628,10 @@ for (const skill of SKILLS) {
     errors.push("distribution/pi/extensions/tempguru.ts: get_cities lists must be capped at 100 and must not claim pagination");
   }
   const availabilityTool = piExtension.match(
-    /name:\s*"tempguru_check_availability"[\s\S]*?(?=\n\s*pi\.registerTool\(|$)/,
+    /name:\s*"tempguru_get_lead_time_guidance"[\s\S]*?(?=\n\s*pi\.registerTool\(|$)/,
   )?.[0] ?? "";
   if (!/\bdate:\s*Type\.String\(/.test(availabilityTool) || /\bdate:\s*Type\.Optional/.test(availabilityTool)) {
-    errors.push("distribution/pi/extensions/tempguru.ts: check_availability date must be required like the REST contract");
+    errors.push("distribution/pi/extensions/tempguru.ts: get_lead_time_guidance date must be required like the REST contract");
   }
   for (const skill of SKILLS) {
     const body = read(`distribution/pi/skills/${skill}/SKILL.md`);

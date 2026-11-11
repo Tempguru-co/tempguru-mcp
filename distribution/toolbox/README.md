@@ -76,7 +76,7 @@ Ordered by leverage. ✅ = already live from earlier pushes.
    origin: `https://mcp.tempguru.co`.
 2. **ChatGPT plugin directory** (the app directory became the plugin
    directory 2026-07-09), 🟠 listed at package v1.0.0 from the 2026-06-10
-   submission; the regenerated `1.7.3` package and upload runbook are in
+   submission; the regenerated `1.7.4` package and upload runbook are in
    [../assistants/chatgpt-app.md](../assistants/chatgpt-app.md).
 3. **GitHub MCP Registry (github.com/mcp) + VS Code `@mcp` gallery**, the
    Copilot install base. 🟡 DIAGNOSED 2026-06-10: hand-curated, no

@@ -11,7 +11,7 @@ This repo serves the TempGuru MCP server (hosted at `https://mcp.tempguru.co/mcp
 | `get_plan` | Restore a complete non-PII plan saved by either planning tool using its 30-day `plan_id` |
 | `get_cities` | Match a city to the configured US/CA market catalog; filter by state or tier (hub/mid/small). This does not confirm order coverage. |
 | `get_roles` | List the staffing roles with skill tiers; returns the slugs other tools accept |
-| `check_availability` | Lead-time guidance for a city + date (guidance, not a reservation) |
+| `get_lead_time_guidance` | Lead-time guidance for a city + date (guidance, not a reservation) |
 | `get_role_pricing` | All-inclusive hourly rate range for one role in one city |
 | `get_compliance_by_state` | Minimum wage, overtime thresholds, state quirks (not legal advice) |
 | `get_policies` | Published booking/procurement policies; missing values are explicitly coordinator-confirmed |

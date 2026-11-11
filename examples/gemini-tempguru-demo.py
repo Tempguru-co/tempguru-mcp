@@ -38,7 +38,7 @@ MODEL = "gemini-2.5-flash"
 # saved plan_id and returns a buyer-operated form, so it is outside this
 # pricing-and-coverage demo.
 READ_TOOLS = {
-    "get_cities", "get_roles", "check_availability",
+    "get_cities", "get_roles", "get_lead_time_guidance",
     "get_role_pricing", "get_compliance_by_state",
 }
 _GEMINI_KEYS = {"type", "description", "properties", "items", "required", "enum", "nullable"}

@@ -94,7 +94,7 @@ export default function Home() {
       desc: "List all event staffing roles with descriptions and skill tiers.",
     },
     {
-      name: "check_availability",
+      name: "get_lead_time_guidance",
       desc: "Lead-time guidance for a city/date, optionally with role and headcount.",
     },
     {

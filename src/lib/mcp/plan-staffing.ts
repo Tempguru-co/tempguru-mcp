@@ -4,7 +4,7 @@
 // complete, structured staffing plan, catalog match, per-role budget math,
 // lead-time guidance, and the state compliance flags that change the plan, plus the exact next
 // tool to call. It composes the same query layer the individual tools wrap, so a
-// plan is always consistent with what get_role_pricing / check_availability /
+// plan is always consistent with what get_role_pricing / get_lead_time_guidance /
 // get_compliance_by_state would return one call at a time.
 //
 // Read-only. Returns variant shapes discriminated by `status`

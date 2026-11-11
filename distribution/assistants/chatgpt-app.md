@@ -52,7 +52,29 @@ ChatGPT, see "Testing in ChatGPT" below) and put its reviewer-accessible URL in
 `extensions.com.openai.review.demo_recording_url`. The generator warns while
 the placeholder is still there.
 
-## What the existing listing looks like (from its downloaded ZIP, 2026-11-11)
+## Two packages exist (found 2026-11-11)
+
+- **Developer dashboard** (platform.openai.com → Plugins): package
+  `app-6a29a9e0634481919b7440b626b0e746`, **1.0.0 Approved, never
+  published** ("Ready to publish" / "Not published"), June copy, no skills,
+  no support URL, MCP configuration "Unavailable" because OpenAI's scan flags
+  `check_availability`'s name (renamed `get_lead_time_guidance` in `1.7.4`).
+  This is the one that reaches the public directory. Its own
+  **Download plugin ZIP** gives the `name` and `.app.json` the generator must
+  use for a **Create draft from ZIP** upload.
+- **chatgpt.com/plugins**: `dev-6a29a4facbbc8191bf54eaf071b16b5d`, the
+  development copy. The 1.7.3 ZIP uploaded there on 2026-11-11 updated only
+  this copy. The generator currently defaults to this identity; switch the
+  defaults (`DEFAULT_PLUGIN_NAME`, `chatgpt-plugin.app.json`) to the dashboard
+  package's values before building the directory draft.
+
+Order of operations: deploy `1.7.4` → MCPs tab → Rescan until the finding
+clears → **Publish plugin** on 1.0.0 (gets the listing live on the current
+server; tools come from the scan) → **Create draft from ZIP** with the `1.7.4`
+package → paste `chatgpt-plugin-review.md` into Review details → Submit for
+review → Publish on approval.
+
+## What the dev copy looks like (from its downloaded ZIP, 2026-11-11)
 
 The converted June package is a Codex-format manifest: `name`
 `dev-6a29a4facbbc8191bf54eaf071b16b5d` (a generated id, not a slug), `version`

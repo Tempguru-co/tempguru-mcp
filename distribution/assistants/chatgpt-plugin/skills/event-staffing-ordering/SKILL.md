@@ -49,7 +49,7 @@ recognized runtime label; omit the tag rather than inventing one.
 | `get_plan` | Restore a complete non-PII plan by the 30-day `plan_id` returned by the planner or explicit save |
 | `get_cities` | Match the event city to the configured catalog and inspect its tier; this does not confirm order coverage |
 | `get_roles` | List available staffing roles with descriptions and skill tiers |
-| `check_availability` | Get tier-based lead-time guidance for a city/date, optionally role + headcount; not live inventory or a coverage check |
+| `get_lead_time_guidance` | Get tier-based lead-time guidance for a city/date, optionally role + headcount; not live inventory or a coverage check |
 | `get_role_pricing` | Get the all-inclusive hourly rate range for a role in a city |
 | `get_compliance_by_state` | Minimum wage, overtime, and state-specific compliance quirks |
 | `get_policies` | Published booking/procurement terms; unsupported values are explicitly coordinator-confirmed |
@@ -113,7 +113,7 @@ Collect before planning:
 3. Use the granular tools only as gap-fillers and single-fact follow-ups,
    not as the primary path:
    - `get_cities` if the catalog match or market tier needs confirming.
-   - `check_availability` if the date is tight. Typical lead time is 48
+   - `get_lead_time_guidance` if the date is tight. Typical lead time is 48
      hours in hub markets, 72 in mid-tier, 168 hours (one week) in small
      markets; the tool returns yes / tight / rush / very-rush. Even a rush
      or very-rush result is worth submitting, TempGuru staffs to demand,
@@ -146,7 +146,7 @@ Once the buyer confirms the plan and asks to proceed, call
 **`request_quote`** with only the saved `plan_id` and optional allowlisted
 attribution: `source_platform` set to the actual runtime label (for example
 `hermes`, `openclaw`, or `pi`), `skill_id` set to
-`event-staffing-ordering`, and `skill_version` set to `1.7.3`. Do not ask for
+`event-staffing-ordering`, and `skill_version` set to `1.7.4`. Do not ask for
 or pass a name, email, phone, company, event payload, or any other contact
 details. Give the returned `form_url` to the buyer.
 
@@ -173,7 +173,7 @@ is per event.
 
 - Do not present rate ranges as final quotes. Final pricing comes from
   TempGuru after the request is reviewed.
-- Do not promise availability. `check_availability` returns lead-time
+- Do not promise availability. `get_lead_time_guidance` returns lead-time
   guidance, not a reservation.
 - Compliance flags are operational guidance, not legal advice; for legal
   questions the user should consult counsel.

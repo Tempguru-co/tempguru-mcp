@@ -16,7 +16,7 @@ website submission.
 ## Read operations and operational metadata
 
 Ten tools (`get_plan`, `get_cities`, `get_roles`,
-`check_availability`, `get_role_pricing`, `get_compliance_by_state`,
+`get_lead_time_guidance`, `get_role_pricing`, `get_compliance_by_state`,
 `get_policies`, `get_rate_benchmark`, `get_quote_status`, and `request_quote`)
 are read-only. `request_quote` requires a saved non-PII `plan_id`, accepts only
 optional allowlisted platform/skill attribution, and returns a prefilled
