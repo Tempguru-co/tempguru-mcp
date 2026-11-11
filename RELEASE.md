@@ -553,12 +553,15 @@ names) and moves the canonical quote skills to `skill_version: 1.7.5`.
   and the test to `tests/skills/test_event_staffing_skill.py` on the PR branch
   in the `kissmyabs32/hermes-agent` fork, then push. Do not modify or restart
   the separate Hermes content agent runtime.
-- **ClawHub:** publish the canonical skills that changed since the `1.7.0`
-  ClawHub copies (source commit `125ee8a`) at version `1.7.5` from the
-  operator's ClawHub account. No repository workflow covers ClawHub. ClawHub is
-  an independent catalog; do not SSH to or change the legacy OpenClaw VPS
-  container at `/docker/openclaw-y5yb/`, edit `openclaw.json`, restart
-  `openclaw-gateway`, or touch sibling agents.
+- **ClawHub:** from the operator's machine, log in once with
+  `npx -y clawhub@latest login`, then run `npm run publish:clawhub -- --dry-run`
+  and `npm run publish:clawhub`. The script publishes all 8 canonical skills at
+  the package version under the existing `@kissmyabs32` slugs and display names,
+  records the source commit, and skips any skill already at that version.
+  Before `1.7.5` the listings were: ordering `1.7.3`, compliance `1.0.0`, the
+  other six `1.7.0`. ClawHub is an independent catalog; do not SSH to or change
+  the legacy OpenClaw VPS container at `/docker/openclaw-y5yb/`, edit
+  `openclaw.json`, restart `openclaw-gateway`, or touch sibling agents.
 - **Pi:** step 5 publishes `tempguru-pi@1.7.5`; never republish `1.7.3`.
 
 Historical record: seven ClawHub buyer-handoff safety copies were published as

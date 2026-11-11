@@ -20,6 +20,7 @@
     "build:worker": "node scripts/build-edge-worker.mjs",
     "build:chatgpt-plugin": "node distribution/assistants/build-chatgpt-plugin.mjs --zip",
     "build:chatgpt-plugin:dev": "node distribution/assistants/build-chatgpt-plugin.mjs --zip --target dev",
+    "publish:clawhub": "node scripts/publish-clawhub.mjs",
     "build:url-map": "node scripts/build-url-map.mjs",
     "sync-rates": "node scripts/sync-rates.mjs",
     "sync:ai-egress": "node scripts/sync-ai-egress.mjs",
