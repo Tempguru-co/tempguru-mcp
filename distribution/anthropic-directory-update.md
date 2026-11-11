@@ -9,7 +9,7 @@ https://claude.com/docs/connectors/building/submission.
 | Portal field | Value |
 |---|---|
 | Server name | TempGuru Event Staffing |
-| Release being reviewed | `1.7.3` |
+| Release being reviewed | `1.7.4` |
 | URL slug | `tempguru-event-staffing` |
 | Tagline | Plan W-2 event staffing across the US and Canada |
 | Connector access | `read_write` |
@@ -25,6 +25,13 @@ https://claude.com/docs/connectors/building/submission.
 | Allowed link origin | `https://mcp.tempguru.co` |
 
 Inventory summary: **12 tools, 2 prompts, 8 resources**.
+
+> **Rename (`1.7.4`):** the lead-time tool `check_availability` is now
+> `get_lead_time_guidance` (title `Get Lead Time Guidance`). Its inputs, output
+> schema, read-only annotations, and behavior are unchanged; the name now
+> matches what the description always said (tier-based lead-time guidance,
+> never inventory, coverage, or a reservation). `request_quote` is titled
+> `Prepare Quote Form` everywhere. Update the portal's tool list to match.
 
 > **AGENT5 disclosure record:** Version `1.7.1` added a factual public
 > first-order offer to server instructions, `get_policies`, completed-plan
@@ -86,7 +93,7 @@ field is intentionally absent rather than implicitly set.
 | 3 | `get_plan` | `Get Saved Staffing Plan` | `true` | `false` | omitted | `false` |
 | 4 | `get_cities` | `Get Cities` | `true` | `false` | omitted | `false` |
 | 5 | `get_roles` | `Get Roles` | `true` | `false` | omitted | `false` |
-| 6 | `check_availability` | `Check Availability` | `true` | `false` | omitted | `false` |
+| 6 | `get_lead_time_guidance` | `Get Lead Time Guidance` | `true` | `false` | omitted | `false` |
 | 7 | `get_role_pricing` | `Get Role Pricing` | `true` | `false` | omitted | `false` |
 | 8 | `get_compliance_by_state` | `Get Compliance By State` | `true` | `false` | omitted | `false` |
 | 9 | `get_policies` | `Get Booking and Procurement Policies` | `true` | `false` | omitted | `false` |

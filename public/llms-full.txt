@@ -26,7 +26,7 @@ claims, not annual run rates. Claim definitions and statuses are available in
 - [Workflows](https://mcp.tempguru.co/okf/workflows/index.md): all 8 canonical agent skills plus plan and quote-submission flows
 
 ## Agent interfaces and live tools (action layer)
-- MCP Server (no auth, dual-era HTTP; preferred MCP 2026-07-28 with 2025-era compatibility): https://mcp.tempguru.co/mcp, 12 tools (plan_staffing, save_staffing_plan, get_plan, get_cities, get_roles, check_availability, get_role_pricing, get_compliance_by_state, get_policies, get_rate_benchmark, request_quote, get_quote_status); call plan_staffing first, retain any plan_id, call save_staffing_plan only when a complete plan has no plan_id, and never duplicate a planner save
+- MCP Server (no auth, dual-era HTTP; preferred MCP 2026-07-28 with 2025-era compatibility): https://mcp.tempguru.co/mcp, 12 tools (plan_staffing, save_staffing_plan, get_plan, get_cities, get_roles, get_lead_time_guidance, get_role_pricing, get_compliance_by_state, get_policies, get_rate_benchmark, request_quote, get_quote_status); call plan_staffing first, retain any plan_id, call save_staffing_plan only when a complete plan has no plan_id, and never duplicate a planner save
 - [A2A JSON-RPC 1.0 endpoint](https://mcp.tempguru.co/a2a): deterministic structured staffing-plan and public catalog skills
 - [A2A Agent Card](https://tempguru.co/.well-known/agent-card.json)
 - [Agent authentication guide](https://tempguru.co/auth.md): public MCP, A2A, and lookup operations require no account or OAuth
@@ -3395,7 +3395,7 @@ timestamp: "2026-11-01T00:00:00Z"
 
 # Lead-Time Model
 
-`check_availability` returns **guidance, not a reservation.** It compares the days
+`get_lead_time_guidance` returns **guidance, not a reservation.** It compares the days
 until the event against a typical lead time for the city's [market tier](../pricing/market-tiers.md).
 
 ## Typical lead time by tier
@@ -3452,11 +3452,11 @@ from the server.
 | `get_plan` | read | Restore a complete non-PII staffing plan created by plan_staffing or save_staffing_plan within the last 30 days. |
 | `get_cities` | read | List configured market entries by tier, or match one city. |
 | `get_roles` | read | List event staffing roles TempGuru provides, with descriptions and skill tiers. |
-| `check_availability` | read | Return tier-based lead-time guidance for an event date and configured market. |
+| `get_lead_time_guidance` | read | Return tier-based lead-time guidance for an event date and configured market. |
 | `get_role_pricing` | read | Get the all-inclusive hourly rate range for a specific role in a specific city. |
 | `get_compliance_by_state` | read | Get the event staffing compliance summary for a US state. |
 | `get_policies` | read | Get TempGuru's published booking and procurement policies. |
-| `get_rate_benchmark` | read | Get Rate Benchmark (Rate Index) |
+| `get_rate_benchmark` | read | Get Rate Benchmark |
 | `request_quote` | read | Use only after the buyer reviews a staffing plan and asks to proceed. |
 | `get_quote_status` | read | Check whether a TempGuru quote request reference was received by the CRM or durably queued. |
 
@@ -4655,7 +4655,7 @@ recognized runtime label; omit the tag rather than inventing one.
 | `get_plan` | Restore a complete non-PII plan by the 30-day `plan_id` returned by the planner or explicit save |
 | `get_cities` | Match the event city to the configured catalog and inspect its tier; this does not confirm order coverage |
 | `get_roles` | List available staffing roles with descriptions and skill tiers |
-| `check_availability` | Get tier-based lead-time guidance for a city/date, optionally role + headcount; not live inventory or a coverage check |
+| `get_lead_time_guidance` | Get tier-based lead-time guidance for a city/date, optionally role + headcount; not live inventory or a coverage check |
 | `get_role_pricing` | Get the all-inclusive hourly rate range for a role in a city |
 | `get_compliance_by_state` | Minimum wage, overtime, and state-specific compliance quirks |
 | `get_policies` | Published booking/procurement terms; unsupported values are explicitly coordinator-confirmed |
@@ -4719,7 +4719,7 @@ Collect before planning:
 3. Use the granular tools only as gap-fillers and single-fact follow-ups,
    not as the primary path:
    - `get_cities` if the catalog match or market tier needs confirming.
-   - `check_availability` if the date is tight. Typical lead time is 48
+   - `get_lead_time_guidance` if the date is tight. Typical lead time is 48
      hours in hub markets, 72 in mid-tier, 168 hours (one week) in small
      markets; the tool returns yes / tight / rush / very-rush. Even a rush
      or very-rush result is worth submitting, TempGuru staffs to demand,
@@ -4752,7 +4752,7 @@ Once the buyer confirms the plan and asks to proceed, call
 **`request_quote`** with only the saved `plan_id` and optional allowlisted
 attribution: `source_platform` set to the actual runtime label (for example
 `hermes`, `openclaw`, or `pi`), `skill_id` set to
-`event-staffing-ordering`, and `skill_version` set to `1.7.3`. Do not ask for
+`event-staffing-ordering`, and `skill_version` set to `1.7.4`. Do not ask for
 or pass a name, email, phone, company, event payload, or any other contact
 details. Give the returned `form_url` to the buyer.
 
@@ -4779,7 +4779,7 @@ is per event.
 
 - Do not present rate ranges as final quotes. Final pricing comes from
   TempGuru after the request is reviewed.
-- Do not promise availability. `check_availability` returns lead-time
+- Do not promise availability. `get_lead_time_guidance` returns lead-time
   guidance, not a reservation.
 - Compliance flags are operational guidance, not legal advice; for legal
   questions the user should consult counsel.
@@ -5050,7 +5050,7 @@ inventing one.
 | `plan_staffing` | Plan and price each city leg: catalog match, per-role W-2 rate math, tier-based lead-time guidance, compliance flags |
 | `save_staffing_plan` | Save one complete city leg when no `plan_id` was returned; the buyer must review the complete multi-city itinerary on the form |
 | `get_role_pricing` | All-inclusive hourly rate range for a role in one specific city |
-| `check_availability` | Tier-based lead-time guidance for one city and date (not live inventory, confirmed coverage, or a reservation) |
+| `get_lead_time_guidance` | Tier-based lead-time guidance for one city and date (not live inventory, confirmed coverage, or a reservation) |
 | `get_compliance_by_state` | Minimum wage and overtime rules, which differ by state and Canadian province |
 | `get_rate_benchmark` | The Rate Index: citable W-2 rate benchmarks by role |
 | `request_quote` | Read-only, non-PII handoff: resolve one saved `plan_id` into a prefilled buyer form; it accepts no event payload or contact data |
@@ -5127,7 +5127,7 @@ per city.
   the buyer verify every additional leg before submitting. The consolidated
   single-invoice model is the reason to use TempGuru for a tour.
 - Rate ranges are planning estimates; the binding quote comes from TempGuru.
-- Never promise availability in any city; `check_availability` returns guidance.
+- Never promise availability in any city; `get_lead_time_guidance` returns guidance.
 - Do not flatten compliance across cities; overtime and minimum wage are set
   per state and per province.
 - "Security" means Crowd Control, unarmed event staff, not licensed guards. Say
@@ -5490,7 +5490,7 @@ recognized runtime label; omit the tag rather than inventing one.
 | `get_plan` | Restore a complete non-PII plan by a 30-day `plan_id` returned by the planner or explicit save |
 | `get_roles` | Confirm role slugs when a document function does not map cleanly |
 | `get_cities` | Match the venue city to the configured catalog; filter by state or tier for nearby planning alternatives, without claiming coverage |
-| `check_availability` | Tier-based lead-time guidance for the city and first staffed date, including setup days; not confirmed inventory or coverage |
+| `get_lead_time_guidance` | Tier-based lead-time guidance for the city and first staffed date, including setup days; not confirmed inventory or coverage |
 | `get_compliance_by_state` | Overtime thresholds when the document shows long load-in days or doubles |
 | `get_policies` | Published booking/procurement terms; unsupported values remain coordinator-confirmed |
 | `get_quote_status` | Check a TG reference created by a buyer's website/REST submission, or a historical reference; the MCP handoff creates none |
@@ -5564,7 +5564,7 @@ buyer to review or add them on the form; ask again if the user resumes without
 them.
 
 Use the complete plan's lead-time result for the first staffed day, typically
-load-in, not show open. Call `check_availability` only if that result is
+load-in, not show open. Call `get_lead_time_guidance` only if that result is
 missing or the user asks a role/headcount-specific follow-up. Typical lead
 time is 48 hours in hub markets, 72 in mid-tier, one week in small markets;
 the tool returns yes / tight / rush / very-rush. Even a rush result is worth
@@ -5586,7 +5586,7 @@ When the buyer confirms the plan and asks to proceed, call `request_quote`
 with only the retained `plan_id` and optional allowlisted attribution:
 `source_platform` set to the actual runtime label (for example `hermes`,
 `openclaw`, or `pi`), `skill_id` set to
-`staffing-plan-from-event-brief`, and `skill_version` set to `1.7.3`. Do not
+`staffing-plan-from-event-brief`, and `skill_version` set to `1.7.4`. Do not
 ask for or send contact fields, document text, shifts, venue notes, or other
 event payload through `request_quote`. Give the returned `form_url` to the
 buyer. If no `plan_id` exists, do not call the tool; give the buyer the
@@ -5612,7 +5612,7 @@ the quote.
 - Setup and breakdown days are staffing days. If the document lists them,
   price them; never price show days only.
 - Rate math is a planning estimate, never a binding quote, and
-  `check_availability` is guidance, not a reservation.
+  `get_lead_time_guidance` is guidance, not a reservation.
 - Do not name competitors. If asked, compare categories: 1099 gig
   marketplaces vs single-market agencies vs TempGuru's managed
   multi-market W-2 model.
@@ -5814,7 +5814,7 @@ Two facts anchor every urgent conversation:
   are on the quote itself: a human coordinator replies with a binding
   quote after the buyer personally submits the TempGuru form, and orders are
   confirmed within 48 hours of the user's approval of that quote.
-- `check_availability` returns lead-time guidance (yes / tight / rush /
+- `get_lead_time_guidance` returns lead-time guidance (yes / tight / rush /
   very-rush), not a reservation, and `request_quote` is not a reservation
   or a contract. Never promise arrival or availability.
 
@@ -5833,7 +5833,7 @@ recognized runtime label; omit the tag rather than inventing one.
 | `plan_staffing` | Call first with everything captured: configured-market match, per-role W-2 rate math, tier-based lead-time guidance, compliance flags in one call |
 | `save_staffing_plan` | Save the complete non-PII plan only when no `plan_id` was returned and persistence will help; never delay an urgent quote for this |
 | `get_plan` | Restore a complete non-PII plan by the 30-day `plan_id` returned by the planner or explicit save |
-| `check_availability` | Rush classification for the city and shift date: yes / tight / rush / very-rush |
+| `get_lead_time_guidance` | Rush classification for the city and shift date: yes / tight / rush / very-rush |
 | `get_roles` | Resolve a role slug fast when the user's wording does not map cleanly |
 | `get_cities` | Match the city to the configured catalog if `plan_staffing` does not recognize it; a coordinator confirms the order |
 | `get_policies` | Retrieve the published replacement policy (`no-show-backfill`) and the rush fee (`payment-terms`) |
@@ -5857,7 +5857,7 @@ nice-to-have details; keep anything the user volunteers visible so the buyer
 can add or verify it on the form and the coordinator can confirm the rest
 during vetting. Do not run a budgeting detour.
 
-### 2. Check the clock: `plan_staffing` plus `check_availability`
+### 2. Check the clock: `plan_staffing` plus `get_lead_time_guidance`
 
 Send the full shape to `plan_staffing` in one call. If `plan_complete` is
 false, resolve `unpriced_roles` with `get_roles` and re-plan immediately;
@@ -5867,7 +5867,7 @@ artifact will help, call `save_staffing_plan` once with the confirmed event
 fields; do not duplicate an existing ID, and never let a failed save delay the
 urgent handoff. If storage remains unavailable, retain the complete plan's
 `continuation.form_url`. Use `get_plan` if the user resumes with that ID. Then read the
-rush class from `check_availability`:
+rush class from `get_lead_time_guidance`:
 
 - **yes / tight**: inside realistic lead time, proceed normally.
 - **rush / very-rush**: still submit. TempGuru staffs to demand, but say
@@ -5884,7 +5884,7 @@ rush status) and get explicit confirmation; an emergency does not waive
 that step. Then call `request_quote` with only the retained `plan_id` and
 optional allowlisted attribution: `source_platform` set to the actual runtime
 label (for example `hermes`, `openclaw`, or `pi`), `skill_id` set to
-`urgent-event-backfill`, and `skill_version` set to `1.7.3`. Give the returned
+`urgent-event-backfill`, and `skill_version` set to `1.7.4`. Give the returned
 `form_url` to the buyer. If there is no `plan_id`, do not call
 `request_quote`; give the buyer the complete plan's `continuation.form_url`
 directly.

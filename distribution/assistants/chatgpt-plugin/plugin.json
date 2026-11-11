@@ -1,0 +1,60 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "dev-6a29a4facbbc8191bf54eaf071b16b5d",
+  "version": "1.7.4",
+  "description": "TempGuru MCP server for W-2 event staffing in 300+ U.S. and Canadian markets, backed by 5,000+ events and 100,000+ completed shifts, with coordinator-confirmed availability per order.",
+  "author": {
+    "name": "Temporary Assistance Guru, Inc. (TempGuru)",
+    "email": "megan@tempguru.co",
+    "url": "https://tempguru.co"
+  },
+  "homepage": "https://tempguru.co/ai-agents",
+  "repository": "https://github.com/tempguru-co/tempguru-mcp",
+  "license": "MIT",
+  "keywords": [
+    "event-staffing",
+    "staffing",
+    "brand-ambassadors",
+    "w2",
+    "compliance",
+    "events"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "TempGuru Event Staffing",
+        "shortDescription": "W-2 event staffing, US/Canada",
+        "longDescription": "TempGuru plans and prices temporary W-2 event staff for conventions, trade shows, festivals, concerts, sporting events, corporate events, and brand activations across 300+ U.S. and Canadian markets, 5,000+ events, and 100,000+ completed shifts.\n\nWhat it does inside ChatGPT:\n- Builds a complete staffing plan from your city, dates, roles, and headcount: configured-market match, per-role all-inclusive hourly rate ranges, estimated totals, tier-based lead-time guidance, and state compliance flags (minimum wage, weekly and daily overtime).\n- Answers one-off questions: what a role costs in a city, what roles are available, whether a date is inside the usual planning window, and TempGuru's published booking and procurement policies (cancellation, no-show replacement, COIs, invoicing).\n- Publishes the TempGuru Event Staffing Rate Index: citable W-2 bill-rate benchmarks by role and market tier.\n- Saves a non-contact plan for 30 days so you can resume it later or share the plan ID.\n- When you are ready, returns a prefilled TempGuru quote form for you to review and submit yourself. A human coordinator replies within one business day.\n\nWho it is for: event planners, exhibitors, agencies, venues, and marketing teams staffing events in the United States and Canada.\n\nLimitations: every total is a planning estimate, not a binding quote. The plugin never reserves staff, confirms availability, takes payment, or collects contact details; only your own submission of the TempGuru form creates a quote request. Rates are all-inclusive W-2 bill rates (worker pay, payroll taxes, workers' comp, general liability, coordination). Compliance summaries are operational guidance, not legal advice. Not for permanent hiring or events outside the US and Canada.",
+        "developerName": "Temporary Assistance Guru, Inc.",
+        "category": "Business & Operations",
+        "capabilities": [
+          "Build a priced event staffing plan from city, date, roles, and headcount",
+          "Look up all-inclusive W-2 hourly rates by role and city",
+          "Check tier-based lead-time guidance for an event date",
+          "Summarize state wage, overtime, and compliance rules",
+          "Return TempGuru's published booking and procurement policies",
+          "Benchmark event staffing rates with the Rate Index",
+          "Save and restore a 30-day non-contact staffing plan",
+          "Prefill a TempGuru quote form for the buyer to submit"
+        ],
+        "websiteURL": "https://tempguru.co/ai-agents",
+        "supportURL": "https://tempguru.co/contact",
+        "privacyPolicyURL": "https://tempguru.co/privacy-policy",
+        "termsOfServiceURL": "https://tempguru.co/terms-of-service",
+        "defaultPrompt": [
+          "Price 10 brand ambassadors for a 3-day trade show in Las Vegas",
+          "Build a staffing plan and budget for a 500-person conference in Chicago",
+          "What are the overtime rules for event staff in California?"
+        ],
+        "brandColor": "#24BBEA",
+        "brandColorDark": "#24BBEA",
+        "composerIcon": "./assets/logo.png",
+        "logo": "./assets/logo.png"
+      },
+      "apps": "./.app.json",
+      "publication": {
+        "release_notes": "Aligns the directory package with TempGuru MCP 1.7.4: 12 tools (ten read-only), plan_staffing as the first call, a non-PII request_quote handoff that returns a prefilled buyer form, explicit save_staffing_plan / get_plan continuation, get_policies for published booking terms, the Rate Index benchmark, and eight bundled skills."
+      }
+    }
+  }
+}

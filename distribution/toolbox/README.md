@@ -74,9 +74,10 @@ Ordered by leverage. ✅ = already live from earlier pushes.
    read-only and idempotent: it returns a TempGuru-owned buyer form URL, never
    collects contact details or creates a CRM lead/reference. Allowed link
    origin: `https://mcp.tempguru.co`.
-2. **ChatGPT app directory**, packaged in
-   [../assistants/chatgpt-app.md](../assistants/chatgpt-app.md); blocked
-   only on business verification.
+2. **ChatGPT plugin directory** (the app directory became the plugin
+   directory 2026-07-09), 🟠 listed at package v1.0.0 from the 2026-06-10
+   submission; the regenerated `1.7.4` package and upload runbook are in
+   [../assistants/chatgpt-app.md](../assistants/chatgpt-app.md).
 3. **GitHub MCP Registry (github.com/mcp) + VS Code `@mcp` gallery**, the
    Copilot install base. 🟡 DIAGNOSED 2026-06-10: hand-curated, no
    auto-ingest of new servers, no PR repo; the documented path is emailing

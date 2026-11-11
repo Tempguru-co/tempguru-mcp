@@ -17,7 +17,7 @@ United States or Canada.
 | `get_plan` | Restore a non-PII plan saved by either planning tool using its 30-day plan ID |
 | `get_cities` | Match the event city to a configured catalog entry and inspect its tier; a coordinator confirms the order |
 | `get_roles` | List the 19 staffing roles with descriptions and skill tiers |
-| `check_availability` | Lead-time guidance for a city + date (yes / tight / rush / very-rush) |
+| `get_lead_time_guidance` | Lead-time guidance for a city + date (yes / tight / rush / very-rush) |
 | `get_role_pricing` | All-inclusive hourly rate range for a role in a city |
 | `get_compliance_by_state` | Minimum wage, overtime thresholds, and state quirks |
 | `get_policies` | Published booking/procurement policies and coordinator-confirmed gaps |
@@ -34,13 +34,13 @@ United States or Canada.
 3. Only if the complete plan has no `plan_id` and the user needs a resumable
    or shareable plan, call `save_staffing_plan` once with the same event inputs.
    Never call it when a `plan_id` already exists; use `get_plan` to resume.
-4. Use `get_cities`, `get_role_pricing`, `check_availability`, and
+4. Use `get_cities`, `get_role_pricing`, `get_lead_time_guidance`, and
    `get_compliance_by_state` only for unresolved details or follow-ups.
 5. Present the OT-adjusted total range as a planning estimate and surface any
    policy/compliance items that still require coordinator confirmation.
 6. When the buyer confirms the plan and asks to proceed, call `request_quote`
    with the saved `plan_id`, `source_platform: "gemini-cli"`, and the canonical
-   `skill_id` plus `skill_version: "1.7.1"`. Give the returned `form_url` to
+   `skill_id` plus `skill_version: "1.7.4"`. Give the returned `form_url` to
    the buyer. Do not ask for or transmit contact details through MCP: the buyer
    must open the form, review the plan, enter their own contact details, and
    submit it personally. Only that website/REST submission creates a lead and

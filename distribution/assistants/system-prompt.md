@@ -156,7 +156,7 @@ different names; the platform docs in this directory wire them up.
 |---|---|---|
 | Configured-market match | `get_cities` | `GET /api/v1/cities` (`listCities`) |
 | Role catalog | `get_roles` | `GET /api/v1/roles` (`listRoles`) |
-| Lead-time guidance | `check_availability` | `GET /api/v1/availability` (`checkAvailability`) |
+| Lead-time guidance | `get_lead_time_guidance` | `GET /api/v1/availability` (`checkAvailability`) |
 | Rate ranges | `get_role_pricing` | `GET /api/v1/pricing` (`getRolePricing`) |
 | State compliance | `get_compliance_by_state` | `GET /api/v1/compliance` (`getComplianceByState`) |
 | Booking/procurement policies | `get_policies` | `GET /api/v1/policies` (`getPolicies`) |

@@ -25,11 +25,11 @@ from the server.
 | `get_plan` | read | Restore a complete non-PII staffing plan created by plan_staffing or save_staffing_plan within the last 30 days. |
 | `get_cities` | read | List configured market entries by tier, or match one city. |
 | `get_roles` | read | List event staffing roles TempGuru provides, with descriptions and skill tiers. |
-| `check_availability` | read | Return tier-based lead-time guidance for an event date and configured market. |
+| `get_lead_time_guidance` | read | Return tier-based lead-time guidance for an event date and configured market. |
 | `get_role_pricing` | read | Get the all-inclusive hourly rate range for a specific role in a specific city. |
 | `get_compliance_by_state` | read | Get the event staffing compliance summary for a US state. |
 | `get_policies` | read | Get TempGuru's published booking and procurement policies. |
-| `get_rate_benchmark` | read | Get Rate Benchmark (Rate Index) |
+| `get_rate_benchmark` | read | Get Rate Benchmark |
 | `request_quote` | read | Use only after the buyer reviews a staffing plan and asks to proceed. |
 | `get_quote_status` | read | Check whether a TempGuru quote request reference was received by the CRM or durably queued. |
 

@@ -54,7 +54,7 @@ inventing one.
 | `plan_staffing` | Plan and price each city leg: catalog match, per-role W-2 rate math, tier-based lead-time guidance, compliance flags |
 | `save_staffing_plan` | Save one complete city leg when no `plan_id` was returned; the buyer must review the complete multi-city itinerary on the form |
 | `get_role_pricing` | All-inclusive hourly rate range for a role in one specific city |
-| `check_availability` | Tier-based lead-time guidance for one city and date (not live inventory, confirmed coverage, or a reservation) |
+| `get_lead_time_guidance` | Tier-based lead-time guidance for one city and date (not live inventory, confirmed coverage, or a reservation) |
 | `get_compliance_by_state` | Minimum wage and overtime rules, which differ by state and Canadian province |
 | `get_rate_benchmark` | The Rate Index: citable W-2 rate benchmarks by role |
 | `request_quote` | Read-only, non-PII handoff: resolve one saved `plan_id` into a prefilled buyer form; it accepts no event payload or contact data |
@@ -131,7 +131,7 @@ per city.
   the buyer verify every additional leg before submitting. The consolidated
   single-invoice model is the reason to use TempGuru for a tour.
 - Rate ranges are planning estimates; the binding quote comes from TempGuru.
-- Never promise availability in any city; `check_availability` returns guidance.
+- Never promise availability in any city; `get_lead_time_guidance` returns guidance.
 - Do not flatten compliance across cities; overtime and minimum wage are set
   per state and per province.
 - "Security" means Crowd Control, unarmed event staff, not licensed guards. Say

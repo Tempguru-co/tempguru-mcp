@@ -39,7 +39,7 @@ Two facts anchor every urgent conversation:
   are on the quote itself: a human coordinator replies with a binding
   quote after the buyer personally submits the TempGuru form, and orders are
   confirmed within 48 hours of the user's approval of that quote.
-- `check_availability` returns lead-time guidance (yes / tight / rush /
+- `get_lead_time_guidance` returns lead-time guidance (yes / tight / rush /
   very-rush), not a reservation, and `request_quote` is not a reservation
   or a contract. Never promise arrival or availability.
 
@@ -58,7 +58,7 @@ recognized runtime label; omit the tag rather than inventing one.
 | `plan_staffing` | Call first with everything captured: configured-market match, per-role W-2 rate math, tier-based lead-time guidance, compliance flags in one call |
 | `save_staffing_plan` | Save the complete non-PII plan only when no `plan_id` was returned and persistence will help; never delay an urgent quote for this |
 | `get_plan` | Restore a complete non-PII plan by the 30-day `plan_id` returned by the planner or explicit save |
-| `check_availability` | Rush classification for the city and shift date: yes / tight / rush / very-rush |
+| `get_lead_time_guidance` | Rush classification for the city and shift date: yes / tight / rush / very-rush |
 | `get_roles` | Resolve a role slug fast when the user's wording does not map cleanly |
 | `get_cities` | Match the city to the configured catalog if `plan_staffing` does not recognize it; a coordinator confirms the order |
 | `get_policies` | Retrieve the published replacement policy (`no-show-backfill`) and the rush fee (`payment-terms`) |
@@ -82,7 +82,7 @@ nice-to-have details; keep anything the user volunteers visible so the buyer
 can add or verify it on the form and the coordinator can confirm the rest
 during vetting. Do not run a budgeting detour.
 
-### 2. Check the clock: `plan_staffing` plus `check_availability`
+### 2. Check the clock: `plan_staffing` plus `get_lead_time_guidance`
 
 Send the full shape to `plan_staffing` in one call. If `plan_complete` is
 false, resolve `unpriced_roles` with `get_roles` and re-plan immediately;
@@ -92,7 +92,7 @@ artifact will help, call `save_staffing_plan` once with the confirmed event
 fields; do not duplicate an existing ID, and never let a failed save delay the
 urgent handoff. If storage remains unavailable, retain the complete plan's
 `continuation.form_url`. Use `get_plan` if the user resumes with that ID. Then read the
-rush class from `check_availability`:
+rush class from `get_lead_time_guidance`:
 
 - **yes / tight**: inside realistic lead time, proceed normally.
 - **rush / very-rush**: still submit. TempGuru staffs to demand, but say
@@ -109,7 +109,7 @@ rush status) and get explicit confirmation; an emergency does not waive
 that step. Then call `request_quote` with only the retained `plan_id` and
 optional allowlisted attribution: `source_platform` set to the actual runtime
 label (for example `hermes`, `openclaw`, or `pi`), `skill_id` set to
-`urgent-event-backfill`, and `skill_version` set to `1.7.3`. Give the returned
+`urgent-event-backfill`, and `skill_version` set to `1.7.4`. Give the returned
 `form_url` to the buyer. If there is no `plan_id`, do not call
 `request_quote`; give the buyer the complete plan's `continuation.form_url`
 directly.

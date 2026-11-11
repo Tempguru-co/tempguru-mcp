@@ -22,7 +22,8 @@ packaging and store listings, not engineering.
 | [build-manifests.mjs](./build-manifests.mjs) | Generates the Copilot manifests from the canonical prompt |
 | `knowledge/` (5 files, generated) | Company overview/FAQ with the approved 300+ U.S. and Canadian markets, 5,000+ events, and 100,000+ completed shifts; roles + full rate matrix; configured-market catalog; 50-state compliance; booking/procurement policies |
 | [chatgpt-custom-gpt.md](./chatgpt-custom-gpt.md) | GPT Store package + ranking playbook |
-| [chatgpt-app.md](./chatgpt-app.md) | ChatGPT app directory submission (MCP, the bigger prize) |
+| [chatgpt-app.md](./chatgpt-app.md) | ChatGPT plugin directory package + upload runbook (MCP + bundled skills, the bigger prize) |
+| [build-chatgpt-plugin.mjs](./build-chatgpt-plugin.mjs) | Generates `chatgpt-plugin/` (plugin.json, mcp.json, skills, assets) and the upload ZIP from the canonical sources, never hand-edit the output |
 | [gemini-gem.md](./gemini-gem.md) | Public Gem (free-tier reach: India, Europe) |
 | [copilot-m365.md](./copilot-m365.md) + `microsoft/` | M365 Copilot declarative agent + generated manifests |
 | [coze-bot.md](./coze-bot.md) | Coze global (→ Telegram/Discord/Messenger) + coze.cn (→ Doubao) |
@@ -38,7 +39,7 @@ included for the full picture.)
 
 | Surface | Type | Status |
 |---|---|---|
-| Official MCP Registry (`co.tempguru/event-staffing`) | MCP | 🟡 `1.7.2` is released and immutable (2026-08-14). Release `1.7.3` publishes automatically when its `server.json` lands on `main`; verify the published Registry version after release. |
+| Official MCP Registry (`co.tempguru/event-staffing`) | MCP | 🟡 `1.7.3` is the latest published version (2026-11-02). Release `1.7.4` (tool rename `check_availability` → `get_lead_time_guidance`) publishes through `publish-registry.yml` after merge; verify the Registry reports `1.7.4`. |
 | Smithery, Glama | MCP | ✅ live |
 | ModelScope MCP 广场 | MCP | ✅ live |
 | Docker MCP Registry | MCP | 🟡 PR #3902 awaiting review |
@@ -46,12 +47,13 @@ included for the full picture.)
 | Postman collection | REST | ✅ imported (re-import after city fix) |
 | Mistral connector directory | MCP | 🟡 outreach drafted, Megan to send via contact form |
 | Anthropic Connectors Directory (claude.ai) | MCP | ✅ approved as a community connector. The AGENT5 disclosure was sent on the original review thread 2026-08-14; `1.7.1` was subsequently deployed after the operator chose to proceed without waiting for guidance. This records no Anthropic approval of the offer. The `1.7.2` hotfix changes policy-topic discovery and telemetry, not offer terms or connector inventory. The release after `1.7.2` removes AGENT5 from every model-readable surface; see `distribution/anthropic-directory-update.md`. |
-| npm CLI (`tempguru-mcp`), GHCR image | dev | 🟡 `1.7.2` is released and immutable (2026-08-14). Release `1.7.3` publishes through `publish-npm.yml` (Trusted Publishing/OIDC) after merge and must be verified at the exact version; GHCR builds from `main`. |
-| Hermes agent catalog (NousResearch) | Agent Skill | 🟡 PR #39150 is open and awaiting upstream review. Release `1.7.3` changes the catalog copy to `1.0.6` (2-hour no-show replacement target), so re-sync both submission files to the PR branch after merge. Do not touch the separate live Hermes content agent runtime. |
-| Pi + Prime Agent (`tempguru-pi` npm package) | Agent Skill + native tools | ✅ `1.7.3` is the current, immutable release; unpinned installs resolve to it. The package has 8 runtime-adapted skills, 9 native tools, a non-PII buyer-form handoff, and automatic `pi` / `prime-agent` attribution. The published-artifact smokes ran on `1.7.2`: the Pi smoke enumerated all 8 skills and loaded the native extension, and pinned persistent Pi and Prime functional smokes each made exactly one Austin call and preserved the coordinator-confirmation boundary. Release `1.7.3` changes only text (skill wording, one native tool description, `skill_version`), and its own smoke has not run yet. Use the next unused patch for any fix; never republish `1.7.3`. |
-| OpenClaw / ClawHub | Agent Skill | 🟡 seven buyer-handoff safety updates were published and verified as immutable `1.7.0` on 2026-08-14 from commit `125ee8a`. Release `1.7.3` changes the canonical skills (`skill_version: 1.7.3`); publishing them needs the operator's ClawHub account, since no repository workflow covers ClawHub. The legacy OpenClaw VPS runtime is unchanged. |
+| npm CLI (`tempguru-mcp`), GHCR image | dev | 🟡 `tempguru-mcp@1.7.3` and GHCR `1.7.3` are published and immutable (2026-11-02). Release `1.7.4` publishes through `publish-npm.yml` and the `v1.7.4` tag after merge. PyPI `tempguru` is still `0.2.0` while `clients/python` is at `0.3.0`; push `python-v0.3.0` or revert the bump. |
+| Hermes agent catalog (NousResearch) | Agent Skill | 🟡 PR #39150 is open and awaiting upstream review. Release `1.7.4` changes the catalog copy to `1.0.7` (tool rename to `get_lead_time_guidance`), so re-sync both submission files to the PR branch after merge. Do not touch the separate live Hermes content agent runtime. |
+| Pi + Prime Agent (`tempguru-pi` npm package) | Agent Skill + native tools | ✅ `1.7.4` is the current release (native tool `tempguru_get_lead_time_guidance`, skills regenerated for the rename); `publish-pi.yml` publishes it after merge. `1.7.3` and earlier remain immutable. The package has 8 runtime-adapted skills, 9 native tools, a non-PII buyer-form handoff, and automatic `pi` / `prime-agent` attribution. The published-artifact smoke last ran on `1.7.2` (all 8 skills enumerated, native extension loaded, one Austin call each for Pi and Prime, coordinator-confirmation boundary preserved); run it on `1.7.4` after publication. Use the next unused patch for any fix; never republish an existing version. |
+| OpenClaw / ClawHub | Agent Skill | 🟡 seven buyer-handoff safety updates were published and verified as immutable `1.7.0` on 2026-08-14 from commit `125ee8a`. Releases `1.7.3` and `1.7.4` change the canonical skills (`skill_version: 1.7.4`, tool rename); publishing them needs the operator's ClawHub account, since no repository workflow covers ClawHub. The legacy OpenClaw VPS runtime is unchanged. |
 | **ChatGPT Custom GPT** | this kit | 🟠 LIVE 2026-06-09, https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner; inspect and refresh its prompt, knowledge, listing, and configured Actions before closeout. MCP uses the buyer-operated form; an explicitly configured REST `submitQuoteRequest` Action may submit once only after the buyer reviews the contact-bearing payload and clearly confirms. |
-| **ChatGPT App (directory)** | this kit | 🟡 SUBMITTED 2026-06-10, v1.0.0 in Review (business-verified org; schemas + annotations + domain verification all shipped same day; see SUBMISSIONS.md row for full package) |
+| **ChatGPT plugin (directory, was "ChatGPT App")** | this kit | 🟠 The developer-dashboard package `app-6a29a9e0634481919b7440b626b0e746` is **1.0.0 Approved, never published** (June copy, no skills, support URL missing). The 2026-11-11 upload of `1.7.3` went to the separate dev plugin `dev-6a29a4fac…`. OpenAI's MCP scan flags `check_availability` as inconsistent with its behavior; release `1.7.4` renames it to `get_lead_time_guidance`. Next: fix the MCPs tab finding (rescan after `1.7.4` deploys), **Publish plugin** on 1.0.0 so the listing exists, then **Create draft from ZIP** with the `1.7.4` package (name + `.app.json` from this dashboard's Download plugin ZIP), paste `chatgpt-plugin-review.md`, submit. Runbook in [chatgpt-app.md](./chatgpt-app.md), audit in [CHATGPT-AUDIT-2026-11.md](../../CHATGPT-AUDIT-2026-11.md). |
+| **ChatGPT Business Hub (Businesses in ChatGPT)** | profile | 🟡 Claimed 2026-11 (beta launched 2026-11-10). Finish Persona identity verification, fill the profile from `system-prompt.md` and the approved claims, baseline Insights (mentions, clicks, discovery topics), add `utm_source=chatgpt.com` to GA4 attribution. Business Agents are US ecommerce/online-service only today and are not connected to the plugin; prepare instructions + context docs from `knowledge/` so TempGuru can publish one the day the category opens. Checklist in the audit. |
 | **Gemini Gem (public)** | this kit | ⬜ build + share Public (~30m) |
 | **M365 Copilot agent** | this kit | ⬜ Partner Center verification first (slow), sideload test |
 | **Coze global bot** | this kit | 🟡 plugin ✅ published to Coze Plugin Store 2026-06-06 (TempGuru_Event_Staffing, 6 ops); companion BOT still to build per coze-bot.md |
@@ -63,9 +65,9 @@ included for the full picture.)
 | **Kimi agent (intl)** | this kit | ⬜ zh prompt ready |
 | **Coze.cn → Doubao, Yuanqi, Baidu, Zhipu** | this kit | ⬜ blocked on +86 verification (see china-platforms.md tiers) |
 
-`tempguru-mcp@1.7.3` and `tempguru-pi@1.7.3` are independently versioned
+`tempguru-mcp@1.7.4` and `tempguru-pi@1.7.4` are independently versioned
 packages that share a number in this release. Both publish after merge through
-their workflows, the canonical skills move to `skill_version: 1.7.3`, and the
+their workflows, the canonical skills move to `skill_version: 1.7.4`, and the
 Hermes and ClawHub copies are re-synced from them.
 
 ## Launch order (highest leverage first)
@@ -137,6 +139,7 @@ When `content/mcp-data/` changes:
 ```
 node distribution/assistants/build-knowledge.mjs
 node distribution/assistants/build-manifests.mjs
+node distribution/assistants/build-chatgpt-plugin.mjs --zip
 ```
 
 then re-upload knowledge to: ChatGPT GPT, Gemini Gem, Coze, Poe, Perplexity,

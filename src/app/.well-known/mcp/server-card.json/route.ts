@@ -88,7 +88,7 @@ const SERVER_CARD = {
         "List all event staffing roles with descriptions and skill tiers.",
     },
     {
-      name: "check_availability",
+      name: "get_lead_time_guidance",
       description:
         "Tier-based lead-time guidance for a configured city/date, optionally with role and headcount; not an inventory or order-coverage check.",
     },

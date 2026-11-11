@@ -117,7 +117,7 @@ export default function (pi: any) {
   });
 
   pi.registerTool({
-    name: "tempguru_check_availability",
+    name: "tempguru_get_lead_time_guidance",
     label: "TempGuru: Availability",
     description:
       "Lead-time guidance for a city and event date (guidance only, never a reservation or a promise of availability).",

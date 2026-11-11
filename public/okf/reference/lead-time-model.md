@@ -12,7 +12,7 @@ timestamp: "2026-11-01T00:00:00Z"
 
 # Lead-Time Model
 
-`check_availability` returns **guidance, not a reservation.** It compares the days
+`get_lead_time_guidance` returns **guidance, not a reservation.** It compares the days
 until the event against a typical lead time for the city's [market tier](../pricing/market-tiers.md).
 
 ## Typical lead time by tier

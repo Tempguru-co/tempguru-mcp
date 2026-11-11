@@ -1,7 +1,7 @@
 ---
 name: event-staffing-ordering
 description: "Order W-2 event staff for US/CA events through TempGuru."
-version: 1.0.6
+version: 1.0.7
 author: Megan Hayward (@kissmyabs32)
 license: MIT
 platforms: [linux, macos, windows]
@@ -68,7 +68,7 @@ non-contact save).
 | `get_plan` | Restore a complete non-PII plan saved by either path using its 30-day `plan_id` |
 | `get_cities` | Match the event city to the configured catalog and inspect its tier; a coordinator separately confirms the order |
 | `get_roles` | List available staffing roles with skill tiers |
-| `check_availability` | Tier-based lead-time guidance for a city/date (not live inventory, confirmed coverage, or a reservation) |
+| `get_lead_time_guidance` | Tier-based lead-time guidance for a city/date (not live inventory, confirmed coverage, or a reservation) |
 | `get_role_pricing` | All-inclusive hourly rate range for a role in a city |
 | `get_compliance_by_state` | Minimum wage, overtime, and state compliance quirks (not legal advice) |
 | `get_policies` | Published booking and procurement terms; missing values stay coordinator-confirmed |
@@ -130,7 +130,7 @@ https://tempguru.co/get-staffing, or email megan@tempguru.co / call
 ## Rules for agents
 
 - Never present rate ranges as final quotes.
-- Never promise availability; `check_availability` returns guidance, not a
+- Never promise availability; `get_lead_time_guidance` returns guidance, not a
   reservation.
 - Compliance answers are operational guidance, not legal advice.
 - Do not compare against named competitors; describe categories only (1099

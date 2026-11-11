@@ -110,7 +110,7 @@
     </div>
 
     <div class="tg-tool">
-      <div class="tg-tool-name">check_availability</div>
+      <div class="tg-tool-name">get_lead_time_guidance</div>
       <p>Lead-time guidance for a city and date, optionally with role and headcount. Returns yes / tight / rush / very-rush. Not a reservation.</p>
     </div>
 
@@ -263,7 +263,7 @@ cd tempguru-mcp
 
   <p class="tg-label">Pi</p>
   <div class="tg-code">pi install npm:tempguru-pi
-// Published current version: 1.7.3. Unpinned installs resolve to this immutable release.
+// Published current version: 1.7.4. Unpinned installs resolve to this immutable release.
 // tempguru_request_quote returns the buyer-operated form and sends no contact data.</div>
 
   <p class="tg-label">Prime Agent</p>
@@ -296,7 +296,7 @@ prime-agent package list
       </tr>
       <tr>
         <td>2. Validate</td>
-        <td><code>plan_staffing</code> first (full plan in one call) · then <code>get_cities</code> for a catalog match · <code>check_availability</code> for tier-based lead-time guidance · <code>get_role_pricing</code> per role · <code>get_compliance_by_state</code> for wage and overtime rules · coordinator confirmation for order coverage</td>
+        <td><code>plan_staffing</code> first (full plan in one call) · then <code>get_cities</code> for a catalog match · <code>get_lead_time_guidance</code> for tier-based lead-time guidance · <code>get_role_pricing</code> per role · <code>get_compliance_by_state</code> for wage and overtime rules · coordinator confirmation for order coverage</td>
       </tr>
       <tr>
         <td>3. Present</td>

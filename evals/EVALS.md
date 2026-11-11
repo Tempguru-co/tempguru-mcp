@@ -23,7 +23,7 @@ node evals/protocol-eras.test.mjs
 | save_staffing_plan persists a server-recomputed non-PII artifact | PASS |
 | get_role_pricing returns Boston brand-ambassador range | PASS |
 | get_role_pricing handles an unknown role gracefully | PASS |
-| check_availability returns a lead-time read | PASS |
+| get_lead_time_guidance returns a lead-time read | PASS |
 | get_compliance_by_state knows California daily OT | PASS |
 | get_cities filters by state | PASS |
 | get_rate_benchmark returns the citable Rate Index | PASS |

@@ -306,7 +306,7 @@ check("buildRateBenchmark('event staff') resolves (synonym) to rates",
 // schemas must still reject incomplete variant payloads at runtime.
 for (const [name, schema, payload] of [
   ["get_cities", outputSchemas.GET_CITIES_SCHEMA, {}],
-  ["check_availability", outputSchemas.CHECK_AVAILABILITY_SCHEMA, { city_found: true }],
+  ["get_lead_time_guidance", outputSchemas.CHECK_AVAILABILITY_SCHEMA, { city_found: true }],
   ["get_role_pricing", outputSchemas.GET_ROLE_PRICING_SCHEMA, {}],
   ["get_compliance_by_state", outputSchemas.GET_COMPLIANCE_SCHEMA, {}],
   ["plan_staffing", outputSchemas.PLAN_STAFFING_SCHEMA, { status: "plan" }],
@@ -360,16 +360,16 @@ const assistantLead = queryRoles().data.roles.find((role) => role.slug === "assi
 check("get_roles avoids the nonexistent Assistant Leads city-guide URL",
   assistantLead?.url === "https://tempguru.co/roles");
 const impossible = queryAvailability({ city: "Dallas", date: "2027-02-30" });
-check("check_availability 2027-02-30 is an impossible-date error, not March 2",
+check("get_lead_time_guidance 2027-02-30 is an impossible-date error, not March 2",
   impossible.ok && "error" in impossible.data && impossible.data.error.includes("Impossible"));
 const past = queryAvailability({ city: "Dallas", date: "2024-01-01" });
-check("check_availability past date carries in_past:true",
+check("get_lead_time_guidance past date carries in_past:true",
   past.ok && "in_past" in past.data && past.data.in_past === true);
 const humanRange = queryAvailability({ city: "Chicago", date: "Aug 14-15, 2026" });
-check("check_availability canonicalizes human date ranges without native-Date drift",
+check("get_lead_time_guidance canonicalizes human date ranges without native-Date drift",
   humanRange.ok && "event_date" in humanRange.data && humanRange.data.event_date === "2026-08-14");
 const wiz = queryAvailability({ city: "Boston", date: "2027-03-10", role: "wizard" });
-check("check_availability unknown role flags role_found:false",
+check("get_lead_time_guidance unknown role flags role_found:false",
   wiz.ok && "role_found" in wiz.data && wiz.data.role_found === false);
 const secPrice = queryRolePricing({ role: "security guard", city: "Boston" });
 check("get_role_pricing 'security guard' carries the unarmed-crowd-control note",

@@ -130,7 +130,7 @@ function assertExactToolSet(label, tools) {
     ?.inputSchema?.properties;
   const saveInput = save?.inputSchema?.properties;
   const availabilityInput = tools.find(
-    (tool) => tool.name === "check_availability",
+    (tool) => tool.name === "get_lead_time_guidance",
   )?.inputSchema?.properties;
   const policiesInput = tools.find(
     (tool) => tool.name === "get_policies",

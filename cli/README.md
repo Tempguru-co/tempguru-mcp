@@ -41,7 +41,7 @@ Works with Claude Desktop, Cursor, Windsurf, Claude Code, and other stdio MCP cl
 | `get_plan` | Restore a non-PII plan saved by either planning path using its 30-day plan ID |
 | `get_cities` | Configured market entries, filtered by state or tier; a match is not confirmed order coverage |
 | `get_roles` | Staffing roles with descriptions and skill tiers |
-| `check_availability` | Lead-time guidance for a city and date |
+| `get_lead_time_guidance` | Lead-time guidance for a city and date |
 | `get_role_pricing` | All-inclusive W-2 hourly rate range for a role in a city |
 | `get_compliance_by_state` | Minimum wage, overtime, and classification rules by state |
 | `get_policies` | Published booking and procurement policies |

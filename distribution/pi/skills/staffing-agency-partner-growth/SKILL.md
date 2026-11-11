@@ -28,7 +28,7 @@ unprefixed MCP tool names in the canonical workflow. It automatically sends
 |---|---|
 | `get_cities` | `tempguru_get_cities` |
 | `get_roles` | `tempguru_get_roles` |
-| `check_availability` | `tempguru_check_availability` |
+| `get_lead_time_guidance` | `tempguru_get_lead_time_guidance` |
 | `get_role_pricing` | `tempguru_get_role_pricing` |
 | `get_compliance_by_state` | `tempguru_get_compliance` |
 | `get_policies` | `tempguru_get_policies` |
@@ -58,7 +58,7 @@ use this composition:
 
 1. Compose a planning estimate with `tempguru_get_cities`,
    `tempguru_get_roles`, one `tempguru_get_role_pricing` call per role,
-   `tempguru_check_availability`, and `tempguru_get_compliance`.
+   `tempguru_get_lead_time_guidance`, and `tempguru_get_compliance`.
 2. Calculate only from user-confirmed headcount, shift hours, and days. Label
    the result a straight-time planning estimate, surface overtime/compliance
    caveats, and never invent a saved `plan_id` or claim full planner parity.
