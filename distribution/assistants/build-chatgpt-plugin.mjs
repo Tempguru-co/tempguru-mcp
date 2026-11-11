@@ -60,10 +60,11 @@ const MCP_SERVER_KEY = "tempguru-event-staffing"; // matches skills' dependencie
 
 // OpenAI keys a plugin by this `name` and rejects an upload whose name differs
 // from the existing listing ("Plugin upload name must match the existing
-// plugin"). The June 2026 submission's name is read from the ZIP the dashboard
-// offers under "download your existing plugin"; override with --name <value>
-// until it is recorded here.
-const DEFAULT_PLUGIN_NAME = "tempguru-event-staffing";
+// plugin"). The June 2026 Apps SDK submission was converted with the display
+// name as its `name`, spaces included (read from the dashboard's downloadable
+// ZIP on 2026-11-11), so that exact string is used. Override with --name only
+// if the dashboard reports a different existing name.
+const DEFAULT_PLUGIN_NAME = "TempGuru Event Staffing";
 const nameArgIndex = process.argv.indexOf("--name");
 const PLUGIN_NAME =
   nameArgIndex !== -1 && process.argv[nameArgIndex + 1]
@@ -194,7 +195,9 @@ function singleLine(label, value) {
 }
 
 if (!/^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/.test(PLUGIN_NAME)) {
-  problems.push(`plugin name '${PLUGIN_NAME}' violates the name format rule`);
+  // The documented format is kebab-case, but a converted legacy listing keeps
+  // whatever name OpenAI assigned it, and an upload must match that name.
+  warnings.push(`plugin name '${PLUGIN_NAME}' is not kebab-case; kept because an upload must match the existing listing`);
 }
 if (!/^\d+\.\d+\.\d+$/.test(pkg.version)) {
   problems.push(`package.json version '${pkg.version}' is not semver`);
