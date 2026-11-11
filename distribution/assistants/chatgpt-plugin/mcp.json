@@ -3,14 +3,7 @@
   "mcpServers": {
     "tempguru-event-staffing": {
       "type": "streamable-http",
-      "url": "https://mcp.tempguru.co/mcp",
-      "extensions": {
-        "com.openai": {
-          "auth": {
-            "type": "none"
-          }
-        }
-      }
+      "url": "https://mcp.tempguru.co/mcp"
     }
   }
 }

@@ -78,8 +78,10 @@ the placeholder is still there.
 the server is attached on the dashboard's MCPs tab. An upload that omits it is
 rejected ("This package omits the plugin's existing MCP"), so this target
 declares the server in `mcp.json` at exactly `https://mcp.tempguru.co/mcp`
-with no app reference, and carries the plugin-level review block (which needs
-exactly one `mcp.json` server).
+with no app reference and no auth block (the existing connection's
+authentication is configured on OpenAI's side, and an auth override is
+rejected), and carries the plugin-level review block (which needs exactly one
+`mcp.json` server). `--with-auth` adds `auth: none` for a brand-new listing.
 
 The dashboard offers only **Publish plugin** while 1.0.0 is the sole version.
 **Submit for review** appears on a draft, which **Create draft from ZIP**

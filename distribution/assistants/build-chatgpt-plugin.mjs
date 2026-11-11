@@ -521,17 +521,20 @@ const manifest = {
   },
 };
 
+// An existing listing already has its connection's authentication configured
+// on OpenAI's side, and an upload that repeats it is rejected ("This app
+// already has authentication configured. Remove the ZIP's auth override to
+// reuse that connection"). So mcp.json carries no auth block by default;
+// --with-auth adds `auth: none` for a brand-new listing whose connection has
+// never been configured.
+const withAuth = process.argv.includes("--with-auth");
 const mcpConfig = {
   $schema: "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
   mcpServers: {
     [MCP_SERVER_KEY]: {
       type: "streamable-http",
       url: MCP_URL,
-      extensions: {
-        "com.openai": {
-          auth: { type: "none" },
-        },
-      },
+      ...(withAuth ? { extensions: { "com.openai": { auth: { type: "none" } } } } : {}),
     },
   },
 };
