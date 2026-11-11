@@ -3,11 +3,12 @@
 //
 //   node distribution/assistants/build-chatgpt-plugin.mjs          # write package
 //   node distribution/assistants/build-chatgpt-plugin.mjs --zip    # also build the upload ZIP
-//   node distribution/assistants/build-chatgpt-plugin.mjs --zip --with-mcp --name <new-name>   # brand-new listing only
+//   node distribution/assistants/build-chatgpt-plugin.mjs --zip --no-review   # enter review info in the dashboard instead
+//   node distribution/assistants/build-chatgpt-plugin.mjs --zip --name <new-name>   # brand-new listing only
 //
 // Output (never hand-edit; regenerate instead):
 //   distribution/assistants/chatgpt-plugin/plugin.json   manifest + listing + review metadata
-//   distribution/assistants/chatgpt-plugin/mcp.json      the remote server (--with-mcp only; see below)
+//   distribution/assistants/chatgpt-plugin/mcp.json      the remote streamable-HTTP server (omit with --no-mcp)
 //   distribution/assistants/chatgpt-plugin/skills/       the 8 canonical skills (+ agents/openai.yaml)
 //   distribution/assistants/chatgpt-plugin/assets/       square PNG icon
 //   distribution/assistants/chatgpt-plugin.zip           (--zip only; gitignored)
@@ -41,13 +42,14 @@ const repoRoot = join(here, "..", "..");
 const outDir = join(here, "chatgpt-plugin");
 const zipPath = join(here, "chatgpt-plugin.zip");
 const wantZip = process.argv.includes("--zip");
-// The existing listing already has the remote MCP server attached (via a
-// registered app reference) and OpenAI updates it from the daily scan, so an
-// update ZIP must not carry MCP configuration or app references
-// (`mcp_configuration_excluded` / `app_configuration_excluded`). Pass
-// --with-mcp only when packaging a brand-new listing that is submitted
-// together with its server.
-const withMcp = process.argv.includes("--with-mcp");
+// mcp.json declares the (single) remote server. OpenAI's validator requires it
+// when plugin-level review.test_cases are present ("Plugin-level test_cases
+// require exactly one MCP server"); the URL must stay byte-identical to the
+// server already attached to the listing. --no-mcp omits it (skills-only
+// package); --no-review omits the review block so review information can be
+// entered in the dashboard instead.
+const withMcp = !process.argv.includes("--no-mcp");
+const withReview = !process.argv.includes("--no-review");
 
 const pkg = JSON.parse(readFileSync(join(repoRoot, "package.json"), "utf8"));
 const publicFacts = JSON.parse(
@@ -452,7 +454,7 @@ const manifest = {
         composerIcon: "./assets/logo.png",
         logo: "./assets/logo.png",
       },
-      review: REVIEW,
+      ...(withReview ? { review: REVIEW } : {}),
       publication: {
         // `countries` is intentionally omitted: omitting it preserves the
         // targeting already configured on the published listing.
@@ -514,6 +516,6 @@ if (wantZip) {
 
 console.log(
   `Wrote ChatGPT plugin package ${PLUGIN_NAME}@${pkg.version} to distribution/assistants/chatgpt-plugin/ ` +
-    `(${skillSummaries.length} skills, ${withMcp ? "mcp.json included" : "no mcp.json: the listing's attached server is updated by OpenAI's daily scan"}, longDescription ${LONG_DESCRIPTION.length} chars)`,
+    `(${skillSummaries.length} skills, ${withMcp ? "1 MCP server" : "no mcp.json"}, ${withReview ? "review block" : "no review block"}, longDescription ${LONG_DESCRIPTION.length} chars)`,
 );
 for (const w of warnings) console.warn(`WARNING: ${w}`);

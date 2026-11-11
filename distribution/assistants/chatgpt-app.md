@@ -40,9 +40,9 @@ for the audit that produced this runbook.
 node distribution/assistants/build-chatgpt-plugin.mjs --zip
 ```
 
-writes `distribution/assistants/chatgpt-plugin/` (`plugin.json`, `skills/`,
-`assets/`; `mcp.json` only with `--with-mcp`) from `package.json`,
-`content/public-facts.json`, and the portable `skills/` copies, then zips it to
+writes `distribution/assistants/chatgpt-plugin/` (`plugin.json`, `mcp.json`,
+`skills/`, `assets/`) from `package.json`, `content/public-facts.json`, and the
+portable `skills/` copies, then zips it to
 `distribution/assistants/chatgpt-plugin.zip` (gitignored). The version is the
 server version (`1.7.3` today), so every release bumps the listing automatically
 and OpenAI's `plugin_version_unchanged` check can never bite.
@@ -64,11 +64,13 @@ consequences baked into the generator:
 
 - The upload `name` must equal that id; any other name is rejected
   ("Plugin upload name must match the existing plugin").
-- Update ZIPs carry no `mcp.json` and no `.app.json`: OpenAI rejects MCP
-  configuration and app references in uploads
-  (`mcp_configuration_excluded`, `app_configuration_excluded`) because the
-  attached server is updated from the daily scan. `--with-mcp` exists only for
-  packaging a brand-new listing.
+- The ZIP carries `mcp.json` with the one remote server at exactly the URL on
+  file. The validator requires it when the manifest holds plugin-level review
+  test cases ("Plugin-level test_cases require exactly one MCP server"), and
+  it never carries `.app.json` (app references are rejected in uploads). If a
+  future validator rejects the MCP block, build with `--no-review` and enter
+  the review cases in the dashboard form instead, or `--no-mcp` for a
+  skills-only package.
 - `plugin-name:skill-name` is capped at 64 chars and the id uses 36, so three
   skills are renamed inside this package only: `multi-city-activation`,
   `agency-partner-growth`, `plan-from-event-brief`. Their `skill_id` values
@@ -87,7 +89,7 @@ Validator rules learned the hard way: `review.test_cases.positive[]` and
 ## Upload steps (update flow for an already-submitted plugin)
 
 1. **Open the existing plugin** in the OpenAI Platform dashboard (platform.openai.com → Plugins → TempGuru Event Staffing). It was submitted through the previous form, so the dashboard offers **download your existing plugin as a ZIP**; keep that file as the baseline.
-2. **Do not touch the MCP server.** It stays attached to the listing and the update flow cannot change its URL (support ticket only); the ZIP deliberately carries no `mcp.json`. Attribution for this surface comes from the server's `openai-chatgpt` UA class and OpenAI's published egress ranges.
+2. **Do not change the MCP server URL.** The update flow cannot change it (support ticket only), which is why the generated `mcp.json` uses exactly `https://mcp.tempguru.co/mcp` with no `?source=` suffix. Attribution for this surface comes from the server's `openai-chatgpt` UA class and OpenAI's published egress ranges.
 3. **MCPs → Issues → Rescan** first. The server is scanned daily, but a manual rescan after a deploy surfaces any annotation or justification finding before the package review starts. Each tool is reviewed separately; a held tool keeps its previously approved metadata.
 4. **Upload plugin to make changes** → choose `chatgpt-plugin.zip`. Resolve automated findings (the generator already enforces the final-submission limits), then **submit for review**. Only one review can be active per plugin.
 5. Review feedback arrives by email. After approval, **publish** replaces the previous package version; the listing then shows `1.7.3`.
