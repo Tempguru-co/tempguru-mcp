@@ -70,10 +70,15 @@ consequences baked into the generator:
   in the manifest. The validator rejects an update without it ("Plugin upload
   must contain exactly the existing canonical app") and also rejects a fresh
   `mcp.json` in its place, so no `mcp.json` is emitted for this listing; the
-  app is the server, and OpenAI keeps updating it from the daily scan. The
-  plugin-level review test cases attach to that one app. A brand-new listing
-  (no app reference yet) gets `mcp.json` instead; `--no-review` moves review
-  entry to the dashboard form.
+  app is the server, and OpenAI keeps updating it from the daily scan.
+- Plugin-level review test cases can only bind to an `mcp.json` server, not
+  to an app reference ("Plugin-level test_cases require exactly one MCP
+  server"), so this listing's manifest carries **no review block**. The
+  generator writes the same five positive and three negative cases, the demo
+  URL, the commerce statement, and the release notes to
+  `distribution/assistants/chatgpt-plugin-review.md` for pasting into the
+  dashboard's review form. A brand-new listing (no app reference yet) gets
+  `mcp.json` plus the manifest review block instead.
 - `plugin-name:skill-name` is capped at 64 chars and the id uses 36, so three
   skills are renamed inside this package only: `multi-city-activation`,
   `agency-partner-growth`, `plan-from-event-brief`. Their `skill_id` values
@@ -94,7 +99,7 @@ Validator rules learned the hard way: `review.test_cases.positive[]` and
 1. **Open the existing plugin** in the OpenAI Platform dashboard (platform.openai.com → Plugins → TempGuru Event Staffing). It was submitted through the previous form, so the dashboard offers **download your existing plugin as a ZIP**; keep that file as the baseline.
 2. **Do not touch the MCP server.** It is the canonical app the ZIP references; its URL cannot be changed through the update flow (support ticket only), and it carries no `?source=` suffix. Attribution for this surface comes from the server's `openai-chatgpt` UA class and OpenAI's published egress ranges.
 3. **MCPs → Issues → Rescan** first. The server is scanned daily, but a manual rescan after a deploy surfaces any annotation or justification finding before the package review starts. Each tool is reviewed separately; a held tool keeps its previously approved metadata.
-4. **Upload plugin to make changes** → choose `chatgpt-plugin.zip`. Resolve automated findings (the generator already enforces the final-submission limits), then **submit for review**. Only one review can be active per plugin.
+4. **Upload plugin to make changes** → choose `chatgpt-plugin.zip`. Resolve automated findings (the generator already enforces the final-submission limits). In the review form, paste the cases, demo URL, commerce statement, and release notes from `distribution/assistants/chatgpt-plugin-review.md`, then **submit for review**. Only one review can be active per plugin.
 5. Review feedback arrives by email. After approval, **publish** replaces the previous package version; the listing then shows `1.7.3`.
 
 ## Directory metadata (what the generator emits)
@@ -115,7 +120,7 @@ Validator rules learned the hard way: `review.test_cases.positive[]` and
 - **Countries:** omitted on purpose. Omitting `publication.countries` preserves the targeting already configured on the listing; `[]` would remove all restrictions. Worldwide is fine (the server declines non-US/CA events; exhibitors abroad planning US shows are a real audience).
 - **Brand color:** `#24BBEA` (2.24:1 on white, 7.19:1 on `#212121`, both above the 2:1 floor).
 
-## Review package (emitted into `plugin.json`)
+## Review package (generated into `chatgpt-plugin-review.md` for the dashboard form)
 
 Five positive cases, each with `tools_triggered` and `expected_behavior`:
 
