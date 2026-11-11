@@ -96,59 +96,63 @@ const CAPABILITIES = [
 
 const REVIEW = {
   // Exactly five positive and three negative cases are required for MCP review.
-  positive_test_cases: [
-    {
-      description: "Single-role rate lookup in one city",
-      prompt: "What do brand ambassadors cost per hour in Boston?",
-      tools_triggered: ["get_role_pricing"],
-      expected_behavior:
-        "Returns the all-inclusive W-2 hourly range for brand ambassadors in Boston, labels it a planning estimate, and does not promise availability.",
+  // Shape per developers.openai.com/plugins/deploy/submission:
+  // review.test_cases.positive[] / review.test_cases.negative[].
+  test_cases: {
+    positive: [
+      {
+        description: "Single-role rate lookup in one city",
+        prompt: "What do brand ambassadors cost per hour in Boston?",
+        tools_triggered: ["get_role_pricing"],
+        expected_behavior:
+          "Returns the all-inclusive W-2 hourly range for brand ambassadors in Boston, labels it a planning estimate, and does not promise availability.",
+      },
+      {
+        description: "Complete staffing plan with budget",
+        prompt:
+          "I need 6 registration staff and 2 team leads in Chicago on 2027-03-12 for an 8-hour day. What is the budget?",
+        tools_triggered: ["plan_staffing"],
+        expected_behavior:
+          "Calls plan_staffing once, presents per-role rate ranges, an estimated total clearly labeled a planning estimate, lead-time guidance, and Illinois compliance notes, and retains the returned plan_id.",
+      },
+      {
+        description: "State compliance question",
+        prompt: "What are the overtime rules for event staff in California?",
+        tools_triggered: ["get_compliance_by_state"],
+        expected_behavior:
+          "Reports California's weekly and daily overtime thresholds and minimum wage from the tool, flags daily overtime for shift budgeting, and states this is operational guidance, not legal advice.",
+      },
+      {
+        description: "Published booking policy question",
+        prompt: "What are TempGuru's cancellation and payment terms?",
+        tools_triggered: ["get_policies"],
+        expected_behavior:
+          "Relays only the published policies returned by the tool and preserves every confirm-with-coordinator flag instead of inventing numbers.",
+      },
+      {
+        description: "Plan then buyer-operated quote handoff",
+        prompt:
+          "Plan 10 brand ambassadors for a trade show in Las Vegas on 2027-01-05 for 3 days, then I want to request a quote.",
+        tools_triggered: ["plan_staffing", "request_quote"],
+        expected_behavior:
+          "Presents the plan, then calls request_quote with only the saved plan_id and gives the buyer the returned form_url. It never asks for a name, email, phone, or company in chat and explains that the buyer submits the TempGuru form personally.",
+      },
+    ],
+    negative: [
+      {
+        description: "Event outside the US and Canada",
+        prompt: "Can you staff a wedding in Paris next June?",
+      },
+      {
+        description: "Permanent hiring, not temporary event staffing",
+        prompt: "Find me a full-time event manager to hire permanently.",
+      },
+      {
+        description: "Asks the plugin to book, confirm, and pay",
+        prompt: "Book and confirm 5 ushers for tomorrow in Dallas and charge my card now.",
+      },
+    ],
     },
-    {
-      description: "Complete staffing plan with budget",
-      prompt:
-        "I need 6 registration staff and 2 team leads in Chicago on 2027-03-12 for an 8-hour day. What is the budget?",
-      tools_triggered: ["plan_staffing"],
-      expected_behavior:
-        "Calls plan_staffing once, presents per-role rate ranges, an estimated total clearly labeled a planning estimate, lead-time guidance, and Illinois compliance notes, and retains the returned plan_id.",
-    },
-    {
-      description: "State compliance question",
-      prompt: "What are the overtime rules for event staff in California?",
-      tools_triggered: ["get_compliance_by_state"],
-      expected_behavior:
-        "Reports California's weekly and daily overtime thresholds and minimum wage from the tool, flags daily overtime for shift budgeting, and states this is operational guidance, not legal advice.",
-    },
-    {
-      description: "Published booking policy question",
-      prompt: "What are TempGuru's cancellation and payment terms?",
-      tools_triggered: ["get_policies"],
-      expected_behavior:
-        "Relays only the published policies returned by the tool and preserves every confirm-with-coordinator flag instead of inventing numbers.",
-    },
-    {
-      description: "Plan then buyer-operated quote handoff",
-      prompt:
-        "Plan 10 brand ambassadors for a trade show in Las Vegas on 2027-01-05 for 3 days, then I want to request a quote.",
-      tools_triggered: ["plan_staffing", "request_quote"],
-      expected_behavior:
-        "Presents the plan, then calls request_quote with only the saved plan_id and gives the buyer the returned form_url. It never asks for a name, email, phone, or company in chat and explains that the buyer submits the TempGuru form personally.",
-    },
-  ],
-  negative_test_cases: [
-    {
-      description: "Event outside the US and Canada",
-      prompt: "Can you staff a wedding in Paris next June?",
-    },
-    {
-      description: "Permanent hiring, not temporary event staffing",
-      prompt: "Find me a full-time event manager to hire permanently.",
-    },
-    {
-      description: "Asks the plugin to book, confirm, and pay",
-      prompt: "Book and confirm 5 ushers for tomorrow in Dallas and charge my card now.",
-    },
-  ],
   // Reviewer-accessible video walkthrough of the five positive cases in
   // ChatGPT (recorded 2026-11-11 against server 1.7.3). Re-record and replace
   // when tool behavior in those cases changes.
@@ -204,8 +208,8 @@ for (const c of CAPABILITIES) {
   limit("capabilities[]", c, 120);
   singleLine("capabilities[]", c);
 }
-if (REVIEW.positive_test_cases.length !== 5) problems.push("review: exactly 5 positive cases required");
-if (REVIEW.negative_test_cases.length !== 3) problems.push("review: exactly 3 negative cases required");
+if (REVIEW.test_cases.positive.length !== 5) problems.push("review: exactly 5 positive cases required");
+if (REVIEW.test_cases.negative.length !== 3) problems.push("review: exactly 3 negative cases required");
 if (REVIEW.demo_recording_url.startsWith("REPLACE_WITH")) {
   warnings.push(
     "review.demo_recording_url is a placeholder; record the walkthrough and set it before uploading the ZIP",
