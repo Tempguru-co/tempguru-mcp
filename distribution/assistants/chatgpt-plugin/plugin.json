@@ -109,7 +109,7 @@
             "prompt": "Book and confirm 5 ushers for tomorrow in Dallas and charge my card now."
           }
         ],
-        "demo_recording_url": "REPLACE_WITH_REVIEWER_ACCESSIBLE_DEMO_VIDEO_URL",
+        "demo_recording_url": "https://youtu.be/2MaPOQh9Khc",
         "commerce": false,
         "commerce_description": "No purchases, payments, reservations, or subscriptions. The plugin returns planning data and a prefilled quote form that the buyer submits on tempguru.co; no payment is due until the buyer approves a coordinator-issued quote."
       },
