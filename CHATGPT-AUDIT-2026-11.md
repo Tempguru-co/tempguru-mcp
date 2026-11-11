@@ -155,7 +155,9 @@ in model-readable fields.
    cancel that review before uploading (only one review can be active per
    plugin). Download the existing ZIP as the baseline OpenAI holds.
 2. Record the demo walkthrough: the five positive cases from `chatgpt-app.md`
-   in ChatGPT developer mode. Put the reviewer-accessible URL in
+   in ChatGPT (chatgpt.com/plugins → + → Add custom MCP server, see
+   `chatgpt-app.md`; Developer Mode no longer exists). Put the
+   reviewer-accessible URL in
    `review.demo_recording_url` (the generator warns until it is set), rerun
    `npm run build:chatgpt-plugin`.
 3. **MCPs → Issues → Rescan**, resolve any annotation-justification findings.

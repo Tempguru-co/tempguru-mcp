@@ -48,7 +48,7 @@ server version (`1.7.3` today), so every release bumps the listing automatically
 and OpenAI's `plugin_version_unchanged` check can never bite.
 
 Before the upload, record the demo walkthrough (the five positive cases below in
-ChatGPT developer mode) and put its reviewer-accessible URL in
+ChatGPT, see "Testing in ChatGPT" below) and put its reviewer-accessible URL in
 `extensions.com.openai.review.demo_recording_url`. The generator warns while
 the placeholder is still there.
 
@@ -108,7 +108,30 @@ or subscription happens in the plugin.
 > https://tempguru.co/privacy-policy. PII is never written to telemetry (see
 > OPERATIONS.md).
 
-## Golden prompts (pre-upload test in developer mode)
+## Testing in ChatGPT (Developer Mode is gone)
+
+OpenAI retired the Developer Mode toggle; its guide now 404s and the
+replacement is a custom-MCP-server plugin you create for yourself:
+
+1. Go to **chatgpt.com/plugins** (ChatGPT web, not mobile).
+2. Select the **+** button → **Add custom MCP server**.
+3. Name it (for example "TempGuru test"), paste the Server URL
+   `https://mcp.tempguru.co/mcp`, choose **No authentication**.
+4. Read the risk warning → **I understand and want to continue** → **Create as
+   a plugin**. ChatGPT lists the 12 tools it discovered.
+5. **Install** the plugin from your personal plugins, start a new chat, type
+   `@` and pick it (or just ask an event-staffing question; implicit use works
+   once installed).
+6. After a server deploy, open the plugin at chatgpt.com/plugins → **Refresh**
+   → new chat; ChatGPT caches tool metadata per conversation.
+
+Account rules apply: full custom-MCP access (including the two non-destructive
+writes) is documented for Business and Enterprise/Edu workspaces, Pro is
+reported as read-only, and workspace admins can disable "Create plugins with
+MCPs". If the + menu has no "Add custom MCP server" entry, that is the
+permission, not the UI.
+
+## Golden prompts (pre-upload test in ChatGPT)
 
 1. "price brand ambassadors in Boston" → `get_role_pricing` → $56-65/hr.
 2. "staff a wedding in Paris" → declines, US/Canada only.
