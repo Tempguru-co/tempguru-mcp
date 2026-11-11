@@ -3,6 +3,7 @@
 //
 //   node distribution/assistants/build-chatgpt-plugin.mjs          # write package
 //   node distribution/assistants/build-chatgpt-plugin.mjs --zip    # also build the upload ZIP
+//   node distribution/assistants/build-chatgpt-plugin.mjs --zip --name <existing-name>
 //
 // Output (never hand-edit; regenerate instead):
 //   distribution/assistants/chatgpt-plugin/plugin.json   manifest + listing + review metadata
@@ -57,7 +58,17 @@ const publicScale =
 const MCP_URL = "https://mcp.tempguru.co/mcp";
 const MCP_SERVER_KEY = "tempguru-event-staffing"; // matches skills' dependencies.tools[].value
 
-const PLUGIN_NAME = "tempguru-event-staffing";
+// OpenAI keys a plugin by this `name` and rejects an upload whose name differs
+// from the existing listing ("Plugin upload name must match the existing
+// plugin"). The June 2026 submission's name is read from the ZIP the dashboard
+// offers under "download your existing plugin"; override with --name <value>
+// until it is recorded here.
+const DEFAULT_PLUGIN_NAME = "tempguru-event-staffing";
+const nameArgIndex = process.argv.indexOf("--name");
+const PLUGIN_NAME =
+  nameArgIndex !== -1 && process.argv[nameArgIndex + 1]
+    ? process.argv[nameArgIndex + 1]
+    : DEFAULT_PLUGIN_NAME;
 const DISPLAY_NAME = "TempGuru Event Staffing"; // <= 30 chars
 const SHORT_DESCRIPTION = "W-2 event staffing, US/Canada"; // <= 30 chars
 const BRAND_COLOR = "#24BBEA"; // 2.24:1 on white, 7.19:1 on #212121
