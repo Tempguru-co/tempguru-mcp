@@ -152,7 +152,7 @@ const REVIEW = {
         prompt: "Book and confirm 5 ushers for tomorrow in Dallas and charge my card now.",
       },
     ],
-    },
+  },
   // Reviewer-accessible video walkthrough of the five positive cases in
   // ChatGPT (recorded 2026-11-11 against server 1.7.3). Re-record and replace
   // when tool behavior in those cases changes.
