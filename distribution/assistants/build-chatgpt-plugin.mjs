@@ -8,7 +8,8 @@
 //
 // Output (never hand-edit; regenerate instead):
 //   distribution/assistants/chatgpt-plugin/plugin.json   manifest + listing + review metadata
-//   distribution/assistants/chatgpt-plugin/mcp.json      the remote streamable-HTTP server (omit with --no-mcp)
+//   distribution/assistants/chatgpt-plugin/.app.json     the listing's canonical app reference (verbatim copy)
+//   distribution/assistants/chatgpt-plugin/mcp.json      only for a brand-new listing without an app reference
 //   distribution/assistants/chatgpt-plugin/skills/       the 8 canonical skills (+ agents/openai.yaml)
 //   distribution/assistants/chatgpt-plugin/assets/       square PNG icon
 //   distribution/assistants/chatgpt-plugin.zip           (--zip only; gitignored)
@@ -48,8 +49,26 @@ const wantZip = process.argv.includes("--zip");
 // server already attached to the listing. --no-mcp omits it (skills-only
 // package); --no-review omits the review block so review information can be
 // entered in the dashboard instead.
-const withMcp = !process.argv.includes("--no-mcp");
 const withReview = !process.argv.includes("--no-review");
+
+// The existing listing's MCP server is a registered "canonical app": the
+// downloaded package carries `.app.json` with its `asdk_app_...` id and the
+// manifest points at it via `apps`. An update upload "must contain exactly the
+// existing canonical app", so that file is reproduced verbatim and no
+// mcp.json is emitted (the app IS the server). Source: the `.app.json` from
+// the dashboard's downloadable ZIP, committed at distribution/assistants/
+// chatgpt-plugin.app.json once known, or passed with --app-json <path>.
+// Without an app reference (a brand-new listing) mcp.json is emitted instead
+// unless --no-mcp.
+const appJsonArgIndex = process.argv.indexOf("--app-json");
+const committedAppJson = join(here, "chatgpt-plugin.app.json");
+const appJsonPath =
+  appJsonArgIndex !== -1 && process.argv[appJsonArgIndex + 1]
+    ? process.argv[appJsonArgIndex + 1]
+    : existsSync(committedAppJson)
+      ? committedAppJson
+      : null;
+const withMcp = !appJsonPath && !process.argv.includes("--no-mcp");
 
 const pkg = JSON.parse(readFileSync(join(repoRoot, "package.json"), "utf8"));
 const publicFacts = JSON.parse(
@@ -454,6 +473,7 @@ const manifest = {
         composerIcon: "./assets/logo.png",
         logo: "./assets/logo.png",
       },
+      ...(appJsonPath ? { apps: "./.app.json" } : {}),
       ...(withReview ? { review: REVIEW } : {}),
       publication: {
         // `countries` is intentionally omitted: omitting it preserves the
@@ -486,6 +506,22 @@ if (problems.length > 0) {
 }
 
 writeFileSync(join(outDir, "plugin.json"), JSON.stringify(manifest, null, 2) + "\n");
+if (appJsonPath) {
+  const appJson = readFileSync(appJsonPath, "utf8");
+  let parsedApp;
+  try {
+    parsedApp = JSON.parse(appJson);
+  } catch {
+    console.error(`${appJsonPath} is not valid JSON`);
+    process.exit(1);
+  }
+  const ids = Object.values(parsedApp?.apps ?? {}).map((entry) => entry?.id).filter(Boolean);
+  if (ids.length === 0) {
+    console.error(`${appJsonPath} has no apps[].id; copy .app.json from the downloaded listing ZIP`);
+    process.exit(1);
+  }
+  writeFileSync(join(outDir, ".app.json"), appJson.endsWith("\n") ? appJson : appJson + "\n");
+}
 if (withMcp) {
   writeFileSync(join(outDir, "mcp.json"), JSON.stringify(mcpConfig, null, 2) + "\n");
 }
@@ -516,6 +552,6 @@ if (wantZip) {
 
 console.log(
   `Wrote ChatGPT plugin package ${PLUGIN_NAME}@${pkg.version} to distribution/assistants/chatgpt-plugin/ ` +
-    `(${skillSummaries.length} skills, ${withMcp ? "1 MCP server" : "no mcp.json"}, ${withReview ? "review block" : "no review block"}, longDescription ${LONG_DESCRIPTION.length} chars)`,
+    `(${skillSummaries.length} skills, ${appJsonPath ? "canonical app reference" : withMcp ? "1 MCP server" : "no server"}, ${withReview ? "review block" : "no review block"}, longDescription ${LONG_DESCRIPTION.length} chars)`,
 );
 for (const w of warnings) console.warn(`WARNING: ${w}`);

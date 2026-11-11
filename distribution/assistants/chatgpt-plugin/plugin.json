@@ -51,6 +51,7 @@
         "composerIcon": "./assets/logo.png",
         "logo": "./assets/logo.png"
       },
+      "apps": "./.app.json",
       "review": {
         "test_cases": {
           "positive": [
