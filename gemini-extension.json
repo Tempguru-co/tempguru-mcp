@@ -1,6 +1,6 @@
 {
   "name": "tempguru-event-staffing",
-  "version": "1.7.4",
+  "version": "1.7.5",
   "description": "Plan and budget W-2 event staffing across 300+ U.S. and Canadian markets, backed by 5,000+ events and 100,000+ completed shifts, with coordinator-confirmed availability per order.",
   "mcpServers": {
     "tempguru-event-staffing": {

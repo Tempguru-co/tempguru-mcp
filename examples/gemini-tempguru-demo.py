@@ -34,7 +34,7 @@ from mcp.client.streamable_http import streamablehttp_client
 
 MCP_URL = "https://mcp.tempguru.co/mcp"
 MODEL = "gemini-2.5-flash"
-# Read-only catalog lookups. request_quote is also read-only, but it requires a
+# Read-only catalog lookups. prepare_quote_form is also read-only, but it requires a
 # saved plan_id and returns a buyer-operated form, so it is outside this
 # pricing-and-coverage demo.
 READ_TOOLS = {

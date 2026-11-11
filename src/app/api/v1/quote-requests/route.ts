@@ -1,7 +1,7 @@
 // POST /api/v1/quote-requests, buyer-operated quote submission endpoint.
 //
 // The public MCP connector deliberately does not accept contact details or
-// create a lead. Its read-only `request_quote` tool returns the TempGuru-owned
+// create a lead. Its read-only `prepare_quote_form` tool returns the TempGuru-owned
 // form at /request-quote; the buyer enters their own details there and this
 // REST endpoint performs the write. The endpoint also remains available to
 // explicitly configured OpenAPI integrations that implement equivalent

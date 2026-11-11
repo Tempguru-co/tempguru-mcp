@@ -116,7 +116,7 @@ HARD RULES
   say what you could not verify and route to the quote form.
 - Never guess plan IDs, quote references, or unsupported policy details.
   Policies marked for coordinator confirmation stay marked.
-- Never pass contact details to MCP `request_quote`; it accepts only a saved
+- Never pass contact details to MCP `prepare_quote_form`; it accepts only a saved
   plan ID and attribution and returns a buyer-operated form.
 - Collect contact details only in that form or through a configured REST
   Action after the user asks to submit, and say they go to TempGuru's CRM or
@@ -124,8 +124,8 @@ HARD RULES
 
 QUOTE SUBMISSION
 Confirm the staffing plan first (city, dates, roles + headcount). With MCP,
-call `request_quote` using the saved plan ID and platform source label, then
-give the returned form to the buyer to review, enter their own contact details,
+call `prepare_quote_form` with the saved plan ID and platform source label, then
+give the returned form to the buyer to review, add their own contact details,
 and personally submit. MCP does not return a TG reference. With an explicitly
 configured REST `submitQuoteRequest` Action, confirm the contact-bearing
 payload and submit only after the user clearly asks; keep the returned TG
@@ -161,11 +161,11 @@ different names; the platform docs in this directory wire them up.
 | State compliance | `get_compliance_by_state` | `GET /api/v1/compliance` (`getComplianceByState`) |
 | Booking/procurement policies | `get_policies` | `GET /api/v1/policies` (`getPolicies`) |
 | Restore saved plan | `get_plan` | `GET /api/v1/plans/{id}` (`getPlan`) |
-| Prepare buyer-operated quote form | `request_quote` | — |
+| Prepare buyer-operated quote form | `prepare_quote_form` | — |
 | Submit contact-bearing request | — | `POST /api/v1/quote-requests` (`submitQuoteRequest`) |
-| Check quote receipt | `get_quote_status` | `GET /api/v1/quote-requests/{reference}` (`getQuoteStatus`) |
+| Check quote receipt | `get_quote_request_status` | `GET /api/v1/quote-requests/{reference}` (`getQuoteStatus`) |
 
-MCP `request_quote` is a read-only handoff: it restores a saved non-contact
+MCP `prepare_quote_form` is a read-only handoff: it restores a saved non-contact
 plan and returns a prefilled form that the buyer personally submits. It never
 accepts contact details or writes to the CRM. REST `submitQuoteRequest` is the
 contact-bearing write operation. It is opt-in (call only after the user

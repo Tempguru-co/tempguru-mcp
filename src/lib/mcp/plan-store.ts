@@ -358,7 +358,7 @@ export async function querySavedPlan(
         "That plan was not found or has expired. Saved plans are retained for 30 days; re-run plan_staffing and save the complete plan when needed.",
       next_steps: [
         "Call plan_staffing again with the event city, date, roles, and headcount, then call save_staffing_plan only if no plan_id was returned and persistence is needed.",
-        "If the buyer already submitted the website form, use get_quote_status with the TG reference returned by that form.",
+        "If the buyer already submitted the website form, use get_quote_request_status with the TG reference returned by that form.",
       ],
     };
   }
@@ -370,7 +370,7 @@ export async function querySavedPlan(
     message: "Saved staffing plan restored. Review it with the user before creating the buyer-operated quote handoff.",
     next_steps: [
       "Confirm the restored roles, headcount, dates, and planning estimate with the user.",
-      "When the buyer asks to proceed, call request_quote with this plan_id and give them the returned form_url.",
+      "When the buyer asks to proceed, call prepare_quote_form with this plan_id and give them the returned form_url.",
       "The buyer must enter and submit their own contact details on the TempGuru form.",
     ],
   };

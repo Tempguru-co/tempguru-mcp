@@ -315,9 +315,9 @@ for (const [name, schema, payload] of [
   }],
   ["get_plan", outputSchemas.GET_PLAN_SCHEMA, { plan_found: true, plan_id: "x", message: "x", next_steps: [] }],
   ["get_policies", outputSchemas.GET_POLICIES_SCHEMA, { status: "policies", policy_found: true }],
-  ["get_quote_status", outputSchemas.GET_QUOTE_STATUS_SCHEMA, { quote_found: true, reference: "x", message: "x", follow_up: "x" }],
+  ["get_quote_request_status", outputSchemas.GET_QUOTE_STATUS_SCHEMA, { quote_found: true, reference: "x", message: "x", follow_up: "x" }],
   ["get_rate_benchmark", outputSchemas.RATE_BENCHMARK_SCHEMA, {}],
-  ["request_quote", outputSchemas.REQUEST_QUOTE_HANDOFF_SCHEMA, {
+  ["prepare_quote_form", outputSchemas.REQUEST_QUOTE_HANDOFF_SCHEMA, {
     handoff_ready: true,
     buyer_submission_required: true,
     plan_found: true,
@@ -861,7 +861,7 @@ check("save_staffing_plan saved outcome carries the portable artifact metadata",
     && explicitSaved.resource_uri
       === `https://mcp.tempguru.co/api/v1/plans/${explicitSaved.plan_id}`
     && explicitSaved.quote_readiness === "buyer_submission_required"
-    && explicitSaved.next_actions.includes("request_quote")
+    && explicitSaved.next_actions.includes("prepare_quote_form")
     && restoredExplicit?.plan_found === true
     && restoredExplicit.snapshot.source === "openclaw",
   JSON.stringify(explicitSaved));
@@ -975,7 +975,7 @@ check("Toronto: compliance is provincial (Ontario), wage deferred to coordinator
 check("city-only call with unknown city returns city_not_found (not the catalog)",
   buildStaffingPlan({ city: "Paris" }).status === "city_not_found");
 // No-plan outcomes carry no plan_id or continuation, so their next steps must
-// not send the agent to request_quote or a nonexistent continuation.form_url.
+// not send the agent to prepare_quote_form or a nonexistent continuation.form_url.
 const noPlanResults = [
   buildStaffingPlan({ city: "Hong Kong", event_date: "2027-03-10" }),
   buildStaffingPlan({ city: "Chicago", roles: [{ role: "astronaut", headcount: 2 }] }),
@@ -987,7 +987,7 @@ check("no-plan outcomes never point the agent at a quote handoff that cannot exi
       r.plan_id === undefined
         && r.continuation === undefined
         && r.next_steps[0].startsWith("No plan was created")
-        && !r.next_steps.some((s) => /call request_quote with the saved plan_id|give the buyer continuation\.form_url/.test(s)))
+        && !r.next_steps.some((s) => /call prepare_quote_form with the saved plan_id|give the buyer continuation\.form_url/.test(s)))
     && noPlanResults[0].next_steps.some((s) => s.includes("US and Canada only")),
   JSON.stringify(noPlanResults.map((r) => r.next_steps)));
 const crew = buildStaffingPlan({
@@ -1084,7 +1084,7 @@ check("quote schema still requires company (additive change did not relax it)",
 check("quote schema caps locations[] at 50",
   !RequestQuoteSchema.safeParse({ ...base, locations: Array.from({ length: 51 }, () => ({ city: "Dallas" })) }).success);
 
-// ── MCP request_quote is a strict non-PII buyer handoff ──
+// ── MCP prepare_quote_form is a strict non-PII buyer handoff ──
 const {
   RequestQuoteHandoffSchema,
   prepareQuoteHandoff,
@@ -1212,7 +1212,7 @@ check("interactive Claude UA yields a canonical handoff platform while crawlers 
     },
   });
   const cityTool = registeredTools.find((tool) => tool.name === "tempguru_get_cities");
-  const quoteTool = registeredTools.find((tool) => tool.name === "tempguru_request_quote");
+  const quoteTool = registeredTools.find((tool) => tool.name === "tempguru_prepare_quote_form");
   check("shared agent package registers its native city and quote tools",
     Boolean(cityTool && quoteTool),
     registeredTools.map((tool) => tool.name).join(", "));
@@ -1713,7 +1713,7 @@ const malformedReferenceResponse = await quoteStatusRoute.GET(
   { params: Promise.resolve({ reference: "TG-123" }) },
 );
 const malformedReferenceBody = await malformedReferenceResponse.json();
-check("REST get_quote_status rejects a malformed reference with 400",
+check("REST get_quote_request_status rejects a malformed reference with 400",
   malformedReferenceResponse.status === 400
     && malformedReferenceBody.error?.code === "invalid_param"
     && malformedReferenceBody.error?.field === "reference");
@@ -1723,7 +1723,7 @@ const absentStatusResponse = await quoteStatusRoute.GET(
   { params: Promise.resolve({ reference: "TG-ABC234" }) },
 );
 const absentStatusBody = await absentStatusResponse.json();
-check("REST get_quote_status returns a no-store 200 for a valid absent reference",
+check("REST get_quote_request_status returns a no-store 200 for a valid absent reference",
   absentStatusResponse.status === 200
     && absentStatusResponse.headers.get("cache-control") === "no-store"
     && absentStatusBody.quote_found === false);
@@ -1833,7 +1833,7 @@ delete process.env.LEAD_WEBHOOK_URL;
 const queueModule = await load("src/lib/notion/create-lead.ts");
 const telemetryHarness = await loadTelemetryHarness();
 await telemetryHarness.track({
-  tool: "request_quote",
+  tool: "prepare_quote_form",
   status: "success",
   channel: "mcp",
   userAgent: "unit-test",
@@ -1843,7 +1843,7 @@ await telemetryHarness.track({
   sourceSkill: "urgent-event-backfill",
 });
 await telemetryHarness.track({
-  tool: "request_quote",
+  tool: "prepare_quote_form",
   status: "success",
   channel: "rest",
   userAgent: "unit-test",

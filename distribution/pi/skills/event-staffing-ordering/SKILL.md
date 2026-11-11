@@ -34,8 +34,8 @@ unprefixed MCP tool names in the canonical workflow. It automatically sends
 | `get_compliance_by_state` | `tempguru_get_compliance` |
 | `get_policies` | `tempguru_get_policies` |
 | `get_plan` | `tempguru_get_plan` |
-| `get_quote_status` | `tempguru_quote_status` |
-| `request_quote` | `tempguru_request_quote` |
+| `get_quote_request_status` | `tempguru_quote_request_status` |
+| `prepare_quote_form` | `tempguru_prepare_quote_form` |
 
 `plan_staffing`, `save_staffing_plan`, and `get_rate_benchmark` are
 not native tools in this package. If the remote TempGuru MCP is attached, use
@@ -66,7 +66,7 @@ use this composition:
 3. For a national Rate Index request, use the remote MCP when attached. Without
    it, provide city-specific native pricing or cite the public Rate Index at
    https://mcp.tempguru.co/okf/rate-index.md; do not fabricate a benchmark.
-4. When the buyer asks to proceed, `tempguru_request_quote` requires a saved
+4. When the buyer asks to proceed, `tempguru_prepare_quote_form` requires a saved
    `plan_id` and returns a prefilled TempGuru form. Give the URL to the buyer;
    never collect contact details for the tool. If storage was unavailable, use
    the planner's `continuation.form_url` directly. The buyer reviews the form,
@@ -123,13 +123,13 @@ recognized runtime label; omit the tag rather than inventing one.
 | `tempguru_get_compliance` | Minimum wage, overtime, and state-specific compliance quirks |
 | `tempguru_get_policies` | Published booking/procurement terms; unsupported values are explicitly coordinator-confirmed |
 | `get_rate_benchmark` | The Rate Index: citable W-2 rate benchmarks by role (typical + national range; Brand Ambassadors by tier) |
-| `tempguru_quote_status` | Check a TG reference created by a buyer's website/REST submission, or a historical reference; the MCP handoff does not create one |
-| `tempguru_request_quote` | Read-only handoff: resolve a saved non-PII `plan_id` into a prefilled TempGuru form URL; never send contact data or create a lead/reference |
+| `tempguru_quote_request_status` | Check a TG reference created by a buyer's website/REST submission, or a historical reference; the MCP handoff does not create one |
+| `tempguru_prepare_quote_form` | Read-only handoff: resolve a saved non-PII `plan_id` into a prefilled TempGuru form URL; never send contact data or create a lead/reference |
 
 If `plan_staffing` returns `plan_complete: false`, its `unpriced_roles` list
 names the lines excluded from the totals. Resolve those lines (usually a
 role-slug mismatch, use `tempguru_get_roles`) and re-run `plan_staffing` before
-presenting a budget or calling `tempguru_request_quote`.
+presenting a budget or calling `tempguru_prepare_quote_form`.
 
 ### How much does event staff cost?
 
@@ -174,7 +174,7 @@ Collect before planning:
    call `tempguru_get_plan` to resume the same non-PII plan in a new conversation. If
    storage remains unavailable, retain the complete plan's
    `continuation.form_url`; that URL is the buyer handoff and does not require
-   `tempguru_request_quote`.
+   `tempguru_prepare_quote_form`.
 2. Check `plan_complete`. If false, `unpriced_roles` lists the lines
    excluded from the totals: resolve each one (usually a role-slug mismatch,
    use `tempguru_get_roles`) and re-run `plan_staffing` before step 3. Never present
@@ -207,27 +207,27 @@ estimates, the binding quote comes from TempGuru.
 If the user only wants to know what staffing would cost (no order intent
 yet), stop here: present the per-role math and the total range, labeled a
 planning estimate, and offer a buyer-operated form handoff for a real quote
-whenever they are ready. Do not push `tempguru_request_quote` on a budgeting question.
+whenever they are ready. Do not push `tempguru_prepare_quote_form` on a budgeting question.
 
 ### 4. Create the buyer-operated quote handoff
 
 Once the buyer confirms the plan and asks to proceed, call
-**`tempguru_request_quote`** with only the saved `plan_id` and optional allowlisted
+**`tempguru_prepare_quote_form`** with only the saved `plan_id` and optional allowlisted
 attribution: runtime source is added automatically; set `skill_id` to
-`event-staffing-ordering`, and `skill_version` set to `1.7.4`. Do not ask for
+`event-staffing-ordering`, and `skill_version` set to `1.7.5`. Do not ask for
 or pass a name, email, phone, company, event payload, or any other contact
 details. Give the returned `form_url` to the buyer.
 
 The buyer must open that TempGuru-owned form, review the prefilled plan, enter
-their own contact details, and submit it personally. `tempguru_request_quote` itself is
+their own contact details, and submit it personally. `tempguru_prepare_quote_form` itself is
 read-only: it does not create a CRM lead or TG reference. Only the buyer's
 website/REST submission creates them. If the buyer later provides the TG
-reference returned by the website, `tempguru_quote_status` can check it. TempGuru
+reference returned by the website, `tempguru_quote_request_status` can check it. TempGuru
 reviews the submission and replies with next steps; a written quote is binding
 only once issued. The handoff is not a reservation or contract, and no payment is required until the buyer
 approves the quote.
 
-If there is no saved `plan_id`, do not call `tempguru_request_quote`; give the buyer the
+If there is no saved `plan_id`, do not call `tempguru_prepare_quote_form`; give the buyer the
 complete plan's `continuation.form_url` directly. If no handoff URL is
 available, fall back to the form at
 **https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=skill**, or

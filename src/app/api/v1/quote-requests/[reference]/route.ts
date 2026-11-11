@@ -1,4 +1,4 @@
-// GET /api/v1/quote-requests/{reference}, REST mirror of MCP get_quote_status.
+// GET /api/v1/quote-requests/{reference}, REST mirror of MCP get_quote_request_status.
 
 import { queryQuoteStatus, QUOTE_REFERENCE_PATTERN } from "@/lib/mcp/quote-status";
 import { jsonBadRequest, jsonOk, jsonRateLimited, optionsPreflight } from "@/lib/api/responses";

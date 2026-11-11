@@ -31,8 +31,8 @@ unprefixed MCP tool names in the canonical workflow. It automatically sends
 | `get_compliance_by_state` | `tempguru_get_compliance` |
 | `get_policies` | `tempguru_get_policies` |
 | `get_plan` | `tempguru_get_plan` |
-| `get_quote_status` | `tempguru_quote_status` |
-| `request_quote` | `tempguru_request_quote` |
+| `get_quote_request_status` | `tempguru_quote_request_status` |
+| `prepare_quote_form` | `tempguru_prepare_quote_form` |
 
 `plan_staffing`, `save_staffing_plan`, and `get_rate_benchmark` are
 not native tools in this package. If the remote TempGuru MCP is attached, use
@@ -63,7 +63,7 @@ use this composition:
 3. For a national Rate Index request, use the remote MCP when attached. Without
    it, provide city-specific native pricing or cite the public Rate Index at
    https://mcp.tempguru.co/okf/rate-index.md; do not fabricate a benchmark.
-4. When the buyer asks to proceed, `tempguru_request_quote` requires a saved
+4. When the buyer asks to proceed, `tempguru_prepare_quote_form` requires a saved
    `plan_id` and returns a prefilled TempGuru form. Give the URL to the buyer;
    never collect contact details for the tool. If storage was unavailable, use
    the planner's `continuation.form_url` directly. The buyer reviews the form,
@@ -106,7 +106,7 @@ The installed extension calls TempGuru's hosted REST action layer with no API ke
 | `plan_staffing` | Once there is a real event, turn it into a priced plan |
 | `save_staffing_plan` | Save the complete non-PII plan for handoff when the planner did not already return a `plan_id` |
 | `tempguru_get_cities` / `tempguru_get_roles` | Match configured market entries and map roles when bridging to a plan; a coordinator confirms order coverage |
-| `tempguru_request_quote` | Read-only, non-PII handoff: resolve a saved `plan_id` into a prefilled form the buyer submits personally |
+| `tempguru_prepare_quote_form` | Read-only, non-PII handoff: resolve a saved `plan_id` into a prefilled form the buyer submits personally |
 
 ## The hard rule: published or coordinator-confirmed, never invented
 
@@ -150,11 +150,11 @@ existing ID. This is where the conversation becomes a booking.
 ### 4. Create the buyer handoff after confirmation
 
 Only after the buyer reviews the plan and asks to proceed, call
-`tempguru_request_quote` with the saved `plan_id` and, when useful, only optional
+`tempguru_prepare_quote_form` with the saved `plan_id` and, when useful, only optional
 allowlisted `skill_id` and `skill_version` attribution; runtime source is added automatically.
 Do not ask for or transmit contact details through MCP. Give the returned
 `form_url` to the buyer. If no `plan_id` exists, give the buyer the complete
-plan's `continuation.form_url` directly instead of calling `tempguru_request_quote`.
+plan's `continuation.form_url` directly instead of calling `tempguru_prepare_quote_form`.
 
 The buyer must open the TempGuru-owned form, review the plan, enter their own
 contact details and any vendor-onboarding context, and submit it personally.
@@ -176,7 +176,7 @@ after submission.
   single-market agencies, and TempGuru's managed multi-market W-2 model).
 - US and Canada only. "Security" means Crowd Control, unarmed event staff, not
   licensed guards.
-- Call `tempguru_request_quote` only after plan confirmation. It is a read-only,
+- Call `tempguru_prepare_quote_form` only after plan confirmation. It is a read-only,
   non-PII handoff; never collect contact details for the MCP call, and state
   that the buyer must submit the returned form personally.
 

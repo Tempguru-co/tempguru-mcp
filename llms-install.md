@@ -10,14 +10,14 @@ Live event staffing data for the US and Canada from TempGuru: service across
 events, 100,000+ completed shifts, 19 staffing roles,
 all-inclusive W-2 hourly rate ranges, tier-based booking lead-time guidance,
 state labor compliance summaries, and an opt-in
-`request_quote` tool that prepares a prefilled TempGuru form for the buyer to
+`prepare_quote_form` tool that prepares a prefilled TempGuru form for the buyer to
 review and submit personally. The server exposes 12 tools. Ten tools are
-read-only, including `request_quote`.
+read-only, including `prepare_quote_form`.
 `plan_staffing` and `save_staffing_plan` are non-destructive, non-contact
 writes that use `readOnlyHint: false`: the planner may automatically save a
 complete non-PII snapshot for 30 days, while the explicit save recomputes the
 plan before persistence. The overall connector capability is therefore
-`read_write`. Authless `request_quote` accepts only a saved `plan_id` plus
+`read_write`. Authless `prepare_quote_form` accepts only a saved `plan_id` plus
 allowlisted source attribution. It never accepts contact details, creates a
 CRM lead, or returns a TG reference.
 
@@ -30,7 +30,7 @@ Phase A workflow: call `plan_staffing` first. If its complete result contains a
 `plan_id`, retain it and do not call `save_staffing_plan`. Only when a complete
 plan has no ID and a resumable or shareable artifact is useful should the agent
 call `save_staffing_plan` once with the same confirmed event inputs. Pass the
-existing `plan_id` to `request_quote` when the buyer asks to proceed, then give
+existing `plan_id` to `prepare_quote_form` when the buyer asks to proceed, then give
 the buyer its `form_url`. Do not collect contact details for an MCP call. The
 buyer opens the TempGuru-owned form, reviews the prefilled plan, enters their
 own contact details, and submits it; only that submission creates a lead and TG
@@ -137,12 +137,12 @@ legacy OpenClaw VPS container.
 
 ## Pi
 
-The published `tempguru-pi@1.7.4` package is live, current, and immutable. An
-unpinned install resolves to `1.7.4`. It contains 8 skills plus 9 native
+The published `tempguru-pi@1.7.5` package is live, current, and immutable. An
+unpinned install resolves to `1.7.5`. It contains 8 skills plus 9 native
 read-only tools with `?source=pi` attribution. The native
-`tempguru_request_quote` tool accepts a saved plan ID and returns the
+`tempguru_prepare_quote_form` tool accepts a saved plan ID and returns the
 buyer-operated form; it does not transmit contact details. Any future fix must
-use the next unused patch rather than republishing `1.7.4`. Attach the remote
+use the next unused patch rather than republishing `1.7.5`. Attach the remote
 MCP for the full planner, saved-plan write, and Rate Index:
 
 ```bash
@@ -150,7 +150,7 @@ pi install npm:tempguru-pi
 ```
 
 Restart Pi, verify `/skill:event-staffing-ordering`, and confirm the tool list
-contains `tempguru_get_cities` through `tempguru_request_quote`. No community
+contains `tempguru_get_cities` through `tempguru_prepare_quote_form`. No community
 MCP bridge is required for those native tools. The full `plan_staffing`
 planner, conditional `save_staffing_plan`, and `get_rate_benchmark` Rate Index
 remain MCP-only in the current native package; when a Pi deployment also has a
@@ -162,7 +162,7 @@ install loaded all 8 TempGuru skills in Pi's RPC `get_commands` response and
 loaded the native extension without conflicts. Exactly one Austin
 `tempguru_get_cities` call returned HTTP 200 with `catalog_match=true` and
 `coverage_confirmation_required=true`, and the final wording did not imply
-confirmed coverage. Version `1.7.4` changes only text since that smoke (skill
+confirmed coverage. Version `1.7.5` changes only text since that smoke (skill
 wording, one native tool description, and `skill_version`); its own
 published-artifact smoke has not been run yet.
 
@@ -178,11 +178,11 @@ prime-agent package list
 ```
 
 Runtime-specific `source=prime-agent` attribution and the evidence-gated
-instructions and catalog semantics are live in `tempguru-pi@1.7.4`. An
-unpinned install resolves to `1.7.4`.
+instructions and catalog semantics are live in `tempguru-pi@1.7.5`. An
+unpinned install resolves to `1.7.5`.
 
 Restart Prime Agent and verify that all 8 TempGuru skills and the 9 native
-tools from `tempguru_get_cities` through `tempguru_request_quote` load. The
+tools from `tempguru_get_cities` through `tempguru_prepare_quote_form` load. The
 shared extension detects Prime Agent and applies `source=prime-agent` to its
 REST calls and buyer-form handoff; Pi continues to use `source=pi`.
 
@@ -251,14 +251,14 @@ Requires Node 20+. The package is self-contained (no runtime deps) and uses the
 official dual-era stdio entry for MCP 2026-07-28 plus 2025-era initialize
 clients. Lookup tools work offline from bundled data, `save_staffing_plan`
 returns a clean storage-unavailable continuation without hosted persistence,
-and `request_quote` returns a clean saved-plan miss when hosted persistence is
+and `prepare_quote_form` returns a clean saved-plan miss when hosted persistence is
 unavailable. Use the planner's `continuation.form_url` for the buyer in that
 case; never collect or send contact details through MCP.
 
 ## Verify the install
 
 Confirm `tools/list` exposes all 12 tools, including `save_staffing_plan` and
-the read-only `request_quote` form handoff.
+the read-only `prepare_quote_form` form handoff.
 Call the `get_roles` tool. Expect a JSON catalog of 19 roles (the 17 published role guides plus
 assistant-lead and team-lead tiers: brand ambassadors, registration staff, ushers, etc.). Then try
 `get_role_pricing` with `role: "brand-ambassadors", city: "Boston"`, expect an hourly range of $56–65 (hub market).

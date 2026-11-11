@@ -2,7 +2,7 @@
 //
 // This schema is consumed by POST /api/v1/quote-requests after a buyer enters
 // and submits their own contact details on the TempGuru form. It is
-// intentionally separate from the authless MCP `request_quote` tool, whose
+// intentionally separate from the authless MCP `prepare_quote_form` tool, whose
 // strict non-PII schema lives in quote-handoff.ts. The OpenAPI spec in
 // src/lib/api/openapi.ts mirrors this REST schema by hand and must stay in
 // sync.

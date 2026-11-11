@@ -43,10 +43,10 @@ Out of scope: permanent or direct hiring, and events outside the United States a
 
 Keep the MCP handoff and the REST submission distinct:
 
-- MCP exposes 12 tools: ten read-only tools (including `request_quote`) and two
+- MCP exposes 12 tools: ten read-only tools (including `prepare_quote_form`) and two
   non-destructive, non-contact saved-plan writes (`plan_staffing` and
   `save_staffing_plan`). The connector is therefore declared `read_write`.
-- Authless MCP `request_quote` accepts only a saved non-PII `plan_id` plus
+- Authless MCP `prepare_quote_form` accepts only a saved non-PII `plan_id` plus
   allowlisted source attribution. It returns a prefilled
   `https://mcp.tempguru.co/request-quote` URL. It never accepts contact
   details, creates a CRM lead, or returns a TG reference.

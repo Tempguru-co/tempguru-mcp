@@ -9,7 +9,7 @@ https://claude.com/docs/connectors/building/submission.
 | Portal field | Value |
 |---|---|
 | Server name | TempGuru Event Staffing |
-| Release being reviewed | `1.7.4` |
+| Release being reviewed | `1.7.5` |
 | URL slug | `tempguru-event-staffing` |
 | Tagline | Plan W-2 event staffing across the US and Canada |
 | Connector access | `read_write` |
@@ -26,11 +26,19 @@ https://claude.com/docs/connectors/building/submission.
 
 Inventory summary: **12 tools, 2 prompts, 8 resources**.
 
+> **Renames (`1.7.5`):** `request_quote` is now `prepare_quote_form` and
+> `get_quote_status` is now `get_quote_request_status`, matching their
+> existing titles (`Prepare Quote Form`, `Get Quote Request Status`). The first
+> only prepares a buyer-operated form and never creates a quote request; the
+> second reports receipt (received/queued), not the quote's status. Inputs,
+> output schemas, annotations, and behavior are unchanged. Update the portal's
+> tool list to match.
+>
 > **Rename (`1.7.4`):** the lead-time tool `check_availability` is now
 > `get_lead_time_guidance` (title `Get Lead Time Guidance`). Its inputs, output
 > schema, read-only annotations, and behavior are unchanged; the name now
 > matches what the description always said (tier-based lead-time guidance,
-> never inventory, coverage, or a reservation). `request_quote` is titled
+> never inventory, coverage, or a reservation). `prepare_quote_form` is titled
 > `Prepare Quote Form` everywhere. Update the portal's tool list to match.
 
 > **AGENT5 disclosure record:** Version `1.7.1` added a factual public
@@ -57,7 +65,7 @@ Approved scale claim IDs: `tg-claim-markets-300-plus-v1`,
 
 TempGuru plans W-2 event staffing across 300+ U.S. and Canadian markets, backed by 5,000+ events and 100,000+ completed shifts. Claude can turn an event brief into a plan; match the configured market catalog; return tier-based lead-time guidance, roles, all-inclusive hourly rates, crew totals, and state/provincial compliance; retrieve booking and procurement policies; save or resume a non-contact plan; and prepare a buyer-operated quote-form handoff. Catalog matching and lead-time guidance do not confirm coverage or inventory; a TempGuru coordinator confirms the order after buyer submission. TempGuru supports trade shows, conferences, festivals, concerts, sporting events, corporate events, brand activations, and multi-city programs. Placements use W-2 employees, not 1099 gig workers.
 
-The connector exposes 12 tools, 2 prompts and 8 skill resources. Ten tools are read-only. It is read_write because plan_staffing may save a 30-day non-PII plan and save_staffing_plan explicitly saves one. Those bounded writes exclude names, email addresses, phone numbers, companies, and free-text contact details. request_quote is read-only and idempotent. It accepts a saved non-PII plan ID plus allowlisted attribution, restores the plan, and returns a prefilled form on TempGuru's mcp.tempguru.co origin. It does not collect or transmit contact information, call the CRM, create a lead, or issue a TG reference. The buyer opens the form, reviews or edits staffing details, enters their own contact details, and submits it. Only that separate website submission creates a lead and reference for a TempGuru coordinator.
+The connector exposes 12 tools, 2 prompts and 8 skill resources. Ten tools are read-only. It is read_write because plan_staffing may save a 30-day non-PII plan and save_staffing_plan explicitly saves one. Those bounded writes exclude names, email addresses, phone numbers, companies, and free-text contact details. prepare_quote_form is read-only and idempotent. It accepts a saved non-PII plan ID plus allowlisted attribution, restores the plan, and returns a prefilled form on TempGuru's mcp.tempguru.co origin. It does not collect or transmit contact information, call the CRM, create a lead, or issue a TG reference. The buyer opens the form, reviews or edits staffing details, adds their own contact details, and submits. Only that separate website submission creates a lead and reference for a TempGuru coordinator.
 
 Rates are planning estimates, availability responses are guidance rather than reservations, and compliance summaries are operational information rather than legal advice. The connector cannot guarantee staffing, finalize pricing, create a contract, process payment, or book workers. A TempGuru coordinator confirms availability and a binding quote after the buyer submits the form.
 
@@ -98,8 +106,8 @@ field is intentionally absent rather than implicitly set.
 | 8 | `get_compliance_by_state` | `Get Compliance By State` | `true` | `false` | omitted | `false` |
 | 9 | `get_policies` | `Get Booking and Procurement Policies` | `true` | `false` | omitted | `false` |
 | 10 | `get_rate_benchmark` | `Get Rate Benchmark` | `true` | `false` | omitted | `false` |
-| 11 | `request_quote` | `Prepare Quote Form` | `true` | `false` | `true` | `false` |
-| 12 | `get_quote_status` | `Get Quote Request Status` | `true` | `false` | omitted | `false` |
+| 11 | `prepare_quote_form` | `Prepare Quote Form` | `true` | `false` | `true` | `false` |
+| 12 | `get_quote_request_status` | `Get Quote Request Status` | `true` | `false` | omitted | `false` |
 
 Permission summary for the portal: **10 read-only tools and 2
 non-destructive, non-contact write tools.** The write tools only persist
@@ -151,7 +159,7 @@ Paste into the portal's data-handling or reviewer-notes field:
 > exclude names, email addresses, phone numbers, companies, and free-text user
 > descriptions.
 >
-> MCP `request_quote` is a strict read-only handoff. Its input schema accepts
+> MCP `prepare_quote_form` is a strict read-only handoff. Its input schema accepts
 > only the saved `plan_id` plus optional allowlisted `source_platform`,
 > `skill_id`, and `skill_version`. It restores the non-PII plan and returns a
 > prefilled URL on TempGuru's own `https://mcp.tempguru.co` origin. It does not
@@ -161,8 +169,8 @@ Paste into the portal's data-handling or reviewer-notes field:
 > The buyer must personally open the returned form, review or edit the plan,
 > enter their own contact details, and press submit. Only that distinct
 > human-operated website/REST submission creates a CRM lead and TG reference.
-> `get_quote_status` reads a reference created by that website/REST flow or a
-> historical reference; it is not a result of MCP `request_quote`.
+> `get_quote_request_status` reads a reference created by that website/REST flow or a
+> historical reference; it is not a result of MCP `prepare_quote_form`.
 >
 > Product telemetry excludes request/response bodies, contact fields, raw IP
 > addresses, raw user-agent strings, plan IDs, and quote references. Bounded
@@ -177,7 +185,7 @@ https://mcp.tempguru.co
 ```
 
 This is an HTTPS origin, not a path. It covers the TempGuru-owned
-`/request-quote` form returned by `request_quote`.
+`/request-quote` form returned by `prepare_quote_form`.
 
 ## Reviewer access and test instructions
 
@@ -193,7 +201,7 @@ Suggested end-to-end review:
 1. Call `plan_staffing` with Chicago, a future date, and a valid role/headcount.
 2. Retain its `plan_id`; if the planner returns none, call
    `save_staffing_plan` once with the same confirmed plan inputs.
-3. Call `request_quote` with that `plan_id`.
+3. Call `prepare_quote_form` with that `plan_id`.
 4. Confirm the result contains a TempGuru-owned `form_url`, not a CRM
    confirmation or TG reference, and that the tool schema exposes no contact
    fields.

@@ -4,7 +4,7 @@ title: "QuoteRequestInput"
 description: "A buyer-submitted staffing plan plus the contact details a coordinator needs to reply."
 ---
 # QuoteRequestInput
-A buyer-submitted staffing plan plus the contact details a coordinator needs to reply. This REST write schema is intentionally separate from the authless MCP request_quote handoff, which accepts no contact details.
+A buyer-submitted staffing plan plus the contact details a coordinator needs to reply. This REST write schema is intentionally separate from the authless MCP prepare_quote_form handoff, which accepts no contact details.
 ## Properties
 
 - `contact_name` (string, required): Full name of the contact person

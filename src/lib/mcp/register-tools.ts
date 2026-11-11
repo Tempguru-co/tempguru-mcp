@@ -75,7 +75,7 @@ const BASE_SERVER_INSTRUCTIONS =
   "get_roles / get_cities; use get_policies for booking terms; flag daily-overtime states (CA, AK, NV, CO). (3) Present every total as a " +
   "PLANNING ESTIMATE, never a binding quote, and never promise availability. (4) Retain the plan_id when plan_staffing returns one. " +
   "Only if a complete plan has no plan_id and the user needs a resumable or shareable plan, call save_staffing_plan once with the same confirmed event inputs; never call it when a plan_id already exists. " +
-  "(5) When the buyer asks to proceed, call request_quote with the saved plan_id. It returns a prefilled TempGuru form URL and never accepts or transmits contact details. " +
+  "(5) When the buyer asks to proceed, call prepare_quote_form with the saved plan_id. It returns a prefilled TempGuru form URL and never accepts or transmits contact details. " +
   "Give that URL to the buyer; the buyer must review the plan, enter their own contact details, and submit the form themselves. Only that buyer submission creates a lead and TG reference. " +
   "TempGuru reviews the submission and replies with next steps; once scope and rates are approved, the 24-48 hour window is an availability response, not a completed roster, and a written quote is binding only once TempGuru issues it; no payment until the buyer approves. " +
   "All rates are all-inclusive W-2 bill rates (worker pay, payroll taxes, workers' comp, " +
@@ -317,7 +317,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
         "Explicitly save a complete non-contact staffing plan for 30 days so it can be shared, resumed, or linked to a later quote request. " +
         "Use only when plan_staffing returned plan_complete:true without a plan_id and the user needs persistence. Never call this tool when plan_staffing already returned a plan_id. " +
         "Provide the same confirmed city, date, event type, attendees, roles, headcount, hours, and days; the server recomputes rates, totals, lead time, and compliance before saving and does not accept caller-supplied pricing or totals. This does not reserve staff, submit contact details, or request a quote. " +
-        "<hints>Branch on status: saved is the only outcome with a durable plan_id; plan_incomplete requires revising the inputs; for rate_limited or storage_unavailable, give the buyer continuation.form_url directly because request_quote requires a saved plan_id.</hints>",
+        "<hints>Branch on status: saved is the only outcome with a durable plan_id; plan_incomplete requires revising the inputs; for rate_limited or storage_unavailable, give the buyer continuation.form_url directly because prepare_quote_form requires a saved plan_id.</hints>",
       inputSchema: SaveStaffingPlanInputSchema,
       outputSchema: SAVE_STAFFING_PLAN_SCHEMA,
       annotations: {
@@ -357,7 +357,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
         "Restore a complete non-PII staffing plan created by plan_staffing or save_staffing_plan within the last 30 days. Use when a buyer starts a new conversation, changes agent platforms, or wants to continue a saved plan before requesting a quote. " +
         "DO NOT guess or enumerate plan IDs; use only the 12-character plan_id the user, plan_staffing, or save_staffing_plan supplied. " +
         "<examples>get_plan(plan_id='ABCDEFGH2345')</examples> " +
-        "<hints>A not-found result means the plan expired, storage was unavailable, or the ID is wrong; re-run plan_staffing. Review the restored plan with the user before request_quote.</hints>",
+        "<hints>A not-found result means the plan expired, storage was unavailable, or the ID is wrong; re-run plan_staffing. Review the restored plan with the user before prepare_quote_form.</hints>",
       inputSchema: z.object({
         plan_id: z
           .string()
@@ -652,7 +652,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     },
   );
 
-  // ─── request_quote ────────────────────────────────────────────────────
+  // ─── prepare_quote_form ────────────────────────────────────────────────────
   //
   // Authless, non-PII handoff tool. It restores an existing saved plan and
   // returns the TempGuru-owned buyer form. It never accepts contact fields and
@@ -660,7 +660,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
   // on the form. The REST quote endpoint remains the browser form's submission
   // target and is intentionally a separate contract.
   server.registerTool(
-    "request_quote",
+    "prepare_quote_form",
     {
       title: "Prepare Quote Form",
       description:
@@ -685,7 +685,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
         sourcePlatform ? { ...input, source_platform: sourcePlatform } : input,
       );
       await track({
-        tool: "request_quote",
+        tool: "prepare_quote_form",
         status: result.handoff_ready ? "success" : "error",
         funnelEvents: result.handoff_ready ? ["quote_handoffs"] : undefined,
         sourcePlatform,
@@ -695,15 +695,15 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
     },
   );
 
-  // ─── get_quote_status ─────────────────────────────────────────────────
+  // ─── get_quote_request_status ─────────────────────────────────────────────────
   server.registerTool(
-    "get_quote_status",
+    "get_quote_request_status",
     {
       title: "Get Quote Request Status",
       description:
-        "Check whether a TempGuru quote request reference was received by the CRM or durably queued. Use only after the buyer personally submitted a TempGuru website form and received a TG reference, or for a historical reference. The authless MCP request_quote handoff does not create a reference. " +
+        "Check whether a TempGuru quote request reference was received by the CRM or durably queued. Use only after the buyer personally submitted a TempGuru website form and received a TG reference, or for a historical reference. The authless MCP prepare_quote_form handoff does not create a reference. " +
         "This v1 status stub reports received/queued only; it does not yet expose quote_sent or won. " +
-        "<examples>get_quote_status(reference='TG-ABC234')</examples> " +
+        "<examples>get_quote_request_status(reference='TG-ABC234')</examples> " +
         "<hints>Status records are retained for 90 days. A not-found result does not prove the CRM lead is absent; follow up with the reference at megan@tempguru.co.</hints>",
       inputSchema: z.object({
         reference: z
@@ -727,7 +727,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
       // be enumerated from the no-auth endpoint.
       const verdict = await checkReadRateLimit(currentContext().ip, "status");
       if (!verdict.allowed) {
-        await track({ tool: "get_quote_status", status: "error" });
+        await track({ tool: "get_quote_request_status", status: "error" });
         return errorResult({
           error: "rate_limited",
           message: `Too many status lookups from this source. Retry after ${verdict.retryAfterSeconds}s.`,
@@ -735,7 +735,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
       }
       const result = await queryQuoteStatus(reference);
       await track({
-        tool: "get_quote_status",
+        tool: "get_quote_request_status",
         status: result.quote_found ? "success" : "error",
       });
       return structuredResult(result);
@@ -813,7 +813,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
               "Fill gaps with get_roles or get_cities if needed. Present the plan with the estimated total clearly " +
               "labeled a planning estimate and flag any compliance notes. Retain plan_id if plan_staffing returned one; " +
               "only call save_staffing_plan when the complete plan has no plan_id and I need it saved or shared, and never save it twice. Ask me to confirm the plan. " +
-              "When I ask to proceed, call request_quote with the saved plan_id and give me its form_url. Do not ask me for contact details in chat or send any through MCP. " +
+              "When I ask to proceed, call prepare_quote_form with the saved plan_id and give me its form_url. Do not ask me for contact details in chat or send any through MCP. " +
               "I will review the prefilled TempGuru form, enter my own contact details, and submit it myself. Only my form submission creates the lead and TG reference. " +
               "TempGuru replies with next steps after I submit; once scope and rates are approved, the 24-48 hour window is an availability response, not a roster, and a written quote is binding only once TempGuru issues it. No payment until I approve.",
           },

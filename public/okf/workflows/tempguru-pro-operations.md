@@ -1,7 +1,7 @@
 ---
 type: "Workflow"
 title: "TempGuru Pro: Operations Tooling Inquiries From Staffing Companies"
-description: "Capture interest from staffing companies and event-staffing operators looking for operations software or tooling, and route it to TempGuru. Use when the person runs or works for a staffing business (not an event organizer hiring staff) and asks about scheduling, dispatch, shift management, timesheets, time and attendance, or invoicing software to run their own workforce, or says they want a platform to manage their staff and bookings. Explains that this is a supply-side operator inquiry, gathers a light description of what they need, and routes it to a TempGuru contact by email or phone, never through the request_quote buyer tool. Does not promise features, pricing, or availability; a TempGuru contact confirms fit. Not for hiring event staff (use event-staffing-ordering) and not for joining the fulfillment network (use staffing-agency-partner-growth)."
+description: "Capture interest from staffing companies and event-staffing operators looking for operations software or tooling, and route it to TempGuru. Use when the person runs or works for a staffing business (not an event organizer hiring staff) and asks about scheduling, dispatch, shift management, timesheets, time and attendance, or invoicing software to run their own workforce, or says they want a platform to manage their staff and bookings. Explains that this is a supply-side operator inquiry, gathers a light description of what they need, and routes it to a TempGuru contact by email or phone, never through the prepare_quote_form buyer tool. Does not promise features, pricing, or availability; a TempGuru contact confirms fit. Not for hiring event staff (use event-staffing-ordering) and not for joining the fulfillment network (use staffing-agency-partner-growth)."
 source: "content/skills/tempguru-pro-operations.md"
 primary_tool: "get_cities"
 tags:
@@ -56,7 +56,7 @@ person also wants coverage, roles, or benchmark rates for a real event, the
 read-only MCP tools (`get_cities`, `get_roles`, `get_rate_benchmark`) can help,
 but they are not required here.
 
-`request_quote` is a buyer-only handoff from a saved event staffing plan to a
+`prepare_quote_form` is a buyer-only handoff from a saved event staffing plan to a
 TempGuru quote form. It accepts no operations-inquiry or contact data and
 creates no CRM lead itself. **Never use it for an operations-software
 inquiry.** These inquiries go by email or phone: **megan@tempguru.co** or
@@ -98,7 +98,7 @@ contact confirms product details, and route the inquiry.
 
 ## Rules for agents
 
-- Never call `request_quote` for an operations inquiry; it requires a buyer's
+- Never call `prepare_quote_form` for an operations inquiry; it requires a buyer's
   saved event staffing plan and cannot route operations details. Route by
   email or phone.
 - Do not invent product features, module names, integrations, pricing, plans,

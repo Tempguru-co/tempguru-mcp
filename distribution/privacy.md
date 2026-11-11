@@ -17,8 +17,8 @@ website submission.
 
 Ten tools (`get_plan`, `get_cities`, `get_roles`,
 `get_lead_time_guidance`, `get_role_pricing`, `get_compliance_by_state`,
-`get_policies`, `get_rate_benchmark`, `get_quote_status`, and `request_quote`)
-are read-only. `request_quote` requires a saved non-PII `plan_id`, accepts only
+`get_policies`, `get_rate_benchmark`, `get_quote_request_status`, and `prepare_quote_form`)
+are read-only. `prepare_quote_form` requires a saved non-PII `plan_id`, accepts only
 optional allowlisted platform/skill attribution, and returns a prefilled
 TempGuru-owned form link. `plan_staffing` and `save_staffing_plan` are
 non-destructive non-contact writes because they may create the 30-day plan
@@ -55,11 +55,11 @@ does not store contact details or the user's free-text description.
 Quote-status stubs retain a TG reference and limited received/queued status
 metadata for up to 90 days. Those references come from buyer-submitted
 website/REST requests or historical REST requests, not from MCP
-`request_quote`. The stubs do not contain the buyer's contact details.
+`prepare_quote_form`. The stubs do not contain the buyer's contact details.
 
-## MCP `request_quote` does not collect personal information
+## MCP `prepare_quote_form` does not collect personal information
 
-`request_quote` is a read-only, idempotent handoff tool. After a buyer confirms
+`prepare_quote_form` is a read-only, idempotent handoff tool. After a buyer confirms
 a saved plan, the agent may send:
 
 - the saved 12-character non-PII `plan_id` (required); and
@@ -108,7 +108,7 @@ availability.
 
 ## Choices and privacy contact
 
-Before `request_quote`, the buyer should review and confirm the non-PII staffing
+Before `prepare_quote_form`, the buyer should review and confirm the non-PII staffing
 plan. The agent must not ask for contact details for the MCP call. After the
 handoff, the buyer decides whether to open the form and must personally review,
 enter contact details, and submit. Declining the form does not affect access to
@@ -126,7 +126,7 @@ used for quote follow-up, but are not the canonical privacy-rights channel.
    standalone replacement at `/privacy`.
 3. Update the policy's subprocessor and retention tables for the providers and
    website/REST queue/status data actually in use; do not describe MCP
-   `request_quote` as sending contact data.
+   `prepare_quote_form` as sending contact data.
 4. Point MCP/App marketplace privacy links to the amended canonical policy.
 5. Add age-based pruning for the recent-event ring and active-day index, or
    preserve the count/date-only disclosure above instead of claiming a blanket

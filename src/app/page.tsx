@@ -114,11 +114,11 @@ export default function Home() {
       desc: "The Rate Index: a measured benchmark of all-inclusive W-2 hourly rates by role (typical + national range; Brand Ambassadors by tier), with methodology and citation line.",
     },
     {
-      name: "get_quote_status",
+      name: "get_quote_request_status",
       desc: "Check a TG reference returned after the buyer submits the website form, including historical references.",
     },
     {
-      name: "request_quote",
+      name: "prepare_quote_form",
       desc: "Restore a saved non-PII plan and return a prefilled TempGuru form the buyer personally submits. Read-only; never accepts contact details or creates a lead.",
     },
   ];
@@ -228,7 +228,7 @@ export default function Home() {
           </li>
           <li>
             When the buyer asks to proceed, call{" "}
-            <code style={codeNameStyle}>request_quote</code> with the saved{" "}
+            <code style={codeNameStyle}>prepare_quote_form</code> with the saved{" "}
             <code style={codeNameStyle}>plan_id</code>, then give the buyer its{" "}
             <code style={codeNameStyle}>form_url</code>. The buyer enters and
             submits their own contact details on that form.

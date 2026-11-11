@@ -21,7 +21,7 @@ const MCP_DISCOVERY = {
       name: "tempguru-mcp",
       title: "TempGuru Event Staffing",
       description:
-        "Dual-era TempGuru event staffing MCP backed by a repository-controlled public catalog, with 12 tools: ten read-only tools including a non-PII request_quote buyer handoff, the non-destructive plan_staffing planner, and an explicit non-destructive save_staffing_plan write. Also ships 8 skill resources and two guided prompts. " +
+        "Dual-era TempGuru event staffing MCP backed by a repository-controlled public catalog, with 12 tools: ten read-only tools including a non-PII prepare_quote_form buyer handoff, the non-destructive plan_staffing planner, and an explicit non-destructive save_staffing_plan write. Also ships 8 skill resources and two guided prompts. " +
         APPROVED_SCALE_DESCRIPTION,
       endpoint: "https://mcp.tempguru.co/mcp",
       transport: "streamable-http",
@@ -55,7 +55,7 @@ const MCP_DISCOVERY = {
           "Call plan_staffing first with the event city, date, roles, and headcount.",
           "If a complete plan already includes plan_id, retain it and do not call save_staffing_plan; the planner already saved the non-PII snapshot.",
           "Call save_staffing_plan only for a complete plan that has no plan_id and needs a durable 30-day artifact; the server recomputes rates and totals from bounded event inputs before saving.",
-          "When the buyer asks to proceed, call request_quote with the saved plan_id and give them its form_url; the buyer enters and submits their own contact details.",
+          "When the buyer asks to proceed, call prepare_quote_form with the saved plan_id and give them its form_url; the buyer enters and submits their own contact details.",
         ],
       },
     },

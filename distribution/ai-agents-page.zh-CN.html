@@ -80,7 +80,7 @@
 
   <h2>MCP 工具</h2>
 
-  <p>共十二个工具：十个只读工具（其中 <code>request_quote</code> 是不含个人联系信息的买家表单交接工具）、一个可尽力自动保存 30 天非联系信息快照且不具破坏性的 <code>plan_staffing</code> 规划工具，以及一个显式的非联系信息写入工具 <code>save_staffing_plan</code>。Phase A（阶段 A）中，请先调用 <code>plan_staffing</code> 并保留其返回的任何 <code>plan_id</code>。仅当完整方案没有编号且确需恢复或分享时，调用一次 <code>save_staffing_plan</code>；已有编号时绝不重复保存。买家要求继续时，仅以已保存的方案编号调用 <code>request_quote</code>，再将返回的表单地址交给买家。</p>
+  <p>共十二个工具：十个只读工具（其中 <code>prepare_quote_form</code> 是不含个人联系信息的买家表单交接工具）、一个可尽力自动保存 30 天非联系信息快照且不具破坏性的 <code>plan_staffing</code> 规划工具，以及一个显式的非联系信息写入工具 <code>save_staffing_plan</code>。Phase A（阶段 A）中，请先调用 <code>plan_staffing</code> 并保留其返回的任何 <code>plan_id</code>。仅当完整方案没有编号且确需恢复或分享时，调用一次 <code>save_staffing_plan</code>；已有编号时绝不重复保存。买家要求继续时，仅以已保存的方案编号调用 <code>prepare_quote_form</code>，再将返回的表单地址交给买家。</p>
 
   <div class="tg-tools">
 
@@ -135,12 +135,12 @@
     </div>
 
     <div class="tg-tool">
-      <div class="tg-tool-name">get_quote_status</div>
+      <div class="tg-tool-name">get_quote_request_status</div>
       <p>查询 TG 报价编号是否已由 CRM 接收或进入持久队列等待重试。</p>
     </div>
 
     <div class="tg-tool">
-      <div class="tg-tool-name">request_quote <span class="tg-tool-badge">只读 | 不含个人信息</span></div>
+      <div class="tg-tool-name">prepare_quote_form <span class="tg-tool-badge">只读 | 不含个人信息</span></div>
       <p>把已保存且不含联系信息的 <code>plan_id</code> 转换为 TempGuru 自有的预填表单。该工具不接受联系人信息、不写入 CRM，也不创建 TG 编号。买家本人打开链接、核对方案、填写自己的联系信息并提交表单。</p>
     </div>
 
@@ -267,8 +267,8 @@ hermes mcp add tempguru --url "https://mcp.tempguru.co/mcp?source=hermes"</div>
 
   <p class="tg-label">Pi</p>
   <div class="tg-code">pi install npm:tempguru-pi
-// 当前已发布版本为 1.7.4；未指定版本时会安装这个不可覆盖的版本。
-// tempguru_request_quote 只返回买家表单，不发送联系人信息。</div>
+// 当前已发布版本为 1.7.5；未指定版本时会安装这个不可覆盖的版本。
+// tempguru_prepare_quote_form 只返回买家表单，不发送联系人信息。</div>
 
   <p class="tg-label">Prime Agent</p>
   <div class="tg-code">prime-agent package install npm:tempguru-pi
@@ -312,7 +312,7 @@ prime-agent package list
       </tr>
       <tr>
         <td>5. 买家交接</td>
-        <td>买家要求继续时，只用已保存的 <code>plan_id</code> 与可选白名单归因字段调用 <code>request_quote</code>，并将返回的 <code>form_url</code> 交给买家。买家本人核对方案、填写自己的联系信息并提交；只有该网站/REST 提交会创建销售线索和 TG 编号。</td>
+        <td>买家要求继续时，只用已保存的 <code>plan_id</code> 与可选白名单归因字段调用 <code>prepare_quote_form</code>，并将返回的 <code>form_url</code> 交给买家。买家本人核对方案、填写自己的联系信息并提交；只有该网站/REST 提交会创建销售线索和 TG 编号。</td>
       </tr>
     </tbody>
   </table>
@@ -334,7 +334,7 @@ prime-agent package list
 
   <h2>安全与隐私</h2>
 
-  <p>十个只读工具均无需身份验证。<code>plan_staffing</code> 与 <code>save_staffing_plan</code> 仅保存经过字段白名单限制且不含联系信息的方案字段；Phase A（阶段 A）中，规划工具已返回 <code>plan_id</code> 时不得再次调用显式保存工具。MCP <code>request_quote</code> 只接受已保存的方案编号和有限的归因字段，并返回 TempGuru 表单地址；它不接受或传输联系人信息，也不创建销售线索或 TG 编号。只有买家本人在网站表单中填写联系信息并点击提交后，这些信息才会发送给 TempGuru。技能资源为纯 markdown，不含可执行代码。</p>
+  <p>十个只读工具均无需身份验证。<code>plan_staffing</code> 与 <code>save_staffing_plan</code> 仅保存经过字段白名单限制且不含联系信息的方案字段；Phase A（阶段 A）中，规划工具已返回 <code>plan_id</code> 时不得再次调用显式保存工具。MCP <code>prepare_quote_form</code> 只接受已保存的方案编号和有限的归因字段，并返回 TempGuru 表单地址；它不接受或传输联系人信息，也不创建销售线索或 TG 编号。只有买家本人在网站表单中填写联系信息并点击提交后，这些信息才会发送给 TempGuru。技能资源为纯 markdown，不含可执行代码。</p>
 
   <hr>
 

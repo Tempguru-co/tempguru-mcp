@@ -526,7 +526,7 @@ const SAVE_PLAN_CONTINUATION = z.object({
 const SAVE_PLAN_NEXT_ACTION = z.enum([
   "share",
   "revise",
-  "request_quote",
+  "prepare_quote_form",
   "plan_again",
   "retry_save",
   "continue_on_website",
@@ -698,7 +698,7 @@ export const GET_POLICIES_SCHEMA = z.object(GET_POLICIES_OUTPUT).superRefine((va
   }
 });
 
-// ─── get_quote_status (found / not found) ───────────────────────────────
+// ─── get_quote_request_status (found / not found) ───────────────────────────────
 
 export const GET_QUOTE_STATUS_OUTPUT = {
   quote_found: z.boolean().describe("Discriminator. false means the status stub is absent or expired."),
@@ -782,7 +782,7 @@ export const RATE_BENCHMARK_SCHEMA = z.object(RATE_BENCHMARK_OUTPUT).superRefine
   }
 });
 
-// ─── request_quote (authless buyer handoff; never submits contact data) ───
+// ─── prepare_quote_form (authless buyer handoff; never submits contact data) ───
 
 export const REQUEST_QUOTE_HANDOFF_OUTPUT = {
   handoff_ready: z

@@ -73,7 +73,7 @@ Notion through the repository drain before a Notion-only automation can see it.
 - Route low-trust leads through verification before outreach.
 - Escalate if the Notion Deal Stage remains `Lead` for one business day; `Lead`
   is the stage created by the current integration (not `New`).
-- Expose received/queued status consistently with `get_quote_status`.
+- Expose received/queued status consistently with `get_quote_request_status`.
 
 ## 5. Plan → won → revenue attribution (ops-side)
 

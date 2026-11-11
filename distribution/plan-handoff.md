@@ -18,10 +18,10 @@ query parameters:
 | `utm_source` | Always `ai-agent`. |
 | `utm_medium` | Normalized agent runtime/platform when known; otherwise the originating channel (`mcp` or `rest`). |
 | `utm_content` | Underlying channel when `utm_medium` carries a controlled runtime source. |
-| `utm_campaign` | `quote-handoff` when the URL was resolved through MCP `request_quote`. |
-| `source_platform` | Optional normalized runtime attribution inferred from the interactive MCP request or added by `request_quote`. |
-| `skill_id` | Optional allowlisted canonical TempGuru skill ID added by `request_quote`. |
-| `skill_version` | Optional bounded skill version added by `request_quote`. |
+| `utm_campaign` | `quote-handoff` when the URL was resolved through MCP `prepare_quote_form`. |
+| `source_platform` | Optional normalized runtime attribution inferred from the interactive MCP request or added by `prepare_quote_form`. |
+| `skill_id` | Optional allowlisted canonical TempGuru skill ID added by `prepare_quote_form`. |
+| `skill_version` | Optional bounded skill version added by `prepare_quote_form`. |
 
 Only the `<plan>.<exp>` pair is signed. `city`, `dates`, and `roles` are convenience hints
 and must be treated as untrusted input. When `plan`, `sig`, and `exp` are
@@ -31,12 +31,12 @@ snapshot over modified query-prefill values. A missing/invalid/expired plan
 must fall back to an ordinary editable form; it must never block the buyer
 from entering the plan themselves.
 
-MCP `request_quote` accepts only a saved `plan_id` plus the three optional
+MCP `prepare_quote_form` accepts only a saved `plan_id` plus the three optional
 allowlisted attribution fields above. It restores the plan and returns this
 URL; it never accepts contact details, calls the CRM, creates a lead, or
 returns a TG reference. If plan persistence failed and there is no `plan_id`,
 the agent must give the buyer the completed plan's `continuation.form_url`
-directly instead of calling `request_quote`.
+directly instead of calling `prepare_quote_form`.
 
 The buyer must open the form, review and edit the plan, enter their own contact
 details, and press submit personally. The form retains the allowlisted

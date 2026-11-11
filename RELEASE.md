@@ -1,30 +1,40 @@
-# TempGuru MCP 1.7.4 release runbook
+# TempGuru MCP 1.7.5 release runbook
 
-Use this runbook for release `1.7.4`. `tempguru-mcp@1.7.3` and
-`tempguru-pi@1.7.3` are already released and immutable; do not try to
-overwrite or republish them. This branch releases `1.7.4` for the server/CLI,
-the Pi package, and the canonical quote skills (`skill_version: 1.7.4`).
+Use this runbook for release `1.7.5`. `tempguru-mcp@1.7.3` and
+`tempguru-pi@1.7.3` are the last published, immutable releases; do not try to
+overwrite or republish them. `1.7.4` was merged and deployed to Vercel on
+2026-11-11 but never published to npm, the Registry, GHCR, or Pi; `1.7.5`
+supersedes it everywhere, so do not publish `1.7.4`. This branch releases
+`1.7.5` for the server/CLI, the Pi package, and the canonical quote skills
+(`skill_version: 1.7.5`).
 
-What `1.7.4` ships (this release versions and publishes it):
+What `1.7.5` ships, together with the unpublished `1.7.4`:
 
-- **MCP tool rename:** `check_availability` is now `get_lead_time_guidance`
-  (title `Get Lead Time Guidance`). OpenAI's plugin-directory scan flagged the
-  old name as inconsistent with the tool's behavior (it returns tier-based
-  lead-time guidance, never inventory or a reservation), and the Anthropic
-  listing carried the same tension. Inputs, output schema, and semantics are
-  unchanged. The REST operation `GET /api/v1/availability` (`checkAvailability`)
-  keeps its name; only the MCP tool and the Pi native tool
-  (`tempguru_get_lead_time_guidance`) change. This is a breaking change for
-  MCP clients that call the old name; there is no alias.
-- **Title alignment:** `request_quote` is titled `Prepare Quote Form` in both
-  `title` and `annotations.title` (it was `Request Quote` / `Prepare Quote
-  Form`), and `get_rate_benchmark` is `Get Rate Benchmark` in both, so no tool
+- **Three MCP tool renames.** OpenAI's plugin-directory MCP scan flags a tool
+  whose name promises more than its description delivers ("This tool's name
+  appears promotional, exaggerated, or inconsistent with its behavior"). It
+  flagged `check_availability`, then `request_quote`:
+  - `check_availability` → `get_lead_time_guidance` (`1.7.4`): tier-based
+    lead-time guidance, never inventory or a reservation.
+  - `request_quote` → `prepare_quote_form` (`1.7.5`): returns a prefilled
+    buyer-operated form and never creates a quote request.
+  - `get_quote_status` → `get_quote_request_status` (`1.7.5`, pre-emptive):
+    reports receipt (received/queued), not the quote's status.
+
+  Inputs, output schemas, annotations, and behavior are unchanged. **Breaking
+  for MCP clients that call the old names; there are no aliases.** The REST
+  operations (`checkAvailability`, `submitQuoteRequest`, `getQuoteStatus`) and
+  their telemetry labels keep their names. The Pi native tools become
+  `tempguru_get_lead_time_guidance`, `tempguru_prepare_quote_form`, and
+  `tempguru_quote_request_status`.
+- **Title alignment (`1.7.4`):** each tool's `title` equals its
+  `annotations.title` (`Prepare Quote Form`, `Get Rate Benchmark`), so no tool
   advertises a behavior its description denies.
-- **Skills regenerated** for the new tool name in every copy (Claude plugin,
-  portable, Pi, Hermes `1.0.7`, ChatGPT plugin package); canonical quote
-  skills move to `skill_version: 1.7.4`.
+- **Skills regenerated** for the new names in every copy (Claude plugin,
+  portable, Pi, Hermes `1.0.8`, ChatGPT plugin package); canonical quote
+  skills move to `skill_version: 1.7.5`.
 - **ChatGPT plugin package generator** (`npm run build:chatgpt-plugin`) and
-  the audit `CHATGPT-AUDIT-2026-11.md` (added on this branch).
+  the audit `CHATGPT-AUDIT-2026-11.md` (`1.7.4`).
 
 Shipped in `1.7.3` (2026-11-02) and unchanged here: dependency security
 updates, `/mcp` body and batch limits, egress-range telemetry labels, AGENT5
@@ -34,7 +44,7 @@ replacement wording.
 
 The buyer-safety boundary introduced in `1.7.0` remains unchanged:
 
-- Authless MCP `request_quote` is a strict, read-only, idempotent handoff.
+- Authless MCP `prepare_quote_form` is a strict, read-only, idempotent handoff.
 - It accepts a saved non-PII `plan_id` and optional bounded attribution only.
 - It returns a prefilled form on `https://mcp.tempguru.co`.
 - It does not accept contact fields, create a CRM lead, or return a TG quote
@@ -59,13 +69,13 @@ authorize TempGuru city-page changes.
 | Vercel production | Merge/push to `main` | Deploys `mcp.tempguru.co`, including `/request-quote` |
 | GHCR `latest` and `sha-*` | Merge/push to `main` | Publishes `ghcr.io/tempguru-co/event-staffing` |
 | MCP Registry initial check | `server.json` version change on `main` | Defers until the matching npm CLI exists |
-| npm CLI | Manual `publish-npm.yml` with `1.7.4` | Publishes `tempguru-mcp`, then re-dispatches the Registry workflow |
-| Pi / Prime Agent npm package | Manual `publish-pi.yml` with `1.7.4` | Publishes `tempguru-pi@1.7.4`, the current immutable package |
-| GHCR semver tags | Push `v1.7.4` | Publishes image tags `1.7.4` and `1.7` |
+| npm CLI | Manual `publish-npm.yml` with `1.7.5` | Publishes `tempguru-mcp`, then re-dispatches the Registry workflow |
+| Pi / Prime Agent npm package | Manual `publish-pi.yml` with `1.7.5` | Publishes `tempguru-pi@1.7.5`, the current immutable package |
+| GHCR semver tags | Push `v1.7.5` | Publishes image tags `1.7.5` and `1.7` |
 | Apex Cloudflare discovery | Manual | Deploys the committed discovery Worker artifact |
 | Anthropic directory | Verification only | Keep the approved community listing aligned with the live server; optionally send the AGENT5 removal note |
-| Hermes | Re-sync PR #39150 | Both submission files match the repository `1.0.7` copies |
-| ClawHub | Operator account | Changed skills published at `1.7.4`; no repository workflow covers ClawHub |
+| Hermes | Re-sync PR #39150 | Both submission files match the repository `1.0.8` copies |
+| ClawHub | Operator account | Changed skills published at `1.7.5`; no repository workflow covers ClawHub |
 | Assistant platforms, Hugging Face | Operator accounts | Updated system prompts, knowledge files, Copilot manifest, and dataset |
 
 Cloudflare deployment is manual and review-gated through this repository's
@@ -121,10 +131,10 @@ node -p 'require("./.claude-plugin/marketplace.json").plugins[0].version'
 ```
 
 The repository build Node major must be at least 22. The root, CLI, Registry,
-Gemini, and plugin release versions printed above must be `1.7.4`. The
-independently versioned Pi package also prints `1.7.4`; step 5 publishes it.
-The canonical quote skills carry `skill_version: 1.7.4`, and the Hermes catalog
-copy carries `version: 1.0.7`. Publishing workflows fail closed when the
+Gemini, and plugin release versions printed above must be `1.7.5`. The
+independently versioned Pi package also prints `1.7.5`; step 5 publishes it.
+The canonical quote skills carry `skill_version: 1.7.5`, and the Hermes catalog
+copy carries `version: 1.0.8`. Publishing workflows fail closed when the
 requested version already exists; every forward fix must use a new unused
 package version.
 
@@ -146,8 +156,8 @@ git status --short
 Review all generated changes before committing them. The release commit must
 contain the source, OKF bundle, discovery documents, OpenAPI/schema artifacts,
 the Cloudflare discovery Worker, CLI source and manifests, skill copies and
-digests (`skill_version: 1.7.4`), assistant knowledge and manifests, the
-Hugging Face dataset, tests, and documentation intended for `1.7.4`. The
+digests (`skill_version: 1.7.5`), assistant knowledge and manifests, the
+Hugging Face dataset, tests, and documentation intended for `1.7.5`. The
 ignored CLI bundle is built and package-checked dynamically by the publisher;
 it is not committed. Do not include unrelated city-page work or duplicate local
 files.
@@ -183,7 +193,7 @@ git diff --exit-code
 The tracked worktree must remain unchanged. Before release, specifically
 confirm the tests prove that:
 
-- MCP `request_quote` has `readOnlyHint: true`,
+- MCP `prepare_quote_form` has `readOnlyHint: true`,
   `destructiveHint: false`, and `idempotentHint: true`.
 - Its strict input schema rejects `contact_name`, `contact_email`,
   `contact_phone`, `company`, and other undeclared fields.
@@ -226,16 +236,16 @@ Confirm:
 Do not update the Anthropic listing or reply to the review thread until the
 production deployment and live canary both pass.
 
-## 4. Publish `tempguru-mcp@1.7.4`
+## 4. Publish `tempguru-mcp@1.7.5`
 
 In GitHub Actions, choose **Publish MCP CLI to npm**, select `main`, enter
-`1.7.4`, and run the workflow. The equivalent command is:
+`1.7.5`, and run the workflow. The equivalent command is:
 
 ```bash
 gh workflow run publish-npm.yml \
   --repo Tempguru-co/tempguru-mcp \
   --ref main \
-  -f version=1.7.4
+  -f version=1.7.5
 ```
 
 The workflow reruns the release gates, verifies the root, CLI, and Registry
@@ -245,13 +255,13 @@ versions, inspects the tarball, publishes `tempguru-mcp`, and dispatches
 Wait for both workflows. Then verify npm and the Registry:
 
 ```bash
-npm --cache /tmp/tempguru-release-cache view tempguru-mcp@1.7.4 version
+npm --cache /tmp/tempguru-release-cache view tempguru-mcp@1.7.5 version
 curl -fsS \
   'https://registry.modelcontextprotocol.io/v0/servers?search=co.tempguru/event-staffing&version=latest' \
   | jq -r '.servers[0].server.version'
 ```
 
-Both commands must return `1.7.4`. Registry propagation can lag npm briefly.
+Both commands must return `1.7.5`. Registry propagation can lag npm briefly.
 If npm succeeds but the Registry dispatch fails, run
 `publish-registry.yml` manually from `main`:
 
@@ -264,34 +274,34 @@ gh workflow run publish-registry.yml \
 Never attempt to overwrite an existing npm or MCP Registry version. Use a new
 patch version for a forward fix.
 
-## 5. Publish and verify the Pi / Prime Agent package, `tempguru-pi@1.7.4`
+## 5. Publish and verify the Pi / Prime Agent package, `tempguru-pi@1.7.5`
 
 `tempguru-pi@1.7.3` remains published and immutable; do not republish it. In
-GitHub Actions, choose the Pi publisher, select `main`, enter `1.7.4`, and run
+GitHub Actions, choose the Pi publisher, select `main`, enter `1.7.5`, and run
 the workflow. The equivalent command is:
 
 ```bash
 gh workflow run publish-pi.yml \
   --repo Tempguru-co/tempguru-mcp \
   --ref main \
-  -f version=1.7.4
+  -f version=1.7.5
 ```
 
-After the workflow succeeds, `tempguru-pi@1.7.4` is the published, current,
+After the workflow succeeds, `tempguru-pi@1.7.5` is the published, current,
 immutable package, and unpinned installs resolve to it. Verify:
 
 ```bash
-npm --cache /tmp/tempguru-release-cache view tempguru-pi@1.7.4 version
+npm --cache /tmp/tempguru-release-cache view tempguru-pi@1.7.5 version
 ```
 
-Install `npm:tempguru-pi@1.7.4` in an isolated Pi configuration and confirm:
+Install `npm:tempguru-pi@1.7.5` in an isolated Pi configuration and confirm:
 
 - Pi's RPC `get_commands` response lists all eight TempGuru skills from the
   published package.
 - The native extension loads without conflicts, and an allowlisted
   `tempguru_get_cities` smoke succeeds.
 - A read-only configured-market, lead-time, or pricing lookup succeeds without implying confirmed coverage.
-- `tempguru_request_quote` accepts a saved plan reference and bounded
+- `tempguru_prepare_quote_form` accepts a saved plan reference and bounded
   attribution, exposes no contact fields, and returns a buyer form link.
 - Calling the handoff does not create a lead or TG reference. Do not submit the
   returned form with fake personal information.
@@ -299,7 +309,7 @@ Install `npm:tempguru-pi@1.7.4` in an isolated Pi configuration and confirm:
 The last published-artifact Pi smoke ran on 2026-08-10 against `1.7.2`: it
 installed one isolated copy, enumerated all eight skills, and made exactly one
 Austin call, which returned HTTP 200 with `catalog_match=true` and
-`coverage_confirmation_required=true`. Versions `1.7.3` and `1.7.4` changed text and renamed one native tool
+`coverage_confirmation_required=true`. Versions `1.7.3` through `1.7.5` changed text and renamed three native tools
 (skill wording, one native tool description, and `skill_version`); record its
 own smoke result here before closing the release.
 
@@ -307,7 +317,7 @@ Run the same published artifact through Prime Agent's persistent package
 loader. Do not combine this installed copy with the ephemeral `-e` loader:
 
 ```bash
-prime-agent package install npm:tempguru-pi@1.7.4
+prime-agent package install npm:tempguru-pi@1.7.5
 prime-agent package list
 prime-agent \
   --mode json \
@@ -389,10 +399,10 @@ curl -fsS https://mcp.tempguru.co/.well-known/agent-card.json \
 curl -fsSI https://mcp.tempguru.co/request-quote
 ```
 
-The health and server card must report `1.7.4`; the server card must list 12
+The health and server card must report `1.7.5`; the server card must list 12
 tools; and the form must resolve on `mcp.tempguru.co`.
 
-## 7. Tag `v1.7.4` and verify GHCR
+## 7. Tag `v1.7.5` and verify GHCR
 
 After npm, Pi, Registry, Vercel, Cloudflare, and the live canary verify, tag
 the exact merge commit:
@@ -401,24 +411,24 @@ the exact merge commit:
 git fetch origin
 git switch main
 git pull --ff-only
-git tag -a v1.7.4 -m "TempGuru MCP v1.7.4"
-git push origin v1.7.4
+git tag -a v1.7.5 -m "TempGuru MCP v1.7.5"
+git push origin v1.7.5
 ```
 
-The tag starts `docker.yml`, which publishes GHCR tags `1.7.4` and `1.7`.
+The tag starts `docker.yml`, which publishes GHCR tags `1.7.5` and `1.7`.
 Verify the immutable image:
 
 ```bash
 docker buildx imagetools inspect \
-  ghcr.io/tempguru-co/event-staffing:1.7.4
+  ghcr.io/tempguru-co/event-staffing:1.7.5
 ```
 
 Create a draft GitHub Release:
 
 ```bash
-gh release create v1.7.4 \
+gh release create v1.7.5 \
   --repo Tempguru-co/tempguru-mcp \
-  --title "TempGuru MCP v1.7.4" \
+  --title "TempGuru MCP v1.7.5" \
   --draft \
   --generate-notes
 ```
@@ -435,7 +445,7 @@ The release notes must call out:
   quote-form prefill remains.
 - `get_policies` publishes all eight booking topics with no open items, and the
   2-hour no-show replacement is a target, not a guarantee.
-- MCP `request_quote` remains a read-only, non-PII buyer-form handoff; only a
+- MCP `prepare_quote_form` remains a read-only, non-PII buyer-form handoff; only a
   buyer's website/REST form submission creates a lead and TG reference.
 - The connector inventory is 12 tools, 2 prompts, and 8 resources.
 
@@ -445,14 +455,15 @@ Publish the draft only after the closeout checklist is complete.
 
 Use
 `distribution/anthropic-directory-update.md` as the paste-ready source. Make
-the portal listing match the deployed `1.7.4` server exactly.
+the portal listing match the deployed `1.7.5` server exactly.
 
 The factual public-offer surface was disclosed to the Anthropic MCP Directory
 team before `1.7.1` was deployed, and the operator chose to deploy without
 waiting for guidance. That history is not Anthropic approval of AGENT5.
-Release `1.7.3` removed the offer from every model-readable surface. Release
-`1.7.4` renames one tool, so the tool inventory in the portal listing must be
-updated to `get_lead_time_guidance` (see the rename note in
+Release `1.7.3` removed the offer from every model-readable surface. Releases
+`1.7.4` and `1.7.5` rename three tools, so the tool inventory in the portal
+listing must be updated to `get_lead_time_guidance`, `prepare_quote_form`, and
+`get_quote_request_status` (see the rename notes in
 `distribution/anthropic-directory-update.md`).
 
 ### Listing fields
@@ -486,11 +497,11 @@ covers the `/request-quote` URL returned by the handoff.
 | `get_compliance_by_state` | Read-only |
 | `get_policies` | Read-only |
 | `get_rate_benchmark` | Read-only |
-| `request_quote` | Read-only and idempotent; returns buyer form, no PII or lead |
-| `get_quote_status` | Read-only; checks buyer-created or historical TG references |
+| `prepare_quote_form` | Read-only and idempotent; returns buyer form, no PII or lead |
+| `get_quote_request_status` | Read-only; checks buyer-created or historical TG references |
 
 This is 10 read-only tools and 2 non-destructive, non-contact persistence
-writes. Do not describe `request_quote` as a write.
+writes. Do not describe `prepare_quote_form` as a write.
 
 ### Exact prompt inventory
 
@@ -518,7 +529,7 @@ The reviewer can:
 1. Call `plan_staffing` with a future event, valid city, and role/headcount.
 2. Retain its `plan_id`, or call `save_staffing_plan` once if no ID was
    returned.
-3. Call `request_quote` with that saved ID.
+3. Call `prepare_quote_form` with that saved ID.
 4. Confirm that the output is a `form_url`, not a lead receipt or TG reference.
 5. Inspect the form without entering contact details or submitting it.
 
@@ -526,29 +537,29 @@ The reviewer can:
 
 The connector is already approved as a community connector. Verify that the
 live directory declaration still says `read_write`, 12 tools, 2 prompts, 8
-resources, and allowed origin `https://mcp.tempguru.co`. Release `1.7.4` does
+resources, and allowed origin `https://mcp.tempguru.co`. Release `1.7.5` does
 not require a new directory submission. If the Directory team replies to the
 existing AGENT5 disclosure, follow its guidance and record the response; do not
 claim Anthropic approved the offer.
 
 ## 9. Re-sync external skill catalogs and assistant copies
 
-Release `1.7.4` changes skill instructions (every reference to
-`check_availability` becomes `get_lead_time_guidance`) and moves the canonical
-quote skills to `skill_version: 1.7.4`.
+Release `1.7.5` changes skill instructions (every reference to
+`check_availability`, `request_quote`, and `get_quote_status` uses the new
+names) and moves the canonical quote skills to `skill_version: 1.7.5`.
 
 - **Hermes:** re-sync PR #39150. Copy `distribution/assistants/hermes/SKILL.md`
-  (`version: 1.0.7`) to `optional-skills/productivity/event-staffing/SKILL.md`
+  (`version: 1.0.8`) to `optional-skills/productivity/event-staffing/SKILL.md`
   and the test to `tests/skills/test_event_staffing_skill.py` on the PR branch
   in the `kissmyabs32/hermes-agent` fork, then push. Do not modify or restart
   the separate Hermes content agent runtime.
 - **ClawHub:** publish the canonical skills that changed since the `1.7.0`
-  ClawHub copies (source commit `125ee8a`) at version `1.7.4` from the
+  ClawHub copies (source commit `125ee8a`) at version `1.7.5` from the
   operator's ClawHub account. No repository workflow covers ClawHub. ClawHub is
   an independent catalog; do not SSH to or change the legacy OpenClaw VPS
   container at `/docker/openclaw-y5yb/`, edit `openclaw.json`, restart
   `openclaw-gateway`, or touch sibling agents.
-- **Pi:** step 5 publishes `tempguru-pi@1.7.4`; never republish `1.7.3`.
+- **Pi:** step 5 publishes `tempguru-pi@1.7.5`; never republish `1.7.3`.
 
 Historical record: seven ClawHub buyer-handoff safety copies were published as
 immutable `1.7.0` on 2026-08-14 from source commit `125ee8a`. Hermes PR #39150
@@ -558,7 +569,7 @@ upstream repository's review status.
 ### Live assistant copies
 
 Repository changes do not automatically update assistants that imported a
-prompt, knowledge file, or REST/OpenAPI Action. For `1.7.4`:
+prompt, knowledge file, or REST/OpenAPI Action. For `1.7.5`:
 
 - Re-paste `distribution/assistants/system-prompt.md` (and the zh-CN prompt
   where used) on each live assistant platform.
@@ -577,20 +588,20 @@ release; keep those rows as future work.
 
 ## 10. Close the release
 
-Do not mark `1.7.4` complete until every applicable item is verified:
+Do not mark `1.7.5` complete until every applicable item is verified:
 
 - Vercel Production serves the merge commit and `/request-quote`.
-- `tempguru-mcp@1.7.4` resolves from npm.
-- `tempguru-pi@1.7.4` resolves from npm.
+- `tempguru-mcp@1.7.5` resolves from npm.
+- `tempguru-pi@1.7.5` resolves from npm.
 - `tempguru-pi@1.7.3` was not republished or overwritten.
-- The official MCP Registry reports `1.7.4`.
-- The Cloudflare discovery Worker deployment is live and serves the `1.7.4`
+- The official MCP Registry reports `1.7.5`.
+- The Cloudflare discovery Worker deployment is live and serves the `1.7.5`
   skill bodies.
 - The documented discovery route bindings resolve to the expected Worker
   content, including `/auth.md` and the request schema; no legacy MCP-repository
   Worker shadows the website-owned apex llms files.
 - `check-live-discovery.yml` passes.
-- GHCR exposes `latest`, `1.7.4`, `1.7`, and the expected `sha-*` image.
+- GHCR exposes `latest`, `1.7.5`, `1.7`, and the expected `sha-*` image.
 - Live MCP, REST, OpenAPI, llms, and OKF surfaces carry no AGENT5 copy;
   `get_policies` returns all eight topics with no open items; and `/mcp`
   refuses an 11-message batch.
@@ -598,7 +609,7 @@ Do not mark `1.7.4` complete until every applicable item is verified:
   resources, and allowed origin `https://mcp.tempguru.co`.
 - The AGENT5 disclosure record does not claim Anthropic approval where no such
   approval has been received.
-- Hermes PR #39150 carries the `1.0.7` copies, and ClawHub serves the `1.7.4`
+- Hermes PR #39150 carries the `1.0.8` copies, and ClawHub serves the `1.7.5`
   skills.
 - Every live assistant platform has the updated prompt and knowledge files,
   the Hugging Face dataset is republished, and the website llms files carry no
@@ -619,7 +630,7 @@ pending third-party reviews labeled pending.
   behavior; keep the Anthropic listing pending or disabled until the approved
   `1.7.x` safety boundary is live again. Rolling back below `1.7.3` also
   restores AGENT5 in model-readable text and the unpatched dependencies;
-  rolling back to `1.7.3` restores the `check_availability` tool name.
+  rolling back to `1.7.3` restores the three old tool names.
 - **Cloudflare:** roll back the discovery Worker from its Deployments tab. The
   website deployment owns the apex llms files; do not restore the retired MCP
   llms Worker as a rollback path.
@@ -627,11 +638,11 @@ pending third-party reviews labeled pending.
   deployed. If the safe handoff is unavailable, tell the reviewer and pause
   re-review rather than leaving an inaccurate listing.
 - **`tempguru-mcp` npm and MCP Registry:** versions are immutable. After
-  `1.7.4`, publish the next unused patch; never overwrite `1.7.4`, `1.7.3`,
+  `1.7.5`, publish the next unused patch; never overwrite `1.7.5`, `1.7.3`,
   `1.7.2`, `1.7.1`, `1.7.0`, or `1.6.0`.
-- **`tempguru-pi` npm:** `1.7.4` is published and immutable once this release
-  ships. Publish any forward fix as a new unused patch such as `1.7.5`; never
-  overwrite `1.7.4`, `1.7.3`, or any earlier artifact.
+- **`tempguru-pi` npm:** `1.7.5` is published and immutable once this release
+  ships. Publish any forward fix as a new unused patch such as `1.7.6`; never
+  overwrite `1.7.5`, `1.7.3`, or any earlier artifact.
 - **GHCR:** preserve versioned tags. A corrective `main` deployment may move
   `latest`; use a new semantic version for a permanent fix.
 - **Hermes and ClawHub:** correct catalog content with a new commit/version and

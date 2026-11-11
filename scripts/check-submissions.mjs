@@ -678,7 +678,7 @@ for (const skill of QUOTE_ATTRIBUTION_SKILLS) {
     `\`${skill}\``,
     "`skill_version`",
     `\`${SKILL_ATTRIBUTION_VERSION}\``,
-    "`get_quote_status`",
+    "`get_quote_request_status`",
   ]) {
     if (!body.includes(fragment)) {
       errors.push(`content/skills/${skill}.md: quote path missing ${fragment}`);
@@ -709,7 +709,7 @@ for (const p of [
   "public/okf/reference/mcp-tools.md",
 ]) {
   const body = read(p);
-  for (const fragment of ["`plan_id`", "`save_staffing_plan`", "`request_quote`"]) {
+  for (const fragment of ["`plan_id`", "`save_staffing_plan`", "`prepare_quote_form`"]) {
     if (!body.includes(fragment)) {
       errors.push(`${p}: explicit-save plan-to-quote handoff missing ${fragment}`);
     }
@@ -727,7 +727,7 @@ for (const fragment of [
   "`source_platform`",
   "`skill_id`",
   "`skill_version`",
-  "`get_quote_status`",
+  "`get_quote_request_status`",
 ]) {
   if (!read("public/okf/workflows/quote-submission.md").includes(fragment)) {
     errors.push(`public/okf/workflows/quote-submission.md: attribution/status path missing ${fragment}`);
@@ -768,7 +768,7 @@ for (const p of [
     "source=hermes",
     "save_staffing_plan",
     "never save a plan that already has an ID",
-    "request_quote",
+    "prepare_quote_form",
   ]) {
     if (!body.includes(fragment)) {
       errors.push(`${path}: posted Hermes Phase A contract missing ${fragment}`);
@@ -810,8 +810,8 @@ if (!/"plan_staffing"[\s\S]*?readOnlyHint:\s*false[\s\S]*?destructiveHint:\s*fal
 if (!/"save_staffing_plan"[\s\S]*?readOnlyHint:\s*false[\s\S]*?destructiveHint:\s*false/.test(REGISTER_TOOLS_SOURCE)) {
   errors.push("src/lib/mcp/register-tools.ts: save_staffing_plan must advertise a non-read-only, non-destructive artifact write");
 }
-if (!/"request_quote"[\s\S]*?readOnlyHint:\s*true[\s\S]*?destructiveHint:\s*false[\s\S]*?idempotentHint:\s*true/.test(REGISTER_TOOLS_SOURCE)) {
-  errors.push("src/lib/mcp/register-tools.ts: request_quote must advertise a read-only, non-destructive, idempotent buyer handoff");
+if (!/"prepare_quote_form"[\s\S]*?readOnlyHint:\s*true[\s\S]*?destructiveHint:\s*false[\s\S]*?idempotentHint:\s*true/.test(REGISTER_TOOLS_SOURCE)) {
+  errors.push("src/lib/mcp/register-tools.ts: prepare_quote_form must advertise a read-only, non-destructive, idempotent buyer handoff");
 }
 for (const forbidden of ["contact_name", "contact_email", "contact_phone", "company"]) {
   if (QUOTE_HANDOFF_SOURCE.includes(`${forbidden}:`)) {
@@ -896,7 +896,7 @@ for (const p of [
 ]) {
   const body = read(p);
   if (/\bnine read-only\b/i.test(body) || /(?:九个|9\s*个)只读/.test(body)) {
-    errors.push(`${p}: stale nine-read-only count; request_quote is now a tenth read-only handoff`);
+    errors.push(`${p}: stale nine-read-only count; prepare_quote_form is now a tenth read-only handoff`);
   }
   if (!body.includes("plan_staffing") || !/(?:non-destructive|不具破坏性|非联系信息|saved-plan write)/i.test(body)) {
     errors.push(`${p}: saved-plan planner side effect is not disclosed`);
@@ -911,7 +911,7 @@ for (const [path, buyerMarker] of [
 ]) {
   const body = read(path);
   if (
-    !body.includes("request_quote") ||
+    !body.includes("prepare_quote_form") ||
     !body.includes("submitQuoteRequest") ||
     !body.includes(buyerMarker)
   ) {
@@ -919,7 +919,7 @@ for (const [path, buyerMarker] of [
   }
   if (
     /same CRM destination, same confirmation payload as the MCP tool/i.test(body) ||
-    /有 request_quote 工具时直接调用/.test(body)
+    /有 prepare_quote_form 工具时直接调用/.test(body)
   ) {
     errors.push(`${path}: stale direct MCP quote-submission instructions remain`);
   }
@@ -1147,7 +1147,7 @@ if (existsSync(join(root, "public/.well-known/agent-skills/index.json"))) {
 }
 
 const requiredMcpLlmsFragments = [
-  "MCP request_quote only returns a buyer-operated form",
+  "MCP prepare_quote_form only returns a buyer-operated form",
   "REST submitQuoteRequest is a contact-bearing write and requires explicit confirmation",
   "https://mcp.tempguru.co/mcp",
   "https://mcp.tempguru.co/api/v1",
@@ -1164,8 +1164,8 @@ for (const path of ["public/llms.txt", "public/llms-full.txt"]) {
     errors.push(`${path}: points agents at the stale two-skill repository`);
   }
   if (
-    body.includes("request_quote / submitQuoteRequest") ||
-    body.includes("request_quote is a no-auth public MCP write tool")
+    body.includes("prepare_quote_form / submitQuoteRequest") ||
+    body.includes("prepare_quote_form is a no-auth public MCP write tool")
   ) {
     errors.push(`${path}: conflates the read-only MCP buyer handoff with the contact-bearing REST write`);
   }

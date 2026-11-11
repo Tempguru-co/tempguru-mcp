@@ -17,12 +17,12 @@
 //   - get_compliance_by_state    state-level employment compliance summary
 //   - get_policies                published booking/procurement terms
 //   - get_rate_benchmark          citable W-2 Rate Index benchmark
-//   - get_quote_status            received/queued quote status by TG reference
-//   - request_quote              return a prefilled buyer-operated quote form
+//   - get_quote_request_status            received/queued quote status by TG reference
+//   - prepare_quote_form              return a prefilled buyer-operated quote form
 //
 // plan_staffing retains its Phase A non-destructive saved-plan side effect for
 // compatibility. save_staffing_plan is the explicit non-contact saved-plan
-// write; request_quote is read-only and never accepts or transmits contact data.
+// write; prepare_quote_form is read-only and never accepts or transmits contact data.
 //
 // Transport: official dual-era HTTP entry (2025 initialize/streamable HTTP
 // plus the 2026-07-28 per-request envelope protocol).

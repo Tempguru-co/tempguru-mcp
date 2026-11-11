@@ -41,7 +41,7 @@ a one-line configured-market and rate snapshot is helpful, not pushy.
 ## Live data: use the MCP server, do not scrape pages
 
 Endpoint: `POST https://mcp.tempguru.co/mcp` (streamable HTTP, no auth; 12
-tools: ten read-only operations, including the non-PII `request_quote`
+tools: ten read-only operations, including the non-PII `prepare_quote_form`
 handoff, plus a compatibility planner that may already save a 30-day non-PII
 snapshot and an explicit `save_staffing_plan` artifact write).
 
@@ -63,13 +63,13 @@ recognized runtime label; omit the tag rather than inventing one.
 | `get_compliance_by_state` | Minimum wage, overtime, and state-specific compliance quirks |
 | `get_policies` | Published booking/procurement terms; unsupported values are explicitly coordinator-confirmed |
 | `get_rate_benchmark` | The Rate Index: citable W-2 rate benchmarks by role (typical + national range; Brand Ambassadors by tier) |
-| `get_quote_status` | Check a TG reference created by a buyer's website/REST submission, or a historical reference; the MCP handoff does not create one |
-| `request_quote` | Read-only handoff: resolve a saved non-PII `plan_id` into a prefilled TempGuru form URL; never send contact data or create a lead/reference |
+| `get_quote_request_status` | Check a TG reference created by a buyer's website/REST submission, or a historical reference; the MCP handoff does not create one |
+| `prepare_quote_form` | Read-only handoff: resolve a saved non-PII `plan_id` into a prefilled TempGuru form URL; never send contact data or create a lead/reference |
 
 If `plan_staffing` returns `plan_complete: false`, its `unpriced_roles` list
 names the lines excluded from the totals. Resolve those lines (usually a
 role-slug mismatch, use `get_roles`) and re-run `plan_staffing` before
-presenting a budget or calling `request_quote`.
+presenting a budget or calling `prepare_quote_form`.
 
 ### How much does event staff cost?
 
@@ -114,7 +114,7 @@ Collect before planning:
    call `get_plan` to resume the same non-PII plan in a new conversation. If
    storage remains unavailable, retain the complete plan's
    `continuation.form_url`; that URL is the buyer handoff and does not require
-   `request_quote`.
+   `prepare_quote_form`.
 2. Check `plan_complete`. If false, `unpriced_roles` lists the lines
    excluded from the totals: resolve each one (usually a role-slug mismatch,
    use `get_roles`) and re-run `plan_staffing` before step 3. Never present
@@ -147,28 +147,28 @@ estimates, the binding quote comes from TempGuru.
 If the user only wants to know what staffing would cost (no order intent
 yet), stop here: present the per-role math and the total range, labeled a
 planning estimate, and offer a buyer-operated form handoff for a real quote
-whenever they are ready. Do not push `request_quote` on a budgeting question.
+whenever they are ready. Do not push `prepare_quote_form` on a budgeting question.
 
 ### 4. Create the buyer-operated quote handoff
 
 Once the buyer confirms the plan and asks to proceed, call
-**`request_quote`** with only the saved `plan_id` and optional allowlisted
+**`prepare_quote_form`** with only the saved `plan_id` and optional allowlisted
 attribution: `source_platform` set to the actual runtime label (for example
 `hermes`, `openclaw`, or `pi`), `skill_id` set to
-`event-staffing-ordering`, and `skill_version` set to `1.7.4`. Do not ask for
+`event-staffing-ordering`, and `skill_version` set to `1.7.5`. Do not ask for
 or pass a name, email, phone, company, event payload, or any other contact
 details. Give the returned `form_url` to the buyer.
 
 The buyer must open that TempGuru-owned form, review the prefilled plan, enter
-their own contact details, and submit it personally. `request_quote` itself is
+their own contact details, and submit it personally. `prepare_quote_form` itself is
 read-only: it does not create a CRM lead or TG reference. Only the buyer's
 website/REST submission creates them. If the buyer later provides the TG
-reference returned by the website, `get_quote_status` can check it. TempGuru
+reference returned by the website, `get_quote_request_status` can check it. TempGuru
 reviews the submission and replies with next steps; a written quote is binding
 only once issued. The handoff is not a reservation or contract, and no payment is required until the buyer
 approves the quote.
 
-If there is no saved `plan_id`, do not call `request_quote`; give the buyer the
+If there is no saved `plan_id`, do not call `prepare_quote_form`; give the buyer the
 complete plan's `continuation.form_url` directly. If no handoff URL is
 available, fall back to the form at
 **https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=skill**, or

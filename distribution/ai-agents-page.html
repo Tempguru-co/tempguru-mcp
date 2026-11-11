@@ -80,7 +80,7 @@
 
   <h2>MCP Tools</h2>
 
-  <p>Twelve tools: ten read-only operations (including the non-PII <code>request_quote</code> buyer-form handoff), a non-destructive <code>plan_staffing</code> planner with best-effort 30-day non-PII autosave, and an explicit non-contact <code>save_staffing_plan</code> write. No authentication required. In Phase A, start with <code>plan_staffing</code> and retain any returned <code>plan_id</code>. Call <code>save_staffing_plan</code> once only when a complete plan has no ID and persistence is needed; never duplicate an existing save. When the buyer asks to proceed, call <code>request_quote</code> with the saved plan ID and give the returned form URL to the buyer.</p>
+  <p>Twelve tools: ten read-only operations (including the non-PII <code>prepare_quote_form</code> buyer-form handoff), a non-destructive <code>plan_staffing</code> planner with best-effort 30-day non-PII autosave, and an explicit non-contact <code>save_staffing_plan</code> write. No authentication required. In Phase A, start with <code>plan_staffing</code> and retain any returned <code>plan_id</code>. Call <code>save_staffing_plan</code> once only when a complete plan has no ID and persistence is needed; never duplicate an existing save. When the buyer asks to proceed, call <code>prepare_quote_form</code> with the saved plan ID and give the returned form URL to the buyer.</p>
 
   <div class="tg-tools">
 
@@ -135,12 +135,12 @@
     </div>
 
     <div class="tg-tool">
-      <div class="tg-tool-name">get_quote_status</div>
+      <div class="tg-tool-name">get_quote_request_status</div>
       <p>Check whether a TG quote reference was received by the CRM or durably queued for retry.</p>
     </div>
 
     <div class="tg-tool">
-      <div class="tg-tool-name">request_quote <span class="tg-tool-badge">read-only · non-PII</span></div>
+      <div class="tg-tool-name">prepare_quote_form <span class="tg-tool-badge">read-only · non-PII</span></div>
       <p>Resolve a saved non-PII <code>plan_id</code> into a prefilled TempGuru-owned form. This tool accepts no contact details, never writes to the CRM, and creates no TG reference. The buyer opens the URL, reviews the plan, enters their own contact information, and submits the form personally.</p>
     </div>
 
@@ -263,8 +263,8 @@ cd tempguru-mcp
 
   <p class="tg-label">Pi</p>
   <div class="tg-code">pi install npm:tempguru-pi
-// Published current version: 1.7.4. Unpinned installs resolve to this immutable release.
-// tempguru_request_quote returns the buyer-operated form and sends no contact data.</div>
+// Published current version: 1.7.5. Unpinned installs resolve to this immutable release.
+// tempguru_prepare_quote_form returns the buyer-operated form and sends no contact data.</div>
 
   <p class="tg-label">Prime Agent</p>
   <div class="tg-code">prime-agent package install npm:tempguru-pi
@@ -308,7 +308,7 @@ prime-agent package list
       </tr>
       <tr>
         <td>5. Buyer handoff</td>
-        <td>When the buyer asks to proceed, call <code>request_quote</code> with only the saved <code>plan_id</code> and optional allowlisted attribution. Give the returned <code>form_url</code> to the buyer. The buyer reviews the plan, enters their own contact details, and submits the form personally; only that website/REST submission creates a lead and TG reference.</td>
+        <td>When the buyer asks to proceed, call <code>prepare_quote_form</code> with only the saved <code>plan_id</code> and optional allowlisted attribution. Give the returned <code>form_url</code> to the buyer. The buyer reviews the plan, enters their own contact details, and submits the form personally; only that website/REST submission creates a lead and TG reference.</td>
       </tr>
     </tbody>
   </table>
@@ -330,7 +330,7 @@ prime-agent package list
 
   <h2>Security &amp; Privacy</h2>
 
-  <p>All ten read-only tools are unauthenticated. <code>plan_staffing</code> and <code>save_staffing_plan</code> persist only allowlisted, non-contact plan fields; Phase A agents must not call the explicit save when the planner already returned a <code>plan_id</code>. MCP <code>request_quote</code> accepts only a saved plan ID and bounded attribution, and returns a TempGuru form URL; it never accepts or transmits contact data and never creates a lead or reference. Contact details reach TempGuru only after the buyer enters them and presses submit on the website form. Skills are plain markdown with no executable code. See TempGuru's privacy policy for retention and processor details.</p>
+  <p>All ten read-only tools are unauthenticated. <code>plan_staffing</code> and <code>save_staffing_plan</code> persist only allowlisted, non-contact plan fields; Phase A agents must not call the explicit save when the planner already returned a <code>plan_id</code>. MCP <code>prepare_quote_form</code> accepts only a saved plan ID and bounded attribution, and returns a TempGuru form URL; it never accepts or transmits contact data and never creates a lead or reference. Contact details reach TempGuru only after the buyer enters them and presses submit on the website form. Skills are plain markdown with no executable code. See TempGuru's privacy policy for retention and processor details.</p>
 
   <hr>
 
@@ -438,7 +438,7 @@ prime-agent package list
     v1.5 (June 2026): TempGuru GPT published with in-chat quote requests; npx install; explicit agent-routing guidance<br>
     v1.4 (June 2026): npm CLI package, install locally with npx -y tempguru-mcp (npmjs.com/package/tempguru-mcp)<br>
     v1.3 (June 2026): Added Gemini API remote-MCP integration<br>
-    v1.2 (June 2026), Added request_quote to tools list; corrected read-only characterization; updated GitHub repo to tempguru-co org<br>
+    v1.2 (June 2026), Added prepare_quote_form to tools list; corrected read-only characterization; updated GitHub repo to tempguru-co org<br>
     v1.1 (June 4, 2026), MCP Registry listing, ChatGPT/Perplexity/Gemini CLI instructions, REST API/OpenAPI<br>
     v1.0 (June 3, 2026), Initial release
   </p>

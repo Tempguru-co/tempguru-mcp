@@ -26,7 +26,7 @@ description: |
   the non-destructive plan_staffing tool may best-effort save a 30-day non-PII
   snapshot; save_staffing_plan is the explicit non-contact write used only when
   a complete plan has no plan_id and persistence is needed, never to duplicate a save.
-  request_quote is read-only: it resolves a saved plan_id into a prefilled
+  prepare_quote_form is read-only: it resolves a saved plan_id into a prefilled
   TempGuru-owned form URL and never accepts contact details or creates a lead or
   TG reference. The buyer reviews and submits that form personally.
 
@@ -148,14 +148,14 @@ tools:
       Informational benchmark, not a binding quote.
     readOnly: true
 
-  - name: get_quote_status
+  - name: get_quote_request_status
     description: >
       Check a TG quote reference created after the buyer personally submits the
       TempGuru website form, or a historical REST-created reference. The MCP
-      request_quote handoff does not create a reference.
+      prepare_quote_form handoff does not create a reference.
     readOnly: true
 
-  - name: request_quote
+  - name: prepare_quote_form
     description: >
       Read-only, idempotent, non-PII buyer handoff. Requires a saved plan_id and
       accepts only optional allowlisted platform/skill attribution, then returns a

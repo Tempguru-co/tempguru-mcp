@@ -29,7 +29,7 @@ FROM node:24-alpine AS runner
 WORKDIR /app
 
 LABEL org.opencontainers.image.title="TempGuru Event Staffing MCP"
-LABEL org.opencontainers.image.description="MCP server for W-2 event staffing planning across 300+ U.S. and Canadian markets, backed by 5,000+ events and 100,000+ completed shifts; catalog matches require coordinator order confirmation. Twelve tools: plan_staffing, save_staffing_plan, get_plan, get_cities, get_roles, get_lead_time_guidance, get_role_pricing, get_compliance_by_state, get_policies, get_rate_benchmark, get_quote_status, request_quote."
+LABEL org.opencontainers.image.description="MCP server for W-2 event staffing planning across 300+ U.S. and Canadian markets, backed by 5,000+ events and 100,000+ completed shifts; catalog matches require coordinator order confirmation. Twelve tools: plan_staffing, save_staffing_plan, get_plan, get_cities, get_roles, get_lead_time_guidance, get_role_pricing, get_compliance_by_state, get_policies, get_rate_benchmark, get_quote_request_status, prepare_quote_form."
 LABEL org.opencontainers.image.vendor="Temporary Assistance Guru, Inc."
 LABEL org.opencontainers.image.url="https://tempguru.co"
 LABEL org.opencontainers.image.source="https://github.com/tempguru-co/tempguru-mcp"
@@ -38,7 +38,7 @@ LABEL org.opencontainers.image.licenses="MIT"
 LABEL mcp.server.name="co.tempguru/event-staffing"
 LABEL mcp.server.transport="streamable-http"
 LABEL mcp.server.url="https://mcp.tempguru.co/mcp"
-LABEL mcp.server.tools="plan_staffing,save_staffing_plan,get_plan,get_cities,get_roles,get_lead_time_guidance,get_role_pricing,get_compliance_by_state,get_policies,get_rate_benchmark,get_quote_status,request_quote"
+LABEL mcp.server.tools="plan_staffing,save_staffing_plan,get_plan,get_cities,get_roles,get_lead_time_guidance,get_role_pricing,get_compliance_by_state,get_policies,get_rate_benchmark,get_quote_request_status,prepare_quote_form"
 
 ENV NODE_ENV=production
 ENV PORT=3000

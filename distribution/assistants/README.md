@@ -39,7 +39,7 @@ included for the full picture.)
 
 | Surface | Type | Status |
 |---|---|---|
-| Official MCP Registry (`co.tempguru/event-staffing`) | MCP | 🟡 `1.7.3` is the latest published version (2026-11-02). Release `1.7.4` (tool rename `check_availability` → `get_lead_time_guidance`) publishes through `publish-registry.yml` after merge; verify the Registry reports `1.7.4`. |
+| Official MCP Registry (`co.tempguru/event-staffing`) | MCP | 🟡 `1.7.3` is the latest published version (2026-11-02). `1.7.4` (tool rename `check_availability` → `get_lead_time_guidance`) was deployed 2026-11-11 but not published to npm or the Registry; release `1.7.5` (renames `request_quote` → `prepare_quote_form`, `get_quote_status` → `get_quote_request_status`) supersedes it and publishes through `publish-npm.yml`, which dispatches `publish-registry.yml`. Verify the Registry reports `1.7.5`. |
 | Smithery, Glama | MCP | ✅ live |
 | ModelScope MCP 广场 | MCP | ✅ live |
 | Docker MCP Registry | MCP | 🟡 PR #3902 awaiting review |
@@ -47,12 +47,12 @@ included for the full picture.)
 | Postman collection | REST | ✅ imported (re-import after city fix) |
 | Mistral connector directory | MCP | 🟡 outreach drafted, Megan to send via contact form |
 | Anthropic Connectors Directory (claude.ai) | MCP | ✅ approved as a community connector. The AGENT5 disclosure was sent on the original review thread 2026-08-14; `1.7.1` was subsequently deployed after the operator chose to proceed without waiting for guidance. This records no Anthropic approval of the offer. The `1.7.2` hotfix changes policy-topic discovery and telemetry, not offer terms or connector inventory. The release after `1.7.2` removes AGENT5 from every model-readable surface; see `distribution/anthropic-directory-update.md`. |
-| npm CLI (`tempguru-mcp`), GHCR image | dev | 🟡 `tempguru-mcp@1.7.3` and GHCR `1.7.3` are published and immutable (2026-11-02). Release `1.7.4` publishes through `publish-npm.yml` and the `v1.7.4` tag after merge. PyPI `tempguru` is still `0.2.0` while `clients/python` is at `0.3.0`; push `python-v0.3.0` or revert the bump. |
-| Hermes agent catalog (NousResearch) | Agent Skill | 🟡 PR #39150 is open and awaiting upstream review. Release `1.7.4` changes the catalog copy to `1.0.7` (tool rename to `get_lead_time_guidance`), so re-sync both submission files to the PR branch after merge. Do not touch the separate live Hermes content agent runtime. |
-| Pi + Prime Agent (`tempguru-pi` npm package) | Agent Skill + native tools | ✅ `1.7.4` is the current release (native tool `tempguru_get_lead_time_guidance`, skills regenerated for the rename); `publish-pi.yml` publishes it after merge. `1.7.3` and earlier remain immutable. The package has 8 runtime-adapted skills, 9 native tools, a non-PII buyer-form handoff, and automatic `pi` / `prime-agent` attribution. The published-artifact smoke last ran on `1.7.2` (all 8 skills enumerated, native extension loaded, one Austin call each for Pi and Prime, coordinator-confirmation boundary preserved); run it on `1.7.4` after publication. Use the next unused patch for any fix; never republish an existing version. |
-| OpenClaw / ClawHub | Agent Skill | 🟡 seven buyer-handoff safety updates were published and verified as immutable `1.7.0` on 2026-08-14 from commit `125ee8a`. Releases `1.7.3` and `1.7.4` change the canonical skills (`skill_version: 1.7.4`, tool rename); publishing them needs the operator's ClawHub account, since no repository workflow covers ClawHub. The legacy OpenClaw VPS runtime is unchanged. |
+| npm CLI (`tempguru-mcp`), GHCR image | dev | 🟡 `tempguru-mcp@1.7.3` and GHCR `1.7.3` are published and immutable (2026-11-02). `1.7.4` was never published; release `1.7.5` publishes through `publish-npm.yml` and the `v1.7.5` tag after merge. PyPI `tempguru` is still `0.2.0` while `clients/python` is at `0.3.0`; push `python-v0.3.0` or revert the bump. |
+| Hermes agent catalog (NousResearch) | Agent Skill | 🟡 PR #39150 is open and awaiting upstream review. Release `1.7.5` changes the catalog copy to `1.0.8` (tool renames `get_lead_time_guidance`, `prepare_quote_form`, `get_quote_request_status`), so re-sync both submission files to the PR branch after merge. Do not touch the separate live Hermes content agent runtime. |
+| Pi + Prime Agent (`tempguru-pi` npm package) | Agent Skill + native tools | ✅ `1.7.5` is the current release (native tools `tempguru_get_lead_time_guidance`, `tempguru_prepare_quote_form`, `tempguru_quote_request_status`; skills regenerated for the renames); `publish-pi.yml` publishes it after merge. `1.7.3` and earlier remain immutable; `1.7.4` was never published. The package has 8 runtime-adapted skills, 9 native tools, a non-PII buyer-form handoff, and automatic `pi` / `prime-agent` attribution. The published-artifact smoke last ran on `1.7.2` (all 8 skills enumerated, native extension loaded, one Austin call each for Pi and Prime, coordinator-confirmation boundary preserved); run it on `1.7.5` after publication. Use the next unused patch for any fix; never republish an existing version. |
+| OpenClaw / ClawHub | Agent Skill | 🟡 seven buyer-handoff safety updates were published and verified as immutable `1.7.0` on 2026-08-14 from commit `125ee8a`. Releases `1.7.3` through `1.7.5` change the canonical skills (`skill_version: 1.7.5`, three tool renames); publishing them needs the operator's ClawHub account, since no repository workflow covers ClawHub. The legacy OpenClaw VPS runtime is unchanged. |
 | **ChatGPT Custom GPT** | this kit | 🟠 LIVE 2026-06-09, https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner; inspect and refresh its prompt, knowledge, listing, and configured Actions before closeout. MCP uses the buyer-operated form; an explicitly configured REST `submitQuoteRequest` Action may submit once only after the buyer reviews the contact-bearing payload and clearly confirms. |
-| **ChatGPT plugin (directory, was "ChatGPT App")** | this kit | 🟠 The developer-dashboard package `app-6a29a9e0634481919b7440b626b0e746` is **1.0.0 Approved, never published** (June copy, no skills, support URL missing). The 2026-11-11 upload of `1.7.3` went to the separate dev plugin `dev-6a29a4fac…`. OpenAI's MCP scan flags `check_availability` as inconsistent with its behavior; release `1.7.4` renames it to `get_lead_time_guidance`. Next: fix the MCPs tab finding (rescan after `1.7.4` deploys), **Publish plugin** on 1.0.0 so the listing exists, then **Create draft from ZIP** with the `1.7.4` package (name + `.app.json` from this dashboard's Download plugin ZIP), paste `chatgpt-plugin-review.md`, submit. Runbook in [chatgpt-app.md](./chatgpt-app.md), audit in [CHATGPT-AUDIT-2026-11.md](../../CHATGPT-AUDIT-2026-11.md). |
+| **ChatGPT plugin (directory, was "ChatGPT App")** | this kit | 🟠 The developer-dashboard package `app-6a29a9e0634481919b7440b626b0e746` is **1.0.0 Approved, never published** (June copy, no skills, support URL missing). The 2026-11-11 upload of `1.7.3` went to the separate dev plugin `dev-6a29a4fac…`. OpenAI's MCP scan flagged `check_availability` (renamed in `1.7.4`) and then `request_quote` as names inconsistent with their behavior; release `1.7.5` renames `request_quote` → `prepare_quote_form` and, pre-emptively, `get_quote_status` → `get_quote_request_status`. Next: fix the MCPs tab finding (rescan after `1.7.5` deploys), **Publish plugin** on 1.0.0 so the listing exists, then **Create draft from ZIP** with the `1.7.5` package (name + `.app.json` from this dashboard's Download plugin ZIP), paste `chatgpt-plugin-review.md`, submit. Runbook in [chatgpt-app.md](./chatgpt-app.md), audit in [CHATGPT-AUDIT-2026-11.md](../../CHATGPT-AUDIT-2026-11.md). |
 | **ChatGPT Business Hub (Businesses in ChatGPT)** | profile | 🟡 Claimed 2026-11 (beta launched 2026-11-10). Finish Persona identity verification, fill the profile from `system-prompt.md` and the approved claims, baseline Insights (mentions, clicks, discovery topics), add `utm_source=chatgpt.com` to GA4 attribution. Business Agents are US ecommerce/online-service only today and are not connected to the plugin; prepare instructions + context docs from `knowledge/` so TempGuru can publish one the day the category opens. Checklist in the audit. |
 | **Gemini Gem (public)** | this kit | ⬜ build + share Public (~30m) |
 | **M365 Copilot agent** | this kit | ⬜ Partner Center verification first (slow), sideload test |
@@ -65,9 +65,9 @@ included for the full picture.)
 | **Kimi agent (intl)** | this kit | ⬜ zh prompt ready |
 | **Coze.cn → Doubao, Yuanqi, Baidu, Zhipu** | this kit | ⬜ blocked on +86 verification (see china-platforms.md tiers) |
 
-`tempguru-mcp@1.7.4` and `tempguru-pi@1.7.4` are independently versioned
+`tempguru-mcp@1.7.5` and `tempguru-pi@1.7.5` are independently versioned
 packages that share a number in this release. Both publish after merge through
-their workflows, the canonical skills move to `skill_version: 1.7.4`, and the
+their workflows, the canonical skills move to `skill_version: 1.7.5`, and the
 Hermes and ClawHub copies are re-synced from them.
 
 ## Launch order (highest leverage first)
@@ -86,7 +86,7 @@ Hermes and ClawHub copies are re-synced from them.
 
 ## Quote conversion boundary
 
-The MCP `request_quote` tool is now a strict non-PII, read-only handoff. It
+The MCP `prepare_quote_form` tool is now a strict non-PII, read-only handoff. It
 accepts a saved `plan_id` plus optional allowlisted attribution and returns a
 prefilled TempGuru-owned `form_url`. It never accepts contact details, calls
 the CRM, or creates a TG reference. If plan storage was unavailable, clients
@@ -95,7 +95,7 @@ use the completed plan's `continuation.form_url` directly.
 On the MCP path, the buyer must open that form, review the plan, enter their
 own contact details, and submit it personally. Only the TempGuru website then
 calls `POST /api/v1/quote-requests` (operationId `submitQuoteRequest`) to create
-the lead and TG reference. Never send contact details to MCP `request_quote`.
+the lead and TG reference. Never send contact details to MCP `prepare_quote_form`.
 
 An assistant may use a separately and explicitly configured REST
 `submitQuoteRequest` Action, but only after it collects the Action schema's
@@ -103,9 +103,9 @@ minimum fields, shows the buyer the complete contact-bearing payload, explains
 that it will be sent to TempGuru's CRM or durable fallback intake queue, and
 receives a clear request to submit. Invoke the write once and preserve a TG
 reference only after success. Without that explicit REST Action, present the
-buyer-operated form. `get_quote_status` remains for references returned by the
+buyer-operated form. `get_quote_request_status` remains for references returned by the
 website/REST submission and for historical TG references; it is not a
-follow-up result of MCP `request_quote`.
+follow-up result of MCP `prepare_quote_form`.
 
 ## Beyond assistant stores: what actually gets a brand "recommended by AI"
 

@@ -238,7 +238,7 @@ compliance_flags:
 # ──────────────────────────────────────────────────────────────────────────────
 # AGENT CONVERSATION
 #
-# The fields the request_quote tool collects from the user.
+# The fields the prepare_quote_form tool collects from the user.
 # Ordered by how a natural conversation should flow.
 #
 # NOT collected here (sales rep collects during review):

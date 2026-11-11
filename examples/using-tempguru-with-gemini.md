@@ -31,7 +31,7 @@ curl -X POST "https://generativelanguage.googleapis.com/v1beta/interactions" \
 Notes:
 - Remote MCP is currently **beta**, supported on `gemini-2.5-flash` (Gemini 3 support is coming).
 - No auth header for the MCP server is needed. Ten of its 12 tools are read-only,
-  including `request_quote`; `plan_staffing` and `save_staffing_plan` are
+  including `prepare_quote_form`; `plan_staffing` and `save_staffing_plan` are
   non-contact saved-plan writes.
 
 ## Option 2, SDK with an explicit tool loop (robust, works today)
@@ -56,9 +56,9 @@ python gemini-tempguru-demo.py "Do you cover Chicago, and what's the registratio
 | `get_lead_time_guidance` | "Can you staff June 15 in Austin?" |
 | `get_role_pricing` | "What do brand ambassadors cost in Boston?" |
 | `get_compliance_by_state` | "W-2 vs 1099 rules for event staff in New York?" |
-| `request_quote` | "Prepare my saved staffing plan for a quote" (read-only; returns a prefilled form the buyer submits personally) |
+| `prepare_quote_form` | "Prepare my saved staffing plan for a quote" (read-only; returns a prefilled form the buyer submits personally) |
 
-Authless `request_quote` accepts a saved `plan_id` plus allowlisted attribution
+Authless `prepare_quote_form` accepts a saved `plan_id` plus allowlisted attribution
 only. It never accepts contact details, writes to TempGuru's CRM, or returns a
 TG reference. Gemini should give the buyer the returned `form_url`; only the
 buyer's own form submission creates the lead.

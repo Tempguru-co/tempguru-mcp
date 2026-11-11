@@ -16,7 +16,7 @@ export interface RequestContext {
   // published egress ranges ("anthropic" / "openai" / "other" / "unknown").
   // A label only; the IP itself is never recorded.
   network: SourceNetwork;
-  // Client IP (x-forwarded-for first hop), used ONLY for the request_quote
+  // Client IP (x-forwarded-for first hop), used ONLY for the prepare_quote_form
   // rate limiter, which stores a truncated hash, never the raw IP. Empty under
   // stdio, where the limiter fails open.
   ip: string;

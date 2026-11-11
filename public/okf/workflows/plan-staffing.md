@@ -27,7 +27,7 @@ flags, and next steps.
 5. **Flag compliance:** check the event's [state profile](../compliance/index.md). Call out the daily-overtime states (Alaska, California, Colorado, Nevada).
 6. **Present the plan** with totals labeled as **planning estimates**, never binding quotes. Never promise availability.
 7. Retain any `plan_id` returned by the completed plan. If persistence is useful and no ID was returned, call `save_staffing_plan` once with the same confirmed event fields; never duplicate an existing save.
-8. When the buyer asks to proceed, call `request_quote` with the saved `plan_id` and give the buyer its `form_url`. Never collect or transmit contact details through MCP. If storage did not return a plan ID, give the buyer the planner's `continuation.form_url` directly.
+8. When the buyer asks to proceed, call `prepare_quote_form` with the saved `plan_id` and give the buyer its `form_url`. Never collect or transmit contact details through MCP. If storage did not return a plan ID, give the buyer the planner's `continuation.form_url` directly.
 
 The team-lead auto-add rule inserts one Team Lead when any single shift reaches
 **20 staff**. See [event archetypes](../archetypes/index.md) for event-type defaults.

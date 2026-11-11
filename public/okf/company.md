@@ -51,7 +51,7 @@ W-2 bill rate (worker pay, employer payroll taxes, workers' compensation, genera
 ## How booking works
 
 1. Build a staffing plan: city, dates, roles, headcount (see [workflows/plan-staffing.md](workflows/plan-staffing.md)).
-2. The authless MCP `request_quote` tool restores the saved non-PII plan and returns a prefilled TempGuru buyer form. It never accepts contact details or creates a lead.
+2. The authless MCP `prepare_quote_form` tool restores the saved non-PII plan and returns a prefilled TempGuru buyer form. It never accepts contact details or creates a lead.
 3. The buyer opens that form, reviews the plan, enters their own contact details, and submits it themselves.
 4. A human coordinator replies with a binding quote within **one business day**.
 5. No payment until the quote is approved. Billing is per event; there is no subscription.

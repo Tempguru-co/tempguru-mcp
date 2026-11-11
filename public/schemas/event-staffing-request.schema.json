@@ -353,5 +353,5 @@
   "additionalProperties": false,
   "$id": "https://tempguru.co/schemas/event-staffing-request.schema.json",
   "title": "TempGuru Event Staffing Quote Request",
-  "description": "The exact public contract accepted by the buyer-operated POST /api/v1/quote-requests endpoint. Authless MCP request_quote accepts only a saved non-PII plan reference and returns a form link."
+  "description": "The exact public contract accepted by the buyer-operated POST /api/v1/quote-requests endpoint. Authless MCP prepare_quote_form accepts only a saved non-PII plan reference and returns a form link."
 }

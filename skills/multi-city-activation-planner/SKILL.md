@@ -57,7 +57,7 @@ inventing one.
 | `get_lead_time_guidance` | Tier-based lead-time guidance for one city and date (not live inventory, confirmed coverage, or a reservation) |
 | `get_compliance_by_state` | Minimum wage and overtime rules, which differ by state and Canadian province |
 | `get_rate_benchmark` | The Rate Index: citable W-2 rate benchmarks by role |
-| `request_quote` | Read-only, non-PII handoff: resolve one saved `plan_id` into a prefilled buyer form; it accepts no event payload or contact data |
+| `prepare_quote_form` | Read-only, non-PII handoff: resolve one saved `plan_id` into a prefilled buyer form; it accepts no event payload or contact data |
 
 ## Workflow
 
@@ -109,12 +109,12 @@ not a separate vendor per market. If the user only wants a budget, stop here.
 ### 5. Create one buyer-operated handoff for the whole program
 
 Only after the buyer confirms the consolidated plan and asks to proceed, call
-`request_quote` once with the primary leg's saved `plan_id` and, when useful,
+`prepare_quote_form` once with the primary leg's saved `plan_id` and, when useful,
 only the optional allowlisted `source_platform`, `skill_id`, and
 `skill_version` attribution. Do not pass contact details, `locations[]`, or
 any event payload: the tool accepts none of them. Give the returned `form_url`
 to the buyer. If the primary leg has no `plan_id`, do not call
-`request_quote`; give the buyer its `continuation.form_url` directly.
+`prepare_quote_form`; give the buyer its `continuation.form_url` directly.
 
 The buyer must open the TempGuru-owned form, review the primary-leg prefill,
 add or verify every other city, date, role, and headcount from the consolidated

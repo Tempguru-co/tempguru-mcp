@@ -56,7 +56,7 @@ joint-employer liability fall on the event organizer.
 
 1. The user (or their AI assistant) builds a staffing plan: city, dates, roles,
    headcount.
-2. With a saved `plan_id`, the authless MCP `request_quote` tool returns a
+2. With a saved `plan_id`, the authless MCP `prepare_quote_form` tool returns a
    prefilled form at https://mcp.tempguru.co/request-quote. It never accepts
    contact details or creates a lead. The buyer opens the link, reviews the
    plan, enters their own contact information, and submits it personally.

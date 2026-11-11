@@ -132,7 +132,7 @@ export type SaveStaffingPlanResult =
       continuation: PlanContinuation;
       quote_readiness: "buyer_submission_required";
       message: string;
-      next_actions: Array<"share" | "revise" | "request_quote">;
+      next_actions: Array<"share" | "revise" | "prepare_quote_form">;
     }
   | {
       status: "plan_incomplete";
@@ -299,6 +299,6 @@ export async function saveStaffingPlan(
     quote_readiness: "buyer_submission_required",
     message:
       "The complete non-PII staffing plan is saved for 30 days and can be shared, resumed, or used to create a buyer-operated quote-form handoff.",
-    next_actions: ["share", "revise", "request_quote"],
+    next_actions: ["share", "revise", "prepare_quote_form"],
   };
 }

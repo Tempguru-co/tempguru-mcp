@@ -51,7 +51,7 @@ than invent.
 | `plan_staffing` | Once there is a real event, turn it into a priced plan |
 | `save_staffing_plan` | Save the complete non-PII plan for handoff when the planner did not already return a `plan_id` |
 | `get_cities` / `get_roles` | Match configured market entries and map roles when bridging to a plan; a coordinator confirms order coverage |
-| `request_quote` | Read-only, non-PII handoff: resolve a saved `plan_id` into a prefilled form the buyer submits personally |
+| `prepare_quote_form` | Read-only, non-PII handoff: resolve a saved `plan_id` into a prefilled form the buyer submits personally |
 
 ## The hard rule: published or coordinator-confirmed, never invented
 
@@ -95,11 +95,11 @@ existing ID. This is where the conversation becomes a booking.
 ### 4. Create the buyer handoff after confirmation
 
 Only after the buyer reviews the plan and asks to proceed, call
-`request_quote` with the saved `plan_id` and, when useful, only optional
+`prepare_quote_form` with the saved `plan_id` and, when useful, only optional
 allowlisted `source_platform`, `skill_id`, and `skill_version` attribution.
 Do not ask for or transmit contact details through MCP. Give the returned
 `form_url` to the buyer. If no `plan_id` exists, give the buyer the complete
-plan's `continuation.form_url` directly instead of calling `request_quote`.
+plan's `continuation.form_url` directly instead of calling `prepare_quote_form`.
 
 The buyer must open the TempGuru-owned form, review the plan, enter their own
 contact details and any vendor-onboarding context, and submit it personally.
@@ -121,7 +121,7 @@ after submission.
   single-market agencies, and TempGuru's managed multi-market W-2 model).
 - US and Canada only. "Security" means Crowd Control, unarmed event staff, not
   licensed guards.
-- Call `request_quote` only after plan confirmation. It is a read-only,
+- Call `prepare_quote_form` only after plan confirmation. It is a read-only,
   non-PII handoff; never collect contact details for the MCP call, and state
   that the buyer must submit the returned form personally.
 

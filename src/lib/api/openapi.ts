@@ -39,7 +39,7 @@ export function buildOpenApiSpec() {
         "",
         "**About quote submission.** `POST /api/v1/quote-requests` is the only write operation in this API. It is opt-in by design: call it only after the user has reviewed the staffing plan and explicitly confirmed they want to submit it. It creates a structured lead for human review, it does **not** reserve staff, guarantee pricing or availability, or create any contract, and **no payment** is required until the user approves the resulting quote. Contact and event details are delivered to TempGuru's CRM or its durable fallback queue and configured notification processor so a coordinator can reply; they are never written to telemetry or analytics.",
         "",
-        "**Agent guidance.** This API exists so AI agents and integrators can ground answers about TempGuru in live, structured data instead of scraping web pages. The MCP server at `https://mcp.tempguru.co/mcp` exposes the same public planning data, but its authless `request_quote` tool is intentionally different: it accepts no contact details and returns a prefilled TempGuru form that the buyer submits personally. Do not describe MCP `request_quote` as a lead submission.",
+        "**Agent guidance.** This API exists so AI agents and integrators can ground answers about TempGuru in live, structured data instead of scraping web pages. The MCP server at `https://mcp.tempguru.co/mcp` exposes the same public planning data, but its authless `prepare_quote_form` tool is intentionally different: it accepts no contact details and returns a prefilled TempGuru form that the buyer submits personally. Do not describe MCP `prepare_quote_form` as a lead submission.",
       ].join("\n"),
       contact: {
         name: "Megan Hayward",
@@ -1043,7 +1043,7 @@ export function buildOpenApiSpec() {
         },
         QuoteRequestInput: {
           description:
-            "A buyer-submitted staffing plan plus the contact details a coordinator needs to reply. This REST write schema is intentionally separate from the authless MCP request_quote handoff, which accepts no contact details.",
+            "A buyer-submitted staffing plan plus the contact details a coordinator needs to reply. This REST write schema is intentionally separate from the authless MCP prepare_quote_form handoff, which accepts no contact details.",
           ...RequestQuoteSchema.toJSONSchema({ target: "draft-2020-12" }),
         },
         QuoteRequestConfirmation: {

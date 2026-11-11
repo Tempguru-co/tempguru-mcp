@@ -43,19 +43,19 @@ Verified public scale:
 | `get_compliance_by_state` | State-level employment compliance summary (minimum wage, overtime, state quirks). NOT legal advice. |
 | `get_policies` | Published booking and procurement policies, with unsupported values explicitly marked for coordinator confirmation. |
 | `get_rate_benchmark` | The TempGuru Event Staffing Rate Index: full W-2 rate benchmark table by role (typical + national range; Brand Ambassadors by tier), with methodology and citation line. |
-| `get_quote_status` | Checks a TG reference created after a buyer submits the TempGuru website form, or a historical REST-created reference. The MCP handoff does not create one. |
-| `request_quote` | Read-only, non-PII buyer handoff. Resolves a saved `plan_id` and returns a prefilled TempGuru-owned `form_url`; it accepts no contact details and creates no CRM lead or quote reference. |
+| `get_quote_request_status` | Checks a TG reference created after a buyer submits the TempGuru website form, or a historical REST-created reference. The MCP handoff does not create one. |
+| `prepare_quote_form` | Read-only, non-PII buyer handoff. Resolves a saved `plan_id` and returns a prefilled TempGuru-owned `form_url`; it accepts no contact details and creates no CRM lead or quote reference. |
 
-Ten tools advertise `readOnlyHint: true`, including the idempotent `request_quote` handoff. `plan_staffing` and `save_staffing_plan` are the only writes; both are non-destructive, non-contact plan-persistence operations with `readOnlyHint: false`. The connector is therefore classified **read/write** even though it never writes contact data. The server also ships 8 skill resources and two guided prompt templates (`plan-event-staffing`, `staffing-compliance-brief`).
+Ten tools advertise `readOnlyHint: true`, including the idempotent `prepare_quote_form` handoff. `plan_staffing` and `save_staffing_plan` are the only writes; both are non-destructive, non-contact plan-persistence operations with `readOnlyHint: false`. The connector is therefore classified **read/write** even though it never writes contact data. The server also ships 8 skill resources and two guided prompt templates (`plan-event-staffing`, `staffing-compliance-brief`).
 
 ### Phase A planning and save workflow
 
 1. Call `plan_staffing` first with the event city, date, roles, and headcount.
 2. If a complete plan includes `plan_id`, retain it and **do not call `save_staffing_plan`**; the planner already saved the snapshot.
 3. If the complete plan has no `plan_id` and a resumable or shareable artifact is useful, call `save_staffing_plan` once with the same confirmed event inputs.
-4. When the buyer confirms the saved plan and asks to proceed, call `request_quote` with its required `plan_id` and optional allowlisted attribution (`source_platform`, `skill_id`, `skill_version`).
+4. When the buyer confirms the saved plan and asks to proceed, call `prepare_quote_form` with its required `plan_id` and optional allowlisted attribution (`source_platform`, `skill_id`, `skill_version`).
 5. Give the returned `form_url` to the buyer. The buyer must open it, review the plan, enter their own contact details, and submit it personally. Only that website/REST submission creates a lead and TG reference.
-6. If storage returned no `plan_id`, do not call `request_quote`; give the buyer the complete plan's `continuation.form_url` directly.
+6. If storage returned no `plan_id`, do not call `prepare_quote_form`; give the buyer the complete plan's `continuation.form_url` directly.
 
 ---
 
@@ -147,10 +147,10 @@ active workspace.
 
 **Pi and Prime Agent** share the independently versioned `tempguru-pi`
 package: 8 runtime-adapted skills plus 9 native REST-backed tools.
-`tempguru-pi@1.7.4` is the published, current, immutable release; the unpinned
-install commands below resolve to `1.7.4`. Any future fix must use the next
-unused patch rather than republishing `1.7.4`. The native
-`tempguru_request_quote` is a read-only saved-plan handoff that returns the
+`tempguru-pi@1.7.5` is the published, current, immutable release; the unpinned
+install commands below resolve to `1.7.5`. Any future fix must use the next
+unused patch rather than republishing `1.7.5`. The native
+`tempguru_prepare_quote_form` is a read-only saved-plan handoff that returns the
 buyer form instead of sending contact data. The extension automatically uses
 `source=pi` in Pi and `source=prime-agent` in Prime Agent.
 
@@ -196,7 +196,7 @@ turn; each directory includes Codex `agents/openai.yaml` metadata.
 
 | Client / Agent runtime | Status | Notes |
 |---|---|---|
-| Claude.ai (web) | ✅ Verified | 12 tools (10 read-only, including `request_quote`, plus planner + explicit non-contact save) |
+| Claude.ai (web) | ✅ Verified | 12 tools (10 read-only, including `prepare_quote_form`, plus planner + explicit non-contact save) |
 | Claude Desktop | ✅ Compatible | Standard remote MCP config |
 | Claude Code | ✅ Verified | Tools load via plugin or direct add |
 | Claude for Work / Cowork | ✅ Compatible | Same connector framework as Claude.ai |
@@ -205,7 +205,7 @@ turn; each directory includes Codex `agents/openai.yaml` metadata.
 | Windsurf | ✅ Compatible | Streamable HTTP transport |
 | Hermes Agent | ✅ Verified | Native remote HTTP MCP plus separate well-known skill discovery |
 | OpenClaw | ✅ Compatible | Native `openclaw mcp add`; top-level `skills/` package included |
-| Pi | ✅ `1.7.4` current | Published artifact exposes 8 runtime-adapted skills + 9 native tools; `tempguru_request_quote` returns the buyer-operated form and sends no contact data; the published-artifact smoke last ran on `1.7.2` |
+| Pi | ✅ `1.7.5` current | Published artifact exposes 8 runtime-adapted skills + 9 native tools; `tempguru_prepare_quote_form` returns the buyer-operated form and sends no contact data; the published-artifact smoke last ran on `1.7.2` |
 | Prime Agent v0.7.0 | ✅ Published-artifact functional smoke passed on `1.7.2` | Uses the same `tempguru-pi` package contract: 8 skills + 9 native tools with automatic `source=prime-agent` attribution; its stock MCP integration cannot yet attach this authless server |
 | OpenAI Agents SDK | ✅ Compatible | Use MCP client with the URL above |
 | ChatGPT (Codex / Custom GPTs with MCP) | ✅ Compatible | Same as OpenAI Agents SDK |
@@ -229,7 +229,7 @@ The matrix is "the server is spec-compliant; any spec-compliant client connects.
 - **Apex discovery:** one Cloudflare Worker generated by `npm run build:worker` serves `tempguru.co`'s `.well-known/*`, `robots.txt`, `auth.md`, and `schemas/*`. The website owns and deploys the apex `llms.txt` and `llms-full.txt`; this repository only generates the separate MCP-hosted exports in `public/`.
 - **Drift gates:** `npm run check:submissions` (CI) and `npm run check-rates` keep the registry/catalog files and rate data in sync with the canonical sources
 
-A public REST surface is available at `mcp.tempguru.co/api/v1/*` with OpenAPI 3.1 at `/openapi.json` and RFC 9727 api-catalog at `/.well-known/api-catalog`. Its read operations include saved plans, policies, and quote status. The human-facing TempGuru form uses `POST /api/v1/quote-requests` only after the buyer reviews the prefill, enters their own contact details, and presses submit; that separate browser/REST action creates the CRM lead and TG reference. The MCP `request_quote` tool does not share that contact-bearing input contract and never performs the REST submission.
+A public REST surface is available at `mcp.tempguru.co/api/v1/*` with OpenAPI 3.1 at `/openapi.json` and RFC 9727 api-catalog at `/.well-known/api-catalog`. Its read operations include saved plans, policies, and quote status. The human-facing TempGuru form uses `POST /api/v1/quote-requests` only after the buyer reviews the prefill, enters their own contact details, and presses submit; that separate browser/REST action creates the CRM lead and TG reference. The MCP `prepare_quote_form` tool does not share that contact-bearing input contract and never performs the REST submission.
 
 ### Telemetry & admin dashboard
 
@@ -244,7 +244,7 @@ Every MCP tool invocation is instrumented with anonymized usage telemetry stored
 
 **No quote PII is captured in MCP telemetry.** Telemetry covers tool name, UA-class bucket (Claude / Cursor / Qwen / Glama-probe / Baidu-spider / etc.), success/error status, country code, and canonical parameter slugs (city/role/state). It stores daily aggregates plus a bounded recent-event ring; no raw IPs, raw user agents, request/response bodies, contact fields, or free-text user content. Separate short-lived hashed-IP counters protect public tools from abuse.
 
-`request_quote` accepts only a saved non-PII `plan_id` plus optional allowlisted attribution, restores that plan, and returns a link on `https://mcp.tempguru.co`. It never asks for, receives, or transmits contact details, and it creates neither a CRM lead nor a TG reference. Contact handling begins only when the buyer opens the form, enters their own details, and submits it; the website then calls the separate REST intake. Those contact fields are never written to MCP product telemetry. See the draft [MCP privacy addendum](./distribution/privacy.md).
+`prepare_quote_form` accepts only a saved non-PII `plan_id` plus optional allowlisted attribution, restores that plan, and returns a link on `https://mcp.tempguru.co`. It never asks for, receives, or transmits contact details, and it creates neither a CRM lead nor a TG reference. Contact handling begins only when the buyer opens the form, enters their own details, and submits it; the website then calls the separate REST intake. Those contact fields are never written to MCP product telemetry. See the draft [MCP privacy addendum](./distribution/privacy.md).
 
 Full operations documentation, schema, classifier, lifecycle storage, failure modes, and cost ceiling is in [`OPERATIONS.md`](./OPERATIONS.md). Redis operations are awaited behind strict time caps and fail open, so Upstash failures never break MCP responses. Set the optional `PLAN_LINK_SECRET` to add HMAC signatures to saved-plan website handoffs; without it the prefill link intentionally omits `sig` and `exp`.
 
@@ -258,7 +258,7 @@ Hourly rates vary by role and city. Brand Ambassadors floor at $40/hour in every
 
 ### Can an AI agent book event staff through this MCP?
 
-It cannot book staff or submit contact details. After a buyer confirms a saved plan, `request_quote` returns a prefilled TempGuru form link. The buyer must open that link, review the plan, enter their own contact details, and submit it personally. Only the website's REST submission creates the CRM lead and TG reference; a coordinator then replies with a quote. The handoff does not reserve staff, guarantee pricing or availability, create a contract, or require payment. Ten tools are read-only; only `plan_staffing` and the conditional `save_staffing_plan` may persist non-contact plan snapshots. Retain a planner-returned `plan_id` and never save it twice. If storage is unavailable, use the returned `continuation.form_url` directly. If your client cannot connect to this MCP, route the user to the [TempGuru Event Staffing Planner GPT](https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner) or the form at https://tempguru.co/get-staffing.
+It cannot book staff or submit contact details. After a buyer confirms a saved plan, `prepare_quote_form` returns a prefilled TempGuru form link. The buyer must open that link, review the plan, enter their own contact details, and submit it personally. Only the website's REST submission creates the CRM lead and TG reference; a coordinator then replies with a quote. The handoff does not reserve staff, guarantee pricing or availability, create a contract, or require payment. Ten tools are read-only; only `plan_staffing` and the conditional `save_staffing_plan` may persist non-contact plan snapshots. Retain a planner-returned `plan_id` and never save it twice. If storage is unavailable, use the returned `continuation.form_url` directly. If your client cannot connect to this MCP, route the user to the [TempGuru Event Staffing Planner GPT](https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner) or the form at https://tempguru.co/get-staffing.
 
 ### Is TempGuru a gig app or a 1099 marketplace?
 

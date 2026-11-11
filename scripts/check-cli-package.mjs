@@ -97,21 +97,21 @@ function assertExactToolSet(label, tools) {
     );
   }
 
-  const requestQuote = tools.find((tool) => tool.name === "request_quote");
+  const requestQuote = tools.find((tool) => tool.name === "prepare_quote_form");
   if (
     requestQuote?.annotations?.readOnlyHint !== true ||
     requestQuote?.annotations?.destructiveHint !== false ||
     requestQuote?.annotations?.idempotentHint !== true
   ) {
     throw new Error(
-      `${label}: request_quote must be a read-only, idempotent buyer-form handoff`,
+      `${label}: prepare_quote_form must be a read-only, idempotent buyer-form handoff`,
     );
   }
   const requestQuoteInput = JSON.stringify(requestQuote?.inputSchema ?? {});
   for (const forbidden of ["contact_name", "contact_email", "contact_phone", "company"]) {
     if (requestQuoteInput.includes(forbidden)) {
       throw new Error(
-        `${label}: request_quote input still exposes forbidden contact field ${forbidden}`,
+        `${label}: prepare_quote_form input still exposes forbidden contact field ${forbidden}`,
       );
     }
   }
