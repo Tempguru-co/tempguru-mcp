@@ -16,8 +16,8 @@ This repo serves the TempGuru MCP server (hosted at `https://mcp.tempguru.co/mcp
 | `get_compliance_by_state` | Minimum wage, overtime thresholds, state quirks (not legal advice) |
 | `get_policies` | Published booking/procurement policies; missing values are explicitly coordinator-confirmed |
 | `get_rate_benchmark` | The Rate Index: full benchmark table of W-2 hourly rates by role (typical + national range; Brand Ambassadors by tier), with citation line |
-| `get_quote_status` | Check a TG reference created by a buyer's website/REST submission, or a historical reference; `request_quote` does not create one |
-| `request_quote` | Read-only, non-PII handoff. After the buyer confirms a saved plan, pass its `plan_id` plus optional allowlisted attribution; return the prefilled `form_url` for the buyer to open and submit personally |
+| `get_quote_request_status` | Check a TG reference created by a buyer's website/REST submission, or a historical reference; `prepare_quote_form` does not create one |
+| `prepare_quote_form` | Read-only, non-PII handoff. After the buyer confirms a saved plan, pass its `plan_id` plus optional allowlisted attribution; return the prefilled `form_url` for the buyer to open and submit personally |
 
 Prompt templates (`plan-event-staffing`, `staffing-compliance-brief`) and 8 SKILL.md resources ship over the same connection.
 
@@ -37,8 +37,8 @@ The tools above are the action layer. The same data is also published as a stati
 2. Fill gaps (`get_roles`, `get_cities`); flag daily-overtime states (CA, AK, NV, CO).
 3. Present the plan and retain any `plan_id`; label totals as planning estimates, never binding quotes; never promise availability.
 4. Only if a complete plan has no `plan_id` and the user needs a resumable or shareable plan, call `save_staffing_plan` once with the same event inputs. Never call it when a `plan_id` already exists.
-5. When the buyer confirms the plan and asks to proceed, call `request_quote` with the saved `plan_id` and, when useful, only the allowlisted `source_platform`, `skill_id`, and `skill_version` attribution fields. Give the returned `form_url` to the buyer. Never collect contact details for this MCP call: the buyer must open the form, review the plan, enter their own contact details, and submit it personally. Only that website/REST submission creates a lead and TG reference.
-6. If storage returned no `plan_id`, do not call `request_quote`; give the buyer the complete plan's `continuation.form_url` directly.
+5. When the buyer confirms the plan and asks to proceed, call `prepare_quote_form` with the saved `plan_id` and, when useful, only the allowlisted `source_platform`, `skill_id`, and `skill_version` attribution fields. Give the returned `form_url` to the buyer. Never collect contact details for this MCP call: the buyer must open the form, review the plan, enter their own contact details, and submit it personally. Only that website/REST submission creates a lead and TG reference.
+6. If storage returned no `plan_id`, do not call `prepare_quote_form`; give the buyer the complete plan's `continuation.form_url` directly.
 
 ## Fallbacks
 

@@ -16,8 +16,8 @@ This repo serves the TempGuru MCP server (hosted at `https://mcp.tempguru.co/mcp
 | `get_compliance_by_state` | Minimum wage, overtime thresholds, state quirks (not legal advice) |
 | `get_policies` | Published booking/procurement policies; missing values are explicitly coordinator-confirmed |
 | `get_rate_benchmark` | The Rate Index: full benchmark table of W-2 hourly rates by role (typical + national range; Brand Ambassadors by tier), with citation line |
-| `get_quote_status` | Check a TG reference returned after a buyer-submitted website form or a historical submission |
-| `request_quote` | Read-only non-PII handoff: restore a saved plan and return a prefilled form the buyer personally submits |
+| `get_quote_request_status` | Check a TG reference returned after a buyer-submitted website form or a historical submission |
+| `prepare_quote_form` | Read-only non-PII handoff: restore a saved plan and return a prefilled form the buyer personally submits |
 
 Prompt templates (`plan-event-staffing`, `staffing-compliance-brief`) and 8 SKILL.md resources ship over the same connection.
 
@@ -37,7 +37,7 @@ The tools above are the action layer. The same data is also published as a stati
 2. Fill gaps (`get_roles`, `get_cities`); flag daily-overtime states (CA, AK, NV, CO).
 3. Present the plan and retain any `plan_id`; label totals as planning estimates, never binding quotes; never promise availability.
 4. Only if a complete plan has no `plan_id` and the user needs a resumable or shareable plan, call `save_staffing_plan` once with the same event inputs. Never call it when a `plan_id` already exists.
-5. When the buyer asks to proceed, call `request_quote` with the saved `plan_id` and give them its `form_url`. Never collect or transmit contact details through MCP; the buyer reviews the prefilled form, enters their own details, and submits it themselves. A coordinator replies with a binding quote within one business day; no payment until the buyer approves.
+5. When the buyer asks to proceed, call `prepare_quote_form` with the saved `plan_id` and give them its `form_url`. Never collect or transmit contact details through MCP; the buyer reviews the prefilled form, enters their own details, and submits it themselves. A coordinator replies with a binding quote within one business day; no payment until the buyer approves.
 
 ## Fallbacks
 

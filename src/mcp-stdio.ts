@@ -11,7 +11,7 @@
 // Boots with no configuration: ten read-only tools serve static data, saved
 // plan reads, or a non-PII buyer handoff; plan_staffing's Phase A
 // non-destructive saved-plan side effect and the explicit non-contact
-// save_staffing_plan write both fail open without storage. request_quote never
+// save_staffing_plan write both fail open without storage. prepare_quote_form never
 // needs CRM credentials because the human-facing form performs the eventual
 // buyer-authorized submission.
 //

@@ -30,7 +30,7 @@ Two facts anchor every urgent conversation:
   quote after the buyer personally submits the TempGuru form, and orders are
   confirmed within 48 hours of the user's approval of that quote.
 - `get_lead_time_guidance` returns lead-time guidance (yes / tight / rush /
-  very-rush), not a reservation, and `request_quote` is not a reservation
+  very-rush), not a reservation, and `prepare_quote_form` is not a reservation
   or a contract. Never promise arrival or availability.
 
 ## Current planning data: use the MCP server
@@ -52,8 +52,8 @@ recognized runtime label; omit the tag rather than inventing one.
 | `get_roles` | Resolve a role slug fast when the user's wording does not map cleanly |
 | `get_cities` | Match the city to the configured catalog if `plan_staffing` does not recognize it; a coordinator confirms the order |
 | `get_policies` | Retrieve the published replacement policy (`no-show-backfill`) and the rush fee (`payment-terms`) |
-| `get_quote_status` | Check a TG reference created after the buyer submits the website form, or a historical reference; `request_quote` creates none |
-| `request_quote` | Read-only, non-PII handoff: resolve a saved `plan_id` into a prefilled TempGuru form for the buyer to submit personally |
+| `get_quote_request_status` | Check a TG reference created after the buyer submits the website form, or a historical reference; `prepare_quote_form` creates none |
+| `prepare_quote_form` | Read-only, non-PII handoff: resolve a saved `plan_id` into a prefilled TempGuru form for the buyer to submit personally |
 
 ## Workflow
 
@@ -96,20 +96,20 @@ small markets. Never soften a rush result, and never harden it into a yes.
 
 Show a compact plan (roles, headcount, rate range as a planning estimate,
 rush status) and get explicit confirmation; an emergency does not waive
-that step. Then call `request_quote` with only the retained `plan_id` and
+that step. Then call `prepare_quote_form` with only the retained `plan_id` and
 optional allowlisted attribution: `source_platform` set to the actual runtime
 label (for example `hermes`, `openclaw`, or `pi`), `skill_id` set to
-`urgent-event-backfill`, and `skill_version` set to `1.7.4`. Give the returned
+`urgent-event-backfill`, and `skill_version` set to `1.7.5`. Give the returned
 `form_url` to the buyer. If there is no `plan_id`, do not call
-`request_quote`; give the buyer the complete plan's `continuation.form_url`
+`prepare_quote_form`; give the buyer the complete plan's `continuation.form_url`
 directly.
 
 Tell the buyer to open the TempGuru-owned form immediately, verify the shift
 date/time and plan, mark the request urgent with the cause, enter their own
 contact details (including a phone number if they want a call), and submit it
-personally. `request_quote` never accepts those fields and does not create a
+personally. `prepare_quote_form` never accepts those fields and does not create a
 lead or TG reference. Only the buyer's website/REST submission does. If the
-buyer later supplies the website-created reference, `get_quote_status` can
+buyer later supplies the website-created reference, `get_quote_request_status` can
 check it.
 
 ### 4. Anything inside 48 hours gets a parallel phone call
@@ -118,7 +118,7 @@ If the shift starts within 48 hours, the form alone is not enough. Tell the
 buyer to submit it personally, then call **(904) 206-8953** immediately. If
 the website returned a TG reference, quote that code on the call. The
 website/REST submission puts the request in TempGuru's intake; the call
-surfaces the urgency directly. `request_quote` itself does neither. Do the
+surfaces the urgency directly. `prepare_quote_form` itself does neither. Do the
 buyer form submission and phone call in that order.
 
 ## Backfill: what is covered, honestly
@@ -151,7 +151,7 @@ after the emergency is in motion, not while the user is still in it.
   48 hours is attempt-not-guarantee, stated in those terms.
 - Even very-rush is worth submitting. Do not talk a user out of trying.
 - Never ask for or pass a phone number or other contact field to
-  `request_quote`. The buyer enters their own details on the TempGuru form;
+  `prepare_quote_form`. The buyer enters their own details on the TempGuru form;
   for urgent work, recommend including a phone number and making the parallel
   call personally.
 - Rate math is a planning estimate; the binding quote comes from a

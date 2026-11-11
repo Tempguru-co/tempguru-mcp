@@ -23,7 +23,7 @@ const SERVER_CARD = {
     title: "TempGuru Event Staffing",
     version: pkg.version,
     description:
-      "Dual-era Model Context Protocol server for TempGuru's repository-backed event staffing catalog. Twelve tools: ten read-only tools including a non-PII request_quote buyer handoff, the non-destructive plan_staffing planner, and an explicit non-destructive save_staffing_plan write. Also ships 8 skill resources and two guided prompts. " +
+      "Dual-era Model Context Protocol server for TempGuru's repository-backed event staffing catalog. Twelve tools: ten read-only tools including a non-PII prepare_quote_form buyer handoff, the non-destructive plan_staffing planner, and an explicit non-destructive save_staffing_plan write. Also ships 8 skill resources and two guided prompts. " +
       APPROVED_SCALE_DESCRIPTION,
     websiteUrl: "https://tempguru.co",
   },
@@ -58,7 +58,7 @@ const SERVER_CARD = {
       "Call plan_staffing first with the event city, date, roles, and headcount.",
       "If a complete plan already includes plan_id, retain it and do not call save_staffing_plan; the planner already saved the non-PII snapshot.",
       "Call save_staffing_plan only for a complete plan that has no plan_id and needs a durable 30-day artifact; the server recomputes rates and totals from bounded event inputs before saving.",
-      "When the buyer asks to proceed, call request_quote with the saved plan_id and give them its form_url; the buyer enters and submits their own contact details.",
+      "When the buyer asks to proceed, call prepare_quote_form with the saved plan_id and give them its form_url; the buyer enters and submits their own contact details.",
     ],
   },
   tools: [
@@ -113,12 +113,12 @@ const SERVER_CARD = {
         "The TempGuru Event Staffing Rate Index: full benchmark table of all-inclusive W-2 hourly rates by role (typical + national range; Brand Ambassadors by tier), with methodology and citation line.",
     },
     {
-      name: "get_quote_status",
+      name: "get_quote_request_status",
       description:
         "Check a TG reference returned after a buyer-submitted website form, including historical references.",
     },
     {
-      name: "request_quote",
+      name: "prepare_quote_form",
       description:
         "Restore a saved non-PII plan and return a prefilled TempGuru buyer form. Read-only: never accepts contact data or creates a lead; the buyer personally submits the form.",
     },

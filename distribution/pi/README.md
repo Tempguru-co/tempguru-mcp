@@ -15,7 +15,7 @@ One package gives either Pi or Prime Agent both layers:
   hosted REST API with runtime-aware attribution (`?source=pi` in Pi and
   `?source=prime-agent` in Prime Agent): cities, roles, availability, pricing,
   compliance, policies, saved plans, quote status, and
-  `tempguru_request_quote`. The quote tool accepts only a saved plan ID and
+  `tempguru_prepare_quote_form`. The quote tool accepts only a saved plan ID and
   returns a TempGuru form the buyer submits personally; it never accepts PII or
   creates a CRM lead.
 
@@ -41,8 +41,8 @@ the model sees it at runtime (the README is not relied on as hidden context):
 | `get_compliance_by_state` | `tempguru_get_compliance` |
 | `get_policies` | `tempguru_get_policies` |
 | `get_plan` | `tempguru_get_plan` |
-| `get_quote_status` | `tempguru_quote_status` |
-| `request_quote` | `tempguru_request_quote` |
+| `get_quote_request_status` | `tempguru_quote_request_status` |
+| `prepare_quote_form` | `tempguru_prepare_quote_form` |
 
 There is no native mapping yet for `plan_staffing`, `save_staffing_plan`, or
 `get_rate_benchmark`. Every generated package skill therefore contains the same
@@ -121,14 +121,14 @@ Notes:
   `pi install npm:tempguru-pi`, then in Pi run `/skills`. Also run
   `prime-agent package install npm:tempguru-pi` and
   `prime-agent package list`. Each runtime must expose 8 TempGuru skills and
-  the 9 tools `tempguru_get_cities` … `tempguru_request_quote`.
+  the 9 tools `tempguru_get_cities` … `tempguru_prepare_quote_form`.
 - Confirm npm independently before calling the release live:
   `npm view tempguru-pi@1.7.2 version`.
 - Record the listing in `distribution/assistants/README.md`'s status tracker.
 
 ## Safety posture (mirrors the MCP server)
 
-- `tempguru_request_quote` is read-only. It requires a saved `plan_id`, returns
+- `tempguru_prepare_quote_form` is read-only. It requires a saved `plan_id`, returns
   a prefilled `https://mcp.tempguru.co/request-quote` URL, and never accepts or
   transmits contact details. The buyer must review and submit the form
   personally; only the REST form submission creates a lead or TG reference.

@@ -1,7 +1,7 @@
 // Lead authenticity scoring for the buyer-operated REST quote-submission path.
 //
 // The buyer-facing REST quote endpoint is public/no-auth: a form buyer or an
-// explicitly configured REST integration can submit a lead. MCP request_quote
+// explicitly configured REST integration can submit a lead. MCP prepare_quote_form
 // never calls this path. This module scores each REST submission from cheap,
 // single-request signals so the CRM record carries a trust level plus the
 // specific reasons, and the downstream enrichment (Frodo) can VERIFY rather

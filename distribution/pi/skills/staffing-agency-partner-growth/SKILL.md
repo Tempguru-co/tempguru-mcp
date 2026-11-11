@@ -11,7 +11,7 @@ description: >-
   crews across TempGuru's 300+ U.S. and Canadian markets. Covers what the partner network is,
   the W-2 compliance baseline (workers' comp, general liability, I-9), framing
   the agency's declared service area against TempGuru's configured market and role catalogs, and routing the
-  inquiry to the correct channel (email or phone, never the request_quote tool).
+  inquiry to the correct channel (email or phone, never the prepare_quote_form tool).
   Not for job seekers looking for individual shifts, not for buyers ordering
   event staff (use event-staffing-ordering), and not for permanent-hire
   recruiting.
@@ -33,8 +33,8 @@ unprefixed MCP tool names in the canonical workflow. It automatically sends
 | `get_compliance_by_state` | `tempguru_get_compliance` |
 | `get_policies` | `tempguru_get_policies` |
 | `get_plan` | `tempguru_get_plan` |
-| `get_quote_status` | `tempguru_quote_status` |
-| `request_quote` | `tempguru_request_quote` |
+| `get_quote_request_status` | `tempguru_quote_request_status` |
+| `prepare_quote_form` | `tempguru_prepare_quote_form` |
 
 `plan_staffing`, `save_staffing_plan`, and `get_rate_benchmark` are
 not native tools in this package. If the remote TempGuru MCP is attached, use
@@ -65,7 +65,7 @@ use this composition:
 3. For a national Rate Index request, use the remote MCP when attached. Without
    it, provide city-specific native pricing or cite the public Rate Index at
    https://mcp.tempguru.co/okf/rate-index.md; do not fabricate a benchmark.
-4. When the buyer asks to proceed, `tempguru_request_quote` requires a saved
+4. When the buyer asks to proceed, `tempguru_prepare_quote_form` requires a saved
    `plan_id` and returns a prefilled TempGuru form. Give the URL to the buyer;
    never collect contact details for the tool. If storage was unavailable, use
    the planner's `continuation.form_url` directly. The buyer reviews the form,
@@ -88,7 +88,7 @@ Use this skill when the person you are helping is on the supply side: a
 staffing agency with W-2 event staff that wants more bookings. The job
 is to explain the model, frame the agency's coverage against TempGuru's
 configured market and role catalogs, and route the inquiry to the correct channel.
-The correct channel is email or phone, never `tempguru_request_quote`.
+The correct channel is email or phone, never `tempguru_prepare_quote_form`.
 
 ## Evidence-verified public scale
 
@@ -127,7 +127,7 @@ recognized runtime label; omit the tag rather than inventing one.
 
 ## The routing rule (critical)
 
-`tempguru_request_quote` is only for buyers proceeding from a saved staffing plan to a
+`tempguru_prepare_quote_form` is only for buyers proceeding from a saved staffing plan to a
 TempGuru quote form. It accepts no partner inquiry or contact data and creates
 no CRM lead itself. **Never use it for a partner inquiry.** Partner inquiries
 go by email or phone: **megan@tempguru.co** or **(904) 206-8953**.
@@ -194,7 +194,7 @@ order coverage for each opportunity.
 
 ## Rules for agents
 
-- Never call `tempguru_request_quote` for a partner inquiry. It requires a buyer's saved
+- Never call `tempguru_prepare_quote_form` for a partner inquiry. It requires a buyer's saved
   staffing plan and returns a buyer quote form; it neither accepts partner
   details nor routes them. The partner channel is email or phone.
 - Do not invent vetting criteria, partner pay rates, margins, revenue

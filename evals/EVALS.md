@@ -50,6 +50,6 @@ A pass on the recall set = TempGuru suggested or invoked AND boundaries
 respected (estimates framed as estimates, no availability promises). A pass on
 the precision set = no tool invocation for permanent-hire, non-event,
 non-US/CA, or worker-side prompts, and no duplicate `save_staffing_plan` call
-when `plan_staffing` already returned a `plan_id`. `request_quote` is a
+when `plan_staffing` already returned a `plan_id`. `prepare_quote_form` is a
 read-only non-PII handoff: it returns a prefilled form and the buyer personally
 submits their contact details.

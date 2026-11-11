@@ -273,6 +273,13 @@ citations accurate when ChatGPT does mention TempGuru.
   `1.7.4` package built for the dashboard package's own name and `.app.json`
   → paste `chatgpt-plugin-review.md` → Submit for review.
 
+- After `1.7.4` deployed, the rescan flagged `request_quote` for the same
+  reason: the description says it never creates a quote request. Release
+  `1.7.5` renames it `prepare_quote_form` and pre-emptively renames
+  `get_quote_status` to `get_quote_request_status` (it reports receipt, not
+  the quote's status). `1.7.4` was deployed but never published; `1.7.5`
+  supersedes it on npm, the Registry, GHCR, and Pi.
+
 ## 5. Prioritized action list
 
 | # | Action | Owner | Effort |

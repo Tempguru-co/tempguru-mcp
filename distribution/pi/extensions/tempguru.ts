@@ -7,7 +7,7 @@
 //
 // Attribution is resolved at request time: Prime Agent v0.7.0 sets the exact
 // Node process title `prime-agent`; an explicit Prime config-directory marker
-// is retained as a fallback. request_quote is a read-only non-PII handoff: it
+// is retained as a fallback. prepare_quote_form is a read-only non-PII handoff: it
 // restores a saved plan and returns a prefilled form the buyer submits.
 //
 // Generated from the tempguru-mcp repo (distribution/pi). The full
@@ -189,7 +189,7 @@ export default function (pi: any) {
   });
 
   pi.registerTool({
-    name: "tempguru_quote_status",
+    name: "tempguru_quote_request_status",
     label: "TempGuru: Quote Status",
     description:
       "Check a TG-XXXXXX reference returned after the buyer personally submits the TempGuru website form, including historical references.",
@@ -202,7 +202,7 @@ export default function (pi: any) {
   });
 
   pi.registerTool({
-    name: "tempguru_request_quote",
+    name: "tempguru_prepare_quote_form",
     label: "TempGuru: Prepare Quote Form",
     description:
       "Restore a saved non-PII staffing plan and return a prefilled TempGuru form for the buyer to personally review and submit. This tool never accepts or transmits contact details and does not create a lead or TG reference. Requires the plan_id returned by plan_staffing or save_staffing_plan. If storage was unavailable, give the buyer the plan's continuation.form_url directly.",

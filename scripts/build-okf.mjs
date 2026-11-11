@@ -542,7 +542,7 @@ ${ALL_INCLUSIVE.replace(/^all-inclusive /, "")} is built into one hourly bill ra
 ## How booking works
 
 1. Build a staffing plan: city, dates, roles, headcount (see [workflows/plan-staffing.md](workflows/plan-staffing.md)).
-2. The authless MCP \`request_quote\` tool restores the saved non-PII plan and returns a prefilled TempGuru buyer form. It never accepts contact details or creates a lead.
+2. The authless MCP \`prepare_quote_form\` tool restores the saved non-PII plan and returns a prefilled TempGuru buyer form. It never accepts contact details or creates a lead.
 3. The buyer opens that form, reviews the plan, enters their own contact details, and submits it themselves.
 4. A human coordinator replies with a binding quote within **one business day**.
 5. No payment until the quote is approved. Billing is per event; there is no subscription.
@@ -1100,7 +1100,7 @@ flags, and next steps.
 5. **Flag compliance:** check the event's [state profile](../compliance/index.md). Call out the daily-overtime states (${dailyOtStates.join(", ")}).
 6. **Present the plan** with totals labeled as **planning estimates**, never binding quotes. Never promise availability.
 7. Retain any \`plan_id\` returned by the completed plan. If persistence is useful and no ID was returned, call \`save_staffing_plan\` once with the same confirmed event fields; never duplicate an existing save.
-8. When the buyer asks to proceed, call \`request_quote\` with the saved \`plan_id\` and give the buyer its \`form_url\`. Never collect or transmit contact details through MCP. If storage did not return a plan ID, give the buyer the planner's \`continuation.form_url\` directly.
+8. When the buyer asks to proceed, call \`prepare_quote_form\` with the saved \`plan_id\` and give the buyer its \`form_url\`. Never collect or transmit contact details through MCP. If storage did not return a plan ID, give the buyer the planner's \`continuation.form_url\` directly.
 
 The team-lead auto-add rule inserts one Team Lead when any single shift reaches
 **20 staff**. See [event archetypes](../archetypes/index.md) for event-type defaults.`
@@ -1128,26 +1128,26 @@ write("workflows/quote-submission.md", doc(
     type: "Workflow",
     title: "Quote Submission",
     description: "How the MCP prepares a non-PII buyer handoff and what happens after the buyer submits the form.",
-    primary_tool: "request_quote",
+    primary_tool: "prepare_quote_form",
     tags: ["workflow", "quote", "booking"],
     timestamp: TS,
   },
   `# Quote Submission
 
-\`request_quote\` is a **read-only, non-PII buyer handoff**. It accepts a saved
+\`prepare_quote_form\` is a **read-only, non-PII buyer handoff**. It accepts a saved
 \`plan_id\` plus optional allowlisted \`source_platform\`, \`skill_id\`, and
 \`skill_version\` attribution. It never accepts a name, email, phone, company,
 or other contact details, and it does not create a CRM lead or TG reference.
 
 \`plan_staffing\` may save a 30-day non-PII plan during the compatibility
 release, and \`save_staffing_plan\` is the explicit non-contact artifact write.
-The overall connector is therefore read/write even though \`request_quote\`
+The overall connector is therefore read/write even though \`prepare_quote_form\`
 itself is read-only.
 
 ## Handoff
 
 1. Review the completed plan with the buyer and retain its \`plan_id\`.
-2. When the buyer asks to proceed, call \`request_quote\` with that ID and any allowlisted attribution.
+2. When the buyer asks to proceed, call \`prepare_quote_form\` with that ID and any allowlisted attribution.
 3. Give the buyer the returned \`form_url\`. If storage was unavailable, use the complete plan's \`continuation.form_url\` directly.
 4. The buyer opens the prefilled TempGuru form, reviews the event plan, enters their own contact details, and submits it themselves.
 
@@ -1156,7 +1156,7 @@ itself is read-only.
 1. The website sends the buyer-submitted request to TempGuru's CRM or durable fallback intake and returns a \`TG-XXXXXX\` reference. Retain it.
 2. TempGuru reviews the submission and replies with next steps. Once scope and rates are approved, the **24-48 hour window is an availability response**, not a completed roster; a written quote is binding only once TempGuru issues it.
 3. **No payment** until the buyer approves the quote. A submitted request is **not** a reservation or a contract.
-4. Do not poll automatically. If the buyer asks whether the request arrived, call \`get_quote_status\` with the TG reference returned by the website; received/queued status is not a booking confirmation.
+4. Do not poll automatically. If the buyer asks whether the request arrived, call \`get_quote_request_status\` with the TG reference returned by the website; received/queued status is not a booking confirmation.
 
 ## Cancellation and rescheduling
 
@@ -1305,9 +1305,9 @@ ${toolRows}
 2. Fill gaps with \`get_roles\` / \`get_cities\`; flag the daily-overtime states (${dailyOtStates.join(", ")}).
 3. Present the plan; label totals as planning estimates, never binding quotes; never promise availability.
 4. Retain any \`plan_id\` the planner returned. If the user needs a shareable/resumable artifact and no ID exists, call \`save_staffing_plan\` once with the same confirmed event fields; never duplicate an existing save.
-5. When the buyer asks to proceed, call \`request_quote\` with the retained \`plan_id\`, actual \`source_platform\`, and canonical \`skill_id\` / \`skill_version\` when a TempGuru skill assembled it.
+5. When the buyer asks to proceed, call \`prepare_quote_form\` with the retained \`plan_id\`, actual \`source_platform\`, and canonical \`skill_id\` / \`skill_version\` when a TempGuru skill assembled it.
 6. Give the buyer the returned \`form_url\`; never collect or transmit their contact details through MCP. The buyer reviews and submits the form themselves.
-7. Retain any TG reference returned by the website form and use \`get_quote_status\` only when the buyer asks for receipt status.
+7. Retain any TG reference returned by the website form and use \`get_quote_request_status\` only when the buyer asks for receipt status.
 
 The REST API at \`${API_BASE}\` mirrors the same query layer, so MCP and HTTP
 cannot drift. See [the REST API](api.md) and [data schemas](data-schema.md).`
@@ -1457,7 +1457,7 @@ claims, not annual run rates. Claim definitions and statuses are available in
 - [A2A Agent Card](${AGENT_CARD_URL})
 - [Agent authentication guide](${AUTH_GUIDE_URL}): public MCP, A2A, and lookup operations require no account or OAuth
 - [Evidence-gated public facts](${PUBLIC_FACTS_URL})
-- Quote-submission boundary: MCP request_quote only returns a buyer-operated form and never accepts contact details; REST submitQuoteRequest is a contact-bearing write and requires explicit confirmation
+- Quote-submission boundary: MCP prepare_quote_form only returns a buyer-operated form and never accepts contact details; REST submitQuoteRequest is a contact-bearing write and requires explicit confirmation
 - [REST API](${API_BASE}): HTTP mirror of the same query layer (OpenAPI 3.1 at ${OPENAPI_URL})
 - [MCP discovery](https://mcp.tempguru.co/.well-known/mcp.json) · [OKF discovery](https://mcp.tempguru.co/.well-known/okf.json)
 

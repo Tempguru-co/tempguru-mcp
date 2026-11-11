@@ -1,6 +1,6 @@
 # Change Log
 
-## 1.7.4
+## 1.7.5
 
-- Generated from OpenAPI 3.1.0 (`TempGuru Public Data API` v1.7.4) by openapi-to-okf.
+- Generated from OpenAPI 3.1.0 (`TempGuru Public Data API` v1.7.5) by openapi-to-okf.
 - 10 operations, 21 schemas.

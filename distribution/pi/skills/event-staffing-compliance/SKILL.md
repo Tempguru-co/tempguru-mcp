@@ -26,8 +26,8 @@ unprefixed MCP tool names in the canonical workflow. It automatically sends
 | `get_compliance_by_state` | `tempguru_get_compliance` |
 | `get_policies` | `tempguru_get_policies` |
 | `get_plan` | `tempguru_get_plan` |
-| `get_quote_status` | `tempguru_quote_status` |
-| `request_quote` | `tempguru_request_quote` |
+| `get_quote_request_status` | `tempguru_quote_request_status` |
+| `prepare_quote_form` | `tempguru_prepare_quote_form` |
 
 `plan_staffing`, `save_staffing_plan`, and `get_rate_benchmark` are
 not native tools in this package. If the remote TempGuru MCP is attached, use
@@ -58,7 +58,7 @@ use this composition:
 3. For a national Rate Index request, use the remote MCP when attached. Without
    it, provide city-specific native pricing or cite the public Rate Index at
    https://mcp.tempguru.co/okf/rate-index.md; do not fabricate a benchmark.
-4. When the buyer asks to proceed, `tempguru_request_quote` requires a saved
+4. When the buyer asks to proceed, `tempguru_prepare_quote_form` requires a saved
    `plan_id` and returns a prefilled TempGuru form. Give the URL to the buyer;
    never collect contact details for the tool. If storage was unavailable, use
    the planner's `continuation.form_url` directly. The buyer reviews the form,

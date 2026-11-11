@@ -2,7 +2,7 @@
 type: "Workflow"
 title: "Quote Submission"
 description: "How the MCP prepares a non-PII buyer handoff and what happens after the buyer submits the form."
-primary_tool: "request_quote"
+primary_tool: "prepare_quote_form"
 tags:
   - "workflow"
   - "quote"
@@ -13,20 +13,20 @@ timestamp: "2026-11-01T00:00:00Z"
 
 # Quote Submission
 
-`request_quote` is a **read-only, non-PII buyer handoff**. It accepts a saved
+`prepare_quote_form` is a **read-only, non-PII buyer handoff**. It accepts a saved
 `plan_id` plus optional allowlisted `source_platform`, `skill_id`, and
 `skill_version` attribution. It never accepts a name, email, phone, company,
 or other contact details, and it does not create a CRM lead or TG reference.
 
 `plan_staffing` may save a 30-day non-PII plan during the compatibility
 release, and `save_staffing_plan` is the explicit non-contact artifact write.
-The overall connector is therefore read/write even though `request_quote`
+The overall connector is therefore read/write even though `prepare_quote_form`
 itself is read-only.
 
 ## Handoff
 
 1. Review the completed plan with the buyer and retain its `plan_id`.
-2. When the buyer asks to proceed, call `request_quote` with that ID and any allowlisted attribution.
+2. When the buyer asks to proceed, call `prepare_quote_form` with that ID and any allowlisted attribution.
 3. Give the buyer the returned `form_url`. If storage was unavailable, use the complete plan's `continuation.form_url` directly.
 4. The buyer opens the prefilled TempGuru form, reviews the event plan, enters their own contact details, and submits it themselves.
 
@@ -35,7 +35,7 @@ itself is read-only.
 1. The website sends the buyer-submitted request to TempGuru's CRM or durable fallback intake and returns a `TG-XXXXXX` reference. Retain it.
 2. TempGuru reviews the submission and replies with next steps. Once scope and rates are approved, the **24-48 hour window is an availability response**, not a completed roster; a written quote is binding only once TempGuru issues it.
 3. **No payment** until the buyer approves the quote. A submitted request is **not** a reservation or a contract.
-4. Do not poll automatically. If the buyer asks whether the request arrived, call `get_quote_status` with the TG reference returned by the website; received/queued status is not a booking confirmation.
+4. Do not poll automatically. If the buyer asks whether the request arrived, call `get_quote_request_status` with the TG reference returned by the website; received/queued status is not a booking confirmation.
 
 ## Cancellation and rescheduling
 

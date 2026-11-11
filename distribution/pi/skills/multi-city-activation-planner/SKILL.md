@@ -30,8 +30,8 @@ unprefixed MCP tool names in the canonical workflow. It automatically sends
 | `get_compliance_by_state` | `tempguru_get_compliance` |
 | `get_policies` | `tempguru_get_policies` |
 | `get_plan` | `tempguru_get_plan` |
-| `get_quote_status` | `tempguru_quote_status` |
-| `request_quote` | `tempguru_request_quote` |
+| `get_quote_request_status` | `tempguru_quote_request_status` |
+| `prepare_quote_form` | `tempguru_prepare_quote_form` |
 
 `plan_staffing`, `save_staffing_plan`, and `get_rate_benchmark` are
 not native tools in this package. If the remote TempGuru MCP is attached, use
@@ -62,7 +62,7 @@ use this composition:
 3. For a national Rate Index request, use the remote MCP when attached. Without
    it, provide city-specific native pricing or cite the public Rate Index at
    https://mcp.tempguru.co/okf/rate-index.md; do not fabricate a benchmark.
-4. When the buyer asks to proceed, `tempguru_request_quote` requires a saved
+4. When the buyer asks to proceed, `tempguru_prepare_quote_form` requires a saved
    `plan_id` and returns a prefilled TempGuru form. Give the URL to the buyer;
    never collect contact details for the tool. If storage was unavailable, use
    the planner's `continuation.form_url` directly. The buyer reviews the form,
@@ -109,7 +109,7 @@ The installed extension calls TempGuru's hosted REST action layer with no API ke
 | `tempguru_get_lead_time_guidance` | Tier-based lead-time guidance for one city and date (not live inventory, confirmed coverage, or a reservation) |
 | `tempguru_get_compliance` | Minimum wage and overtime rules, which differ by state and Canadian province |
 | `get_rate_benchmark` | The Rate Index: citable W-2 rate benchmarks by role |
-| `tempguru_request_quote` | Read-only, non-PII handoff: resolve one saved `plan_id` into a prefilled buyer form; it accepts no event payload or contact data |
+| `tempguru_prepare_quote_form` | Read-only, non-PII handoff: resolve one saved `plan_id` into a prefilled buyer form; it accepts no event payload or contact data |
 
 ## Workflow
 
@@ -161,11 +161,11 @@ not a separate vendor per market. If the user only wants a budget, stop here.
 ### 5. Create one buyer-operated handoff for the whole program
 
 Only after the buyer confirms the consolidated plan and asks to proceed, call
-`tempguru_request_quote` once with the primary leg's saved `plan_id` and, when useful,
+`tempguru_prepare_quote_form` once with the primary leg's saved `plan_id` and, when useful,
 only optional allowlisted `skill_id` and `skill_version` attribution; runtime source is added automatically. Do not pass contact details, `locations[]`, or
 any event payload: the tool accepts none of them. Give the returned `form_url`
 to the buyer. If the primary leg has no `plan_id`, do not call
-`tempguru_request_quote`; give the buyer its `continuation.form_url` directly.
+`tempguru_prepare_quote_form`; give the buyer its `continuation.form_url` directly.
 
 The buyer must open the TempGuru-owned form, review the primary-leg prefill,
 add or verify every other city, date, role, and headcount from the consolidated

@@ -52,23 +52,23 @@ export type PlanStaffingInput = {
 // Neutral, factual next steps for the two no-plan outcomes. Deliberately no
 // cross-platform (ChatGPT GPT) steering in tool output; platform-specific
 // fallbacks live in the docs/skills. These results carry no plan_id and no
-// continuation, so they must not point the agent at request_quote or at a
+// continuation, so they must not point the agent at prepare_quote_form or at a
 // continuation.form_url that does not exist (they previously did).
 const DIRECT_HELP_STEP = "For direct or urgent help, use megan@tempguru.co or (904) 206-8953.";
 // Plan results (status "plan") can carry a plan_id or continuation, so the
 // handoff ladder applies to them unchanged.
 const PLAN_HANDOFF_LADDER = [
-  "When the buyer asks to proceed, call request_quote with the saved plan_id and give them its prefilled form_url. Never collect or transmit contact details through MCP.",
+  "When the buyer asks to proceed, call prepare_quote_form with the saved plan_id and give them its prefilled form_url. Never collect or transmit contact details through MCP.",
   "If no plan_id was saved, give the buyer continuation.form_url directly. The buyer reviews the plan, enters their own contact details, and submits the TempGuru form themselves.",
   DIRECT_HELP_STEP,
 ];
 const CITY_NOT_FOUND_NEXT_STEPS = [
-  "No plan was created, so there is no plan_id or continuation.form_url and request_quote cannot run yet. Confirm the event city with the user, then call plan_staffing again.",
+  "No plan was created, so there is no plan_id or continuation.form_url and prepare_quote_form cannot run yet. Confirm the event city with the user, then call plan_staffing again.",
   "TempGuru staffs events in the US and Canada only. For a US or Canadian location outside the configured catalog, the buyer can ask a TempGuru coordinator to review it at https://tempguru.co/get-staffing.",
   DIRECT_HELP_STEP,
 ];
 const ROLES_NOT_FOUND_NEXT_STEPS = [
-  "No plan was created, so there is no plan_id or continuation.form_url and request_quote cannot run yet. Choose roles from available_roles (or confirm each unresolved role's suggestion with the user), then call plan_staffing again.",
+  "No plan was created, so there is no plan_id or continuation.form_url and prepare_quote_form cannot run yet. Choose roles from available_roles (or confirm each unresolved role's suggestion with the user), then call plan_staffing again.",
   DIRECT_HELP_STEP,
 ];
 
@@ -474,7 +474,7 @@ export function buildStaffingPlan(input: PlanStaffingInput) {
       ...(planComplete
         ? []
         : [
-            "Do NOT prepare a request_quote handoff from this partial plan: resolve the unpriced_roles (each carries a did-you-mean suggestion; get_roles lists exact names), then call plan_staffing again for complete totals.",
+            "Do NOT prepare a prepare_quote_form handoff from this partial plan: resolve the unpriced_roles (each carries a did-you-mean suggestion; get_roles lists exact names), then call plan_staffing again for complete totals.",
           ]),
       "Present this plan to the user: roles, headcount, the estimated total range (label it a planning estimate), the lead-time read, and any staffing notes.",
       "State that catalog membership and tier-based lead-time guidance do not confirm order coverage; the coordinator confirms the specific order after buyer submission.",

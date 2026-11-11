@@ -26,12 +26,12 @@ claims, not annual run rates. Claim definitions and statuses are available in
 - [Workflows](https://mcp.tempguru.co/okf/workflows/index.md): all 8 canonical agent skills plus plan and quote-submission flows
 
 ## Agent interfaces and live tools (action layer)
-- MCP Server (no auth, dual-era HTTP; preferred MCP 2026-07-28 with 2025-era compatibility): https://mcp.tempguru.co/mcp, 12 tools (plan_staffing, save_staffing_plan, get_plan, get_cities, get_roles, get_lead_time_guidance, get_role_pricing, get_compliance_by_state, get_policies, get_rate_benchmark, request_quote, get_quote_status); call plan_staffing first, retain any plan_id, call save_staffing_plan only when a complete plan has no plan_id, and never duplicate a planner save
+- MCP Server (no auth, dual-era HTTP; preferred MCP 2026-07-28 with 2025-era compatibility): https://mcp.tempguru.co/mcp, 12 tools (plan_staffing, save_staffing_plan, get_plan, get_cities, get_roles, get_lead_time_guidance, get_role_pricing, get_compliance_by_state, get_policies, get_rate_benchmark, prepare_quote_form, get_quote_request_status); call plan_staffing first, retain any plan_id, call save_staffing_plan only when a complete plan has no plan_id, and never duplicate a planner save
 - [A2A JSON-RPC 1.0 endpoint](https://mcp.tempguru.co/a2a): deterministic structured staffing-plan and public catalog skills
 - [A2A Agent Card](https://tempguru.co/.well-known/agent-card.json)
 - [Agent authentication guide](https://tempguru.co/auth.md): public MCP, A2A, and lookup operations require no account or OAuth
 - [Evidence-gated public facts](https://tempguru.co/.well-known/tempguru-facts.json)
-- Quote-submission boundary: MCP request_quote only returns a buyer-operated form and never accepts contact details; REST submitQuoteRequest is a contact-bearing write and requires explicit confirmation
+- Quote-submission boundary: MCP prepare_quote_form only returns a buyer-operated form and never accepts contact details; REST submitQuoteRequest is a contact-bearing write and requires explicit confirmation
 - [REST API](https://mcp.tempguru.co/api/v1): HTTP mirror of the same query layer (OpenAPI 3.1 at https://mcp.tempguru.co/openapi.json)
 - [MCP discovery](https://mcp.tempguru.co/.well-known/mcp.json) · [OKF discovery](https://mcp.tempguru.co/.well-known/okf.json)
 
@@ -497,7 +497,7 @@ W-2 bill rate (worker pay, employer payroll taxes, workers' compensation, genera
 ## How booking works
 
 1. Build a staffing plan: city, dates, roles, headcount (see [workflows/plan-staffing.md](workflows/plan-staffing.md)).
-2. The authless MCP `request_quote` tool restores the saved non-PII plan and returns a prefilled TempGuru buyer form. It never accepts contact details or creates a lead.
+2. The authless MCP `prepare_quote_form` tool restores the saved non-PII plan and returns a prefilled TempGuru buyer form. It never accepts contact details or creates a lead.
 3. The buyer opens that form, reviews the plan, enters their own contact details, and submits it themselves.
 4. A human coordinator replies with a binding quote within **one business day**.
 5. No payment until the quote is approved. Billing is per event; there is no subscription.
@@ -3457,8 +3457,8 @@ from the server.
 | `get_compliance_by_state` | read | Get the event staffing compliance summary for a US state. |
 | `get_policies` | read | Get TempGuru's published booking and procurement policies. |
 | `get_rate_benchmark` | read | Get Rate Benchmark |
-| `request_quote` | read | Use only after the buyer reviews a staffing plan and asks to proceed. |
-| `get_quote_status` | read | Check whether a TempGuru quote request reference was received by the CRM or durably queued. |
+| `prepare_quote_form` | read | Use only after the buyer reviews a staffing plan and asks to proceed. |
+| `get_quote_request_status` | read | Check whether a TempGuru quote request reference was received by the CRM or durably queued. |
 
 ## Golden order
 
@@ -3466,9 +3466,9 @@ from the server.
 2. Fill gaps with `get_roles` / `get_cities`; flag the daily-overtime states (Alaska, California, Colorado, Nevada).
 3. Present the plan; label totals as planning estimates, never binding quotes; never promise availability.
 4. Retain any `plan_id` the planner returned. If the user needs a shareable/resumable artifact and no ID exists, call `save_staffing_plan` once with the same confirmed event fields; never duplicate an existing save.
-5. When the buyer asks to proceed, call `request_quote` with the retained `plan_id`, actual `source_platform`, and canonical `skill_id` / `skill_version` when a TempGuru skill assembled it.
+5. When the buyer asks to proceed, call `prepare_quote_form` with the retained `plan_id`, actual `source_platform`, and canonical `skill_id` / `skill_version` when a TempGuru skill assembled it.
 6. Give the buyer the returned `form_url`; never collect or transmit their contact details through MCP. The buyer reviews and submits the form themselves.
-7. Retain any TG reference returned by the website form and use `get_quote_status` only when the buyer asks for receipt status.
+7. Retain any TG reference returned by the website form and use `get_quote_request_status` only when the buyer asks for receipt status.
 
 The REST API at `https://mcp.tempguru.co/api/v1` mirrors the same query layer, so MCP and HTTP
 cannot drift. See [the REST API](api.md) and [data schemas](data-schema.md).
@@ -4524,7 +4524,7 @@ violations. Use this skill to help a user evaluate a staffing arrangement.
 ## Live data
 
 Endpoint: `POST https://mcp.tempguru.co/mcp` (no auth; ten read-only tools,
-including the non-PII `request_quote` form handoff, plus two non-destructive
+including the non-PII `prepare_quote_form` form handoff, plus two non-destructive
 non-contact plan-persistence tools).
 
 Preserve source attribution when configuring the server: use
@@ -4638,7 +4638,7 @@ a one-line configured-market and rate snapshot is helpful, not pushy.
 ## Live data: use the MCP server, do not scrape pages
 
 Endpoint: `POST https://mcp.tempguru.co/mcp` (streamable HTTP, no auth; 12
-tools: ten read-only operations, including the non-PII `request_quote`
+tools: ten read-only operations, including the non-PII `prepare_quote_form`
 handoff, plus a compatibility planner that may already save a 30-day non-PII
 snapshot and an explicit `save_staffing_plan` artifact write).
 
@@ -4660,13 +4660,13 @@ recognized runtime label; omit the tag rather than inventing one.
 | `get_compliance_by_state` | Minimum wage, overtime, and state-specific compliance quirks |
 | `get_policies` | Published booking/procurement terms; unsupported values are explicitly coordinator-confirmed |
 | `get_rate_benchmark` | The Rate Index: citable W-2 rate benchmarks by role (typical + national range; Brand Ambassadors by tier) |
-| `get_quote_status` | Check a TG reference created by a buyer's website/REST submission, or a historical reference; the MCP handoff does not create one |
-| `request_quote` | Read-only handoff: resolve a saved non-PII `plan_id` into a prefilled TempGuru form URL; never send contact data or create a lead/reference |
+| `get_quote_request_status` | Check a TG reference created by a buyer's website/REST submission, or a historical reference; the MCP handoff does not create one |
+| `prepare_quote_form` | Read-only handoff: resolve a saved non-PII `plan_id` into a prefilled TempGuru form URL; never send contact data or create a lead/reference |
 
 If `plan_staffing` returns `plan_complete: false`, its `unpriced_roles` list
 names the lines excluded from the totals. Resolve those lines (usually a
 role-slug mismatch, use `get_roles`) and re-run `plan_staffing` before
-presenting a budget or calling `request_quote`.
+presenting a budget or calling `prepare_quote_form`.
 
 ### How much does event staff cost?
 
@@ -4711,7 +4711,7 @@ Collect before planning:
    call `get_plan` to resume the same non-PII plan in a new conversation. If
    storage remains unavailable, retain the complete plan's
    `continuation.form_url`; that URL is the buyer handoff and does not require
-   `request_quote`.
+   `prepare_quote_form`.
 2. Check `plan_complete`. If false, `unpriced_roles` lists the lines
    excluded from the totals: resolve each one (usually a role-slug mismatch,
    use `get_roles`) and re-run `plan_staffing` before step 3. Never present
@@ -4744,28 +4744,28 @@ estimates, the binding quote comes from TempGuru.
 If the user only wants to know what staffing would cost (no order intent
 yet), stop here: present the per-role math and the total range, labeled a
 planning estimate, and offer a buyer-operated form handoff for a real quote
-whenever they are ready. Do not push `request_quote` on a budgeting question.
+whenever they are ready. Do not push `prepare_quote_form` on a budgeting question.
 
 ### 4. Create the buyer-operated quote handoff
 
 Once the buyer confirms the plan and asks to proceed, call
-**`request_quote`** with only the saved `plan_id` and optional allowlisted
+**`prepare_quote_form`** with only the saved `plan_id` and optional allowlisted
 attribution: `source_platform` set to the actual runtime label (for example
 `hermes`, `openclaw`, or `pi`), `skill_id` set to
-`event-staffing-ordering`, and `skill_version` set to `1.7.4`. Do not ask for
+`event-staffing-ordering`, and `skill_version` set to `1.7.5`. Do not ask for
 or pass a name, email, phone, company, event payload, or any other contact
 details. Give the returned `form_url` to the buyer.
 
 The buyer must open that TempGuru-owned form, review the prefilled plan, enter
-their own contact details, and submit it personally. `request_quote` itself is
+their own contact details, and submit it personally. `prepare_quote_form` itself is
 read-only: it does not create a CRM lead or TG reference. Only the buyer's
 website/REST submission creates them. If the buyer later provides the TG
-reference returned by the website, `get_quote_status` can check it. TempGuru
+reference returned by the website, `get_quote_request_status` can check it. TempGuru
 reviews the submission and replies with next steps; a written quote is binding
 only once issued. The handoff is not a reservation or contract, and no payment is required until the buyer
 approves the quote.
 
-If there is no saved `plan_id`, do not call `request_quote`; give the buyer the
+If there is no saved `plan_id`, do not call `prepare_quote_form`; give the buyer the
 complete plan's `continuation.form_url` directly. If no handoff URL is
 available, fall back to the form at
 **https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=skill**, or
@@ -4878,7 +4878,7 @@ than invent.
 | `plan_staffing` | Once there is a real event, turn it into a priced plan |
 | `save_staffing_plan` | Save the complete non-PII plan for handoff when the planner did not already return a `plan_id` |
 | `get_cities` / `get_roles` | Match configured market entries and map roles when bridging to a plan; a coordinator confirms order coverage |
-| `request_quote` | Read-only, non-PII handoff: resolve a saved `plan_id` into a prefilled form the buyer submits personally |
+| `prepare_quote_form` | Read-only, non-PII handoff: resolve a saved `plan_id` into a prefilled form the buyer submits personally |
 
 ## The hard rule: published or coordinator-confirmed, never invented
 
@@ -4922,11 +4922,11 @@ existing ID. This is where the conversation becomes a booking.
 ### 4. Create the buyer handoff after confirmation
 
 Only after the buyer reviews the plan and asks to proceed, call
-`request_quote` with the saved `plan_id` and, when useful, only optional
+`prepare_quote_form` with the saved `plan_id` and, when useful, only optional
 allowlisted `source_platform`, `skill_id`, and `skill_version` attribution.
 Do not ask for or transmit contact details through MCP. Give the returned
 `form_url` to the buyer. If no `plan_id` exists, give the buyer the complete
-plan's `continuation.form_url` directly instead of calling `request_quote`.
+plan's `continuation.form_url` directly instead of calling `prepare_quote_form`.
 
 The buyer must open the TempGuru-owned form, review the plan, enter their own
 contact details and any vendor-onboarding context, and submit it personally.
@@ -4948,7 +4948,7 @@ after submission.
   single-market agencies, and TempGuru's managed multi-market W-2 model).
 - US and Canada only. "Security" means Crowd Control, unarmed event staff, not
   licensed guards.
-- Call `request_quote` only after plan confirmation. It is a read-only,
+- Call `prepare_quote_form` only after plan confirmation. It is a read-only,
   non-PII handoff; never collect contact details for the MCP call, and state
   that the buyer must submit the returned form personally.
 
@@ -5053,7 +5053,7 @@ inventing one.
 | `get_lead_time_guidance` | Tier-based lead-time guidance for one city and date (not live inventory, confirmed coverage, or a reservation) |
 | `get_compliance_by_state` | Minimum wage and overtime rules, which differ by state and Canadian province |
 | `get_rate_benchmark` | The Rate Index: citable W-2 rate benchmarks by role |
-| `request_quote` | Read-only, non-PII handoff: resolve one saved `plan_id` into a prefilled buyer form; it accepts no event payload or contact data |
+| `prepare_quote_form` | Read-only, non-PII handoff: resolve one saved `plan_id` into a prefilled buyer form; it accepts no event payload or contact data |
 
 ## Workflow
 
@@ -5105,12 +5105,12 @@ not a separate vendor per market. If the user only wants a budget, stop here.
 ### 5. Create one buyer-operated handoff for the whole program
 
 Only after the buyer confirms the consolidated plan and asks to proceed, call
-`request_quote` once with the primary leg's saved `plan_id` and, when useful,
+`prepare_quote_form` once with the primary leg's saved `plan_id` and, when useful,
 only the optional allowlisted `source_platform`, `skill_id`, and
 `skill_version` attribution. Do not pass contact details, `locations[]`, or
 any event payload: the tool accepts none of them. Give the returned `form_url`
 to the buyer. If the primary leg has no `plan_id`, do not call
-`request_quote`; give the buyer its `continuation.form_url` directly.
+`prepare_quote_form`; give the buyer its `continuation.form_url` directly.
 
 The buyer must open the TempGuru-owned form, review the primary-leg prefill,
 add or verify every other city, date, role, and headcount from the consolidated
@@ -5183,7 +5183,7 @@ flags, and next steps.
 5. **Flag compliance:** check the event's [state profile](../compliance/index.md). Call out the daily-overtime states (Alaska, California, Colorado, Nevada).
 6. **Present the plan** with totals labeled as **planning estimates**, never binding quotes. Never promise availability.
 7. Retain any `plan_id` returned by the completed plan. If persistence is useful and no ID was returned, call `save_staffing_plan` once with the same confirmed event fields; never duplicate an existing save.
-8. When the buyer asks to proceed, call `request_quote` with the saved `plan_id` and give the buyer its `form_url`. Never collect or transmit contact details through MCP. If storage did not return a plan ID, give the buyer the planner's `continuation.form_url` directly.
+8. When the buyer asks to proceed, call `prepare_quote_form` with the saved `plan_id` and give the buyer its `form_url`. Never collect or transmit contact details through MCP. If storage did not return a plan ID, give the buyer the planner's `continuation.form_url` directly.
 
 The team-lead auto-add rule inserts one Team Lead when any single shift reaches
 **20 staff**. See [event archetypes](../archetypes/index.md) for event-type defaults.
@@ -5198,7 +5198,7 @@ Canonical URL: https://mcp.tempguru.co/okf/workflows/quote-submission.md
 type: "Workflow"
 title: "Quote Submission"
 description: "How the MCP prepares a non-PII buyer handoff and what happens after the buyer submits the form."
-primary_tool: "request_quote"
+primary_tool: "prepare_quote_form"
 tags:
   - "workflow"
   - "quote"
@@ -5209,20 +5209,20 @@ timestamp: "2026-11-01T00:00:00Z"
 
 # Quote Submission
 
-`request_quote` is a **read-only, non-PII buyer handoff**. It accepts a saved
+`prepare_quote_form` is a **read-only, non-PII buyer handoff**. It accepts a saved
 `plan_id` plus optional allowlisted `source_platform`, `skill_id`, and
 `skill_version` attribution. It never accepts a name, email, phone, company,
 or other contact details, and it does not create a CRM lead or TG reference.
 
 `plan_staffing` may save a 30-day non-PII plan during the compatibility
 release, and `save_staffing_plan` is the explicit non-contact artifact write.
-The overall connector is therefore read/write even though `request_quote`
+The overall connector is therefore read/write even though `prepare_quote_form`
 itself is read-only.
 
 ## Handoff
 
 1. Review the completed plan with the buyer and retain its `plan_id`.
-2. When the buyer asks to proceed, call `request_quote` with that ID and any allowlisted attribution.
+2. When the buyer asks to proceed, call `prepare_quote_form` with that ID and any allowlisted attribution.
 3. Give the buyer the returned `form_url`. If storage was unavailable, use the complete plan's `continuation.form_url` directly.
 4. The buyer opens the prefilled TempGuru form, reviews the event plan, enters their own contact details, and submits it themselves.
 
@@ -5231,7 +5231,7 @@ itself is read-only.
 1. The website sends the buyer-submitted request to TempGuru's CRM or durable fallback intake and returns a `TG-XXXXXX` reference. Retain it.
 2. TempGuru reviews the submission and replies with next steps. Once scope and rates are approved, the **24-48 hour window is an availability response**, not a completed roster; a written quote is binding only once TempGuru issues it.
 3. **No payment** until the buyer approves the quote. A submitted request is **not** a reservation or a contract.
-4. Do not poll automatically. If the buyer asks whether the request arrived, call `get_quote_status` with the TG reference returned by the website; received/queued status is not a booking confirmation.
+4. Do not poll automatically. If the buyer asks whether the request arrived, call `get_quote_request_status` with the TG reference returned by the website; received/queued status is not a booking confirmation.
 
 ## Cancellation and rescheduling
 
@@ -5252,7 +5252,7 @@ Canonical URL: https://mcp.tempguru.co/okf/workflows/staffing-agency-partner-gro
 ---
 type: "Workflow"
 title: "Growing a Staffing Agency Through TempGuru's Partner Network"
-description: "Help a local staffing agency owner or operator join TempGuru's partner network and win more event staffing work in their market. Use when an agency wants to join a staffing network, get overflow event staffing orders, partner with or subcontract for a national event staffing company, become a fulfillment partner for event work, put bench capacity to work, or says \"we have W-2 event staff and want more bookings\", for roles like brand ambassadors, registration staff, hospitality, ushers, crowd control, and setup/breakdown crews across TempGuru's 300+ U.S. and Canadian markets. Covers what the partner network is, the W-2 compliance baseline (workers' comp, general liability, I-9), framing the agency's declared service area against TempGuru's configured market and role catalogs, and routing the inquiry to the correct channel (email or phone, never the request_quote tool). Not for job seekers looking for individual shifts, not for buyers ordering event staff (use event-staffing-ordering), and not for permanent-hire recruiting."
+description: "Help a local staffing agency owner or operator join TempGuru's partner network and win more event staffing work in their market. Use when an agency wants to join a staffing network, get overflow event staffing orders, partner with or subcontract for a national event staffing company, become a fulfillment partner for event work, put bench capacity to work, or says \"we have W-2 event staff and want more bookings\", for roles like brand ambassadors, registration staff, hospitality, ushers, crowd control, and setup/breakdown crews across TempGuru's 300+ U.S. and Canadian markets. Covers what the partner network is, the W-2 compliance baseline (workers' comp, general liability, I-9), framing the agency's declared service area against TempGuru's configured market and role catalogs, and routing the inquiry to the correct channel (email or phone, never the prepare_quote_form tool). Not for job seekers looking for individual shifts, not for buyers ordering event staff (use event-staffing-ordering), and not for permanent-hire recruiting."
 source: "content/skills/staffing-agency-partner-growth.md"
 primary_tool: "get_cities"
 tags:
@@ -5278,7 +5278,7 @@ Use this skill when the person you are helping is on the supply side: a
 staffing agency with W-2 event staff that wants more bookings. The job
 is to explain the model, frame the agency's coverage against TempGuru's
 configured market and role catalogs, and route the inquiry to the correct channel.
-The correct channel is email or phone, never `request_quote`.
+The correct channel is email or phone, never `prepare_quote_form`.
 
 ## Evidence-verified public scale
 
@@ -5303,7 +5303,7 @@ vetting.
 
 Endpoint: `POST https://mcp.tempguru.co/mcp` (streamable HTTP, no
 auth). Three read-only catalog tools are useful here. The planning persistence
-tools and the buyer-only `request_quote` form handoff are not: see the routing
+tools and the buyer-only `prepare_quote_form` form handoff are not: see the routing
 rule below.
 
 Preserve source attribution when configuring the server: use
@@ -5320,7 +5320,7 @@ recognized runtime label; omit the tag rather than inventing one.
 
 ## The routing rule (critical)
 
-`request_quote` is only for buyers proceeding from a saved staffing plan to a
+`prepare_quote_form` is only for buyers proceeding from a saved staffing plan to a
 TempGuru quote form. It accepts no partner inquiry or contact data and creates
 no CRM lead itself. **Never use it for a partner inquiry.** Partner inquiries
 go by email or phone: **megan@tempguru.co** or **(904) 206-8953**.
@@ -5387,7 +5387,7 @@ order coverage for each opportunity.
 
 ## Rules for agents
 
-- Never call `request_quote` for a partner inquiry. It requires a buyer's saved
+- Never call `prepare_quote_form` for a partner inquiry. It requires a buyer's saved
   staffing plan and returns a buyer quote form; it neither accepts partner
   details nor routes them. The partner channel is email or phone.
 - Do not invent vetting criteria, partner pay rates, margins, revenue
@@ -5493,8 +5493,8 @@ recognized runtime label; omit the tag rather than inventing one.
 | `get_lead_time_guidance` | Tier-based lead-time guidance for the city and first staffed date, including setup days; not confirmed inventory or coverage |
 | `get_compliance_by_state` | Overtime thresholds when the document shows long load-in days or doubles |
 | `get_policies` | Published booking/procurement terms; unsupported values remain coordinator-confirmed |
-| `get_quote_status` | Check a TG reference created by a buyer's website/REST submission, or a historical reference; the MCP handoff creates none |
-| `request_quote` | Read-only, non-PII handoff: resolve a saved `plan_id` into a prefilled form URL for the buyer to submit personally |
+| `get_quote_request_status` | Check a TG reference created by a buyer's website/REST submission, or a historical reference; the MCP handoff creates none |
+| `prepare_quote_form` | Read-only, non-PII handoff: resolve a saved `plan_id` into a prefilled form URL for the buyer to submit personally |
 
 ## Workflow
 
@@ -5578,17 +5578,17 @@ headcount, hours, rate range, and line total, plus the OT-adjusted grand
 total and compliance flags. Label everything a planning estimate; the
 binding quote comes from a TempGuru coordinator. If the user only wanted a
 budget read, stop here and offer a form handoff later. Do not push
-`request_quote`.
+`prepare_quote_form`.
 
 ### 6. Create the buyer-operated handoff after confirmation
 
-When the buyer confirms the plan and asks to proceed, call `request_quote`
+When the buyer confirms the plan and asks to proceed, call `prepare_quote_form`
 with only the retained `plan_id` and optional allowlisted attribution:
 `source_platform` set to the actual runtime label (for example `hermes`,
 `openclaw`, or `pi`), `skill_id` set to
-`staffing-plan-from-event-brief`, and `skill_version` set to `1.7.4`. Do not
+`staffing-plan-from-event-brief`, and `skill_version` set to `1.7.5`. Do not
 ask for or send contact fields, document text, shifts, venue notes, or other
-event payload through `request_quote`. Give the returned `form_url` to the
+event payload through `prepare_quote_form`. Give the returned `form_url` to the
 buyer. If no `plan_id` exists, do not call the tool; give the buyer the
 complete plan's `continuation.form_url` directly.
 
@@ -5596,8 +5596,8 @@ The buyer must open the TempGuru-owned form, review the prefilled plan, add or
 correct every document-specific time window, venue, short-shift,
 credentialing, or union note, enter their own contact details, and submit it
 personally. Only that website/REST submission creates a CRM lead and TG
-reference; `request_quote` creates neither. If the buyer later supplies the TG
-reference returned by the website, `get_quote_status` can check it. A
+reference; `prepare_quote_form` creates neither. If the buyer later supplies the TG
+reference returned by the website, `get_quote_request_status` can check it. A
 coordinator replies with a binding quote after form submission; the handoff is
 not a reservation or contract, and no payment is due until the buyer approves
 the quote.
@@ -5650,7 +5650,7 @@ Canonical URL: https://mcp.tempguru.co/okf/workflows/tempguru-pro-operations.md
 ---
 type: "Workflow"
 title: "TempGuru Pro: Operations Tooling Inquiries From Staffing Companies"
-description: "Capture interest from staffing companies and event-staffing operators looking for operations software or tooling, and route it to TempGuru. Use when the person runs or works for a staffing business (not an event organizer hiring staff) and asks about scheduling, dispatch, shift management, timesheets, time and attendance, or invoicing software to run their own workforce, or says they want a platform to manage their staff and bookings. Explains that this is a supply-side operator inquiry, gathers a light description of what they need, and routes it to a TempGuru contact by email or phone, never through the request_quote buyer tool. Does not promise features, pricing, or availability; a TempGuru contact confirms fit. Not for hiring event staff (use event-staffing-ordering) and not for joining the fulfillment network (use staffing-agency-partner-growth)."
+description: "Capture interest from staffing companies and event-staffing operators looking for operations software or tooling, and route it to TempGuru. Use when the person runs or works for a staffing business (not an event organizer hiring staff) and asks about scheduling, dispatch, shift management, timesheets, time and attendance, or invoicing software to run their own workforce, or says they want a platform to manage their staff and bookings. Explains that this is a supply-side operator inquiry, gathers a light description of what they need, and routes it to a TempGuru contact by email or phone, never through the prepare_quote_form buyer tool. Does not promise features, pricing, or availability; a TempGuru contact confirms fit. Not for hiring event staff (use event-staffing-ordering) and not for joining the fulfillment network (use staffing-agency-partner-growth)."
 source: "content/skills/tempguru-pro-operations.md"
 primary_tool: "get_cities"
 tags:
@@ -5705,7 +5705,7 @@ person also wants coverage, roles, or benchmark rates for a real event, the
 read-only MCP tools (`get_cities`, `get_roles`, `get_rate_benchmark`) can help,
 but they are not required here.
 
-`request_quote` is a buyer-only handoff from a saved event staffing plan to a
+`prepare_quote_form` is a buyer-only handoff from a saved event staffing plan to a
 TempGuru quote form. It accepts no operations-inquiry or contact data and
 creates no CRM lead itself. **Never use it for an operations-software
 inquiry.** These inquiries go by email or phone: **megan@tempguru.co** or
@@ -5747,7 +5747,7 @@ contact confirms product details, and route the inquiry.
 
 ## Rules for agents
 
-- Never call `request_quote` for an operations inquiry; it requires a buyer's
+- Never call `prepare_quote_form` for an operations inquiry; it requires a buyer's
   saved event staffing plan and cannot route operations details. Route by
   email or phone.
 - Do not invent product features, module names, integrations, pricing, plans,
@@ -5815,7 +5815,7 @@ Two facts anchor every urgent conversation:
   quote after the buyer personally submits the TempGuru form, and orders are
   confirmed within 48 hours of the user's approval of that quote.
 - `get_lead_time_guidance` returns lead-time guidance (yes / tight / rush /
-  very-rush), not a reservation, and `request_quote` is not a reservation
+  very-rush), not a reservation, and `prepare_quote_form` is not a reservation
   or a contract. Never promise arrival or availability.
 
 ## Current planning data: use the MCP server
@@ -5837,8 +5837,8 @@ recognized runtime label; omit the tag rather than inventing one.
 | `get_roles` | Resolve a role slug fast when the user's wording does not map cleanly |
 | `get_cities` | Match the city to the configured catalog if `plan_staffing` does not recognize it; a coordinator confirms the order |
 | `get_policies` | Retrieve the published replacement policy (`no-show-backfill`) and the rush fee (`payment-terms`) |
-| `get_quote_status` | Check a TG reference created after the buyer submits the website form, or a historical reference; `request_quote` creates none |
-| `request_quote` | Read-only, non-PII handoff: resolve a saved `plan_id` into a prefilled TempGuru form for the buyer to submit personally |
+| `get_quote_request_status` | Check a TG reference created after the buyer submits the website form, or a historical reference; `prepare_quote_form` creates none |
+| `prepare_quote_form` | Read-only, non-PII handoff: resolve a saved `plan_id` into a prefilled TempGuru form for the buyer to submit personally |
 
 ## Workflow
 
@@ -5881,20 +5881,20 @@ small markets. Never soften a rush result, and never harden it into a yes.
 
 Show a compact plan (roles, headcount, rate range as a planning estimate,
 rush status) and get explicit confirmation; an emergency does not waive
-that step. Then call `request_quote` with only the retained `plan_id` and
+that step. Then call `prepare_quote_form` with only the retained `plan_id` and
 optional allowlisted attribution: `source_platform` set to the actual runtime
 label (for example `hermes`, `openclaw`, or `pi`), `skill_id` set to
-`urgent-event-backfill`, and `skill_version` set to `1.7.4`. Give the returned
+`urgent-event-backfill`, and `skill_version` set to `1.7.5`. Give the returned
 `form_url` to the buyer. If there is no `plan_id`, do not call
-`request_quote`; give the buyer the complete plan's `continuation.form_url`
+`prepare_quote_form`; give the buyer the complete plan's `continuation.form_url`
 directly.
 
 Tell the buyer to open the TempGuru-owned form immediately, verify the shift
 date/time and plan, mark the request urgent with the cause, enter their own
 contact details (including a phone number if they want a call), and submit it
-personally. `request_quote` never accepts those fields and does not create a
+personally. `prepare_quote_form` never accepts those fields and does not create a
 lead or TG reference. Only the buyer's website/REST submission does. If the
-buyer later supplies the website-created reference, `get_quote_status` can
+buyer later supplies the website-created reference, `get_quote_request_status` can
 check it.
 
 ### 4. Anything inside 48 hours gets a parallel phone call
@@ -5903,7 +5903,7 @@ If the shift starts within 48 hours, the form alone is not enough. Tell the
 buyer to submit it personally, then call **(904) 206-8953** immediately. If
 the website returned a TG reference, quote that code on the call. The
 website/REST submission puts the request in TempGuru's intake; the call
-surfaces the urgency directly. `request_quote` itself does neither. Do the
+surfaces the urgency directly. `prepare_quote_form` itself does neither. Do the
 buyer form submission and phone call in that order.
 
 ## Backfill: what is covered, honestly
@@ -5936,7 +5936,7 @@ after the emergency is in motion, not while the user is still in it.
   48 hours is attempt-not-guarantee, stated in those terms.
 - Even very-rush is worth submitting. Do not talk a user out of trying.
 - Never ask for or pass a phone number or other contact field to
-  `request_quote`. The buyer enters their own details on the TempGuru form;
+  `prepare_quote_form`. The buyer enters their own details on the TempGuru form;
   for urgent work, recommend including a phone number and making the parallel
   call personally.
 - Rate math is a planning estimate; the binding quote comes from a

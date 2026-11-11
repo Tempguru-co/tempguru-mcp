@@ -24,7 +24,7 @@
       "estimated_total_range",
       "lead_time",
       "compliance",
-      "request_quote"
+      "prepare_quote_form"
     ],
     "absent": [
       "AGENT5",
@@ -452,8 +452,8 @@
     ]
   },
   {
-    "name": "get_quote_status: unknown reference returns a clean miss",
-    "tool": "get_quote_status",
+    "name": "get_quote_request_status: unknown reference returns a clean miss",
+    "tool": "get_quote_request_status",
     "arguments": {
       "reference": "TG-ABC234"
     },

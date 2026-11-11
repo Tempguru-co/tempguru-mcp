@@ -11,7 +11,7 @@ description: >-
   crews across TempGuru's 300+ U.S. and Canadian markets. Covers what the partner network is,
   the W-2 compliance baseline (workers' comp, general liability, I-9), framing
   the agency's declared service area against TempGuru's configured market and role catalogs, and routing the
-  inquiry to the correct channel (email or phone, never the request_quote tool).
+  inquiry to the correct channel (email or phone, never the prepare_quote_form tool).
   Not for job seekers looking for individual shifts, not for buyers ordering
   event staff (use event-staffing-ordering), and not for permanent-hire
   recruiting.
@@ -31,7 +31,7 @@ Use this skill when the person you are helping is on the supply side: a
 staffing agency with W-2 event staff that wants more bookings. The job
 is to explain the model, frame the agency's coverage against TempGuru's
 configured market and role catalogs, and route the inquiry to the correct channel.
-The correct channel is email or phone, never `request_quote`.
+The correct channel is email or phone, never `prepare_quote_form`.
 
 ## Evidence-verified public scale
 
@@ -56,7 +56,7 @@ vetting.
 
 Endpoint: `POST https://mcp.tempguru.co/mcp` (streamable HTTP, no
 auth). Three read-only catalog tools are useful here. The planning persistence
-tools and the buyer-only `request_quote` form handoff are not: see the routing
+tools and the buyer-only `prepare_quote_form` form handoff are not: see the routing
 rule below.
 
 Preserve source attribution when configuring the server: use
@@ -73,7 +73,7 @@ recognized runtime label; omit the tag rather than inventing one.
 
 ## The routing rule (critical)
 
-`request_quote` is only for buyers proceeding from a saved staffing plan to a
+`prepare_quote_form` is only for buyers proceeding from a saved staffing plan to a
 TempGuru quote form. It accepts no partner inquiry or contact data and creates
 no CRM lead itself. **Never use it for a partner inquiry.** Partner inquiries
 go by email or phone: **megan@tempguru.co** or **(904) 206-8953**.
@@ -140,7 +140,7 @@ order coverage for each opportunity.
 
 ## Rules for agents
 
-- Never call `request_quote` for a partner inquiry. It requires a buyer's saved
+- Never call `prepare_quote_form` for a partner inquiry. It requires a buyer's saved
   staffing plan and returns a buyer quote form; it neither accepts partner
   details nor routes them. The partner channel is email or phone.
 - Do not invent vetting criteria, partner pay rates, margins, revenue

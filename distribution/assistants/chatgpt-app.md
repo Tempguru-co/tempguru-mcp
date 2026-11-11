@@ -25,7 +25,7 @@ for the audit that produced this runbook.
 | Requirement | Status |
 |---|---|
 | Remote MCP server over HTTPS (one per plugin) | ✅ `https://mcp.tempguru.co/mcp` (streamable HTTP, protocol 2026-07-28 down to 2024-11-05) |
-| Explicit `readOnlyHint` / `destructiveHint` / `openWorldHint` on every tool | ✅ 12 tools; 10 read-only including the non-PII `request_quote` form handoff; `plan_staffing` and `save_staffing_plan` truthfully flagged as non-destructive, non-contact writes |
+| Explicit `readOnlyHint` / `destructiveHint` / `openWorldHint` on every tool | ✅ 12 tools; 10 read-only including the non-PII `prepare_quote_form` form handoff; `plan_staffing` and `save_staffing_plan` truthfully flagged as non-destructive, non-contact writes |
 | No-auth or OAuth | ✅ no-auth (`auth.type: none`, simplest review path) |
 | Domain verification token at `/.well-known/openai-apps-challenge` | ✅ served by `src/app/.well-known/openai-apps-challenge/route.ts` |
 | Tool descriptions written for model selection | ✅ "use this when..." style, no promotional copy |
@@ -58,7 +58,13 @@ the placeholder is still there.
   `app-6a29a9e0634481919b7440b626b0e746`, **1.0.0 Approved, never
   published** ("Ready to publish" / "Not published"), June copy, no skills,
   no support URL, MCP configuration "Unavailable" because OpenAI's scan flags
-  `check_availability`'s name (renamed `get_lead_time_guidance` in `1.7.4`).
+  tool names inconsistent with their behavior: `check_availability` (renamed
+  `get_lead_time_guidance` in `1.7.4`) and then `request_quote` (renamed
+  `prepare_quote_form` in `1.7.5`, alongside `get_quote_status` →
+  `get_quote_request_status`). The scanner compares each tool's name with its
+  description; a name that promises more than the description allows is
+  flagged, and the listing's MCP configuration stays "Unavailable" until a
+  rescan is clean.
   This is the one that reaches the public directory. Its own
   **Download plugin ZIP** gives the `name` and `.app.json` the generator must
   use for a **Create draft from ZIP** upload.
@@ -68,9 +74,9 @@ the placeholder is still there.
   defaults (`DEFAULT_PLUGIN_NAME`, `chatgpt-plugin.app.json`) to the dashboard
   package's values before building the directory draft.
 
-Order of operations: deploy `1.7.4` → MCPs tab → Rescan until the finding
+Order of operations: deploy `1.7.5` → MCPs tab → Rescan until the finding
 clears → **Publish plugin** on 1.0.0 (gets the listing live on the current
-server; tools come from the scan) → **Create draft from ZIP** with the `1.7.4`
+server; tools come from the scan) → **Create draft from ZIP** with the `1.7.5`
 package → paste `chatgpt-plugin-review.md` into Review details → Submit for
 review → Publish on approval.
 
@@ -104,7 +110,7 @@ consequences baked into the generator:
 - `plugin-name:skill-name` is capped at 64 chars and the id uses 36, so three
   skills are renamed inside this package only: `multi-city-activation`,
   `agency-partner-growth`, `plan-from-event-brief`. Their `skill_id` values
-  sent to `request_quote` stay canonical; the server allowlists those.
+  sent to `prepare_quote_form` stay canonical; the server allowlists those.
 - `developerName` is not controlled by the manifest. The portal sets it from
   the organization's verified publisher identity and flags the manifest value
   with `developer_name_defaulted`. To change what the directory shows, change
@@ -150,7 +156,7 @@ Five positive cases, each with `tools_triggered` and `expected_behavior`:
 2. "6 registration staff + 2 team leads in Chicago on 2027-03-12, 8-hour day, budget?" → `plan_staffing`, total labeled an estimate, lead time, Illinois notes, `plan_id` retained.
 3. "Overtime rules for event staff in California?" → `get_compliance_by_state`, daily OT flagged, not legal advice.
 4. "TempGuru's cancellation and payment terms?" → `get_policies`, coordinator-confirmed flags preserved.
-5. "Plan 10 BAs in Las Vegas for 3 days, then request a quote" → `plan_staffing` then `request_quote` with the `plan_id` only; buyer gets `form_url`; no contact details asked in chat.
+5. "Plan 10 BAs in Las Vegas for 3 days, then request a quote" → `plan_staffing` then `prepare_quote_form` with the `plan_id` only; buyer gets `form_url`; no contact details asked in chat.
 
 Three negative cases: a wedding in Paris (declines, US/CA only), a permanent
 full-time hire (out of scope), and "book, confirm, and charge my card now"
@@ -161,7 +167,7 @@ or subscription happens in the plugin.
 
 ## Buyer-handoff and write-action justification
 
-> Authless `request_quote` is read-only and accepts only a saved non-PII
+> Authless `prepare_quote_form` is read-only and accepts only a saved non-PII
 > `plan_id` plus allowlisted source attribution. It returns a prefilled
 > TempGuru-owned form URL and never accepts contact details, creates a CRM
 > lead, or returns a TG reference. The buyer opens the URL, reviews the plan,
@@ -199,7 +205,7 @@ permission, not the UI.
 
 1. "price brand ambassadors in Boston" → `get_role_pricing` → $56-65/hr.
 2. "staff a wedding in Paris" → declines, US/Canada only.
-3. "I want a quote for this saved plan" → model calls `request_quote` with the
+3. "I want a quote for this saved plan" → model calls `prepare_quote_form` with the
    `plan_id` only, gives the buyer its `form_url`, and does not ask for contact
    details in chat.
 4. Malformed city ("Bostonn") → server's suggestion field surfaces; model

@@ -31,8 +31,8 @@
     "get_compliance_by_state",
     "get_policies",
     "get_rate_benchmark",
-    "request_quote",
-    "get_quote_status"
+    "prepare_quote_form",
+    "get_quote_request_status"
   ],
   "skills": [
     "event-staffing-ordering",
@@ -52,7 +52,7 @@
     "index": "https://mcp.tempguru.co/okf/index.md",
     "tarball": "https://mcp.tempguru.co/okf.tar.gz",
     "file_count": 106,
-    "sha256": "0a17983f8a02eaedeec1b9791da5d1978edd3feda67284240e73c63ea8f1558a",
-    "bytes": 343088
+    "sha256": "c1030989d8ac0aa84dedb3d82aa4ff78eaa6890d7968719804a517e508e99be5",
+    "bytes": 343600
   }
 }

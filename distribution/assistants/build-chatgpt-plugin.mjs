@@ -183,9 +183,9 @@ const REVIEW = {
         description: "Plan then buyer-operated quote handoff",
         prompt:
           "Plan 10 brand ambassadors for a trade show in Las Vegas on 2027-01-05 for 3 days, then I want to request a quote.",
-        tools_triggered: "plan_staffing, request_quote",
+        tools_triggered: "plan_staffing, prepare_quote_form",
         expected_behavior:
-          "Presents the plan, then calls request_quote with only the saved plan_id and gives the buyer the returned form_url. It never asks for a name, email, phone, or company in chat and explains that the buyer submits the TempGuru form personally.",
+          "Presents the plan, then calls prepare_quote_form with only the saved plan_id and gives the buyer the returned form_url. It never asks for a name, email, phone, or company in chat and explains that the buyer submits the TempGuru form personally.",
       },
     ],
     negative: [
@@ -214,7 +214,7 @@ const REVIEW = {
 
 const RELEASE_NOTES =
   `Aligns the directory package with TempGuru MCP ${pkg.version}: 12 tools (ten read-only), ` +
-  "plan_staffing as the first call, a non-PII request_quote handoff that returns a prefilled buyer form, " +
+  "plan_staffing as the first call, a non-PII prepare_quote_form handoff that returns a prefilled buyer form, " +
   "explicit save_staffing_plan / get_plan continuation, get_policies for published booking terms, " +
   "the Rate Index benchmark, and eight bundled skills.";
 
@@ -350,7 +350,7 @@ function yamlQuote(value) {
 // OpenAI limits `plugin-name:skill-name` to 64 chars. The listing's generated
 // 36-char name leaves 27 for a skill name, so the three longest canonical
 // skills are renamed inside this package only. The canonical skill_id values
-// sent to request_quote are left untouched (the server allowlists them).
+// sent to prepare_quote_form are left untouched (the server allowlists them).
 const SKILL_RENAMES = Object.freeze({
   "multi-city-activation-planner": "multi-city-activation",
   "staffing-agency-partner-growth": "agency-partner-growth",

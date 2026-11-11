@@ -55,7 +55,7 @@ const SOURCE_ALIASES = new Map([
   ["website_widget", "website-widget"],
 ]);
 
-// Broader than controlled campaign/source tags: request_quote callers may
+// Broader than controlled campaign/source tags: prepare_quote_form callers may
 // identify any established agent runtime. Keep this separate so a valid
 // platform never collapses to `other`, while arbitrary public strings still
 // cannot enter Redis.

@@ -1,6 +1,6 @@
 // Creates a new lead in the Inbound Deal Pipeline when a buyer submits the
 // TempGuru quote form or an approved REST integration posts the same contract.
-// The authless MCP request_quote tool never calls this module.
+// The authless MCP prepare_quote_form tool never calls this module.
 //
 // Uses the Notion REST API directly (no SDK) to keep the dependency footprint
 // small. Around the write we add the lead-lifecycle guarantees the funnel needs:

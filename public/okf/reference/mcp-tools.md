@@ -30,8 +30,8 @@ from the server.
 | `get_compliance_by_state` | read | Get the event staffing compliance summary for a US state. |
 | `get_policies` | read | Get TempGuru's published booking and procurement policies. |
 | `get_rate_benchmark` | read | Get Rate Benchmark |
-| `request_quote` | read | Use only after the buyer reviews a staffing plan and asks to proceed. |
-| `get_quote_status` | read | Check whether a TempGuru quote request reference was received by the CRM or durably queued. |
+| `prepare_quote_form` | read | Use only after the buyer reviews a staffing plan and asks to proceed. |
+| `get_quote_request_status` | read | Check whether a TempGuru quote request reference was received by the CRM or durably queued. |
 
 ## Golden order
 
@@ -39,9 +39,9 @@ from the server.
 2. Fill gaps with `get_roles` / `get_cities`; flag the daily-overtime states (Alaska, California, Colorado, Nevada).
 3. Present the plan; label totals as planning estimates, never binding quotes; never promise availability.
 4. Retain any `plan_id` the planner returned. If the user needs a shareable/resumable artifact and no ID exists, call `save_staffing_plan` once with the same confirmed event fields; never duplicate an existing save.
-5. When the buyer asks to proceed, call `request_quote` with the retained `plan_id`, actual `source_platform`, and canonical `skill_id` / `skill_version` when a TempGuru skill assembled it.
+5. When the buyer asks to proceed, call `prepare_quote_form` with the retained `plan_id`, actual `source_platform`, and canonical `skill_id` / `skill_version` when a TempGuru skill assembled it.
 6. Give the buyer the returned `form_url`; never collect or transmit their contact details through MCP. The buyer reviews and submits the form themselves.
-7. Retain any TG reference returned by the website form and use `get_quote_status` only when the buyer asks for receipt status.
+7. Retain any TG reference returned by the website form and use `get_quote_request_status` only when the buyer asks for receipt status.
 
 The REST API at `https://mcp.tempguru.co/api/v1` mirrors the same query layer, so MCP and HTTP
 cannot drift. See [the REST API](api.md) and [data schemas](data-schema.md).

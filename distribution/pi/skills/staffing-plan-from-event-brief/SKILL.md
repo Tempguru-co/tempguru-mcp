@@ -33,8 +33,8 @@ unprefixed MCP tool names in the canonical workflow. It automatically sends
 | `get_compliance_by_state` | `tempguru_get_compliance` |
 | `get_policies` | `tempguru_get_policies` |
 | `get_plan` | `tempguru_get_plan` |
-| `get_quote_status` | `tempguru_quote_status` |
-| `request_quote` | `tempguru_request_quote` |
+| `get_quote_request_status` | `tempguru_quote_request_status` |
+| `prepare_quote_form` | `tempguru_prepare_quote_form` |
 
 `plan_staffing`, `save_staffing_plan`, and `get_rate_benchmark` are
 not native tools in this package. If the remote TempGuru MCP is attached, use
@@ -65,7 +65,7 @@ use this composition:
 3. For a national Rate Index request, use the remote MCP when attached. Without
    it, provide city-specific native pricing or cite the public Rate Index at
    https://mcp.tempguru.co/okf/rate-index.md; do not fabricate a benchmark.
-4. When the buyer asks to proceed, `tempguru_request_quote` requires a saved
+4. When the buyer asks to proceed, `tempguru_prepare_quote_form` requires a saved
    `plan_id` and returns a prefilled TempGuru form. Give the URL to the buyer;
    never collect contact details for the tool. If storage was unavailable, use
    the planner's `continuation.form_url` directly. The buyer reviews the form,
@@ -124,8 +124,8 @@ recognized runtime label; omit the tag rather than inventing one.
 | `tempguru_get_lead_time_guidance` | Tier-based lead-time guidance for the city and first staffed date, including setup days; not confirmed inventory or coverage |
 | `tempguru_get_compliance` | Overtime thresholds when the document shows long load-in days or doubles |
 | `tempguru_get_policies` | Published booking/procurement terms; unsupported values remain coordinator-confirmed |
-| `tempguru_quote_status` | Check a TG reference created by a buyer's website/REST submission, or a historical reference; the MCP handoff creates none |
-| `tempguru_request_quote` | Read-only, non-PII handoff: resolve a saved `plan_id` into a prefilled form URL for the buyer to submit personally |
+| `tempguru_quote_request_status` | Check a TG reference created by a buyer's website/REST submission, or a historical reference; the MCP handoff creates none |
+| `tempguru_prepare_quote_form` | Read-only, non-PII handoff: resolve a saved `plan_id` into a prefilled form URL for the buyer to submit personally |
 
 ## Workflow
 
@@ -209,16 +209,16 @@ headcount, hours, rate range, and line total, plus the OT-adjusted grand
 total and compliance flags. Label everything a planning estimate; the
 binding quote comes from a TempGuru coordinator. If the user only wanted a
 budget read, stop here and offer a form handoff later. Do not push
-`tempguru_request_quote`.
+`tempguru_prepare_quote_form`.
 
 ### 6. Create the buyer-operated handoff after confirmation
 
-When the buyer confirms the plan and asks to proceed, call `tempguru_request_quote`
+When the buyer confirms the plan and asks to proceed, call `tempguru_prepare_quote_form`
 with only the retained `plan_id` and optional allowlisted attribution:
 runtime source is added automatically; set `skill_id` to
-`staffing-plan-from-event-brief`, and `skill_version` set to `1.7.4`. Do not
+`staffing-plan-from-event-brief`, and `skill_version` set to `1.7.5`. Do not
 ask for or send contact fields, document text, shifts, venue notes, or other
-event payload through `tempguru_request_quote`. Give the returned `form_url` to the
+event payload through `tempguru_prepare_quote_form`. Give the returned `form_url` to the
 buyer. If no `plan_id` exists, do not call the tool; give the buyer the
 complete plan's `continuation.form_url` directly.
 
@@ -226,8 +226,8 @@ The buyer must open the TempGuru-owned form, review the prefilled plan, add or
 correct every document-specific time window, venue, short-shift,
 credentialing, or union note, enter their own contact details, and submit it
 personally. Only that website/REST submission creates a CRM lead and TG
-reference; `tempguru_request_quote` creates neither. If the buyer later supplies the TG
-reference returned by the website, `tempguru_quote_status` can check it. A
+reference; `tempguru_prepare_quote_form` creates neither. If the buyer later supplies the TG
+reference returned by the website, `tempguru_quote_request_status` can check it. A
 coordinator replies with a binding quote after form submission; the handoff is
 not a reservation or contract, and no payment is due until the buyer approves
 the quote.

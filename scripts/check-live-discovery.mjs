@@ -90,7 +90,7 @@ function assertPhaseAContract(label, descriptor) {
     "ten read-only",
     "plan_staffing",
     "save_staffing_plan",
-    "request_quote",
+    "prepare_quote_form",
   ]) {
     if (!description.includes(fragment)) {
       throw new Error(`${label}: description missing ${fragment}: ${description}`);
@@ -135,7 +135,7 @@ function assertPhaseAContract(label, descriptor) {
     !instructions.includes("plan_id") ||
     !/do not call save_staffing_plan/i.test(instructions) ||
     !/no plan_id/i.test(instructions) ||
-    !instructions.includes("request_quote") ||
+    !instructions.includes("prepare_quote_form") ||
     !/buyer|form_url/i.test(instructions)
   ) {
     throw new Error(`${label}: staged Phase A workflow metadata is incomplete`);

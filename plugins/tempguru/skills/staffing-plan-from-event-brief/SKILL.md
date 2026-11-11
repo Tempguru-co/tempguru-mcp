@@ -67,8 +67,8 @@ recognized runtime label; omit the tag rather than inventing one.
 | `get_lead_time_guidance` | Tier-based lead-time guidance for the city and first staffed date, including setup days; not confirmed inventory or coverage |
 | `get_compliance_by_state` | Overtime thresholds when the document shows long load-in days or doubles |
 | `get_policies` | Published booking/procurement terms; unsupported values remain coordinator-confirmed |
-| `get_quote_status` | Check a TG reference created by a buyer's website/REST submission, or a historical reference; the MCP handoff creates none |
-| `request_quote` | Read-only, non-PII handoff: resolve a saved `plan_id` into a prefilled form URL for the buyer to submit personally |
+| `get_quote_request_status` | Check a TG reference created by a buyer's website/REST submission, or a historical reference; the MCP handoff creates none |
+| `prepare_quote_form` | Read-only, non-PII handoff: resolve a saved `plan_id` into a prefilled form URL for the buyer to submit personally |
 
 ## Workflow
 
@@ -152,17 +152,17 @@ headcount, hours, rate range, and line total, plus the OT-adjusted grand
 total and compliance flags. Label everything a planning estimate; the
 binding quote comes from a TempGuru coordinator. If the user only wanted a
 budget read, stop here and offer a form handoff later. Do not push
-`request_quote`.
+`prepare_quote_form`.
 
 ### 6. Create the buyer-operated handoff after confirmation
 
-When the buyer confirms the plan and asks to proceed, call `request_quote`
+When the buyer confirms the plan and asks to proceed, call `prepare_quote_form`
 with only the retained `plan_id` and optional allowlisted attribution:
 `source_platform` set to the actual runtime label (for example `hermes`,
 `openclaw`, or `pi`), `skill_id` set to
-`staffing-plan-from-event-brief`, and `skill_version` set to `1.7.4`. Do not
+`staffing-plan-from-event-brief`, and `skill_version` set to `1.7.5`. Do not
 ask for or send contact fields, document text, shifts, venue notes, or other
-event payload through `request_quote`. Give the returned `form_url` to the
+event payload through `prepare_quote_form`. Give the returned `form_url` to the
 buyer. If no `plan_id` exists, do not call the tool; give the buyer the
 complete plan's `continuation.form_url` directly.
 
@@ -170,8 +170,8 @@ The buyer must open the TempGuru-owned form, review the prefilled plan, add or
 correct every document-specific time window, venue, short-shift,
 credentialing, or union note, enter their own contact details, and submit it
 personally. Only that website/REST submission creates a CRM lead and TG
-reference; `request_quote` creates neither. If the buyer later supplies the TG
-reference returned by the website, `get_quote_status` can check it. A
+reference; `prepare_quote_form` creates neither. If the buyer later supplies the TG
+reference returned by the website, `get_quote_request_status` can check it. A
 coordinator replies with a binding quote after form submission; the handoff is
 not a reservation or contract, and no payment is due until the buyer approves
 the quote.

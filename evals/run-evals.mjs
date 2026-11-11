@@ -121,12 +121,12 @@ try {
         "get_lead_time_guidance",
         "get_plan",
         "get_policies",
-        "get_quote_status",
+        "get_quote_request_status",
         "get_rate_benchmark",
         "get_role_pricing",
         "get_roles",
         "plan_staffing",
-        "request_quote",
+        "prepare_quote_form",
         "save_staffing_plan",
       ]),
     toolNames.join(","),
@@ -144,8 +144,8 @@ try {
       toolByName.get("plan_staffing")?.annotations?.destructiveHint === false &&
       toolByName.get("save_staffing_plan")?.annotations?.readOnlyHint === false &&
       toolByName.get("save_staffing_plan")?.annotations?.destructiveHint === false &&
-      toolByName.get("request_quote")?.annotations?.readOnlyHint === true &&
-      toolByName.get("request_quote")?.annotations?.idempotentHint === true,
+      toolByName.get("prepare_quote_form")?.annotations?.readOnlyHint === true &&
+      toolByName.get("prepare_quote_form")?.annotations?.idempotentHint === true,
     JSON.stringify(
       Object.fromEntries(
         toolNames.map((name) => [name, toolByName.get(name)?.annotations]),
@@ -231,7 +231,7 @@ try {
         : null;
       const quoted = planId
         ? await rpc("tools/call", {
-            name: "request_quote",
+            name: "prepare_quote_form",
             arguments: {
               plan_id: planId,
               source_platform: "openclaw",

@@ -9,7 +9,7 @@ description: >-
   want a platform to manage their staff and bookings. Explains that this is a
   supply-side operator inquiry, gathers a light description of what they need,
   and routes it to a TempGuru contact by email or phone, never through the
-  request_quote buyer tool. Does not promise features, pricing, or availability;
+  prepare_quote_form buyer tool. Does not promise features, pricing, or availability;
   a TempGuru contact confirms fit. Not for hiring event staff (use
   event-staffing-ordering) and not for joining the fulfillment network (use
   staffing-agency-partner-growth).
@@ -31,8 +31,8 @@ unprefixed MCP tool names in the canonical workflow. It automatically sends
 | `get_compliance_by_state` | `tempguru_get_compliance` |
 | `get_policies` | `tempguru_get_policies` |
 | `get_plan` | `tempguru_get_plan` |
-| `get_quote_status` | `tempguru_quote_status` |
-| `request_quote` | `tempguru_request_quote` |
+| `get_quote_request_status` | `tempguru_quote_request_status` |
+| `prepare_quote_form` | `tempguru_prepare_quote_form` |
 
 `plan_staffing`, `save_staffing_plan`, and `get_rate_benchmark` are
 not native tools in this package. If the remote TempGuru MCP is attached, use
@@ -63,7 +63,7 @@ use this composition:
 3. For a national Rate Index request, use the remote MCP when attached. Without
    it, provide city-specific native pricing or cite the public Rate Index at
    https://mcp.tempguru.co/okf/rate-index.md; do not fabricate a benchmark.
-4. When the buyer asks to proceed, `tempguru_request_quote` requires a saved
+4. When the buyer asks to proceed, `tempguru_prepare_quote_form` requires a saved
    `plan_id` and returns a prefilled TempGuru form. Give the URL to the buyer;
    never collect contact details for the tool. If storage was unavailable, use
    the planner's `continuation.form_url` directly. The buyer reviews the form,
@@ -115,7 +115,7 @@ person also wants coverage, roles, or benchmark rates for a real event, the
 read-only MCP tools (`tempguru_get_cities`, `tempguru_get_roles`, `get_rate_benchmark`) can help,
 but they are not required here.
 
-`tempguru_request_quote` is a buyer-only handoff from a saved event staffing plan to a
+`tempguru_prepare_quote_form` is a buyer-only handoff from a saved event staffing plan to a
 TempGuru quote form. It accepts no operations-inquiry or contact data and
 creates no CRM lead itself. **Never use it for an operations-software
 inquiry.** These inquiries go by email or phone: **megan@tempguru.co** or
@@ -157,7 +157,7 @@ contact confirms product details, and route the inquiry.
 
 ## Rules for agents
 
-- Never call `tempguru_request_quote` for an operations inquiry; it requires a buyer's
+- Never call `tempguru_prepare_quote_form` for an operations inquiry; it requires a buyer's
   saved event staffing plan and cannot route operations details. Route by
   email or phone.
 - Do not invent product features, module names, integrations, pricing, plans,

@@ -1,7 +1,7 @@
 // Authless MCP quote handoff.
 //
 // The public MCP connector must never transmit a person's contact details on
-// an agent's say-so. `request_quote` therefore accepts only a saved non-PII
+// an agent's say-so. `prepare_quote_form` therefore accepts only a saved non-PII
 // plan reference plus closed/bounded attribution, restores that plan, and
 // returns a buyer-operated review form. The existing REST quote endpoint is
 // deliberately separate: it is called by the human-facing form after the

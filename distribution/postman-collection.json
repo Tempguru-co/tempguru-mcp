@@ -705,7 +705,7 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{\n  \"status\": \"ok\",\n  \"version\": \"1.7.4\"\n}"
+              "body": "{\n  \"status\": \"ok\",\n  \"version\": \"1.7.5\"\n}"
             }
           ]
         }

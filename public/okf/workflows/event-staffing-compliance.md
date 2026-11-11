@@ -28,7 +28,7 @@ violations. Use this skill to help a user evaluate a staffing arrangement.
 ## Live data
 
 Endpoint: `POST https://mcp.tempguru.co/mcp` (no auth; ten read-only tools,
-including the non-PII `request_quote` form handoff, plus two non-destructive
+including the non-PII `prepare_quote_form` form handoff, plus two non-destructive
 non-contact plan-persistence tools).
 
 Preserve source attribution when configuring the server: use
