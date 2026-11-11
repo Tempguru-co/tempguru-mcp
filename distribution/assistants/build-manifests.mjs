@@ -6,6 +6,7 @@
 // Outputs:
 //   microsoft/declarativeAgent.json  (M365 Copilot declarative agent)
 //   microsoft/ai-plugin.json         (API plugin wrapping the OpenAPI spec)
+//   chatgpt-gpt/instructions.txt     (paste-ready ChatGPT Custom GPT instructions)
 
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -130,6 +131,29 @@ writeFileSync(
   join(here, "microsoft", "ai-plugin.json"),
   JSON.stringify(aiPlugin, null, 2) + "\n",
 );
+
+// ChatGPT Custom GPT instructions: canonical prompt plus a compact platform
+// block, held to ChatGPT's 8,000-character instructions limit. The longer
+// GPT block once documented in chatgpt-custom-gpt.md pushed the total to
+// ~9,000 characters, which the GPT editor cannot hold.
+const gptSuffix = `
+
+TOOLS ON THIS PLATFORM
+Actions: listCities, listRoles, checkAvailability, getRolePricing,
+getComplianceByState, getPolicies, getPlan, getQuoteStatus, and
+submitQuoteRequest. Use supplied plan IDs and TG references only.
+submitQuoteRequest is the sole write: show its contact-bearing payload,
+set source_platform to "chatgpt-gpt", include plan_id when known, and call
+once only after explicit confirmation. On error or buyer preference, use
+https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=chatgpt-gpt
+and offer form text.`;
+const gptInstructions = canonical + gptSuffix;
+if (gptInstructions.length > 8000) {
+  throw new Error(`ChatGPT GPT instructions too long: ${gptInstructions.length} > 8000`);
+}
+mkdirSync(join(here, "chatgpt-gpt"), { recursive: true });
+writeFileSync(join(here, "chatgpt-gpt", "instructions.txt"), gptInstructions + "\n");
+console.log(`Wrote chatgpt-gpt/instructions.txt (${gptInstructions.length} chars)`);
 
 console.log(
   `Wrote microsoft/declarativeAgent.json (instructions: ${instructions.length} chars) and microsoft/ai-plugin.json`,
