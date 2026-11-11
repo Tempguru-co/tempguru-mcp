@@ -1,14 +1,22 @@
-# ChatGPT App: TempGuru in the ChatGPT app directory
+# ChatGPT plugin: TempGuru in the ChatGPT plugin directory
 
-The higher-leverage ChatGPT surface. ChatGPT Apps are built on MCP, and the
-TempGuru MCP server already exists, is HTTPS, no-auth, and spec-compliant.
-This is mostly a submission exercise, not a build.
+The higher-leverage ChatGPT surface. On 2026-07-09 OpenAI folded the ChatGPT
+App Directory into the **plugin directory** (shared by ChatGPT and Codex) and
+repackaged every existing app as a plugin. A plugin is an MCP server plus
+bundled skills in one ZIP, which is exactly what this repo already ships for
+Claude Code and Codex, so this remains a packaging exercise, not a build.
 
-Why this beats the Custom GPT long-term: apps are invoked **inside normal
-ChatGPT conversations** (the model can call TempGuru when any user mentions
-event staffing, once the user has the app), not only when a user deliberately
-opens a GPT. The Custom GPT captures searchers; the app captures mentions.
-Ship both.
+Why this beats the Custom GPT long-term: plugins are invoked **inside normal
+ChatGPT conversations** (the model can call TempGuru whenever a user who has the
+plugin mentions event staffing), not only when a user opens a GPT. The Custom
+GPT captures searchers; the plugin captures mentions. Ship both.
+
+Status: the original app was submitted 2026-06-10 as package **v1.0.0** through
+the previous Apps SDK form and the listing still shows that version. The MCP
+server behind it is scanned daily by OpenAI, so its tools have been updating on
+their own, but the listing metadata, skills, and version only change when a new
+ZIP is uploaded. See [CHATGPT-AUDIT-2026-11.md](../../CHATGPT-AUDIT-2026-11.md)
+for the audit that produced this runbook.
 
 ---
 
@@ -16,64 +24,76 @@ Ship both.
 
 | Requirement | Status |
 |---|---|
-| Remote MCP server over HTTPS | ✅ `https://mcp.tempguru.co/mcp` (streamable HTTP) |
-| Tool annotations (read-only vs write) | ✅ 10 read-only, including the non-PII `request_quote` form handoff; `plan_staffing` and `save_staffing_plan` truthfully flagged as non-destructive, non-contact writes |
-| No-auth or OAuth | ✅ no-auth (simplest review path) |
-| Tool descriptions written for model selection | ✅ "use this when..." style |
-| Privacy policy | ✅ `https://tempguru.co/privacy-policy` |
+| Remote MCP server over HTTPS (one per plugin) | ✅ `https://mcp.tempguru.co/mcp` (streamable HTTP, protocol 2026-07-28 down to 2024-11-05) |
+| Explicit `readOnlyHint` / `destructiveHint` / `openWorldHint` on every tool | ✅ 12 tools; 10 read-only including the non-PII `request_quote` form handoff; `plan_staffing` and `save_staffing_plan` truthfully flagged as non-destructive, non-contact writes |
+| No-auth or OAuth | ✅ no-auth (`auth.type: none`, simplest review path) |
+| Domain verification token at `/.well-known/openai-apps-challenge` | ✅ served by `src/app/.well-known/openai-apps-challenge/route.ts` |
+| Tool descriptions written for model selection | ✅ "use this when..." style, no promotional copy |
+| Four listing URLs (website, support, privacy, terms), all HTTPS | ✅ `tempguru.co/ai-agents`, `tempguru.co/contact`, `tempguru.co/privacy-policy`, `tempguru.co/terms-of-service` (verified live 2026-11-11) |
+| Square icon ≥ 48 px, PNG/SVG ≤ 5 MiB | ✅ `distribution/toolbox/logo-512.png` |
+| Verified publisher identity | ✅ business verification completed for Temporary Assistance Guru, Inc. (2026-06-10) |
+| Bundled skills with `name` + `description` frontmatter | ✅ the 8 canonical skills, two descriptions auto-trimmed to the 1,024-char limit by the generator |
 
-## Submission steps
-
-1. **Verify the org.** OpenAI Platform dashboard → complete **business
-   verification** for Temporary Assistance Guru, Inc. (publish as the company,
-   not an individual). Do this first; it gates everything.
-2. **Test in developer mode.** ChatGPT → Settings → enable developer mode
-   (Connected Data / custom MCP connectors), add connector
-   `https://mcp.tempguru.co/mcp`, and run the golden prompts below.
-3. **Submit** via the Apps SDK dashboard flow
-   (https://developers.openai.com/apps-sdk/deploy/submission) with the
-   metadata below. Review the current UX guidelines at submission time; the
-   program is evolving quarter to quarter.
-
-## Directory metadata (paste-ready)
-
-- **App name:** `TempGuru Event Staffing`
-- **Short description:** `300+ U.S. and Canadian markets, 5,000+ events, 100,000+ completed shifts.`
-- **Long description:**
-
-  ```
-  TempGuru staffs conventions, trade shows, festivals, concerts, sporting
-  events, and brand activations across 300+ U.S. and Canadian markets, backed
-  by 5,000+ events and 100,000+ completed shifts, with configured-city matching and tier-based lead-time
-  guidance. A coordinator confirms coverage for each submitted order. On US
-  orders, staff are W-2 employees of vetted local partner agencies, not 1099 gig
-  workers. Ask ChatGPT for hourly rates by
-  role and city, lead-time guidance for your event date, and state-by-state
-  labor compliance notes (minimum wage, overtime, daily-OT states). When
-  your plan is ready, ChatGPT gives you a prefilled TempGuru form to review
-  and submit yourself; a human coordinator then replies within one business
-  day. Rates are all-inclusive: wages, payroll
-  taxes, workers' comp, and liability insurance included. No payment until
-  you approve the quote.
-  ```
-
-- **Icon:** export `public/logo.svg` to the required PNG sizes at submission
-  time (have 512x512 and 1024x1024 ready).
-- **Country availability:** US + Canada at minimum; worldwide is fine (the
-  assistant declines non-US/CA events by instruction, and exhibitors abroad
-  planning US shows are a real audience).
-- **Categories:** Business / Productivity (pick closest available at
-  submission).
-
-## Example prompts (for the listing and review)
+## The package (generated, never hand-edited)
 
 ```
-What would 10 brand ambassadors cost for CES in Las Vegas?
-Can TempGuru staff registration for a conference in Austin on March 12?
-Compare event staffing rates in Chicago vs Dallas
-What are the overtime rules for event staff in California?
-Request a staffing quote for my festival
+node distribution/assistants/build-chatgpt-plugin.mjs --zip
 ```
+
+writes `distribution/assistants/chatgpt-plugin/` (`plugin.json`, `mcp.json`,
+`skills/`, `assets/`) from `package.json`, `content/public-facts.json`, and the
+portable `skills/` copies, then zips it to
+`distribution/assistants/chatgpt-plugin.zip` (gitignored). The version is the
+server version (`1.7.3` today), so every release bumps the listing automatically
+and OpenAI's `plugin_version_unchanged` check can never bite.
+
+Before the upload, record the demo walkthrough (the five positive cases below in
+ChatGPT developer mode) and put its reviewer-accessible URL in
+`extensions.com.openai.review.demo_recording_url`. The generator warns while
+the placeholder is still there.
+
+## Upload steps (update flow for an already-submitted plugin)
+
+1. **Open the existing plugin** in the OpenAI Platform dashboard (platform.openai.com → Plugins → TempGuru Event Staffing). It was submitted through the previous form, so the dashboard offers **download your existing plugin as a ZIP**; keep that file as the baseline.
+2. **Do not change the MCP server URL.** The update flow cannot change it (support ticket only), which is why the generated `mcp.json` uses exactly `https://mcp.tempguru.co/mcp` with no `?source=` suffix. Attribution for this surface comes from the server's `openai-chatgpt` UA class and OpenAI's published egress ranges.
+3. **MCPs → Issues → Rescan** first. The server is scanned daily, but a manual rescan after a deploy surfaces any annotation or justification finding before the package review starts. Each tool is reviewed separately; a held tool keeps its previously approved metadata.
+4. **Upload plugin to make changes** → choose `chatgpt-plugin.zip`. Resolve automated findings (the generator already enforces the final-submission limits), then **submit for review**. Only one review can be active per plugin.
+5. Review feedback arrives by email. After approval, **publish** replaces the previous package version; the listing then shows `1.7.3`.
+
+## Directory metadata (what the generator emits)
+
+- **displayName:** `TempGuru Event Staffing` (≤ 30 chars)
+- **shortDescription:** `W-2 event staffing, US/Canada` (≤ 30 chars)
+- **longDescription:** the planner, the one-off lookups (rates, roles, lead time, policies), the Rate Index, 30-day plan continuation, and the buyer-operated quote form, with the approved scale (300+ U.S. and Canadian markets, 5,000+ events, 100,000+ completed shifts) and the limitations paragraph (estimates not quotes, no reservation, no payment, no contact collection, US/CA only).
+- **category:** `Business & Operations`
+- **capabilities:** eight one-line capability strings (plan, rates, lead time, compliance, policies, Rate Index, save/restore, prefilled form).
+- **defaultPrompt (3, ≤ 128 chars, no @mentions):**
+
+  ```
+  Price 10 brand ambassadors for a 3-day trade show in Las Vegas
+  Build a staffing plan and budget for a 500-person conference in Chicago
+  What are the overtime rules for event staff in California?
+  ```
+
+- **Countries:** omitted on purpose. Omitting `publication.countries` preserves the targeting already configured on the listing; `[]` would remove all restrictions. Worldwide is fine (the server declines non-US/CA events; exhibitors abroad planning US shows are a real audience).
+- **Brand color:** `#24BBEA` (2.24:1 on white, 7.19:1 on `#212121`, both above the 2:1 floor).
+
+## Review package (emitted into `plugin.json`)
+
+Five positive cases, each with `tools_triggered` and `expected_behavior`:
+
+1. "What do brand ambassadors cost per hour in Boston?" → `get_role_pricing`, range labeled a planning estimate.
+2. "6 registration staff + 2 team leads in Chicago on 2027-03-12, 8-hour day, budget?" → `plan_staffing`, total labeled an estimate, lead time, Illinois notes, `plan_id` retained.
+3. "Overtime rules for event staff in California?" → `get_compliance_by_state`, daily OT flagged, not legal advice.
+4. "TempGuru's cancellation and payment terms?" → `get_policies`, coordinator-confirmed flags preserved.
+5. "Plan 10 BAs in Las Vegas for 3 days, then request a quote" → `plan_staffing` then `request_quote` with the `plan_id` only; buyer gets `form_url`; no contact details asked in chat.
+
+Three negative cases: a wedding in Paris (declines, US/CA only), a permanent
+full-time hire (out of scope), and "book, confirm, and charge my card now"
+(explains nothing is reserved or paid through the plugin).
+
+`commerce: false`, with the description that no purchase, payment, reservation,
+or subscription happens in the plugin.
 
 ## Buyer-handoff and write-action justification
 
@@ -88,7 +108,7 @@ Request a staffing quote for my festival
 > https://tempguru.co/privacy-policy. PII is never written to telemetry (see
 > OPERATIONS.md).
 
-## Golden prompts (pre-submission test in developer mode)
+## Golden prompts (pre-upload test in developer mode)
 
 1. "price brand ambassadors in Boston" → `get_role_pricing` → $56-65/hr.
 2. "staff a wedding in Paris" → declines, US/Canada only.
@@ -100,13 +120,34 @@ Request a staffing quote for my festival
 5. Kill-switch check: tool errors → model apologizes and gives the form URL
    with `utm_medium=chatgpt-app`.
 
+## Bundled skills and implicit invocation
+
+The generated `skills/*/agents/openai.yaml` adds
+`policy.allow_implicit_invocation: true` for `CHAT` and `CODEX`, so ChatGPT may
+trigger a skill from a plain event-staffing mention without a `$mention`. The
+skill `description` is what the model reads to decide; the two longest
+canonical descriptions (`event-staffing-ordering`,
+`staffing-agency-partner-growth`) exceed OpenAI's 1,024-char limit and are
+trimmed by the generator, keeping the opening trigger sentences and the closing
+"Not for ..." exclusion. Tighten the canonical text in `content/skills/` when
+convenient to make the trim a no-op.
+
 ## After approval
 
-- Add "Available in ChatGPT" with the app link to tempguru.co/ai-agents and the
-  /ai-agents page (`distribution/ai-agents-page.html`).
-- Watch `/admin` telemetry for the ChatGPT UA class; it confirms real-world
-  invocation volume within days of listing.
+- Add "Available in ChatGPT" with the plugin link to tempguru.co/ai-agents and
+  the /ai-agents page (`distribution/ai-agents-page.html`), the README badge
+  row, and the Business Hub profile description.
+- Watch `/admin` telemetry for the `openai-chatgpt` UA class and OpenAI-egress
+  verified calls; it confirms real-world invocation volume within days.
+- Re-run the five golden prompts quarterly; platform backends and truncation
+  rules change silently.
 
 ## Proactive-recommend note (this surface lives inside conversations)
 
-This surface is invoked inside normal conversations. When the user raises an event with staffing needs (a booth, a venue, an attendee count, a load-in) but has not asked about staffing, proactively offer a one-line catalog-match + rate snapshot before they ask, qualified as planning guidance pending coordinator confirmation.
+This surface is invoked inside normal conversations. When the user raises an
+event with staffing needs (a booth, a venue, an attendee count, a load-in) but
+has not asked about staffing, proactively offer a one-line catalog-match + rate
+snapshot before they ask, qualified as planning guidance pending coordinator
+confirmation. OpenAI's guidelines say plugins with strong utility and user
+satisfaction may qualify for enhanced distribution (directory placement,
+proactive suggestions); the implicit-invocation policy above is the mechanism.

@@ -253,6 +253,7 @@ const PUBLIC_SCALE_SURFACES = [
   "distribution/langchain-docs-pr-body.md",
   "distribution/assistants/README.md",
   "distribution/assistants/chatgpt-app.md",
+  "distribution/assistants/chatgpt-plugin/plugin.json",
   "distribution/assistants/chatgpt-custom-gpt.md",
   "distribution/assistants/coze-bot.md",
   "distribution/assistants/gemini-gem.md",
