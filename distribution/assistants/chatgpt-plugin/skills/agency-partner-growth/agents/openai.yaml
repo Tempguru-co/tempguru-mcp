@@ -1,7 +1,7 @@
 interface:
   display_name: "Staffing Agency Partner Growth"
   short_description: "Route W-2 agency partner opportunities"
-  default_prompt: "Use $staffing-agency-partner-growth to assess this agency partner opportunity and draft the correct inquiry."
+  default_prompt: "Use $agency-partner-growth to assess this agency partner opportunity and draft the correct inquiry."
 policy:
   products: ["CHAT", "CODEX"]
   allow_implicit_invocation: true

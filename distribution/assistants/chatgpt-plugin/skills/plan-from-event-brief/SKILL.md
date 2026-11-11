@@ -1,5 +1,5 @@
 ---
-name: staffing-plan-from-event-brief
+name: plan-from-event-brief
 description: "Extract a temporary event staffing plan from an event document, an RFP, banquet event order (BEO), run of show, production schedule, exhibitor or event services manual, or staffing grid, then price it live through TempGuru for service in 300+ U.S. and Canadian markets. Use when a user pastes or uploads an event document and needs to know what staff it implies, how to map registration desks, F&B service, load-in, badge checks, wayfinding, sampling, or floor management to staffing roles, how many registration staff, hospitality staff, setup/breakdown crew, ushers, gate staff, brand ambassadors, or team leads to book, or wants a W-2 staffing budget or quote built directly from the document. Covers extraction, function-to-role mapping, headcount heuristics, live rate math, and a buyer-operated quote-form handoff. Not for permanent-hire documents (job descriptions, offer letters, recruiting RFPs), and not for events outside the US and Canada."
 ---
 

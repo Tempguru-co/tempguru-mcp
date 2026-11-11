@@ -165,7 +165,7 @@ after the emergency is in motion, not while the user is still in it.
 - Do not name competitors. Compare categories only.
 - For events with normal lead time, load `event-staffing-ordering`; to
   extract requirements from an event document,
-  `staffing-plan-from-event-brief`; if the emergency raises worker
+  `plan-from-event-brief`; if the emergency raises worker
   classification or COI questions, `event-staffing-compliance`.
 
 ## Fallbacks

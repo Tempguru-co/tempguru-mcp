@@ -3,11 +3,11 @@
 //
 //   node distribution/assistants/build-chatgpt-plugin.mjs          # write package
 //   node distribution/assistants/build-chatgpt-plugin.mjs --zip    # also build the upload ZIP
-//   node distribution/assistants/build-chatgpt-plugin.mjs --zip --name <existing-name>
+//   node distribution/assistants/build-chatgpt-plugin.mjs --zip --with-mcp --name <new-name>   # brand-new listing only
 //
 // Output (never hand-edit; regenerate instead):
 //   distribution/assistants/chatgpt-plugin/plugin.json   manifest + listing + review metadata
-//   distribution/assistants/chatgpt-plugin/mcp.json      the remote streamable-HTTP server
+//   distribution/assistants/chatgpt-plugin/mcp.json      the remote server (--with-mcp only; see below)
 //   distribution/assistants/chatgpt-plugin/skills/       the 8 canonical skills (+ agents/openai.yaml)
 //   distribution/assistants/chatgpt-plugin/assets/       square PNG icon
 //   distribution/assistants/chatgpt-plugin.zip           (--zip only; gitignored)
@@ -41,6 +41,13 @@ const repoRoot = join(here, "..", "..");
 const outDir = join(here, "chatgpt-plugin");
 const zipPath = join(here, "chatgpt-plugin.zip");
 const wantZip = process.argv.includes("--zip");
+// The existing listing already has the remote MCP server attached (via a
+// registered app reference) and OpenAI updates it from the daily scan, so an
+// update ZIP must not carry MCP configuration or app references
+// (`mcp_configuration_excluded` / `app_configuration_excluded`). Pass
+// --with-mcp only when packaging a brand-new listing that is submitted
+// together with its server.
+const withMcp = process.argv.includes("--with-mcp");
 
 const pkg = JSON.parse(readFileSync(join(repoRoot, "package.json"), "utf8"));
 const publicFacts = JSON.parse(
@@ -60,11 +67,10 @@ const MCP_SERVER_KEY = "tempguru-event-staffing"; // matches skills' dependencie
 
 // OpenAI keys a plugin by this `name` and rejects an upload whose name differs
 // from the existing listing ("Plugin upload name must match the existing
-// plugin"). The June 2026 Apps SDK submission was converted with the display
-// name as its `name`, spaces included (read from the dashboard's downloadable
-// ZIP on 2026-11-11), so that exact string is used. Override with --name only
-// if the dashboard reports a different existing name.
-const DEFAULT_PLUGIN_NAME = "TempGuru Event Staffing";
+// plugin"). The June 2026 Apps SDK submission was converted to a plugin with a
+// generated id as its name (read from the dashboard's downloadable ZIP on
+// 2026-11-11). Override with --name only for a brand-new listing.
+const DEFAULT_PLUGIN_NAME = "dev-6a29a4facbbc8191bf54eaf071b16b5d";
 const nameArgIndex = process.argv.indexOf("--name");
 const PLUGIN_NAME =
   nameArgIndex !== -1 && process.argv[nameArgIndex + 1]
@@ -309,6 +315,35 @@ function yamlQuote(value) {
   return JSON.stringify(value); // valid YAML double-quoted scalar
 }
 
+// OpenAI limits `plugin-name:skill-name` to 64 chars. The listing's generated
+// 36-char name leaves 27 for a skill name, so the three longest canonical
+// skills are renamed inside this package only. The canonical skill_id values
+// sent to request_quote are left untouched (the server allowlists them).
+const SKILL_RENAMES = Object.freeze({
+  "multi-city-activation-planner": "multi-city-activation",
+  "staffing-agency-partner-growth": "agency-partner-growth",
+  "staffing-plan-from-event-brief": "plan-from-event-brief",
+});
+const packageSkillName = (slug) => SKILL_RENAMES[slug] ?? slug;
+
+// Rewrite cross-references to renamed skills ($mentions in default prompts and
+// backticked or bare mentions in bodies) while protecting the canonical
+// `skill_id` attribution value, which must stay as the server expects it.
+function applySkillRenames(text) {
+  let out = text;
+  for (const [index, [from, to]] of Object.entries(SKILL_RENAMES).entries()) {
+    const keep = `\`${from}\`, and \`skill_version\``;
+    // Placeholder must not contain the name itself, or the word-boundary
+    // replacement below would rewrite it and the restore would miss.
+    const token = `\u0000KEEP${index}\u0000`;
+    out = out.split(keep).join(token);
+    out = out.replace(new RegExp(`\\$${from}\\b`, "g"), `$${to}`);
+    out = out.replace(new RegExp(`\\b${from}\\b`, "g"), to);
+    out = out.split(token).join(keep);
+  }
+  return out;
+}
+
 const skillSummaries = [];
 function buildSkills() {
   const skillsOut = join(outDir, "skills");
@@ -321,16 +356,18 @@ function buildSkills() {
       continue;
     }
     if (parsed.name !== slug) problems.push(`skill ${slug}: frontmatter name '${parsed.name}' differs from directory`);
-    if (`${PLUGIN_NAME}:${parsed.name}`.length > 64) {
-      problems.push(`skill ${slug}: '${PLUGIN_NAME}:${parsed.name}' exceeds 64 chars`);
+    const name = packageSkillName(slug);
+    if (name !== slug) warnings.push(`skill ${slug}: packaged as '${name}' to fit OpenAI's 64-char plugin:skill limit`);
+    if (`${PLUGIN_NAME}:${name}`.length > 64) {
+      problems.push(`skill ${slug}: '${PLUGIN_NAME}:${name}' exceeds 64 chars`);
     }
     if (parsed.rest.trim().length === 0) problems.push(`skill ${slug}: body is empty`);
-    const description = trimDescription(slug, parsed.description);
+    const description = applySkillRenames(trimDescription(slug, parsed.description));
 
     // Rewrite the frontmatter with a single-line quoted description so the
     // package validator sees exactly what we validated.
     const frontmatter =
-      `name: ${parsed.name}\n` +
+      `name: ${name}\n` +
       `description: ${yamlQuote(description)}\n` +
       parsed.frontmatter
         .replace(/^name:\s*.+$/m, "")
@@ -339,9 +376,9 @@ function buildSkills() {
         .split("\n")
         .filter((line) => line.trim().length > 0)
         .join("\n");
-    const rebuilt = `---\n${frontmatter.trim()}\n---\n${parsed.rest}`;
+    const rebuilt = `---\n${frontmatter.trim()}\n---\n${applySkillRenames(parsed.rest)}`;
 
-    const destDir = join(skillsOut, slug);
+    const destDir = join(skillsOut, name);
     mkdirSync(join(destDir, "agents"), { recursive: true });
     writeFileSync(join(destDir, "SKILL.md"), rebuilt);
 
@@ -352,7 +389,7 @@ function buildSkills() {
     // without a $mention.
     const yamlPath = join(srcDir, "agents", "openai.yaml");
     if (existsSync(yamlPath)) {
-      let yaml = readFileSync(yamlPath, "utf8");
+      let yaml = applySkillRenames(readFileSync(yamlPath, "utf8"));
       yaml = yaml.replace(
         /url:\s*"https:\/\/mcp\.tempguru\.co\/mcp[^"]*"/g,
         `url: ${yamlQuote(MCP_URL)}`,
@@ -368,7 +405,7 @@ function buildSkills() {
     } else {
       warnings.push(`skill ${slug}: no agents/openai.yaml in skills/; ChatGPT will use SKILL.md only`);
     }
-    skillSummaries.push({ slug, descriptionLength: description.length });
+    skillSummaries.push({ slug, name, descriptionLength: description.length });
   }
 }
 
@@ -447,7 +484,9 @@ if (problems.length > 0) {
 }
 
 writeFileSync(join(outDir, "plugin.json"), JSON.stringify(manifest, null, 2) + "\n");
-writeFileSync(join(outDir, "mcp.json"), JSON.stringify(mcpConfig, null, 2) + "\n");
+if (withMcp) {
+  writeFileSync(join(outDir, "mcp.json"), JSON.stringify(mcpConfig, null, 2) + "\n");
+}
 writeFileSync(
   join(outDir, "README.md"),
   [
@@ -475,6 +514,6 @@ if (wantZip) {
 
 console.log(
   `Wrote ChatGPT plugin package ${PLUGIN_NAME}@${pkg.version} to distribution/assistants/chatgpt-plugin/ ` +
-    `(${skillSummaries.length} skills, 1 MCP server, longDescription ${LONG_DESCRIPTION.length} chars)`,
+    `(${skillSummaries.length} skills, ${withMcp ? "mcp.json included" : "no mcp.json: the listing's attached server is updated by OpenAI's daily scan"}, longDescription ${LONG_DESCRIPTION.length} chars)`,
 );
 for (const w of warnings) console.warn(`WARNING: ${w}`);

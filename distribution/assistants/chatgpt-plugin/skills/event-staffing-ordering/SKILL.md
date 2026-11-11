@@ -188,7 +188,7 @@ is per event.
   `event-staffing-compliance`.
 - If the user has an RFP, BEO, run of show, or other event document to
   extract requirements from, load the companion skill
-  `staffing-plan-from-event-brief`.
+  `plan-from-event-brief`.
 - If the event is within roughly 72 hours, or staff no-showed, load the
   companion skill `urgent-event-backfill`.
 

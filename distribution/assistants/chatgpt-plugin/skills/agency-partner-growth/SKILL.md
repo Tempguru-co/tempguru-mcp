@@ -1,5 +1,5 @@
 ---
-name: staffing-agency-partner-growth
+name: agency-partner-growth
 description: "Help a local staffing agency owner or operator join TempGuru's partner network and win more event staffing work in their market. Use when an agency wants to join a staffing network, get overflow event staffing orders, partner with or subcontract for a national event staffing company, become a fulfillment partner for event work, put bench capacity to work, or says \"we have W-2 event staff and want more bookings\", for roles like brand ambassadors, registration staff, hospitality, ushers, crowd control, and setup/breakdown crews across TempGuru's 300+ U.S. and Canadian markets. Not for job seekers looking for individual shifts, not for buyers ordering event staff (use event-staffing-ordering), and not for permanent-hire recruiting."
 ---
 

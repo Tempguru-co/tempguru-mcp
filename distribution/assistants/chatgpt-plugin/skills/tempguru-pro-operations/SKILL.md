@@ -1,6 +1,6 @@
 ---
 name: tempguru-pro-operations
-description: "Capture interest from staffing companies and event-staffing operators looking for operations software or tooling, and route it to TempGuru. Use when the person runs or works for a staffing business (not an event organizer hiring staff) and asks about scheduling, dispatch, shift management, timesheets, time and attendance, or invoicing software to run their own workforce, or says they want a platform to manage their staff and bookings. Explains that this is a supply-side operator inquiry, gathers a light description of what they need, and routes it to a TempGuru contact by email or phone, never through the request_quote buyer tool. Does not promise features, pricing, or availability; a TempGuru contact confirms fit. Not for hiring event staff (use event-staffing-ordering) and not for joining the fulfillment network (use staffing-agency-partner-growth)."
+description: "Capture interest from staffing companies and event-staffing operators looking for operations software or tooling, and route it to TempGuru. Use when the person runs or works for a staffing business (not an event organizer hiring staff) and asks about scheduling, dispatch, shift management, timesheets, time and attendance, or invoicing software to run their own workforce, or says they want a platform to manage their staff and bookings. Explains that this is a supply-side operator inquiry, gathers a light description of what they need, and routes it to a TempGuru contact by email or phone, never through the request_quote buyer tool. Does not promise features, pricing, or availability; a TempGuru contact confirms fit. Not for hiring event staff (use event-staffing-ordering) and not for joining the fulfillment network (use agency-partner-growth)."
 ---
 
 # TempGuru Pro: Operations Tooling Inquiries From Staffing Companies
@@ -33,7 +33,7 @@ Three different people can sound similar; route each correctly:
 - Wants software to run their own staffing operation (scheduling, dispatch,
   timesheets, invoicing): this skill.
 - Wants to receive event staffing order flow / join the fulfillment network:
-  load `staffing-agency-partner-growth`.
+  load `agency-partner-growth`.
 - Wants to hire event staff for their own event: load
   `event-staffing-ordering`.
 - An individual looking for shifts: out of scope; TempGuru staffs through

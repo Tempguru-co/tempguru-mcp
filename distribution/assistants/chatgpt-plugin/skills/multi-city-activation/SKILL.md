@@ -1,5 +1,5 @@
 ---
-name: multi-city-activation-planner
+name: multi-city-activation
 description: "Plan and price a multi-city event staffing program with one consolidated quote. Use when a user is staffing a tour, roadshow, sampling or mall tour, festival circuit, national brand activation, product-launch rollout, or any program that runs in more than one city, and needs brand ambassadors, registration staff, hospitality, ushers, crowd control, or setup/breakdown crews across several markets at once. Covers matching every city to the configured catalog, planning and pricing each leg with W-2 rate data, surfacing that compliance and overtime differ by state and province, and creating one buyer-operated form handoff so TempGuru can return one program quote. Not for a single-city event (use event-staffing-ordering) and not for events outside the US and Canada."
 ---
 
