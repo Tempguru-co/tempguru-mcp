@@ -70,13 +70,23 @@ the placeholder is still there.
   use for a **Create draft from ZIP** upload.
 - **chatgpt.com/plugins**: `dev-6a29a4facbbc8191bf54eaf071b16b5d`, the
   development copy. The 1.7.3 ZIP uploaded there on 2026-11-11 updated only
-  this copy. The generator currently defaults to this identity; switch the
-  defaults (`DEFAULT_PLUGIN_NAME`, `chatgpt-plugin.app.json`) to the dashboard
-  package's values before building the directory draft.
+  this copy. Build for it with `npm run build:chatgpt-plugin:dev`.
 
-Order of operations: deploy `1.7.5` → MCPs tab → Rescan until the finding
-clears → **Publish plugin** on 1.0.0 (gets the listing live on the current
-server; tools come from the scan) → **Create draft from ZIP** with the `1.7.5`
+`npm run build:chatgpt-plugin` targets the **directory** package by default
+(name `app-6a29a9e0634481919b7440b626b0e746`, app reference
+`chatgpt-plugin.directory.app.json`). The directory package's app id follows
+the dev package's pattern and has not yet been read from its own ZIP; if a
+**Create draft from ZIP** upload rejects the app reference, replace that file
+with the `.app.json` from the dashboard's Download plugin ZIP.
+
+The dashboard offers only **Publish plugin** while 1.0.0 is the sole version.
+**Submit for review** appears on a draft, which **Create draft from ZIP**
+creates.
+
+Order of operations: deploy `1.7.5` → MCPs tab → Rescan (renamed tools then
+show "This new tool definition needs further review before it can be
+published": a human-review hold, cleared by review, not by code) →
+**Create draft from ZIP** with the `1.7.5`
 package → paste `chatgpt-plugin-review.md` into Review details → Submit for
 review → Publish on approval.
 
@@ -93,8 +103,8 @@ consequences baked into the generator:
 - The upload `name` must equal that id; any other name is rejected
   ("Plugin upload name must match the existing plugin").
 - The ZIP carries the listing's canonical app reference verbatim: `.app.json`
-  with id `asdk_app_6a29a4facbbc8191bf54eaf071b16b5d` (committed as
-  `distribution/assistants/chatgpt-plugin.app.json`) and `apps: "./.app.json"`
+  (committed as `distribution/assistants/chatgpt-plugin.directory.app.json` and
+  `chatgpt-plugin.dev.app.json`, one per package) and `apps: "./.app.json"`
   in the manifest. The validator rejects an update without it ("Plugin upload
   must contain exactly the existing canonical app") and also rejects a fresh
   `mcp.json` in its place, so no `mcp.json` is emitted for this listing; the
