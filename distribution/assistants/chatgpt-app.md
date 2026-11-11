@@ -73,11 +73,13 @@ the placeholder is still there.
   this copy. Build for it with `npm run build:chatgpt-plugin:dev`.
 
 `npm run build:chatgpt-plugin` targets the **directory** package by default
-(name `app-6a29a9e0634481919b7440b626b0e746`, app reference
-`chatgpt-plugin.directory.app.json`). The directory package's app id follows
-the dev package's pattern and has not yet been read from its own ZIP; if a
-**Create draft from ZIP** upload rejects the app reference, replace that file
-with the `.app.json` from the dashboard's Download plugin ZIP.
+(name `app-6a29a9e0634481919b7440b626b0e746`). Its 1.0.0 export (read
+2026-11-11) is a Codex manifest plus logo with no `.app.json` and no MCP file;
+the server is attached on the dashboard's MCPs tab. An upload that omits it is
+rejected ("This package omits the plugin's existing MCP"), so this target
+declares the server in `mcp.json` at exactly `https://mcp.tempguru.co/mcp`
+with no app reference, and carries the plugin-level review block (which needs
+exactly one `mcp.json` server).
 
 The dashboard offers only **Publish plugin** while 1.0.0 is the sole version.
 **Submit for review** appears on a draft, which **Create draft from ZIP**
@@ -103,8 +105,8 @@ consequences baked into the generator:
 - The upload `name` must equal that id; any other name is rejected
   ("Plugin upload name must match the existing plugin").
 - The ZIP carries the listing's canonical app reference verbatim: `.app.json`
-  (committed as `distribution/assistants/chatgpt-plugin.directory.app.json` and
-  `chatgpt-plugin.dev.app.json`, one per package) and `apps: "./.app.json"`
+  (committed as `distribution/assistants/chatgpt-plugin.dev.app.json`; the
+  directory package has none and uses `mcp.json`) and `apps: "./.app.json"`
   in the manifest. The validator rejects an update without it ("Plugin upload
   must contain exactly the existing canonical app") and also rejects a fresh
   `mcp.json` in its place, so no `mcp.json` is emitted for this listing; the

@@ -60,11 +60,11 @@ const wantZip = process.argv.includes("--zip");
 // reference is present: the app IS the server.
 //
 //   directory (default): the platform.openai.com dashboard package that reaches
-//     the public plugin directory. Name read from the dashboard on 2026-11-11;
-//     the app id follows the dev package's `<prefix>-<hex>` / `asdk_app_<hex>`
-//     pattern. If an upload rejects the app reference, replace
-//     chatgpt-plugin.directory.app.json with the `.app.json` from that page's
-//     Download plugin ZIP.
+//     the public plugin directory. Its 1.0.0 export (read 2026-11-11) is a
+//     Codex manifest plus logo with no `.app.json` and no MCP file: the server
+//     is attached on the dashboard's MCPs tab. An upload must still declare
+//     that server ("This package omits the plugin's existing MCP"), so this
+//     target emits mcp.json at the exact URL on file and no app reference.
 //   dev: the chatgpt.com/plugins development copy (name and .app.json read from
 //     its downloaded ZIP on 2026-11-11).
 //
@@ -74,7 +74,7 @@ const wantZip = process.argv.includes("--zip");
 const TARGETS = {
   directory: {
     name: "app-6a29a9e0634481919b7440b626b0e746",
-    appJson: "chatgpt-plugin.directory.app.json",
+    appJson: null,
   },
   dev: {
     name: "dev-6a29a4facbbc8191bf54eaf071b16b5d",
@@ -92,11 +92,11 @@ if (!TARGET) {
   process.exit(1);
 }
 const appJsonArgIndex = process.argv.indexOf("--app-json");
-const committedAppJson = join(here, TARGET.appJson);
+const committedAppJson = TARGET.appJson ? join(here, TARGET.appJson) : null;
 const appJsonPath =
   appJsonArgIndex !== -1 && process.argv[appJsonArgIndex + 1]
     ? process.argv[appJsonArgIndex + 1]
-    : existsSync(committedAppJson)
+    : committedAppJson && existsSync(committedAppJson)
       ? committedAppJson
       : null;
 const withMcp = !appJsonPath && !process.argv.includes("--no-mcp");
