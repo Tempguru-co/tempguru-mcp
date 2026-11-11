@@ -2,7 +2,8 @@
 // the canonical sources, so the listing can never drift from the server.
 //
 //   node distribution/assistants/build-chatgpt-plugin.mjs          # write package
-//   node distribution/assistants/build-chatgpt-plugin.mjs --zip    # also build the upload ZIP
+//   node distribution/assistants/build-chatgpt-plugin.mjs --zip    # also build the upload ZIP (directory package)
+//   node distribution/assistants/build-chatgpt-plugin.mjs --zip --target dev   # chatgpt.com dev copy
 //   node distribution/assistants/build-chatgpt-plugin.mjs --zip --with-review   # force the manifest review block (mcp.json listings only)
 //   node distribution/assistants/build-chatgpt-plugin.mjs --zip --name <new-name>   # brand-new listing only
 //
@@ -51,21 +52,51 @@ const wantZip = process.argv.includes("--zip");
 // package); --no-review omits the review block so review information can be
 // entered in the dashboard instead.
 
-// The existing listing's MCP server is a registered "canonical app": the
-// downloaded package carries `.app.json` with its `asdk_app_...` id and the
-// manifest points at it via `apps`. An update upload "must contain exactly the
-// existing canonical app", so that file is reproduced verbatim and no
-// mcp.json is emitted (the app IS the server). Source: the `.app.json` from
-// the dashboard's downloadable ZIP, committed at distribution/assistants/
-// chatgpt-plugin.app.json once known, or passed with --app-json <path>.
-// Without an app reference (a brand-new listing) mcp.json is emitted instead
-// unless --no-mcp.
+// Two OpenAI plugin packages exist for TempGuru, and an upload must match the
+// target package's `name` ("Plugin upload name must match the existing
+// plugin") and carry exactly its canonical app reference (`.app.json`, whose
+// `asdk_app_...` id is the attached MCP server; "Plugin upload must contain
+// exactly the existing canonical app"). No mcp.json is emitted when an app
+// reference is present: the app IS the server.
+//
+//   directory (default): the platform.openai.com dashboard package that reaches
+//     the public plugin directory. Its 1.0.0 export (read 2026-11-11) is a
+//     Codex manifest plus logo with no `.app.json` and no MCP file: the server
+//     is attached on the dashboard's MCPs tab. An upload must still declare
+//     that server ("This package omits the plugin's existing MCP"), so this
+//     target emits mcp.json at the exact URL on file and no app reference.
+//   dev: the chatgpt.com/plugins development copy (name and .app.json read from
+//     its downloaded ZIP on 2026-11-11).
+//
+// --target dev|directory picks one; --name and --app-json override either
+// field; a brand-new listing with no app reference gets mcp.json unless
+// --no-mcp.
+const TARGETS = {
+  directory: {
+    name: "app-6a29a9e0634481919b7440b626b0e746",
+    appJson: null,
+  },
+  dev: {
+    name: "dev-6a29a4facbbc8191bf54eaf071b16b5d",
+    appJson: "chatgpt-plugin.dev.app.json",
+  },
+};
+const targetArgIndex = process.argv.indexOf("--target");
+const TARGET_KEY =
+  targetArgIndex !== -1 && process.argv[targetArgIndex + 1]
+    ? process.argv[targetArgIndex + 1]
+    : "directory";
+const TARGET = TARGETS[TARGET_KEY];
+if (!TARGET) {
+  console.error(`Unknown --target '${TARGET_KEY}'; use one of: ${Object.keys(TARGETS).join(", ")}`);
+  process.exit(1);
+}
 const appJsonArgIndex = process.argv.indexOf("--app-json");
-const committedAppJson = join(here, "chatgpt-plugin.app.json");
+const committedAppJson = TARGET.appJson ? join(here, TARGET.appJson) : null;
 const appJsonPath =
   appJsonArgIndex !== -1 && process.argv[appJsonArgIndex + 1]
     ? process.argv[appJsonArgIndex + 1]
-    : existsSync(committedAppJson)
+    : committedAppJson && existsSync(committedAppJson)
       ? committedAppJson
       : null;
 const withMcp = !appJsonPath && !process.argv.includes("--no-mcp");
@@ -97,17 +128,12 @@ const publicScale =
 const MCP_URL = "https://mcp.tempguru.co/mcp";
 const MCP_SERVER_KEY = "tempguru-event-staffing"; // matches skills' dependencies.tools[].value
 
-// OpenAI keys a plugin by this `name` and rejects an upload whose name differs
-// from the existing listing ("Plugin upload name must match the existing
-// plugin"). The June 2026 Apps SDK submission was converted to a plugin with a
-// generated id as its name (read from the dashboard's downloadable ZIP on
-// 2026-11-11). Override with --name only for a brand-new listing.
-const DEFAULT_PLUGIN_NAME = "dev-6a29a4facbbc8191bf54eaf071b16b5d";
+// The target package's name (see TARGETS above); --name overrides it.
 const nameArgIndex = process.argv.indexOf("--name");
 const PLUGIN_NAME =
   nameArgIndex !== -1 && process.argv[nameArgIndex + 1]
     ? process.argv[nameArgIndex + 1]
-    : DEFAULT_PLUGIN_NAME;
+    : TARGET.name;
 const DISPLAY_NAME = "TempGuru Event Staffing"; // <= 30 chars
 const SHORT_DESCRIPTION = "W-2 event staffing, US/Canada"; // <= 30 chars
 const BRAND_COLOR = "#24BBEA"; // 2.24:1 on white, 7.19:1 on #212121
@@ -495,17 +521,20 @@ const manifest = {
   },
 };
 
+// An existing listing already has its connection's authentication configured
+// on OpenAI's side, and an upload that repeats it is rejected ("This app
+// already has authentication configured. Remove the ZIP's auth override to
+// reuse that connection"). So mcp.json carries no auth block by default;
+// --with-auth adds `auth: none` for a brand-new listing whose connection has
+// never been configured.
+const withAuth = process.argv.includes("--with-auth");
 const mcpConfig = {
   $schema: "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
   mcpServers: {
     [MCP_SERVER_KEY]: {
       type: "streamable-http",
       url: MCP_URL,
-      extensions: {
-        "com.openai": {
-          auth: { type: "none" },
-        },
-      },
+      ...(withAuth ? { extensions: { "com.openai": { auth: { type: "none" } } } } : {}),
     },
   },
 };
@@ -612,7 +641,7 @@ if (wantZip) {
 }
 
 console.log(
-  `Wrote ChatGPT plugin package ${PLUGIN_NAME}@${pkg.version} to distribution/assistants/chatgpt-plugin/ ` +
+  `Wrote ChatGPT plugin package ${PLUGIN_NAME}@${pkg.version} (target: ${TARGET_KEY}) to distribution/assistants/chatgpt-plugin/ ` +
     `(${skillSummaries.length} skills, ${appJsonPath ? "canonical app reference" : withMcp ? "1 MCP server" : "no server"}, ${withReview ? "review block" : "no review block"}, longDescription ${LONG_DESCRIPTION.length} chars)`,
 );
 for (const w of warnings) console.warn(`WARNING: ${w}`);
