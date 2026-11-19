@@ -179,7 +179,7 @@ is a point-in-time snapshot (source data updated ${snapshotUpdated}).
 
 Generated from the canonical \`content/mcp-data/\` files in
 [Tempguru-co/tempguru-mcp](https://github.com/Tempguru-co/tempguru-mcp).
-Maintainer: megan@tempguru.co · License: MIT.
+Maintainer: contactus@tempguru.co · License: MIT.
 `;
 
 writeFileSync(join(outDir, "README.md"), card);

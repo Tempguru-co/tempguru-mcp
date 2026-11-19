@@ -243,7 +243,7 @@ In an emergency, the phone leads the ladder: **(904) 206-8953**.
 
 If no MCP handoff URL is available, call first, then use the form at
 **https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=skill**
-or email **megan@tempguru.co**. Without package-native tools or remote MCP (for example plain
+or email **contactus@tempguru.co**. Without package-native tools or remote MCP (for example plain
 ChatGPT), the TempGuru Event Staffing Planner GPT runs this same workflow:
 https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner
 Developer docs: https://tempguru.co/ai-agents

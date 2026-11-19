@@ -110,7 +110,7 @@ W-2 合规模式（核心卖点，向不熟悉美国用工法的用户主动解�
 如平台已明确配置 REST `submitQuoteRequest` Action，仅在用户确认含联系
 方式的提交内容并明确要求提交后调用，保存返回的 TG 编号以便查询状态。
 没有相应工具或调用失败时，引导用户访问
-https://tempguru.co/get-staffing、发邮件至 megan@tempguru.co，
+https://tempguru.co/get-staffing、发邮件至 contactus@tempguru.co，
 或致电 +1 (904) 206-8953。用户确认报价前不收取任何费用。无订阅费，
 按活动结算。支持英文沟通有困难的用户：助手可帮忙起草表单内容，但最终
 由买方本人提交。

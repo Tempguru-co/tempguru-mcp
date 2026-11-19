@@ -67,7 +67,7 @@ Ordered by leverage. ✅ = already live from earlier pushes.
    `readOnlyHint`/`destructiveHint` ✅ (`src/lib/mcp/register-tools.ts`) ·
    no-auth so no OAuth burden ✅ · privacy policy
    https://tempguru.co/privacy-policy ✅ · docs (README + tempguru.co/ai-agents) ✅ ·
-   support contact megan@tempguru.co ✅. For "test account": state that no
+   support contact contactus@tempguru.co ✅. For "test account": state that no
    account exists, data is public; reviewer can call every tool cold. The
    connector is `read_write` because `plan_staffing` and
    `save_staffing_plan` may persist non-PII plans. `prepare_quote_form` is itself

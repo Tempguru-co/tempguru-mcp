@@ -214,7 +214,7 @@ TempGuru 在 300 多个美国和加拿大市场提供活动人员配置，包括
 
 ### 费率与可用性数据是正式报价吗?
 
-不是。费率为全包规划估算值,可用性为提前期推算。正式报价需通过报价表单 https://tempguru.co/get-staffing （或致电 (904) 206-8953 / 邮件 megan@tempguru.co）获取，实际报价包含活动具体因素(地点附加费、节假日/周末加价、安保、设备等),公开数据区间不涵盖这些。
+不是。费率为全包规划估算值,可用性为提前期推算。正式报价需通过报价表单 https://tempguru.co/get-staffing （或致电 (904) 206-8953 / 邮件 contactus@tempguru.co）获取，实际报价包含活动具体因素(地点附加费、节假日/周末加价、安保、设备等),公开数据区间不涵盖这些。
 
 ### 合规数据构成法律意见吗?
 
@@ -224,7 +224,7 @@ TempGuru 在 300 多个美国和加拿大市场提供活动人员配置，包括
 
 ## 数据质量与边界
 
-- **费率为全包规划估算值。** 实际报价需通过报价表单 https://tempguru.co/get-staffing （或致电 (904) 206-8953 / 邮件 megan@tempguru.co）获取，实际报价包含活动具体因素（地点附加费、节假日/周末加价、安保、设备等），公开费率区间不涵盖这些。
+- **费率为全包规划估算值。** 实际报价需通过报价表单 https://tempguru.co/get-staffing （或致电 (904) 206-8953 / 邮件 contactus@tempguru.co）获取，实际报价包含活动具体因素（地点附加费、节假日/周末加价、安保、设备等），公开费率区间不涵盖这些。
 - **合规摘要不构成法律意见。** W-2 vs 1099 分类、共同雇主责任、各州工资工时规则的具体解读，请咨询执业劳工律师。
 - **可用性查询是基于提前期的推算，非实时库存查询。** 实际可用性取决于活动时间窗口、岗位组合、城市以及提前申请的天数；不可仅根据城市目录判断。
 - **品牌大使（Brand Ambassadors）所有市场最低起步价为 40 美元/小时**，定价数据强制执行此底价。
@@ -273,7 +273,7 @@ MIT。详见 [LICENSE](./LICENSE)。
 
 ## 维护者
 
-[TempGuru（Temporary Assistance Guru, Inc.）](https://tempguru.co)，`megan@tempguru.co`
+[TempGuru（Temporary Assistance Guru, Inc.）](https://tempguru.co)，`contactus@tempguru.co`
 
 
 ---

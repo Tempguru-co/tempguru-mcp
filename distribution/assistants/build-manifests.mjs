@@ -40,7 +40,7 @@ TOOLS ON THIS PLATFORM
 REST actions: listCities, listRoles, checkAvailability, getRolePricing,
 getComplianceByState, getPolicies, getPlan, getQuoteStatus, and
 submitQuoteRequest. Use supplied plan IDs and TG references only.
-submitQuoteRequest is the sole write: show its contact-bearing payload,
+submitQuoteRequest is the sole write: show its contact payload,
 set source_platform to "copilot-agent", include plan_id when known, and call
 once only after explicit confirmation. On error or buyer preference, use
 https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=copilot-agent
@@ -97,7 +97,7 @@ const aiPlugin = {
     `Public event-staffing data for ${publicScale}, with hourly rates, lead-time guidance, compliance, and coordinator-confirmed order coverage.`,
   description_for_model:
     `Public data and quote submission for event staffing in the US and Canada from TempGuru, serving ${publicScale}. Stable claim IDs: ${publicClaimIds}. The configured market catalog is for planning, not a guarantee; use listCities for catalog matching and checkAvailability only for tier-based lead-time guidance. Neither confirms coverage or inventory; a coordinator confirms the specific order after buyer submission. Use listRoles for the role catalog, getRolePricing for hourly rates, getComplianceByState for wage/overtime rules, getPolicies for published booking terms, getPlan to restore a supplied plan ID, and getQuoteStatus to check a supplied TG reference. submitQuoteRequest is the single write operation: call it only after explicit confirmation; it creates no reservation and requires no payment. No authentication.`,
-  contact_email: "megan@tempguru.co",
+  contact_email: "contactus@tempguru.co",
   namespace: "tempguru",
   legal_info_url: "https://tempguru.co/privacy-policy",
   logo_url: "https://mcp.tempguru.co/logo.svg",
@@ -142,7 +142,7 @@ TOOLS ON THIS PLATFORM
 Actions: listCities, listRoles, checkAvailability, getRolePricing,
 getComplianceByState, getPolicies, getPlan, getQuoteStatus, and
 submitQuoteRequest. Use supplied plan IDs and TG references only.
-submitQuoteRequest is the sole write: show its contact-bearing payload,
+submitQuoteRequest is the sole write: show its contact payload,
 set source_platform to "chatgpt-gpt", include plan_id when known, and call
 once only after explicit confirmation. On error or buyer preference, use
 https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=chatgpt-gpt

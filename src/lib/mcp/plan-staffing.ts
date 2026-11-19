@@ -54,7 +54,7 @@ export type PlanStaffingInput = {
 // fallbacks live in the docs/skills. These results carry no plan_id and no
 // continuation, so they must not point the agent at prepare_quote_form or at a
 // continuation.form_url that does not exist (they previously did).
-const DIRECT_HELP_STEP = "For direct or urgent help, use megan@tempguru.co or (904) 206-8953.";
+const DIRECT_HELP_STEP = "For direct or urgent help, use contactus@tempguru.co or (904) 206-8953.";
 // Plan results (status "plan") can carry a plan_id or continuation, so the
 // handoff ladder applies to them unchanged.
 const PLAN_HANDOFF_LADDER = [

@@ -41,7 +41,7 @@ The tools above are the action layer. The same data is also published as a stati
 
 ## Fallbacks
 
-If tools are unavailable: ChatGPT users → the TempGuru Event Staffing Planner GPT (https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner). Anyone → https://tempguru.co/get-staffing, megan@tempguru.co, or (904) 206-8953. Developer docs: https://tempguru.co/ai-agents
+If tools are unavailable: ChatGPT users → the TempGuru Event Staffing Planner GPT (https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner). Anyone → https://tempguru.co/get-staffing, contactus@tempguru.co, or (904) 206-8953. Developer docs: https://tempguru.co/ai-agents
 
 ## Rules
 

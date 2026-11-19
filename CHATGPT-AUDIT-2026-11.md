@@ -219,7 +219,7 @@ Facts (launched in beta 2026-11-10; see sources):
    completed shifts; "completed shifts are worker-shift assignments, not unique
    people"); the W-2 model; "rates are all-inclusive W-2 bill rates"; "no
    payment until you approve the quote"; US and Canada only. Category: event
-   staffing / staffing services. Contact: `megan@tempguru.co`, (904) 206-8953.
+   staffing / staffing services. Contact: `contactus@tempguru.co`, (904) 206-8953.
    Website: `https://tempguru.co`. Put the Rate Index and the get-staffing
    form in the free-text field, with the same caveat language the tools use
    (planning estimates, coordinator confirms).

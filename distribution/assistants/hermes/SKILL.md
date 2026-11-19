@@ -124,7 +124,7 @@ a reservation or contract, and no payment is required until the buyer
 approves the quote.
 
 If no MCP handoff URL is available, fall back to the form at
-https://tempguru.co/get-staffing, or email megan@tempguru.co / call
+https://tempguru.co/get-staffing, or email contactus@tempguru.co / call
 (904) 206-8953. No subscription; billing is per event.
 
 ## Rules for agents

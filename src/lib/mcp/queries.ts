@@ -690,7 +690,7 @@ export function queryPolicies(input: PoliciesQuery = {}): PolicyQueryResult {
         available_topics: publishedPolicies.map((policy) => policy.topic),
         message:
           `No published TempGuru policy topic matched "${input.topic}". ` +
-          "Choose an available topic or ask a coordinator at megan@tempguru.co for event-specific terms.",
+          "Choose an available topic or ask a coordinator at contactus@tempguru.co for event-specific terms.",
       });
     }
   }

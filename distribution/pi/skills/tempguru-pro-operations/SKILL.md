@@ -118,7 +118,7 @@ but they are not required here.
 `tempguru_prepare_quote_form` is a buyer-only handoff from a saved event staffing plan to a
 TempGuru quote form. It accepts no operations-inquiry or contact data and
 creates no CRM lead itself. **Never use it for an operations-software
-inquiry.** These inquiries go by email or phone: **megan@tempguru.co** or
+inquiry.** These inquiries go by email or phone: **contactus@tempguru.co** or
 **(904) 206-8953**.
 
 ## Workflow
@@ -141,7 +141,7 @@ it brief; a contact will go deeper.
 Draft a short email for the user to confirm, then send it (or hand them the
 draft):
 
-- To: **megan@tempguru.co**
+- To: **contactus@tempguru.co**
 - Subject: **TempGuru Pro / operations inquiry - {company}**
 - Body: company, what they run today, and the operations problem they want to
   solve.
@@ -170,7 +170,7 @@ contact confirms product details, and route the inquiry.
 
 ## Fallbacks
 
-This channel does not depend on tools: email **megan@tempguru.co** or call
+This channel does not depend on tools: email **contactus@tempguru.co** or call
 **(904) 206-8953**. If the person turns out to be a buyer who needs to hire
 staff, point them to the form at
 **https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=skill** or the

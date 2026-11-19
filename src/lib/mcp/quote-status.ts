@@ -110,7 +110,7 @@ export type QuoteStatusResult =
     };
 
 const FOLLOW_UP_GUIDANCE =
-  "A coordinator replies within one business day; to follow up cite this reference to megan@tempguru.co.";
+  "A coordinator replies within one business day; to follow up cite this reference to contactus@tempguru.co.";
 
 /** Shared MCP/REST read behavior for a quote reference. */
 export async function queryQuoteStatus(

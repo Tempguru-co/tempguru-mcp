@@ -43,7 +43,7 @@ export function buildOpenApiSpec() {
       ].join("\n"),
       contact: {
         name: "Megan Hayward",
-        email: "megan@tempguru.co",
+        email: "contactus@tempguru.co",
         url: "https://tempguru.co",
       },
       license: {

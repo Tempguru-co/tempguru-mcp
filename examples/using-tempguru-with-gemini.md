@@ -69,4 +69,4 @@ all-inclusive"*, straight from live TempGuru data.
 
 ## If the MCP call fails
 
-The native remote-MCP path is beta. If a call errors, fall back to the form at https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=gemini-api, or megan@tempguru.co / (904) 206-8953. A coordinator replies within one business day.
+The native remote-MCP path is beta. If a call errors, fall back to the form at https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=gemini-api, or contactus@tempguru.co / (904) 206-8953. A coordinator replies within one business day.

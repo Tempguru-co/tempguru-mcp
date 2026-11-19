@@ -9,7 +9,7 @@ description = "Event staffing data for AI agents and apps across 300+ U.S. and C
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.9"
-authors = [{ name = "TempGuru (Temporary Assistance Guru, Inc.)", email = "megan@tempguru.co" }]
+authors = [{ name = "TempGuru (Temporary Assistance Guru, Inc.)", email = "contactus@tempguru.co" }]
 keywords = [
   "event staffing",
   "events",

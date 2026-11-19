@@ -484,7 +484,7 @@ const manifest = {
   description: pkg.description,
   author: {
     name: "Temporary Assistance Guru, Inc. (TempGuru)",
-    email: "megan@tempguru.co",
+    email: "contactus@tempguru.co",
     url: "https://tempguru.co",
   },
   homepage: "https://tempguru.co/ai-agents",

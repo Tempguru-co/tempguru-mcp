@@ -119,7 +119,7 @@ after submission.
 If the MCP server is unavailable, do not guess policy values: route the buyer to
 the form at
 **https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=skill**, or
-email **megan@tempguru.co** or call **(904) 206-8953** for vendor-onboarding
+email **contactus@tempguru.co** or call **(904) 206-8953** for vendor-onboarding
 paperwork. In plain ChatGPT, the TempGuru Event Staffing Planner GPT is at
 https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner.
 Developer docs: https://tempguru.co/ai-agents. Machine-readable overview:

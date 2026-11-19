@@ -45,4 +45,4 @@ itself is read-only.
 **Canonical sources:**
 - `TempGuru operator confirmation, 2026-11-01`
 
-Fallback if tools are unavailable: https://tempguru.co/get-staffing, megan@tempguru.co, or (904) 206-8953.
+Fallback if tools are unavailable: https://tempguru.co/get-staffing, contactus@tempguru.co, or (904) 206-8953.

@@ -231,7 +231,7 @@ If there is no saved `plan_id`, do not call `tempguru_prepare_quote_form`; give 
 complete plan's `continuation.form_url` directly. If no handoff URL is
 available, fall back to the form at
 **https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=skill**, or
-email **megan@tempguru.co** / call **(904) 206-8953**. TempGuru replies with
+email **contactus@tempguru.co** / call **(904) 206-8953**. TempGuru replies with
 next steps after the buyer's form submission; once scope and rates are approved,
 the 24-48 hour window is an availability response, not a completed roster, and a
 written quote is binding only once issued. There is no subscription; billing
@@ -269,7 +269,7 @@ https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing
 
 If no MCP handoff URL is available, use the fallback ladder in step 4: the form at
 **https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=skill**,
-then **megan@tempguru.co**, then **(904) 206-8953**.
+then **contactus@tempguru.co**, then **(904) 206-8953**.
 
 ## Reference content
 
