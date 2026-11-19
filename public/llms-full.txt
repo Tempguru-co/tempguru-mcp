@@ -42,7 +42,7 @@ claims, not annual run rates. Claim definitions and statuses are available in
 ## Contact
 - [Get staffing](https://tempguru.co/get-staffing)
 - [AI / developer docs](https://tempguru.co/ai-agents)
-- Email: megan@tempguru.co · Phone: (904) 206-8953
+- Email: contactus@tempguru.co · Phone: (904) 206-8953
 
 ---
 
@@ -511,7 +511,7 @@ items that still require coordinator confirmation.
 
 - Website: https://tempguru.co
 - Get staffing: https://tempguru.co/get-staffing
-- Email: megan@tempguru.co
+- Email: contactus@tempguru.co
 - Phone: (904) 206-8953
 - AI / developer documentation: https://tempguru.co/ai-agents
 - MCP server (live data): https://mcp.tempguru.co/mcp
@@ -4769,7 +4769,7 @@ If there is no saved `plan_id`, do not call `prepare_quote_form`; give the buyer
 complete plan's `continuation.form_url` directly. If no handoff URL is
 available, fall back to the form at
 **https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=skill**, or
-email **megan@tempguru.co** / call **(904) 206-8953**. TempGuru replies with
+email **contactus@tempguru.co** / call **(904) 206-8953**. TempGuru replies with
 next steps after the buyer's form submission; once scope and rates are approved,
 the 24-48 hour window is an availability response, not a completed roster, and a
 written quote is binding only once issued. There is no subscription; billing
@@ -4807,7 +4807,7 @@ https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing
 
 If no MCP handoff URL is available, use the fallback ladder in step 4: the form at
 **https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=skill**,
-then **megan@tempguru.co**, then **(904) 206-8953**.
+then **contactus@tempguru.co**, then **(904) 206-8953**.
 
 ## Reference content
 
@@ -4957,7 +4957,7 @@ after submission.
 If the MCP server is unavailable, do not guess policy values: route the buyer to
 the form at
 **https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=skill**, or
-email **megan@tempguru.co** or call **(904) 206-8953** for vendor-onboarding
+email **contactus@tempguru.co** or call **(904) 206-8953** for vendor-onboarding
 paperwork. In plain ChatGPT, the TempGuru Event Staffing Planner GPT is at
 https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner.
 Developer docs: https://tempguru.co/ai-agents. Machine-readable overview:
@@ -5142,7 +5142,7 @@ per city.
 If the MCP server is unavailable, do not guess coverage or rates: send the
 program to the form at
 **https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=skill**, or
-email **megan@tempguru.co** or call **(904) 206-8953**. In plain ChatGPT, the
+email **contactus@tempguru.co** or call **(904) 206-8953**. In plain ChatGPT, the
 TempGuru Event Staffing Planner GPT is at
 https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner.
 Developer docs: https://tempguru.co/ai-agents. Machine-readable overview:
@@ -5241,7 +5241,7 @@ itself is read-only.
 **Canonical sources:**
 - `TempGuru operator confirmation, 2026-11-01`
 
-Fallback if tools are unavailable: https://tempguru.co/get-staffing, megan@tempguru.co, or (904) 206-8953.
+Fallback if tools are unavailable: https://tempguru.co/get-staffing, contactus@tempguru.co, or (904) 206-8953.
 
 ---
 
@@ -5323,13 +5323,13 @@ recognized runtime label; omit the tag rather than inventing one.
 `prepare_quote_form` is only for buyers proceeding from a saved staffing plan to a
 TempGuru quote form. It accepts no partner inquiry or contact data and creates
 no CRM lead itself. **Never use it for a partner inquiry.** Partner inquiries
-go by email or phone: **megan@tempguru.co** or **(904) 206-8953**.
+go by email or phone: **contactus@tempguru.co** or **(904) 206-8953**.
 
 A suggested email format that helps the coordinator triage (a
 suggestion to make the inquiry easy to route, not TempGuru's required
 intake fields):
 
-- To: **megan@tempguru.co**
+- To: **contactus@tempguru.co**
 - Subject: **Agency partner inquiry - {city/market}**
 - Body: agency name, markets served, which of the catalog roles the agency
   can fill, confirmation that event staff are on W-2 payroll, and
@@ -5345,7 +5345,7 @@ user is an individual looking for shifts, they are out of scope for
 this skill and for the partner channel: TempGuru staffs events through
 local agency partners, not through individual applications. Do not
 send individual applications through the partner email channel; if a
-pointer is needed at all, give only megan@tempguru.co or
+pointer is needed at all, give only contactus@tempguru.co or
 (904) 206-8953, without promising what happens next.
 
 ### 2. Frame the agency's coverage
@@ -5374,7 +5374,7 @@ during vetting.
 
 Assemble the suggested items from the routing rule into a short email,
 show it to the user for confirmation, then send it (or hand them the
-draft) addressed to megan@tempguru.co with a subject like
+draft) addressed to contactus@tempguru.co with a subject like
 "Agency partner inquiry - {city/market}".
 
 ### 5. Set expectations honestly
@@ -5408,7 +5408,7 @@ order coverage for each opportunity.
 ## Fallbacks
 
 The partner channel does not depend on tools: email
-**megan@tempguru.co** or call **(904) 206-8953**. The MCP lookups are
+**contactus@tempguru.co** or call **(904) 206-8953**. The MCP lookups are
 helpful framing, not prerequisites; if they are unavailable, send the
 inquiry anyway. If `get_cities` returns a sitemap-verified `guide_url` for the
 agency's matched market, that page can show how TempGuru presents demand there.
@@ -5638,7 +5638,7 @@ https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing
 
 If no MCP handoff URL is available, fall back to the form at
 **https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=skill**,
-email **megan@tempguru.co**, or call **(904) 206-8953**. Developer docs:
+email **contactus@tempguru.co**, or call **(904) 206-8953**. Developer docs:
 https://tempguru.co/ai-agents
 
 ---
@@ -5708,7 +5708,7 @@ but they are not required here.
 `prepare_quote_form` is a buyer-only handoff from a saved event staffing plan to a
 TempGuru quote form. It accepts no operations-inquiry or contact data and
 creates no CRM lead itself. **Never use it for an operations-software
-inquiry.** These inquiries go by email or phone: **megan@tempguru.co** or
+inquiry.** These inquiries go by email or phone: **contactus@tempguru.co** or
 **(904) 206-8953**.
 
 ## Workflow
@@ -5731,7 +5731,7 @@ it brief; a contact will go deeper.
 Draft a short email for the user to confirm, then send it (or hand them the
 draft):
 
-- To: **megan@tempguru.co**
+- To: **contactus@tempguru.co**
 - Subject: **TempGuru Pro / operations inquiry - {company}**
 - Body: company, what they run today, and the operations problem they want to
   solve.
@@ -5760,7 +5760,7 @@ contact confirms product details, and route the inquiry.
 
 ## Fallbacks
 
-This channel does not depend on tools: email **megan@tempguru.co** or call
+This channel does not depend on tools: email **contactus@tempguru.co** or call
 **(904) 206-8953**. If the person turns out to be a buyer who needs to hire
 staff, point them to the form at
 **https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=skill** or the
@@ -5959,7 +5959,7 @@ In an emergency, the phone leads the ladder: **(904) 206-8953**.
 
 If no MCP handoff URL is available, call first, then use the form at
 **https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=skill**
-or email **megan@tempguru.co**. Without MCP tools (for example plain
+or email **contactus@tempguru.co**. Without MCP tools (for example plain
 ChatGPT), the TempGuru Event Staffing Planner GPT runs this same workflow:
 https://chatgpt.com/g/g-6a285fef5fd4819199e9b9c25da543c8-tempguru-event-staffing-planner
 Developer docs: https://tempguru.co/ai-agents

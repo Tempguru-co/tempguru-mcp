@@ -348,4 +348,4 @@ MIT. See [LICENSE](./LICENSE).
 
 ## Maintainer
 
-[TempGuru (Temporary Assistance Guru, Inc.)](https://tempguru.co), `megan@tempguru.co`
+[TempGuru (Temporary Assistance Guru, Inc.)](https://tempguru.co), `contactus@tempguru.co`

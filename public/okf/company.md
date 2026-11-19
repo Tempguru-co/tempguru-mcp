@@ -65,7 +65,7 @@ items that still require coordinator confirmation.
 
 - Website: https://tempguru.co
 - Get staffing: https://tempguru.co/get-staffing
-- Email: megan@tempguru.co
+- Email: contactus@tempguru.co
 - Phone: (904) 206-8953
 - AI / developer documentation: https://tempguru.co/ai-agents
 - MCP server (live data): https://mcp.tempguru.co/mcp

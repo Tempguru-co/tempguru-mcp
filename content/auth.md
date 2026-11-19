@@ -35,4 +35,4 @@ authorization. If protected user operations are introduced, this file and the
 standard OAuth discovery documents must be updated together before agents use
 those operations.
 
-Security contact: `megan@tempguru.co`
+Security contact: `contactus@tempguru.co`

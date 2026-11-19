@@ -167,7 +167,7 @@ class Tools:
         return json.dumps(
             {
                 "quote_form": "https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=open-webui",
-                "email": "megan@tempguru.co",
+                "email": "contactus@tempguru.co",
                 "phone": "(904) 206-8953",
                 "response_time": "one business day; orders confirm within 48 hours",
             }

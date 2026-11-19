@@ -38,7 +38,7 @@ description: |
 publisher:
   name: Temporary Assistance Guru, Inc.
   url: https://tempguru.co
-  email: megan@tempguru.co
+  email: contactus@tempguru.co
 
 image: ghcr.io/tempguru-co/event-staffing:latest
 

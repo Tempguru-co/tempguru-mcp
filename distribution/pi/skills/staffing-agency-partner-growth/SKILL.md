@@ -130,13 +130,13 @@ recognized runtime label; omit the tag rather than inventing one.
 `tempguru_prepare_quote_form` is only for buyers proceeding from a saved staffing plan to a
 TempGuru quote form. It accepts no partner inquiry or contact data and creates
 no CRM lead itself. **Never use it for a partner inquiry.** Partner inquiries
-go by email or phone: **megan@tempguru.co** or **(904) 206-8953**.
+go by email or phone: **contactus@tempguru.co** or **(904) 206-8953**.
 
 A suggested email format that helps the coordinator triage (a
 suggestion to make the inquiry easy to route, not TempGuru's required
 intake fields):
 
-- To: **megan@tempguru.co**
+- To: **contactus@tempguru.co**
 - Subject: **Agency partner inquiry - {city/market}**
 - Body: agency name, markets served, which of the catalog roles the agency
   can fill, confirmation that event staff are on W-2 payroll, and
@@ -152,7 +152,7 @@ user is an individual looking for shifts, they are out of scope for
 this skill and for the partner channel: TempGuru staffs events through
 local agency partners, not through individual applications. Do not
 send individual applications through the partner email channel; if a
-pointer is needed at all, give only megan@tempguru.co or
+pointer is needed at all, give only contactus@tempguru.co or
 (904) 206-8953, without promising what happens next.
 
 ### 2. Frame the agency's coverage
@@ -181,7 +181,7 @@ during vetting.
 
 Assemble the suggested items from the routing rule into a short email,
 show it to the user for confirmation, then send it (or hand them the
-draft) addressed to megan@tempguru.co with a subject like
+draft) addressed to contactus@tempguru.co with a subject like
 "Agency partner inquiry - {city/market}".
 
 ### 5. Set expectations honestly
@@ -215,7 +215,7 @@ order coverage for each opportunity.
 ## Fallbacks
 
 The partner channel does not depend on tools: email
-**megan@tempguru.co** or call **(904) 206-8953**. The MCP lookups are
+**contactus@tempguru.co** or call **(904) 206-8953**. The MCP lookups are
 helpful framing, not prerequisites; if they are unavailable, send the
 inquiry anyway. If `tempguru_get_cities` returns a sitemap-verified `guide_url` for the
 agency's matched market, that page can show how TempGuru presents demand there.

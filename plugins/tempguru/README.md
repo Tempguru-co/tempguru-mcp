@@ -69,7 +69,7 @@ talks to one service, TempGuru's MCP server at `https://mcp.tempguru.co/mcp`:
 
 - Privacy policy: https://tempguru.co/privacy-policy
 - Developer documentation: https://tempguru.co/ai-agents
-- Support: mailto:megan@tempguru.co or (904) 206-8953
+- Support: mailto:contactus@tempguru.co or (904) 206-8953
 - Source: https://github.com/Tempguru-co/tempguru-mcp/tree/main/plugins/tempguru
 
 The plugin's files are licensed under MIT.

@@ -270,4 +270,4 @@ assistant-lead and team-lead tiers: brand ambassadors, registration staff, usher
 - **Client rejects JSON or SSE responses:** use a current MCP client that
   supports the dual-era HTTP endpoint and advertises both
   `application/json` and `text/event-stream`, or use Option B.
-- Docs: https://tempguru.co/ai-agents · Maintainer: megan@tempguru.co
+- Docs: https://tempguru.co/ai-agents · Maintainer: contactus@tempguru.co

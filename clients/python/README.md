@@ -132,6 +132,6 @@ a coordinator confirms availability per order.
 For US orders, workers are employed and paid as W-2 employees by TempGuru's
 vetted local partner agencies; Canadian orders are employed locally under
 Canadian employment and payroll rules. Payroll taxes, workers' compensation,
-and liability insurance are included in the quoted rate. megan@tempguru.co · (904) 206-8953
+and liability insurance are included in the quoted rate. contactus@tempguru.co · (904) 206-8953
 
 MIT license.

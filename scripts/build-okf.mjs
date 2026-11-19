@@ -556,7 +556,7 @@ items that still require coordinator confirmation.
 
 - Website: ${SITE}
 - Get staffing: ${SITE}/get-staffing
-- Email: megan@tempguru.co
+- Email: contactus@tempguru.co
 - Phone: (904) 206-8953
 - AI / developer documentation: ${AGENT_DOCS_URL}
 - MCP server (live data): ${MCP_ENDPOINT}
@@ -1162,7 +1162,7 @@ itself is read-only.
 
 ${policyBody(cancellationPolicy)}
 
-Fallback if tools are unavailable: ${SITE}/get-staffing, megan@tempguru.co, or (904) 206-8953.`
+Fallback if tools are unavailable: ${SITE}/get-staffing, contactus@tempguru.co, or (904) 206-8953.`
 ));
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -1468,7 +1468,7 @@ claims, not annual run rates. Claim definitions and statuses are available in
 ## Contact
 - [Get staffing](${SITE}/get-staffing)
 - [AI / developer docs](${AGENT_DOCS_URL})
-- Email: megan@tempguru.co · Phone: (904) 206-8953
+- Email: contactus@tempguru.co · Phone: (904) 206-8953
 `;
 writeFileSync(join(publicDir, "llms.txt"), llmsTxt);
 

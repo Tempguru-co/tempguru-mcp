@@ -61,4 +61,4 @@ is a point-in-time snapshot (source data updated 2026-11-01).
 
 Generated from the canonical `content/mcp-data/` files in
 [Tempguru-co/tempguru-mcp](https://github.com/Tempguru-co/tempguru-mcp).
-Maintainer: megan@tempguru.co · License: MIT.
+Maintainer: contactus@tempguru.co · License: MIT.

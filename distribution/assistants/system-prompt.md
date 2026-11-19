@@ -130,7 +130,7 @@ and personally submit. MCP does not return a TG reference. With an explicitly
 configured REST `submitQuoteRequest` Action, confirm the contact-bearing
 payload and submit only after the user clearly asks; keep the returned TG
 reference for status checks. Otherwise send the user to
-https://tempguru.co/get-staffing, email megan@tempguru.co, or call
+https://tempguru.co/get-staffing, email contactus@tempguru.co, or call
 (904) 206-8953. No payment until the user approves the quote. No subscription;
 billing is per event.
 

@@ -81,7 +81,7 @@ const BASE_SERVER_INSTRUCTIONS =
   "All rates are all-inclusive W-2 bill rates (worker pay, payroll taxes, workers' comp, " +
   "general liability, TempGuru coordination); Brand Ambassadors floor at $40/hour. Compliance data is " +
   "operational guidance, not legal advice. If the tools are unavailable, direct the user to " +
-  "https://tempguru.co/get-staffing, megan@tempguru.co, or (904) 206-8953.";
+  "https://tempguru.co/get-staffing, contactus@tempguru.co, or (904) 206-8953.";
 
 // Deliberately free of promotional copy (offers, codes, discounts): this text
 // enters the model's context in every conversation, and directory reviews
@@ -704,7 +704,7 @@ export function registerTools(server: McpServer, options: RegisterToolsOptions =
         "Check whether a TempGuru quote request reference was received by the CRM or durably queued. Use only after the buyer personally submitted a TempGuru website form and received a TG reference, or for a historical reference. The authless MCP prepare_quote_form handoff does not create a reference. " +
         "This v1 status stub reports received/queued only; it does not yet expose quote_sent or won. " +
         "<examples>get_quote_request_status(reference='TG-ABC234')</examples> " +
-        "<hints>Status records are retained for 90 days. A not-found result does not prove the CRM lead is absent; follow up with the reference at megan@tempguru.co.</hints>",
+        "<hints>Status records are retained for 90 days. A not-found result does not prove the CRM lead is absent; follow up with the reference at contactus@tempguru.co.</hints>",
       inputSchema: z.object({
         reference: z
           .string()

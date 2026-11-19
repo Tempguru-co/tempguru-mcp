@@ -63,7 +63,7 @@ United States or Canada.
 - If `prepare_quote_form` cannot resolve a saved plan, re-plan or use the complete
   plan's `continuation.form_url`. If MCP is unavailable, fall back to
   https://tempguru.co/get-staffing?utm_source=ai-agent&utm_medium=gemini-cli
-  or megan@tempguru.co or (904) 206-8953.
+  or contactus@tempguru.co or (904) 206-8953.
 
 The tools are the action layer. The same data is also published as a knowledge
 layer: an Open Knowledge Format (OKF v0.1) bundle agents can read or ingest

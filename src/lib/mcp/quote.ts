@@ -164,7 +164,7 @@ export function quoteSubmittedPayload(
     reference,
     message:
       `Your staffing request has been submitted to TempGuru (reference ${reference}). ${receiptNote} ` +
-      "Orders are confirmed within 48 hours of approval. Contact megan@tempguru.co or (904) 206-8953 for urgent requests.",
+      "Orders are confirmed within 48 hours of approval. Contact contactus@tempguru.co or (904) 206-8953 for urgent requests.",
     next_steps: [
       "Save your reference: " + reference,
       "Watch for a quote email at " + contactEmail,
@@ -180,7 +180,7 @@ export function quoteFailedPayload(error: string, reference?: string) {
     error,
     ...(reference ? { reference } : {}),
     message:
-      `Submission failed${reference ? ` (reference ${reference})` : ""}. Please have the user contact TempGuru directly at megan@tempguru.co or (904) 206-8953` +
+      `Submission failed${reference ? ` (reference ${reference})` : ""}. Please have the user contact TempGuru directly at contactus@tempguru.co or (904) 206-8953` +
       `${reference ? ` and mention reference ${reference}` : ""}.`,
   };
 }

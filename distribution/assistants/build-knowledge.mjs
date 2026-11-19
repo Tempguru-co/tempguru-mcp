@@ -157,7 +157,7 @@ are planning estimates; binding quotes account for event-specific factors
 - Website: https://tempguru.co
 - Quote form: https://tempguru.co/get-staffing
 - Saved-plan quote handoff: https://mcp.tempguru.co/request-quote
-- Email: megan@tempguru.co
+- Email: contactus@tempguru.co
 - Phone: (904) 206-8953
 - AI agent documentation: https://tempguru.co/ai-agents
 - Machine-readable site overview: https://tempguru.co/llms.txt

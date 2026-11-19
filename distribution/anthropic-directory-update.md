@@ -19,7 +19,7 @@ https://claude.com/docs/connectors/building/submission.
 | User setup | No account, API key, or paid plan is required |
 | Documentation URL | `https://mcp.tempguru.co/` |
 | Privacy policy URL | `https://tempguru.co/privacy-policy` |
-| Support contact | `megan@tempguru.co` |
+| Support contact | `contactus@tempguru.co` |
 | Company | Temporary Assistance Guru, Inc. |
 | Company website | `https://tempguru.co` |
 | Allowed link origin | `https://mcp.tempguru.co` |
@@ -266,4 +266,4 @@ Megan Hayward
 
 Temporary Assistance Guru, Inc.
 
-megan@tempguru.co
+contactus@tempguru.co
